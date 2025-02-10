@@ -123,18 +123,45 @@ r = /[^(]*/; // 匹配零或多个非开始圆括号字符
 
 
 
-### replace() 
+### replace()  
 
 ```javascript
-text,replace(/javascript/gi, "JavaScript");
+text.replace(/javascript/gi, "JavaScript");
 ```
 
 
 
 ### match() 
 
+**`有 g 全局标志`**
+
 ```javascript
-"7 plus 8 equal 15".match(/\d+/g); // ["7", "8", "15"]
+const str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const regexp = /[A-E]/gi;
+const matches = str.match(regexp);
+
+console.log(matches);
+// ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e']
+```
+
+
+
+**`没有 g 全局标志`**
+
+```javascript
+const str = "For more information, see Chapter 3.4.5.1";
+const re = /see (chapter \d+(\.\d)*)/i;
+const found = str.match(re);
+
+console.log(found);
+// [
+//   'see Chapter 3.4.5.1',
+//   'Chapter 3.4.5.1',
+//   '.1',
+//   index: 22,
+//   input: 'For more information, see Chapter 3.4.5.1',
+//   groups: undefined
+// ]
 ```
 
 
@@ -157,9 +184,47 @@ let zipcode = new RegExp("\\d{5}", "g");
 
 ### test()
 
+```javascript
+const regex = /hello/i;
+const string = "Hello World";
+
+regex.test(string); // true
+```
 
 
-### exec()       
+
+### exec()
+
+```       javascript
+const regex = /hello/;
+const string = "hello world";
+const result = regex.exec(string);
+
+if (result) {
+    console.log(result[0]); // "hello"
+    console.log(result.index) // 0
+    console.log(result.input); // "hello world"
+} else {
+    console.log("No match");
+}
+```
+
+
+
+```javascript
+let regex = /(\d{4})-(\d{2})-(\d{2})/;
+const string = "2024-03-15";
+const result = regex.exec(string);
+
+if (result) {
+    console.log(result[0]); // "2024-03-15"
+    console.log(result[1]); // "2024"
+    console.log(result[2]); // "03"
+    console.log(result[3]); // "15"
+}
+```
+
+
 
  
 
