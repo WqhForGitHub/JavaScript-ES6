@@ -226,5 +226,222 @@ if (result) {
 
 
 
- 
+
+
+# 11.4 日期与时间
+
+```javascript
+let now = new Date();
+
+let epoch = new Date(0);
+
+let century = new Date(2100, 0, 1, 2, 3, 4, 5);
+```
+
+
+
+```javascript
+let century = new Date(Date.UTC(2100, 0, 1));
+```
+
+```javascript
+let century = new Date("2100-01-01T00:00:00Z");
+```
+
+
+
+```javascript
+let d = new Date();
+
+d.setFullYear(d.getFullYear() + 1);
+```
+
+
+
+## 1. 时间戳
+
+```javascript
+d.setTime(d.getTime() + 30000);
+```
+
+
+
+## 2. 日期计算
+
+```javascript
+let d = new Date();
+
+d.setMonth(d.getMonth() + 3, d.getDate() + 14);
+```
+
+
+
+
+
+## 3. 格式化与解析日期字符串
+
+```javascript
+let d = new Date(2020, 0, 1, 17, 10, 30);
+d.toString();
+d.toUTCString();
+d.toLocaleDateString(); 
+d.toLocaleTimeString();
+d.toISOString();
+```
+
+
+
+
+
+# 11.5 Error 类
+
+```javascript
+class HTTPError extends Error {
+    constructor(status, statusText, url) {
+        super(`${status} ${statusText}: ${url}`);
+        this.status = status;
+        this.statusText = statusText;
+        this.url = url;
+    }
+    
+    get name() { return "HTTPError" }
+}
+
+let error = new HTTPError(404, "Not Found", "http://example.com/");
+error.status; // 404
+error.message; // "404 Not Found: http://example.com/"
+error.name; // "HTTPError"
+```
+
+
+
+
+
+# 11.6  JSON 序列化与解析
+
+
+
+
+
+# 11.7 国际化 API
+
+
+
+
+
+# 11.8 控制台 API
+
+控制台 API 定义了以下函数。
+
+## console.log()
+
+## console.debug()
+
+## console.info()
+
+## console.warn()
+
+## console.error()
+
+## console.assert()
+
+## console.clear()
+
+## console.table()
+
+## console.trace()
+
+## console.count()
+
+## console.countReset()
+
+## console.group()
+
+## console.groupCollapsed()
+
+## console.groupEnd()
+
+## console.time()
+
+## console.timeLog()
+
+## console.timeEnd()
+
+
+
+
+
+# 11.9 URL API
+
+```javascript
+let url = new URL("https://example.com:8000/path/name?q=term#fragment");
+
+url.href; // https://example.com:8000/path/name?q=term#fragment
+url.origin; // https://example.com:8000
+url.protocol; // https:
+url.host; // example.com:8000
+url.hostname; // example.com
+url.port; // "8000"
+url.pathname; // "/path/name"
+url.search; // ?q=term
+url.hash; // "#fragment"
+```
+
+
+
+```javascript
+let url = new URL("ftp://admin:1337!@ftp.example.com/");
+
+url.href; // "ftp://admin:1337!@ftp.example.com/"
+url.origin; // "ftp://ftp.example.com"
+url.username; // "admin"
+url.password; // "1337!"
+```
+
+
+
+```javascript
+let url = new URL("https://example.com");
+
+url.pathname = "api/search";
+url.search = "q=test";
+url.toString(); // "https://example.com/api/search?q=test"
+```
+
+
+
+## 1. 遗留 URL 函数
+
+
+
+### encodeURI()
+
+
+
+### decodeURI()
+
+
+
+### encodeURIComponent()
+
+
+
+### decodeURIComponent()
+
+
+
+
+
+# 11.10 计时器
+
+
+
+```javascript
+let clock = setInterval(() => {
+    console.clear();
+    console.log(new Date().toLocaleTimeString());
+}, 1000);
+
+setTimeout(() => { clearInterval(clock); }, 10000);
+```
 
