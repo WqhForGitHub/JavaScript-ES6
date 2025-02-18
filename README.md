@@ -1,286 +1,3 @@
-# JavaScript 执行上下文和执行栈
-
-
-
-## 一、执行上下文
-
-
-
-### 1. 什么是执行上下文
-
-**`简而言之，执行上下文就是当前 JavaScript 代码被解析和执行时所在环境的抽象概念，JavaScript 中运行任何的代码都是在执行上下文中运行。`** 
-
-
-
-### 2. 执行上下文的类型
-
-**`执行上下文总共有三种类型：`** 
-
-* **`全局执行上下文：这是默认的、最基础的执行上下文。不在任何函数中的代码都位于全局执行上下文中。它做了两件事：`** 
-
-  **`1. 创建一个全局对象，在浏览器中这个全局对象就是 window 对象。`**
-
-  **`2. 将 this 指针指向这个全局对象。一个程序中只能存在一个全局执行上下文。`**
-
-* **`函数执行上下文：每次调用函数时，都会为该函数创建一个新的执行上下文。每个函数都拥有自己的执行上下文，但是只有在函数被调用的时候才会被创建。一个程序中可以存在任意数量的函数执行上下文。每当一个新的执行上下文被创建，它都会按照特定的顺序执行一系列步骤，具体过程将在本文后面讨论。`** 
-
-* **`Eval 函数执行上下文：运行在 eval 函数中的代码也获得了自己的执行上下文，但由于 JavaScript 开发人员不常用 eval 函数，所以在这里不再讨论。`** 
-
-
-
-
-
-## 二、执行上下文的生命周期
-
-**`执行上下文的生命周期包括三个阶段：创建阶段 → 执行阶段  →  回收阶段，本文重点介绍创建阶段。`** 
-
-
-
-### 1. 创建阶段
-
-**`当函数被调用时，但未执行任何其内部代码之前，会做以下三件事：`**
-
-* **`创建变量对象：首先初始化函数的参数 arguments，提升函数声明和变量声明。下文会详细说明。`**
-* **`创建作用域链：在执行上下文的创建阶段，作用域链是在变量对象之后创建的。作用域链本身包含变量对象。作用域链用于解析变量。当被要求解析变量时，JavaScript 始终从代码嵌套的最内层开始，如果最内层没有找到变量，就会跳转到上一层父作用域中查找，直到找到该变量。`**
-* **`确定 this 指向：包括多种情况，下文会详细说明`** 
-
-**`在一段 JS 脚本执行之前，要先解析代码，解析的时候会先创建一个全局执行上下文环境，先把代码中即将执行的变量、函数声明都拿出来。变量先暂时赋值为 undefined，函数则先声明好可使用。这一步做完了，然后再开始正式执行程序。`** 
-
-**`另外，一个函数在执行之前，也会创建一个函数执行上下文环境，跟全局上下文差不多，不过函数执行上下文中会多出 this、arguments 和函数的参数。`**
-
-
-
-### 2. 执行阶段
-
-**`执行变量赋值、代码执行`** 
-
-
-
-### 3. 回收阶段
-
-**`执行上下文出栈等待虚拟机回收执行上下文`** 
-
-
-
-## 三、变量提升和 this 指向的细节
-
-
-
-### 1. 变量声明提升
-
-**`大部分编程语言都是先声明变量再使用，但在 JS 中，事情有些不一样：`** 
-
-```javascript
-console.log(a); // undefined
-var a = 10; 
-```
-
-上述代码正常输出 undefined 而不是报错 Uncaught ReferenceError：a is not defined。这是因为声明提升，相当于如下代码：
-
-```javascript
-var a; 
-console.log(a); 
-a = 10; 
-```
-
-
-
-
-
-### 2. 函数声明提升
-
-**`我们都知道，创建一个函数的方法有两种，一种是通过函数声明 function foo() {}，另一种是通过函数表达式 var foo = function() {}，那这两种在函数提升有什么区别呢？`** 
-
-```javascript
-console.log(f1);
-function f1() {}
-console.log(f2);
-var f2 = function() {}
-```
-
-**`接下来我们通过一个例子来说明这个问题：`** 
-
-```javascript
-function test() {
-    foo(); // Uncaught TypeError foo is not a function
-    bar(); // this will run
-    
-    var foo = function () {
-        console.log("this won't run！");
-    }
-    
-    function bar() {
-        console.log("this will run!");
-    }
-}
-
-test();
-```
-
-**`在上面的例子中，foo() 调用的时候报错了，而 bar 能够正常调用。`** 
-
-**`我们前面说过变量和函数都会上升，遇到函数表达式 var foo = function() {} 时，首先会将 var foo 上升到函数体顶部，然而此时的 foo 的值为 undefined，所以执行 foo() 报错。而对于函数 bar()，则是提升了整个函数，所以 bar() 才能够顺利执行。有个细节必须注意：当遇到函数和变量同名且都会被提升的情况，函数声明优先级比较高，因此变量声明会被函数声明所覆盖，但是可以重新赋值。`** 
-
-```javascript
-console.log(a); // 输出 function a() { console.log("我是函数") }
-
-function a() {
-    console.log("我是函数")
-}
-
-var a = "我是变量";
-
-console.log(a); // 输出 我是变量
-```
-
-**`function 声明的优先级比 var 声明高，也就意味着当两个同名变量同时被 function 和 var 声明时，function 声明会覆盖 var 声明。`** 
-
-**`这代码等效于：`** 
-
-```javascript
-function a() {
-    console.log("我是函数")
-}
-
-var a;
-console.log(a); // 输出 function a() { console.log("我是函数") }
-
-a = "我是变量";
-
-console.log(a); // 输出 我是变量
-```
-
-最后我们看个复杂点的例子：
-
-```javascript
-function test(arg) {
-    console.log(arg); // 输出函数
-    
-    var arg = "hello";
-    
-    function arg() {
-        console.log("hello world");
-    }
-    
-    console.log(arg); // 输出 hello
-}
-
-test("hi");
-```
-
-
-
-### 3. 确定 this 的指向
-
-**`this 的值是在执行的时候确认，定义的时候不能确认，为什么呢？因为 this 是执行上下文环境的一部分，而执行上下文需要在代码执行之前确定，而不是定义的时候。看如下例子：`**
-
-```javascript
-function foo() {
-    console.log(this.a);
-}
-
-var a = 1;
-foo();
-
-function fn() {
-    console.log(this);
-}
-
-var obj = { fn: fn };
-obj.fn();
-
-function CreateJsPerson(name, age) {
-    this.name = name;
-    this.age = age;
-}
-
-var p1 = new CreateJsPerson("", 48);
-
-function add(c, d) {
-    return this.a + this.b + c + d;
-}
-
-var o = { a: 1, b: 3 };
-add.call(o, 5, 7);
-add.apply(o, [10, 20]);
-```
-
-
-
-```html
-<button id="btn1">
-    箭头函数 this
-</button>
-<script type="text/javascript">
-    let btn1 = document.getElementById("btn1");
-    let obj = {
-        name: "kobe",
-        age: 39,
-        getName: function () {
-            btn1.onclick = () => {
-                console.log(this); // obj
-            };
-        }
-    };
-    
-    obj.getName();
-</script>
-```
-
-
-
-
-
-
-
-
-
-
-
-## 四、执行上下文栈
-
-**`函数多了，就有多个函数执行上下文，每次调用函数创建一个新的执行上下文，那如何管理创建的那么多执行上下文呢？`** 
-
-**`JavaScript 引擎创建了执行上下文栈来管理执行上下文。可以把执行上下文栈认为是一个存储函数调用的栈结构，遵循先进后出的原则。`** 
-
-**`从上面的流程图，我们需要记住几个关键点：`** 
-
-* **`JavaScript 执行在单线程上，所有的代码都是排队执行`** 
-* **`一开始浏览器执行全局的代码时，首先创建全局的执行上下文，压入执行栈的顶部。`** 
-* **`每当进入一个函数的执行就会创建函数的执行上下文，并且把它压入执行栈的顶部。当前函数执行完成后，当前函数的执行上下文出栈，并等待垃圾回收。`** 
-* **`浏览器的 JS 执行引擎总是访问栈顶的执行上下文。`** 
-* **`全局上下文只有唯一的一个，它在浏览器关闭时出栈。`** 
-
-我们再来看个例子：
-
-```javascript
-var color = "blue";
-function changeColor() {
-    var anotherColor = "red";
-    function swapColors() {
-        var tempColor = anotherColor;
-        anotherColor = color;
-        color = tempColor;
-    }
-    
-    swapColors();
-}
-
-changeColor();
-```
-
-**`上述代码运行按照如下步骤：`** 
-
-* **`当上述代码在浏览器中加载时，JavaScript 引擎会创建一个全局执行上下文并且将它推入当前的执行栈`** 
-* **`调用 changeColor 函数时，此时 changeColor 函数内部代码还未执行，js 执行引擎立即创建一个 changeColor 的执行上下文，然后把这执行上下文压入到执行栈中。`** 
-* **`执行 changeColor 函数过程中，调用 swapColors 函数，同样地，swapColors 函数执行之前也创建了一个 swapColors 的执行上下文，并压入到执行栈中。`** 
-* **`swapColors 函数执行完成，swapColors 函数的执行上下文出栈，并且被销毁。`** 
-* **`changeColor 函数执行完成，changeColor 函数的执行上下文出栈，并且被销毁。`** 
-
-
-
-
-
 # 深入理解 JavaScript 作用域和作用域链
 
 
@@ -691,3 +408,293 @@ x(); // bar()
 **`执行上下文在运行时确定，随时可能改变；作用域在定义时确定，并且不会改变。`** 
 
 **`一个作用域下可能包含若干个上下文环境。有可能从来没有过上下文环境（函数从来就没有被调用过）；有可能有过，现在函数被调用完毕后，上下文环境被销毁了；有可能同时存在一个或多个闭包。同一个作用域下，不同的调用会产生不同的执行上下文环境，继而产生不同的变量的值。`** 
+
+
+
+
+
+
+
+# JavaScript 执行上下文和执行栈
+
+
+
+## 一、执行上下文
+
+
+
+### 1. 什么是执行上下文
+
+**`简而言之，执行上下文就是当前 JavaScript 代码被解析和执行时所在环境的抽象概念，JavaScript 中运行任何的代码都是在执行上下文中运行。`** 
+
+
+
+### 2. 执行上下文的类型
+
+**`执行上下文总共有三种类型：`** 
+
+* **`全局执行上下文：这是默认的、最基础的执行上下文。不在任何函数中的代码都位于全局执行上下文中。它做了两件事：`** 
+
+  **`1. 创建一个全局对象，在浏览器中这个全局对象就是 window 对象。`**
+
+  **`2. 将 this 指针指向这个全局对象。一个程序中只能存在一个全局执行上下文。`**
+
+* **`函数执行上下文：每次调用函数时，都会为该函数创建一个新的执行上下文。每个函数都拥有自己的执行上下文，但是只有在函数被调用的时候才会被创建。一个程序中可以存在任意数量的函数执行上下文。每当一个新的执行上下文被创建，它都会按照特定的顺序执行一系列步骤，具体过程将在本文后面讨论。`** 
+
+* **`Eval 函数执行上下文：运行在 eval 函数中的代码也获得了自己的执行上下文，但由于 JavaScript 开发人员不常用 eval 函数，所以在这里不再讨论。`** 
+
+
+
+
+
+## 二、执行上下文的生命周期
+
+**`执行上下文的生命周期包括三个阶段：创建阶段 → 执行阶段  →  回收阶段，本文重点介绍创建阶段。`** 
+
+
+
+### 1. 创建阶段
+
+**`当函数被调用时，但未执行任何其内部代码之前，会做以下三件事：`**
+
+* **`创建变量对象：首先初始化函数的参数 arguments，提升函数声明和变量声明。下文会详细说明。`**
+* **`创建作用域链：在执行上下文的创建阶段，作用域链是在变量对象之后创建的。作用域链本身包含变量对象。作用域链用于解析变量。当被要求解析变量时，JavaScript 始终从代码嵌套的最内层开始，如果最内层没有找到变量，就会跳转到上一层父作用域中查找，直到找到该变量。`**
+* **`确定 this 指向：包括多种情况，下文会详细说明`** 
+
+**`在一段 JS 脚本执行之前，要先解析代码，解析的时候会先创建一个全局执行上下文环境，先把代码中即将执行的变量、函数声明都拿出来。变量先暂时赋值为 undefined，函数则先声明好可使用。这一步做完了，然后再开始正式执行程序。`** 
+
+**`另外，一个函数在执行之前，也会创建一个函数执行上下文环境，跟全局上下文差不多，不过函数执行上下文中会多出 this、arguments 和函数的参数。`**
+
+
+
+### 2. 执行阶段
+
+**`执行变量赋值、代码执行`** 
+
+
+
+### 3. 回收阶段
+
+**`执行上下文出栈等待虚拟机回收执行上下文`** 
+
+
+
+## 三、变量提升和 this 指向的细节
+
+
+
+### 1. 变量声明提升
+
+**`大部分编程语言都是先声明变量再使用，但在 JS 中，事情有些不一样：`** 
+
+```javascript
+console.log(a); // undefined
+var a = 10; 
+```
+
+上述代码正常输出 undefined 而不是报错 Uncaught ReferenceError：a is not defined。这是因为声明提升，相当于如下代码：
+
+```javascript
+var a; 
+console.log(a); 
+a = 10; 
+```
+
+
+
+
+
+### 2. 函数声明提升
+
+**`我们都知道，创建一个函数的方法有两种，一种是通过函数声明 function foo() {}，另一种是通过函数表达式 var foo = function() {}，那这两种在函数提升有什么区别呢？`** 
+
+```javascript
+console.log(f1);
+function f1() {}
+console.log(f2);
+var f2 = function() {}
+```
+
+**`接下来我们通过一个例子来说明这个问题：`** 
+
+```javascript
+function test() {
+    foo(); // Uncaught TypeError foo is not a function
+    bar(); // this will run
+    
+    var foo = function () {
+        console.log("this won't run！");
+    }
+    
+    function bar() {
+        console.log("this will run!");
+    }
+}
+
+test();
+```
+
+**`在上面的例子中，foo() 调用的时候报错了，而 bar 能够正常调用。`** 
+
+**`我们前面说过变量和函数都会上升，遇到函数表达式 var foo = function() {} 时，首先会将 var foo 上升到函数体顶部，然而此时的 foo 的值为 undefined，所以执行 foo() 报错。而对于函数 bar()，则是提升了整个函数，所以 bar() 才能够顺利执行。有个细节必须注意：当遇到函数和变量同名且都会被提升的情况，函数声明优先级比较高，因此变量声明会被函数声明所覆盖，但是可以重新赋值。`** 
+
+```javascript
+console.log(a); // 输出 function a() { console.log("我是函数") }
+
+function a() {
+    console.log("我是函数")
+}
+
+var a = "我是变量";
+
+console.log(a); // 输出 我是变量
+```
+
+**`function 声明的优先级比 var 声明高，也就意味着当两个同名变量同时被 function 和 var 声明时，function 声明会覆盖 var 声明。`** 
+
+**`这代码等效于：`** 
+
+```javascript
+function a() {
+    console.log("我是函数")
+}
+
+var a;
+console.log(a); // 输出 function a() { console.log("我是函数") }
+
+a = "我是变量";
+
+console.log(a); // 输出 我是变量
+```
+
+最后我们看个复杂点的例子：
+
+```javascript
+function test(arg) {
+    console.log(arg); // 输出函数
+    
+    var arg = "hello";
+    
+    function arg() {
+        console.log("hello world");
+    }
+    
+    console.log(arg); // 输出 hello
+}
+
+test("hi");
+```
+
+
+
+### 3. 确定 this 的指向
+
+**`this 的值是在执行的时候确认，定义的时候不能确认，为什么呢？因为 this 是执行上下文环境的一部分，而执行上下文需要在代码执行之前确定，而不是定义的时候。看如下例子：`**
+
+```javascript
+function foo() {
+    console.log(this.a);
+}
+
+var a = 1;
+foo();
+
+function fn() {
+    console.log(this);
+}
+
+var obj = { fn: fn };
+obj.fn();
+
+function CreateJsPerson(name, age) {
+    this.name = name;
+    this.age = age;
+}
+
+var p1 = new CreateJsPerson("", 48);
+
+function add(c, d) {
+    return this.a + this.b + c + d;
+}
+
+var o = { a: 1, b: 3 };
+add.call(o, 5, 7);
+add.apply(o, [10, 20]);
+```
+
+
+
+```html
+<button id="btn1">
+    箭头函数 this
+</button>
+<script type="text/javascript">
+    let btn1 = document.getElementById("btn1");
+    let obj = {
+        name: "kobe",
+        age: 39,
+        getName: function () {
+            btn1.onclick = () => {
+                console.log(this); // obj
+            };
+        }
+    };
+    
+    obj.getName();
+</script>
+```
+
+
+
+
+
+
+
+
+
+
+
+## 四、执行上下文栈
+
+**`函数多了，就有多个函数执行上下文，每次调用函数创建一个新的执行上下文，那如何管理创建的那么多执行上下文呢？`** 
+
+**`JavaScript 引擎创建了执行上下文栈来管理执行上下文。可以把执行上下文栈认为是一个存储函数调用的栈结构，遵循先进后出的原则。`** 
+
+**`从上面的流程图，我们需要记住几个关键点：`** 
+
+* **`JavaScript 执行在单线程上，所有的代码都是排队执行`** 
+* **`一开始浏览器执行全局的代码时，首先创建全局的执行上下文，压入执行栈的顶部。`** 
+* **`每当进入一个函数的执行就会创建函数的执行上下文，并且把它压入执行栈的顶部。当前函数执行完成后，当前函数的执行上下文出栈，并等待垃圾回收。`** 
+* **`浏览器的 JS 执行引擎总是访问栈顶的执行上下文。`** 
+* **`全局上下文只有唯一的一个，它在浏览器关闭时出栈。`** 
+
+我们再来看个例子：
+
+```javascript
+var color = "blue";
+function changeColor() {
+    var anotherColor = "red";
+    function swapColors() {
+        var tempColor = anotherColor;
+        anotherColor = color;
+        color = tempColor;
+    }
+    
+    swapColors();
+}
+
+changeColor();
+```
+
+**`上述代码运行按照如下步骤：`** 
+
+* **`当上述代码在浏览器中加载时，JavaScript 引擎会创建一个全局执行上下文并且将它推入当前的执行栈`** 
+* **`调用 changeColor 函数时，此时 changeColor 函数内部代码还未执行，js 执行引擎立即创建一个 changeColor 的执行上下文，然后把这执行上下文压入到执行栈中。`** 
+* **`执行 changeColor 函数过程中，调用 swapColors 函数，同样地，swapColors 函数执行之前也创建了一个 swapColors 的执行上下文，并压入到执行栈中。`** 
+* **`swapColors 函数执行完成，swapColors 函数的执行上下文出栈，并且被销毁。`** 
+* **`changeColor 函数执行完成，changeColor 函数的执行上下文出栈，并且被销毁。`** 
+
+
+
+
+
