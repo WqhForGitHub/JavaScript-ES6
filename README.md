@@ -492,7 +492,7 @@ console.log(a); // undefined
 var a = 10; 
 ```
 
-上述代码正常输出 undefined 而不是报错 Uncaught ReferenceError：a is not defined。这是因为声明提升，相当于如下代码：
+**`上述代码正常输出 undefined 而不是报错 Uncaught ReferenceError：a is not defined。这是因为声明提升，相当于如下代码：`** 
 
 ```javascript
 var a; 
@@ -567,7 +567,7 @@ a = "我是变量";
 console.log(a); // 输出 我是变量
 ```
 
-最后我们看个复杂点的例子：
+**`最后我们看个复杂点的例子：`** 
 
 ```javascript
 function test(arg) {
@@ -697,4 +697,552 @@ changeColor();
 
 
 
+
+# 闭包
+
+
+
+## 一、引子
+
+
+
+**`闭包是 JavaScript 语言的一个难点，面试时常被问及，它是它的特色，很多高级应用都要依靠闭包实现。本文尽可能用简单易懂的花，讲清楚闭包的概念、形成条件及其常见的面试题。`** 
+
+
+
+**`我们先来看一个例子：`** 
+
+
+
+```javascript
+var n = 999;
+
+function f1() {
+    console.log(n);
+}
+
+f1(); // 999
+```
+
+
+
+**`上面代码中，函数 f1 可以读取全局变量 n。但是，函数外部无法读取函数内部声明的变量。`** 
+
+
+
+```javascript
+function f1() {
+    var n = 999;
+}
+
+console.log(n); // Uncaught ReferenceError: n is not defined
+```
+
+
+
+**`上面代码中，函数 f1 内部声明的变量 n，函数外是无法读取的。`** 
+
+
+
+**`如果有时候需要得到函数内的局部变量。正常情况下，这是办不到的，只有通过变通方法才能实现。那就是在函数的内部，再定义一个函数。`** 
+
+
+
+```javascript
+function f1() {
+    var n = 999;
+    
+    function f2() {
+        console.log(n); // 999
+    }
+}
+```
+
+
+
+**`上面代码中，函数 f2 就在函数 f1 内部，这时 f1 内部的所有局部变量，对 f2 都是可见的。既然 f2 可以读取 f1 的局部变量，那么只要把 f2 作为返回值，我们不就可以在 f1 外部读取它的内部变量了。`** 
+
+
+
+## 二、闭包是什么
+
+**`我们可以对上面代码进行如下修改：`** 
+
+```javascript
+function f1() {
+    var a = 999;
+    
+    function f2() {
+        console.log(a);
+    }
+    
+    return f2;
+}
+
+var result = f1();
+result();
+```
+
+**`上面代码中，函数 f1 的返回值就是函数 f2，由于 f2 可以读取 f1 的内部变量，所以就可以在外部获得 f1 的内部变量了。闭包就是函数 f2，即能够读取其他函数内部变量的函数。闭包就是函数中的函数，里面的函数可以访问外面函数的变量，外面的变量的是这个内部函数的一部分。`** 
+
+**`闭包形成的条件`** 
+
+* **`函数嵌套`** 
+* **`内部函数引用外部函数的局部变量`** 
+
+
+
+## 三、闭包的特性
+
+
+
+**`每个函数都是闭包，每个函数天生都能够记忆自己定义时所处的作用域环境。`** 
+
+
+
+```javascript
+var inner;
+
+function outer() {
+    var a = 250;
+    
+    inner = function () {
+        console.log(a); // 这个函数虽然在外面执行，但能够记忆定义时的那个作用域，a 是 250
+    }
+}
+
+outer();
+
+var a = 300;
+
+inner(); // 一个函数在执行的时候，找闭包里面的变量，不会理会当前作用域
+```
+
+```javascript
+function outer(x) {
+    function inner(y) {
+        console.log(x + y);
+    }
+    
+    return inner;
+}
+
+var inn = outer(3); // 传入数字 3 ，inner 函数中 x 便会记住这个值
+
+inn(5); // 当 inner 函数再传入 5 的时候，只会对 y 赋值，所以最后弹出 8
+```
+
+
+
+## 四、闭包的内存泄漏
+
+```javascript
+function fn() {
+    var num = 100;
+    
+    return function () {}
+}
+
+var f = fn(); // fn 执行形成的这个私有作用域就不能再销毁了
+```
+
+
+
+**`接下来我们看下有关于内存泄漏的一道经典面试题：`** 
+
+```javascript
+function outer() {
+    var num = 0;
+    
+    return function add() {
+        num++;
+        console.log(num);
+    };
+}
+
+var func1 = outer();
+
+func1(); // 1
+
+func1(); // 2
+
+var func2 = outer();
+
+func2(); // 1
+
+func2(); // 2
+```
+
+
+
+## 五、闭包的作用
+
+**`1. 可以读取函数内部的变量`**
+
+**`2. 可以使变量的值长期保存在内存中，生命周期长。因此不能滥用闭包，否则会造成网页的性能问题。`**
+
+**`3. 可以用来实现 JS 模块`**
+
+**`具体请看下面的例子：`** 
+
+```html
+<script type="text/javascript" src="myModule.js"></script>
+
+<script type="text/javascript">
+    myModule2.doSomething()
+    myModule2.doOtherthing()
+</script>
+```
+
+
+
+```javascript
+(function () {
+    var msg = "Beijing";
+    
+    function doSomething() {
+        console.log("doSomething()" + msg.toUpperCase());
+    }
+    
+    function doOtherthing() {
+        console.log("doOtherthing()" + msg.toLowerCase());
+    }
+    
+    // 向外暴露对象
+    window.myModule2 = {
+        doSomething: doSomething,
+        doOtherthing: doOtherthing
+    }
+})();
+```
+
+
+
+## 六、闭包的运用
+
+**`我们要实现这样的一个需求：点击某个按钮，提示点击的是第 n 个按钮，此处我们先不用事件代理：`** 
+
+```html
+<button>测试1</button>
+<button>测试2</button>
+<button>测试3</button>
+
+<script type="text/javascript">
+    var btns = document.getElementsByTagName("button");
+    
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].onclick = function () {
+            console.log("第" + (i + 1) + "个");
+        }
+    }
+</script>
+```
+
+**`万万没想到，点击任意一个按钮，后台都是弹出第四个，这是因为 i 是全局变量，执行到点击事件时，此时 i 的值为 3。那该如何修改，最简单的是用 let 声明：`** 
+
+```javascript
+for (let i = 0; i < btns.length; i++) {
+    btns[i].onclick = function () {
+        console.log("第" + (i + 1) + "个")
+    }
+}
+```
+
+**`另外我们可以通过闭包的方式来修改：`** 
+
+```javascript
+for (var i = 0; i < btns.length; i++) {
+    (function (j) {
+        btns[j].onclick = function () {
+            console.log("第" + (j + 1) + "个")
+        }
+    })(i)
+}
+```
+
+
+
+
+
+# 原型与原型链详解
+
+
+
+## 一、构造函数
+
+**`构造函数模式的目的就是为了创建一个自定义类，并且创建这个类的实例。构造函数模式中拥有了类和实例的概念，并且实例和实例之间是相互独立的，即实例识别。`** 
+
+**`构造函数就是一个普通函数，创建方式和普通函数没有区别，不同的是构造函数习惯上首字母大写。另外就是调用方式的不同，普通函数是直接调用，而构造函数需要使用 new 关键字来调用。`** 
+
+```javascript
+function Person(name, age, gender) {
+    this.name = name;
+    this.age = age;
+    this.gender = gender;
+    this.sayName = function () {
+        console.log(this.name);
+    }
+}
+
+var per = new Person("孙悟空", 18, "男");
+
+function Dog(name, age, gender) {
+    this.name = name;
+    this.age = age;
+    this.gender = gender;
+}
+
+var dog = new Dog("旺财", 4, "雄");
+
+console.log(per);
+console.log(dog);
+```
+
+**`每创建一个 Person 构造函数，在 Person 构造函数中，为每一个对象都添加了一个 sayName 方法，也就是说构造函数每执行一次就会创建一个新的 sayName 方法。这样就导致了构造函数执行一次就会创建一个新的方法，执行 10000 次就会创建 10000 个新的方法，而 10000 个方法都是一模一样的，为什么不把这个方法单独放到一个地方，并让所有的实例都可以访问到？这就需要原型（prototype）。`** 
+
+
+
+## 二、原型
+
+**`在 JavaScript 中，每当定义一个函数数据类型（普通函数、类）时候，都会天生自带一个 prototype 属性，这个属性指向函数的原型对象，并且这个属性是一个对象数据类型的值。`** 
+
+
+
+## 三、原型链
+
+### **`1. __proto__ 和 constructor`**
+
+**`每一个对象数据类型（普通对象、实例、prototype）也天生自带一个属性 __proto__，属性值是当前实例所属类的原型（prototype）。原型对象中有一个属性 constructor，它指向函数对象。`** 
+
+```javascript
+function Person() {}
+
+var person = new Person();
+
+console.log(person.__proto__ === Person.prototype); // true
+console.log(Person.prototype.constructor === Person); // true
+
+console.log(Object.getPrototypeOf(person) === Person.prototype); // true
+```
+
+
+
+### 2. 何为原型链
+
+**`在 JavaScript 中万物都是对象，对象和对象之间也有关系，并不是孤立存在的。对象之间的继承关系，在 JavaScript 是通过 prototype 对象指向父类对象，直到指向 Object 对象为止，这样就形成了一个原型指向的链条，称之为原型链。`** 
+
+**`举例说明：person → Person → Object，普通人继承人类，人类继承对象类`** 
+
+**`当我们访问对象的一个属性或方法时，它会先在对象自身中寻找，如果有则直接使用，如果没有则会去原型对象中寻找，如果找到则直接使用。如果没有则去原型的原型中寻找，直到找到 Object 对象的原型，Object 对象的原型没有原型，如果在 Object 原型中依然没有找到，则返回 undefined。`**
+
+**`我们可以使用对象的 hasOwnProperty() 来检查对象自身中是否含有该属性；使用 in 检查对象中是否含有某个属性时，如果对象中没有但是原型中有，也会返回 true。`** 
+
+```javascript
+function Person() {}
+
+Person.prototype.a = 123;
+
+Person.prototype.sayHello = function () {
+    console.log("hello");
+};
+
+var person = new Person();
+
+console.log(person.a); // 123
+console.log(person.hasOwnProperty("a")); // false
+console.log("a" in person); // true
+```
+
+**`person 实例中没有 a 这个属性，从 person 对象中找不到 a 属性就会从 person 的原型也就是 person.__proto__，也就是 Person.prototype 中查找，很幸运地得到 a 的值为 123。那假如 person.__proto__ 中也没有该属性，又该如何查找？`**
+
+**`当读取实例的属性时，如果找不到，就会查找与对象关联的原型中的属性，如果还查不到，就去找原型的原型，一直找到最顶层 Object 为止。Object 是 JS 中所有对象数据类型的基类（最顶层的类）在 Object.prototype 上没有 __proto__ 这个属性。`** 
+
+```javascript
+console.log(Object.prototype.__proto__ === null); // true
+```
+
+
+
+
+
+# JavaScript 常见的六种继承方式
+
+
+
+## 方式一、原型链继承
+
+这种方式关键在于：子类型的原型为父类型的一个实例对象。
+
+```javascript
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+    this.play = [1, 2, 3];
+    this.setName = function () {}
+}
+
+Person.prototype.setAge = function () {};
+
+function Student(price) {
+    this.price = price;
+    this.setScore = function () {};
+}
+
+Student.prototype = new Person();
+var s1 = new Student(15000);
+var s2 = new Student(14000);
+console.log(s1, s2);
+```
+
+
+
+## 方法二：借用构造函数继承
+
+```javascript
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+    this.setName = function () {}
+}
+
+Person.prototype.setAge = function () {};
+
+function Student(name, age, price) {
+    Person.call(this, name, age);
+    this.price = price;
+}
+
+var s1 = new Student("Tom", 20, 15000);
+```
+
+
+
+
+
+## 方法三：原型链 + 借用构造函数的组合继承
+
+```javascript
+function Person (name, age) {
+    this.name = name;
+    this.age = age;
+    this.setAge = function () {}
+}
+
+Person.prototype.setAge = function () {
+    console.log("111");
+}
+
+function Student (name, age, price) {
+    Person.call(this, name, age);
+    this.price = price;
+    this.setScore = function () {}
+}
+
+Student.prototype = new Person();
+Student.prototype.constructor = Student;
+Student.prototype.sayHello = function () {};
+var s1 = new Student("Tom", 20, 15000);
+var s2 = new Student("Jack", 22, 14000);
+
+console.log(s1);
+console.log(s1.constructor); // Student
+console.log(p1.constructor); // Person
+```
+
+
+
+
+
+## 方式四：组合继承优化1
+
+```javascript
+function Person (name, age) {
+    this.name = name;
+    this.age = age;
+    this.setAge = function () {};
+}
+
+Person.prototype.setAge = function () {
+    console.log("111");
+}
+
+function Student (name, age, price) {
+    Person.call(this, name, age);
+    this.price = price;
+    this.setScore = function () {};
+}
+
+Student.prototype = Person.prototype;
+Student.prototype.sayHello = function () {}
+var s1 = new Student("Tom", 20, 15000);
+console.log(s1);
+```
+
+
+
+
+
+## 方式五：组合继承优化2
+
+```javascript
+function Person (name, age) {
+    this.name = name;
+    this.age = age;
+}
+
+Person.prototype.setAge = function () {
+    console.log("111");
+}
+
+function Student (name, age, price) {
+    Person.call(this, name, age);
+    this.price = price;
+    this.setScore = function () {}
+}
+
+Student.prototype = Object.create(Person.prototype);
+Student.prototype.constructor = Student;
+var s1 = new Student("Tom", 20, 15000);
+console.log(s1 instanceof Student, s1 instanceof Person); // true
+console.log(s1);
+```
+
+
+
+
+
+## 方式六：ES6 中 class 的继承
+
+```javascript
+class Person {
+    constructor(name, age) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    showName () {
+        console.log("调用父类的方法");
+        console.log(this.name, this.age);
+    }
+}
+
+let p1 = new Person("kobe", 39);
+console.log(p1);
+
+class Student extends Person {
+    constuctor(name, age, salary) {
+        super(name, age);
+        this.salary = salary;
+    }
+    
+    showName() {
+        console.log("调用子类的方法");
+        console.log(this.name, this.age, this.salary);
+    }
+}
+
+let s1 = new Student("wade", 38, 100000);
+console.log(s1);
+s1.showName();
+```
 
