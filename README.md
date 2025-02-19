@@ -1725,6 +1725,10 @@ var a = b;
 
 ### 1. 标记清除
 
+**`这是 JavaScript 中最常用的垃圾回收方式。当变量进入执行环境是就标记这个变量为进入环境。从逻辑上讲，永远不能释放进入环境的变量所占用的内存，因为只要执行流进入相应的环境，就可能会用到他们。当变量离开环境时，则将其标记为离开环境。`** 
+
+**`垃圾收集器在运行的时候会给存储在内存中的所有变量都加上标记。然后，它会去掉环境中的变量以及被环境中的变量引用的标记。而在此之后再被加上标记的变量将被视为准备删除的变量，原因是环境中的变量已经无法访问到这些变量了。最后，垃圾收集器完成内存清除工作，销毁那些带标记的值，并回收他们所占用的内存空间。`** 
+
 ```javascript
 var m = 0, n = 19; // 把 m, n, add() 标记为进入环境
 add(m, n); // 把 a, b, c 标记为进入环境
@@ -1739,6 +1743,245 @@ function add(a, b) {
 
 
 
+
+### 2. 引用计数
+
+**`所谓引用计数是指语言引擎有一张引用表，保存了内存里面所有的资源（通常是各种值）的引用次数。如果一个值的引用次数是 0，就表示这个值不再用到了，因此可以将这块内存释放。`** 
+
+**`如果一个值不再需要了，引用数却不为 0，垃圾回收机制无法释放这块内存，从而导致内存泄漏。`** 
+
+```javascript
+var arr = [1, 2, 3, 4];
+
+arr = [2, 4, 5];
+
+console.log("浪里行舟");
+```
+
+**`上面代码中，数组 [1, 2, 3, 4] 是一个值，会占用内存。变量 arr 是仅有的对这个值的引用，因此引用次数为 1。尽管后面的代码没有用到 arr，它还是会持续占用内存。至于如何释放内存，我们下文介绍。`** 
+
+**`第三行代码中，数组 [1, 2, 3, 4] 引用的变量 arr 又取得了另外一个值，则数组 [1, 2, 3, 4] 的引用次数就减 1，此时它引用次数变成 0，则说明没有办法再访问这个值了，因而就可以将其所占的内存空间给收回来。`** 
+
+**`但是引用计数有个最大的问题：循环引用`** 
+
+```javascript
+function func() {
+    let obj1 = {};
+    let obj2 = {};
+    
+    obj1.a = obj2;
+    obj2.a = obj1;
+}
+```
+
+**`当函数 func 执行结束后，返回值为 undefined，所以整个函数以及内部的变量都应该被回收，但根据引用计数方法，obj1 和 obj2 的引用次数都不为 0，所以他们不会被回收。`** 
+
+**`要解决循环引用问题，最好是在不使用它们的时候手工将它们设为空。上面的例子可以这么做：`** 
+
+```javascript
+obj1 = null;
+obj2 = null;
+```
+
+
+
+
+
+## 三、哪些情况会引起内存泄漏？
+
+**`虽然 JavaScript 会自动垃圾收集，但是如果我们的代码写法不当，会让变量一直处于进入环境的状态，无法被回收。下面列一下内存泄漏常见的几种情况：`** 
+
+
+
+### 1. 意外的全局变量
+
+```javascript
+function foo(arg) {
+    bar = "this is a hidden global variable";
+}
+```
+
+**`bar 没被声明，会变成一个全局变量，在页面关闭之前不会被释放。`** 
+
+**`另一种意外的全局变量可能由 this 创建：`** 
+
+```javascript
+function foo() {
+    this.variable = "potential accidental global";
+}
+
+foo(); // foo 调用自己，this 指向了全局对象 window
+```
+
+**`在 JavaScript 文件头部加上 "use strict" ，可以避免此类错误发生。启用严格模式解析 JavaScript，避免意外的全局变量。`** 
+
+
+
+### 2. 被遗忘的计时器或回调函数
+
+```javascript
+var someResource = getData();
+
+setInterval(function() {
+    var node = document.getElementById("Node");
+    
+    if (node) {
+        node.innerHTML = JSON.stringify(someResource);
+    }
+}, 1000);
+```
+
+**`这样的代码很常见，如果 id 为 Node 的元素从 DOM 中移除，该定时器仍会存在，同时，因为回调函数中包含对 someResource 的引用，定时器外面的 someResource 也不会被释放。`** 
+
+
+
+### 3. 闭包
+
+```javascript
+function bindEvent() {
+    var obj = document.createElement("xxx");
+    obj.onclick = function () {
+        
+    }
+}
+```
+
+**`闭包可以维持函数内局部变量，使其得不到释放。上例定义事件回调时，由于是函数内定义函数，并且内部函数事件回调引用外部函数，形成了闭包。`** 
+
+```javascript
+function bindEvent() {
+    var obj = document.createElement("xxx");
+    obj.onclick = onclickHandler;
+}
+
+function onclickHandler() {}
+```
+
+```javascript
+function bindEvent() {
+    var obj = document.createElement("xxx");
+    obj.onclick = function () {};
+    obj = null;
+}
+```
+
+
+
+### 4. 没有清理的 DOM 元素引用
+
+**`有时，保存 DOM 节点内部数据结构很有用。假如你想快速更新表格的几行内容，把每一行 DOM 存成字典（JSON 键值对）或者数组很有意义。此时，同样的 DOM 元素存在两个引用：一个在 DOM 树中，另一个在字典中。将来你决定删除这些行时，需要把两个引用都清除。`** 
+
+```javascript
+var elements = {
+    button: document.getElementById("button"),
+    image: document.getElementById("image"),
+    text: document.getElementById("text")
+};
+
+function doStuff() {
+    image.src = "http://some.url/image";
+    button.click();
+    console.log(text.innerHTML);
+}
+
+function removeButton() {
+    document.body.removeChild(document.getElementById("button"));
+}
+```
+
+**`虽然我们用 removeChild 移除了 button，但是还在 elements 对象里保存着 #button 的引用，换言之，DOM 元素还在内存里面。`** 
+
+
+
+## 四、内存泄漏的识别方法
+
+**`新版本的chrome在 performance 中查看：`** 
+
+**`步骤:`** 
+
+- **`打开开发者工具 Performance`** 
+- **`勾选 Screenshots 和 memory`** 
+- **`左上角小圆点开始录制(record)`** 
+- **`停止录制`** 
+
+
+
+**`避免内存泄漏的一些方式：`** 
+
+- **`减少不必要的全局变量，或者生命周期较长的对象，及时对无用的数据进行垃圾回收`** 
+- **`注意程序逻辑，避免“死循环”之类的`** 
+- **`避免创建过多的对象`** 
+
+**`总而言之需要遵循一条原则：不用了的东西要及时归还`** 
+
+
+
+
+
+## 五、垃圾回收的使用场景优化
+
+
+
+### 1. 数组 array 优化
+
+**`将 [] 赋值一个数组对象，是清空数组的捷径（例如：arr = []），但是需要注意的是，这种方式又创建了一个新的空对象，并且将原来的数组对象变成了一小片内存垃圾。实际上，将数组长度赋值为 0（arr.length = 0）也能达到清空数组的目的，并且同时能实现数组重用，减少内存垃圾的产生。`** 
+
+```javascript
+const arr = [1, 2, 3, 4, 5];
+
+console.log("浪里行舟");
+
+arr.length = 0;
+```
+
+
+
+### 2. 对象尽量复用
+
+**`对象尽量复用，尤其是在循环等地方出现创建新对象，能复用就复用。不用的对象，尽可能设置为 null，尽快被垃圾回收掉。`** 
+
+```javascript
+var t = {};
+
+for (var i = 0; i < 10; i++) {
+    t.age = 19;
+    t.name = "123";
+    t.index = 1;
+    
+    console.log(t);
+}
+
+t = null; // 对象如果已经不用了，立即设置为 null，等待垃圾回收
+```
+
+
+
+### 3. 在循环中的函数表达式，能复用最好放到循环外面
+
+```javascript
+for (var k = 0; k < 10; k++) {
+    var t = function (a) {
+        console.log(a)
+    }
+    
+    t(k);
+}
+```
+
+
+
+```javascript
+// 推荐用法
+function t(a) {
+    console.log(a);
+}
+
+for (var k = 0; k < 10; k++) {
+    t(k);
+}
+
+t = null;
+```
 
 
 
