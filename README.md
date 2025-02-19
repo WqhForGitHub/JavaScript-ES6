@@ -1,3 +1,444 @@
+
+
+# 九种跨域方式实现原理
+
+
+
+## 一、什么是跨域？
+
+
+
+### 1. 什么是同源策略及其限制内容？
+
+
+
+### 2. 常见跨域场景
+
+
+
+
+
+## 二、跨域解决方案
+
+
+
+### 1. jsonp
+
+
+
+#### 1. JSONP 原理
+
+**`利用 <script> 标签没有跨域限制的漏洞，网页可以得到从其他来源动态产生的 JSON 数据。JSON 请求一定需要对方的服务器做支持才可以。`**
+
+
+
+#### 2. JSONP 和 AJAX 对比
+
+**`JSONP 和 AJAX 相同，都是客户端向服务器端发送请求，从服务器端获取数据的方式。但 AJAX 属于同源策略，JSONP 属于非同源策略（跨域请求）。`** 
+
+
+
+#### 3. JSONP 优缺点
+
+**`JSONP 优点是简单兼容性好，可用于解决主流浏览器的跨域数据访问的问题。缺点是仅支持 get 方法具有局限性，不安全可能会遭受 XSS 攻击。`** 
+
+
+
+#### 4. JSONP 的实现流程
+
+* **`声明一个回调函数，其函数名（如 show）当做参数值，要传递给跨域请求数据的服务器，函数形参要获取目标数据（服务器返回的 data）。`** 
+* **`创建一个 <script> 标签，把那个跨域的 API 数据接口地址，赋值给 script 的 src，还要在这个地址中向服务器传递该函数名（可以通过问号传参 ?callback=show）。`** 
+* **`服务器接收到请求后，需要进行特殊的处理：把传递进来的函数名和它需要给你的数据拼接成一个字符串。例如：传递进去的函数名是 show，它准备好的数据是 show("我不爱你")。`** 
+* **`最后服务器把准备的数据通过 HTTP 协议返回给客户端，客户端再调用执行之前声明的回调函数（show），对返回的数据进行操作。`** 
+
+**`在开发中可能会遇到多个 JSONP 请求的回调函数名是相同的，这时候就需要自己封装一个 JSONP 函数`**。
+
+```javascript
+function jsonp({ url, params, callback }) {
+    return new Promise((resolve, reject) => {
+        
+        let script = document.createElement("script");
+        
+        window[callback] = function(data) {
+            resolve(data);
+            document.body.removeChild(script);
+        }
+        
+        params = { ...params, callback };
+        
+        let arrs = [];
+        for (let key in params) {
+            arrs.push(`${key}=${params[key]}`);
+        }
+        
+        script.src = `${url}?${arrs.join("&")}`;
+        
+        document.body.appendChild(script);
+    })
+}
+
+jsonp({
+    url: "http://localhost:3000/say",
+    params: { wd: "Iloveyou" },
+    callback: "show"
+}).then(data => {
+    console.log(data);
+})
+```
+
+**`上面这段代码相当于向 http://localhost:3000/say?wd=Iloveyou&callback=show 这个地址请求数据，然后后台返回 show("我不爱你")，最后会运行 show() 这个函数，打印出我不爱你`** 
+
+```javascript
+let express = require("express");
+let app = express();
+app.get("/say", function(req, res) {
+    let { wd, callback } = req.queryl
+    console.log(wd); // Iloveyou
+    console.log(callback); // show
+    res.end(`${callback}("我不爱你")`);
+});
+
+app.listen(3000);
+```
+
+
+
+
+
+### 2. cors
+
+
+
+
+
+### 3. postMessage
+
+
+
+
+
+### 4. websocket
+
+
+
+### 5. node 中间件代理
+
+
+
+### 6. nginx 反向代理
+
+
+
+
+
+### 7. window.name + iframe
+
+
+
+
+
+### 8. location.hash + iframe
+
+
+
+
+
+### 9. document.domain + iframe
+
+
+
+
+
+
+
+# JavaScript 数据类型转换
+
+
+
+## 一、强制转换
+
+
+
+### 1. 其他的数据类型转换为 String
+
+#### 方式一：toString() 方法
+
+* **`调用被转换数据类型的 toString() 方法，该方法不会影响到原变量，它会讲转换的结果返回，但是注意：null 和 undefined 这两个值没有 toString，如果调用他们的方法，会报错。`** 
+
+```javascript
+var a = 123;
+
+a.toString(); // "123"
+
+var b = null;
+
+b.toString(); // 报错
+
+var c = undefined;
+
+c.toString(); // 报错
+```
+
+* **`采用 Number 类型的 toString() 方法的基模式，可以用不同的基输出数字，例如二进制的基是 2，八进制的基是 8，十六进制的基是 16。`** 
+
+```javascript
+var iNum = 10;
+
+console.log(iNum.toString(2)); // 1010
+console.log(iNum.toString(8)); // 12
+console.log(iNum.toString(16)); // A
+```
+
+
+
+### 方式二：String() 函数
+
+* **`使用 String() 函数做强制类型转换时，对于 Number 和 Boolean 实际上就是调用的 toString() 方法，但是对于 null 和 undefined，就不会调用 toString() 方法，它会将 null 直接转换为 "null"，将 undefined 直接转换为 "undefined"。`** 
+
+```javascript
+var a = null;
+
+String(a); // "null"
+
+var b = undefined;
+
+String(b); // "undefined"
+```
+
+* **`String 方法的参数如果是对象，返回一个类型字符串；如果是数组，返回该数组的字符串形式。`** 
+
+```javascript
+String({ a: 1 }); // "[object Object]"
+String([1, 2, 3]); // "1,2,3"
+```
+
+
+
+
+
+### 2、其他的数据类型转换为 Number
+
+
+
+#### 方式一：使用 Number() 函数
+
+下面分成两种情况讨论，一种是参数是原始类型的值，另一种是参数是对象。
+
+
+
+**`(1) 原始类型值`** 
+
+**`1. 字符串转数字`**
+
+```javascript
+Number("324"); // 324
+Number("324abc"); // NaN
+Number(""); // 0
+```
+
+
+
+**`2. 布尔值转数字：true 转成 1，false 转成 0`**
+
+```javascript
+Number(true); // 1
+Number(false); // 0
+```
+
+
+
+**`3. undefined 转数字：转成 NaN`**
+
+```javascript
+Number(undefined); // NaN
+```
+
+
+
+**`4. null 转数字：转成 0`**
+
+```javascript
+Number(null); // 0
+```
+
+
+
+**`5. Number() 接受数值作为参数，此时它既能识别负的十六进制，也能识别 0 开头的八进制，返回值永远是十进制`**
+
+```javascript
+Number(3.15); // 3.15
+Number(023); // 19
+Number(0x12); // 18
+Number(-0x12); // -18
+```
+
+
+
+**`(2) 对象`** 
+
+**`简单的规则是，Number 方法的参数是对象时，将返回 NaN，除非是包含单个数值的数组。`**
+
+```javascript
+Number({ a: 1 }); // NaN
+Number([1, 2, 3]); // NaN
+Number([5]); // 5
+```
+
+
+
+#### 方式二：parseInt & parseFloat()
+
+**`这种方式专门用来对付字符串，parseInt() 一个字符串转换为一个整数，可以将一个字符串的有效的整数内容取出来，然后转换为 Number。parseFloat() 把一个字符串转换为一个浮点数。parseFloat() 作用和 parseInt() 类似，不同的是它可以获得有效的小数。`** 
+
+```javascript
+console.log(parseInt(".21")); // NaN
+console.log(parseInt("10.3")); // 10
+console.log(parseInt(".21")); // 0.21
+console.log(parseInt(".d1")); // NaN
+console.log(parseInt("10.11.33")); // 10.11
+console.log(parseInt("4.3years")); // 4.3
+console.log(parseInt("He40.3")); // NaN
+```
+
+**`parseInt() 没有第二个参数时默认以十进制转换数值，有第二个参数时，以第二个参数为基数转换数值，如果基数有误返回 NaN`**
+
+```javascript
+console.log(parseInt("13")); // 13
+console.log(parseInt("11", 2)); // 3
+console.log(parseInt("17", 8)); // 15
+console.log(parseInt("1f", 16)); // 31
+```
+
+**`两者的区别：Number 函数将字符串转为数值，要比 parseInt 函数严格很多。基本上，只要有一个字符无法转成数值，整个字符串就会被转化为 NaN。`**
+
+```javascript
+parseInt("42 cats"); // 42
+Number("42 cats"); // NaN
+```
+
+**`上面代码中，parseInt 逐个解析字符，而 Number 函数整体转换为字符串的类型。`** 
+
+**`另外，对空字符串的处理也不一样。`** 
+
+```javascript
+Number("     "); // 0
+parseInt("   "); // NaN
+```
+
+
+
+
+
+### 3、其他的数据类型转换为 Boolean
+
+**`它的转换规则相对简单，只有空字符串（""）、null、undefined、+0、-0 和 NaN 转为布尔型是 false，其他的都是 true，空数组、空对象转换为布尔类型也是 true，甚至连 false 对应的布尔对象 new Boolean(false) 也是 true。`** 
+
+```javascript
+Boolean(undefined); // false
+Boolean(null); // false
+Boolean(0); // false
+Boolean(NaN); // false
+Boolean(""); // false
+```
+
+```javascript
+Boolean({}); // true
+Boolean([]); // true
+Boolean(new Boolean(false)); // true
+```
+
+
+
+
+
+## 二、自动转换
+
+**`遇到以下三种情况时，JavaScript 会自动转换数据类型，即转换是自动完成的，用户不可见。`** 
+
+
+
+### 1. 自动转换为布尔值
+
+**`JavaScript 遇到预期为布尔值的地方（比如 if 语句的条件部分），就会将非布尔值的参数自动转换为布尔值。系统内部会自动调用 Boolean 函数。`** 
+
+```javascript
+if ("abc") {
+    console.log("hello");
+}
+```
+
+
+
+### 2. 自动转换为数值
+
+**`算术运算符（+ - * /）跟非 Number 类型的值进行运算时，会将这些值转换为 Number，然后在运算，除了字符串的加法运算`** 
+
+```javascript
+true + 1; // 2
+2 + null; // 2
+undefined + 1 // NaN
+2 + NaN; // NaN
+'5' - '2'; // 3
+'5' * '2'; // 10
+true - 1; // 0
+'1' - 1; // 0
+'5' * []; // 0
+false / '5'; // 0
+'abc' - 1; // NaN
+```
+
+
+
+**`一元运算符也会把运算子转成数值`**
+
+```javascript
++ "abc"; // NaN
+- "abc"; // NaN
++ true; // 1
+- false; // 0
+```
+
+
+
+### 3. 自动转换为字符串
+
+**`字符串的自动转换，主要发生在字符串的加法运算时。当一个值为字符串，另一个值为非字符串，则后者转为字符串。`**
+
+```javascript
+'5' + 1; // '51'
+'5' + true // "5true"
+"5" + false; // "5false"
+"5" + {}; // "5[object Object]"
+"5" + []; // "5"
+"5" + function () {}; // "5function () {}"
+"5" + undefined; // "5undefined"
+"5" + null; // "5null"
+```
+
+
+
+
+
+## 三、总结
+
+
+
+### 1. 强制转换的各种情况
+
+
+
+### 2. 自动转换的各种情况
+
+* **`只有空字符串（""）、null、undefined、+0、-0 和 NaN 转为布尔值是 false，其他的都是 true`** 
+* **`除了加法运算符（+）有可能把运算子转为字符串，其他运算符都会把运算子自动转成数值。一元运算符也会把运算子转成数值。`** 
+* **`字符串的自动转换，主要发生在字符串的加法运算时。`** 
+
+
+
+
+
+
+
 # 深入理解 JavaScript 作用域和作用域链
 
 
@@ -1245,4 +1686,59 @@ let s1 = new Student("wade", 38, 100000);
 console.log(s1);
 s1.showName();
 ```
+
+
+
+
+
+# JavaScript 中的垃圾回收和内存泄漏
+
+
+
+## 一、垃圾回收的必要性
+
+**`由于字符串、对象和数组没有固定大小，所有当他们的大小已知时，才能对他们进行动态的存储分配。JavaScript 程序每次创建字符串、数组或对象时，解释器都必须分配内存来存储那个实体。只要像这样动态地分配了内存，最终都要释放那些内存以便他们能够被再用，否则，JavaScript 的解释器将会消耗完系统中所有可用的内存，造成系统崩溃。`** 
+
+**`这段话解释了为什么需要系统需要垃圾回收，JavaScript 不像 C/C++，它有自己的一套垃圾回收机制。`** 
+
+**`JavaScript 垃圾回收机制很简单：找出不再使用的变量，然后释放掉其占用的内存，但是这个过程不是时时的，因为其开销比较大，所以垃圾回收器会按照固定的时间间隔周期性的执行。`** 
+
+```javascript
+var a = "浪里行舟";
+var b = "前端工匠";
+var a = b;
+```
+
+**`这段代码运行之后，浪里行舟这个字符串失去了引用（之前是被 a 引用），系统检测到这个事实之后，就会释放该字符串的存储空间以便这些空间可以被再利用。`** 
+
+
+
+
+
+## 二、垃圾回收机制
+
+**`垃圾回收机制怎么知道，哪些内存不再需要？`** 
+
+**`垃圾回收有两种方法：标记清除、引用计数。引用计数不太常用，标记清除较为常用。`** 
+
+
+
+### 1. 标记清除
+
+```javascript
+var m = 0, n = 19; // 把 m, n, add() 标记为进入环境
+add(m, n); // 把 a, b, c 标记为进入环境
+console.log(n); // a, b, c 标记为离开环境，等待垃圾回收
+function add(a, b) {
+    a++;
+    var c = a + b;
+    return c;
+}
+```
+
+
+
+
+
+
 
