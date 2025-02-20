@@ -1691,6 +1691,478 @@ s1.showName();
 
 
 
+
+
+# this 指向
+
+
+
+## 二、了解 this
+
+**`this 实际上是在函数被调用时发生的绑定，它指向什么完全取决于函数在哪里被调用。`**
+
+
+
+## 三、this 到底是谁
+
+
+
+### 1. 函数执行时首先要看函数名前面是是否有 "."，有的话，"." 前面是谁，this 就是谁；没有的话 this 就是 window
+
+```javascript
+function fn() {
+    console.log(this);
+} 
+
+var obj = { fn: fn };
+
+fn(); // this 指向 window
+
+obj.fn(); // this 指向 obj
+
+function sum() {
+    fn(); // this 指向 window
+}
+
+sum();
+
+var oo = {
+    sum: function () {
+        console.log(this); // this 指向 oo
+        fn(); // this 指向 window
+    }
+};
+
+oo.sum();
+```
+
+
+
+### 2. 自执行函数中的 this 永远是 window
+
+```javascript
+(function() {})(); // this 指向 window
+```
+
+
+
+### 3. 给元素的某一个事件绑定方法，当事件触发的时候，执行对应的方法，方法中的 this 是当前的元素，除了 IE6 ~ IE8 下使用 attachEvent
+
+* **`DOM0 事件绑定`**
+
+```javascript
+oDiv.onclick = function () {
+    // this 指向 oDiv
+};
+```
+
+
+
+* **`DOM2 事件绑定`**
+
+```javascript
+oDiv.addEventListener("click", function() {
+    // this 指向 oDiv
+}, false);
+```
+
+* **`在 IE6 ~ IE8 下使用 attachEvent，默认的 this 就是指的 window 对象`**
+
+```javascript
+oDiv.attachEvent("click", function() {
+    // this 指向 window
+})
+```
+
+**`我们大多数时候，遇到事件绑定，如下面例子这种，对于 IE6 ~ 8 使用 attachEvent 不必太较真。`**
+
+```javascript
+function fn() {
+    console.log(this);
+}
+
+document.getElementById("div1").onclick = fn; // fn 中的 this 就是 div1
+document.getElementById("div1").onclick = function() {
+    console.log(this); // this 指向 div1
+    fn(); // this 指向 window
+}
+```
+
+
+
+### 4. 在构造函数模式中，类中（函数体中）出现的 this.xxx=xxx 中的 this 是当前类的一个实例
+
+```javascript
+function CreateJsPerson(name, age) {
+    this.name = name;
+    this.age = age;
+    this.writeJs = function() {
+        console.log("my name is " + this.name + ", i can write Js");
+    };
+}
+
+var p1 = new CreateJsPerson("尹华芝", 48);
+```
+
+**`必须要注意一点：类中某一个属性值（方法），方法中的 this 需要看方法执行的时候，前面是否有 "."，才能知道 this 是谁。大家不妨看下接下来的这个例子，就可明白是啥意思。`** 
+
+```javascript
+function Fn() {
+    this.x = 100;
+    this.getX = function() {
+        console.log(this.x);
+    }
+}
+
+var f1 = new Fn();
+
+f1.getX(); // 100
+
+var ss = f1.getX;
+ss(); undefined
+```
+
+
+
+### 5. call、apply 和 bind
+
+**`我们先来看一个问题，想在下面的例子中 this 绑定 obj，怎么实现？`** 
+
+```javascript
+var obj = { name: "浪里行舟" };
+
+function fn() {
+    console.log(this);
+}
+
+fn();
+
+obj.fn(); // Uncaught TypeError: obj.fn is not a function
+```
+
+**`如果直接绑定 obj.fn() 程序就会报错。这里我们应该用 fn.call(obj) 就可以实现 this 绑定 obj，接下来我们详细介绍下 call 方法。`**
+
+* **`call 方法的作用：`**
+
+**`1. 首先我们让原型上的 call 方法执行，在执行 call 方法的时候，我们让 fn 方法中的 this 变为第一个参数值 obj；然后再把 fn 这个函数执行。`**
+
+**`2. call 还可以传值，在严格模式下和非严格模式下，得到值不一样。`**
+
+```javascript
+var obj = { name: "浪里行舟" };
+
+function fn(num1, num2) {
+    console.log(num1 + num2);
+    console.log(this);
+}
+
+fn.call(100, 200); // this 指向 100，num1: 100,num2: undefined
+fn.call(obj, 100, 200); // this 指向 obj, num1:100, num2:200
+fn.call(); // this 指向 window
+fn.call(null); // this 指向 window
+fn.call(undefined); // this 指向 window
+```
+
+
+
+**`严格模式下`**
+
+```javascript
+fn.call(); // this 指向 undefined
+fn.call(null); // this 指向 null
+fn.call(undefined); // this 指向 undefined
+```
+
+
+
+**`两者唯一的区别：call 第二个参数开始接受一个参数列表，apply 第二个参数开始接受一个参数数组。`**
+
+```javascript
+fn.call(obj, 100, 200);
+fn.apply(obj, [100, 200]);
+```
+
+
+
+* **`bind：这个方法在 IE6 ~ 8 下不兼容，和 call/apply 类似都是用来改变 this 关键字的，但是和这两者有明显区别：`**
+
+```javascript
+fn.call(obj, 1, 2);
+
+fn.bind(obj, 1, 2);
+
+var tempFn = fn.bind(obj, 1, 2);
+
+tempFn();
+```
+
+**`bind 体现了预处理思想：事先把 fn 的 this 改变为我们想要的结果，并且把对应的参数值也准备好，以后要用到了，直接的执行即可。`**
+
+**`call 和 apply 直接执行函数，而 bind 需要再一次调用。`**
+
+```javascript
+var a = {
+    name: "Cherry",
+    fn: function (a, b) {
+        console.log(a + b);
+    }
+}
+
+var b = a.fn;
+b.bind(a, 1, 2)(); // 3
+```
+
+**`必须要声明一点：遇到第五种情况（call apply 和 bind），前面四种全部让步。`**
+
+
+
+
+
+## 四、箭头函数 this 指向
+
+**`箭头函数正如名称所示那样使用一个箭头（=>）来定义函数的新语法，但它优于传统的函数，主要体现两点：更简短的函数并且不绑定 this。`**
+
+```javascript
+var obj = {
+    birth: 1990,
+    getAge: function () {
+        var b = this.birth;
+        var fn = function () {
+            return new Date().getFullYear() - this.birth;
+        };
+        
+        return fn();
+    }
+};
+```
+
+**`现在，箭头函数完全修复了 this 的指向，箭头函数没有自己的 this，箭头函数的 this 不是调用的时候决定的，而是在定义的时候处在的对象就是它的 this。`**
+
+**`换句话说，箭头函数的 this 看外层的是否有函数，如果有，外层函数的 this 就是内部箭头函数的 this，如果没有，则 this 是 window。`**
+
+```html
+<button id="btn1">测试箭头函数 this_1</button>
+<button id="btn2">测试箭头函数 this_2</button>
+
+<script type="text/javascript">
+    let btn1 = document.getElementById("btn1");
+    
+    let obj = {
+        name: "kobe",
+        age: 39,
+        getName: function () {
+            btn1.onclick = () => {
+                console.log(this); // obj
+            }
+        }
+    };
+    
+    obj.getName();
+</script>
+```
+
+
+
+**`上例中，由于箭头函数不会创建自己的 this，它只会从自己的作用域链的上一层继承 this。其实可以简化为如下代码：`**
+
+```javascript
+let btn1 = document.getElementById("btn1");
+
+let obj = {
+    name: "kobe",
+    age: 39,
+    getName: function () {
+        console.log(this);
+    }
+};
+
+obj.getName();
+```
+
+**`那假如上一层并不存在函数，this 指向又是谁？`**
+
+```html
+<button id="btn1">测试箭头函数 this_1</button>
+<button id="btn2">测试箭头函数 this_2</button>
+
+<script type="text/javascript">
+    let btn2 = document.getElementById("btn2");
+    
+    let obj = {
+        name: "kobe",
+        age: 39,
+        getName: () => {
+            btn2.onclick = () => {
+                console.log(this); // window
+            }
+        }
+    };
+    
+    obj.getName();
+</script>
+```
+
+**`上例中，虽然存在两个箭头函数，其实 this 取决于最外层的箭头函数，由于 obj 是个对象而非函数，所以 this 指向为 window 对象。`**
+
+**`由于 this 在箭头函数中已经按照词法作用域绑定了，所以，用 call() 或者 apply() 调用箭头函数时，无法对 this 进行绑定，即传入的第一个参数被忽略：`**
+
+```javascript
+var obj = {
+    birth: 1990,
+    getAge: function (year) {
+        var b = this.birth;
+        var fn = (y) => y - this.birth;
+        return fn.call({ birth: 2000 }, year);
+    }
+};
+
+obj.getAge(2018); // 28
+```
+
+
+
+
+
+
+
+# 浏览器与 Node 的事件循环
+
+
+
+## 一、线程与进程
+
+
+
+### 1. 概念
+
+**`我们经常说是 JS 是单线程执行的，指的是一个进程里只有一个主线程，那么到底什么是线程？什么是进程？`** 
+
+**`进程是 CPU 资源分配的最小单位；线程是 CPU 调度的最小单位。`**
+
+
+
+### 2. 多进程与多线程
+
+* **`多进程：在同一个时间里，同一个计算机系统中如果允许两个或两个以上的进程处于运行状态。多进程带来的好处是明显的，比如你可以听歌的同时，打开编辑器敲代码，编辑器和听歌软件的进程之间丝毫不会相互干扰。`** 
+* **`多线程：程序中包含多个执行流，即在一个程序中可以同时运行多个不同的线程来执行不同的任务，也就是说允许单个程序创建多个并行执行的线程来完成各自的任务。`** 
+
+**`以 Chrome 浏览器中为例，当你打开一个 Tab 页时，其实就是创建了一个进程，一个进程中可以有多个线程，比如渲染线程、JS 引擎线程、HTTP 请求线程等等。当你发起一个请求时，其实就是创建了一个线程，当请求结束后，该线程可能会被销毁。`** 
+
+
+
+
+
+## 二、浏览器内核
+
+**`简单来说浏览器内核是通过取得页面内容、整理信息（应用 CSS）、计算和组合最终输出可视化的图像结果，通常也被称为渲染引擎。`** 
+
+**`浏览器内核是多线程，在内核控制下各线程相互配合以保持同步，一个浏览器通常由以下常驻线程组成：`** 
+
+* **`GUI 渲染线程`** 
+* **`JavaScript 引擎线程`** 
+* **`定时触发器线程`** 
+* **`事件触发线程`** 
+* **`异步 http 请求线程`** 
+
+
+
+### 1. GUI 渲染线程
+
+* **`主要负责页面的渲染，解析 HTML、CSS，构建 DOM 树，布局和绘制等。`** 
+* **`当界面需要重绘或者由于某种操作引发回流时，将执行该线程。`** 
+* **`该线程与 JS 引擎线程互斥，当执行 JS 引擎线程时，GUI 渲染会被挂起，当任务队列空闲时，主线程才会去执行 GUI 渲染。`** 
+
+
+
+### 2. JS 引擎线程
+
+* **`该线程当然是主要负责处理 JavaScript 脚本，执行代码。`** 
+* **`也是主要负责执行准备好待执行的事件，即定时器计数结束，或者异步请求成功并正确返回时，将依次进入任务队列，等待 JS 引擎线程的执行。`** 
+* **`当然，该线程与 GUI 渲染线程互斥，当 JS 引擎线程执行 JavaScript 脚本时间过长，将导致页面渲染的阻塞。`** 
+
+
+
+### 3. 定时器触发线程
+
+* **`负责执行异步定时器一类的函数的线程，如：setTimeout、setInterval。`** 
+* **`主线程依次执行代码时，遇到定时器，会将定时器交给该线程处理，当计数完毕后，事件触发线程会将计数完毕后的事件加入到任务队列的尾部，等待 JS 引擎线程执行。`** 
+
+
+
+### 4. 事件触发线程
+
+* **`主要负责将准备好的事件交给 JS 引擎线程执行。`** 
+
+**`比如 setTimeout 定时器计数结束，ajax 等异步请求成功并触发回调函数，或者用户触发点击事件时，该线程会将整装待发的事件依次加入到任务队列的队尾，等待 JS 引擎线程的执行。`** 
+
+
+
+### 5. 异步 http 请求线程
+
+* **`负责执行异步请求一类的函数的线程，如：Promise，axios，ajax 等。`** 
+* **`主线程依次执行代码时，遇到异步请求，会将函数交给该线程处理，当监听到状态码变更，如果有回调函数，事件触发线程会将回调函数加入到任务队列的尾部，等待 JS 引擎线程执行。`** 
+
+
+
+## 三、浏览器中的 Event Loop
+
+
+
+### 1. micro-task 与 macro-task
+
+**`浏览器端事件循环中的异步队列有两种：macro（宏任务）队列和 micro（微任务）队列。宏任务队列可以有多个，微任务队列只有一个。`** 
+
+* **`常见的 macro-task 比如：setTimeout、setInterval、script（整体代码）、I/O 操作、UI 渲染等。`** 
+* **`常见的 micro-task 比如：new Promise().then(回调)、MutationObserver 等。`** 
+
+
+
+### 2. Event Loop 过程解析
+
+**`一个完整的 Event Loop 过程，可以概括为以下阶段：`** 
+
+* **`一开始执行栈为空，我们可以把执行栈认为是一个存储函数调用的栈结构，遵循后进先出的原则。micro 队列空，macro 队列里有且只有一个 script 脚本（整体代码）。`** 
+* **`全局上下文（script 标签）被推入执行栈，同步代码执行。在执行过程中，会判断是同步任务还是异步任务，通过对一些接口的调用，可以产生新的 macro-task 与 micro-task，它们会分别被推入各自的任务队列里。同步代码执行完了，script 脚本会被移出 macro 队列，这个过程本质上是队列的 macro-task 的执行和出队的过程。`** 
+* **`上一步我们出队的是一个 macro-task，这一步我们处理的是 micro-task。但需要注意的是：当 macro-task 出队时，任务是一个一个执行的；而 micro-task 出队时，任务是一对一对执行的。因此，我们处理 micro 队列这一步，会逐个执行队列中的任务并把它出队，直到队列被清空。`** 
+* **`执行渲染操作，更新界面。`** 
+* **`检查是否存在 Web worker 任务，如果有，则对其进行处理。`** 
+* **`上述过程循环往复，直到两个队列都清空。`** 
+
+**`我们总结一下，每一次循环都是一个这样的过程：`** 
+
+**`当某个宏任务执行完后，会查看是否有微任务队列。如果有，先执行微任务队列中的所有任务，如果没有，会读取宏任务队列中排在最前的任务，执行宏任务的过程中，遇到微任务，依次加入微任务队列。栈空后，再次读取微任务队列里的任务，依次类推。`** 
+
+接下来我们看个例子来介绍上面流程：
+
+```javascript
+Promise.resolve().then(() => {
+    console.log("Promise1");
+    setTimeout(() => {
+        console.log("setTimeout2");
+    }, 0)
+});
+
+setTimeout(() => {
+    console.log("setTimeout1");
+    Promise.resolve().then(() => {
+        console.log("Promise2");
+    });
+}, 0);
+```
+
+**`最后输出结果是 Promise1，setTimeout1，Promise2，setTimeout2`** 
+
+* **`一开始执行栈的同步任务（这属于宏任务）执行完毕，会去查看是否有微任务队列，上题中存在（有且只有一个），然后执行微任务队列中的所有任务输出 Promise1，同时会生成一个宏任务 setTimeout2。`** 
+* **`然后去查看宏任务队列，宏任务 setTimeout1 在 setTimeout2 之前，先执行宏任务 setTimeout1，输出 setTimeout1。`** 
+* **`在执行宏任务 setTimeout1 时会生成微任务 Promise2，放入微任务队列中，接着先去清空微任务队列中的所有任务，输出 Promise2。`** 
+* **`清空完微任务队列中的所有任务后，就又会去宏任务队列取一个，这回执行的是 setTimeout2。`** 
+
+
+
+
+
+
+
 # JavaScript 中的垃圾回收和内存泄漏
 
 
