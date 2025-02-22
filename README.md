@@ -1,154 +1,5 @@
 
 
-# 九种跨域方式实现原理
-
-
-
-## 一、什么是跨域？
-
-
-
-### 1. 什么是同源策略及其限制内容？
-
-
-
-### 2. 常见跨域场景
-
-
-
-
-
-## 二、跨域解决方案
-
-
-
-### 1. jsonp
-
-
-
-#### 1. JSONP 原理
-
-**`利用 <script> 标签没有跨域限制的漏洞，网页可以得到从其他来源动态产生的 JSON 数据。JSON 请求一定需要对方的服务器做支持才可以。`**
-
-
-
-#### 2. JSONP 和 AJAX 对比
-
-**`JSONP 和 AJAX 相同，都是客户端向服务器端发送请求，从服务器端获取数据的方式。但 AJAX 属于同源策略，JSONP 属于非同源策略（跨域请求）。`** 
-
-
-
-#### 3. JSONP 优缺点
-
-**`JSONP 优点是简单兼容性好，可用于解决主流浏览器的跨域数据访问的问题。缺点是仅支持 get 方法具有局限性，不安全可能会遭受 XSS 攻击。`** 
-
-
-
-#### 4. JSONP 的实现流程
-
-* **`声明一个回调函数，其函数名（如 show）当做参数值，要传递给跨域请求数据的服务器，函数形参要获取目标数据（服务器返回的 data）。`** 
-* **`创建一个 <script> 标签，把那个跨域的 API 数据接口地址，赋值给 script 的 src，还要在这个地址中向服务器传递该函数名（可以通过问号传参 ?callback=show）。`** 
-* **`服务器接收到请求后，需要进行特殊的处理：把传递进来的函数名和它需要给你的数据拼接成一个字符串。例如：传递进去的函数名是 show，它准备好的数据是 show("我不爱你")。`** 
-* **`最后服务器把准备的数据通过 HTTP 协议返回给客户端，客户端再调用执行之前声明的回调函数（show），对返回的数据进行操作。`** 
-
-**`在开发中可能会遇到多个 JSONP 请求的回调函数名是相同的，这时候就需要自己封装一个 JSONP 函数`**。
-
-```javascript
-function jsonp({ url, params, callback }) {
-    return new Promise((resolve, reject) => {
-        
-        let script = document.createElement("script");
-        
-        window[callback] = function(data) {
-            resolve(data);
-            document.body.removeChild(script);
-        }
-        
-        params = { ...params, callback };
-        
-        let arrs = [];
-        for (let key in params) {
-            arrs.push(`${key}=${params[key]}`);
-        }
-        
-        script.src = `${url}?${arrs.join("&")}`;
-        
-        document.body.appendChild(script);
-    })
-}
-
-jsonp({
-    url: "http://localhost:3000/say",
-    params: { wd: "Iloveyou" },
-    callback: "show"
-}).then(data => {
-    console.log(data);
-})
-```
-
-**`上面这段代码相当于向 http://localhost:3000/say?wd=Iloveyou&callback=show 这个地址请求数据，然后后台返回 show("我不爱你")，最后会运行 show() 这个函数，打印出我不爱你`** 
-
-```javascript
-let express = require("express");
-let app = express();
-app.get("/say", function(req, res) {
-    let { wd, callback } = req.queryl
-    console.log(wd); // Iloveyou
-    console.log(callback); // show
-    res.end(`${callback}("我不爱你")`);
-});
-
-app.listen(3000);
-```
-
-
-
-
-
-### 2. cors
-
-
-
-
-
-### 3. postMessage
-
-
-
-
-
-### 4. websocket
-
-
-
-### 5. node 中间件代理
-
-
-
-### 6. nginx 反向代理
-
-
-
-
-
-### 7. window.name + iframe
-
-
-
-
-
-### 8. location.hash + iframe
-
-
-
-
-
-### 9. document.domain + iframe
-
-
-
-
-
 
 
 # JavaScript 数据类型转换
@@ -2457,5 +2308,485 @@ t = null;
 
 
 
+
+
+
+
+# DOM 事件机制
+
+
+
+## 前言
+
+本文主要介绍 DOM 事件级别、DOM 事件模型、事件流、事件代理和 Event 对象常见的应用，希望对你们有些帮助和启发！
+
+
+
+## 一、DOM 事件级别
+
+**`DOM 级别一共可以分为四个级别：DOM0级、DOM1级、DOM2级和 DOM3级。而 DOM 事件分为 3 个级别：DOM 0 级事件处理，DOM 2 级事件处理和 DOM 3 级事件处理。由于 DOM 1级中没有事件的相关内容，所以没有 DOM 1 级事件。`** 
+
+
+
+### 1. DOM 0 级事件
+
+**`el.onclick = function() {}`**
+
+```javascript
+var btn = document.getElementById("btn");
+
+btn.onclick = function() {
+    console.log(this.innerHTML);
+}
+```
+
+**`当希望为同一个元素/标签绑定多个同类型事件的时候（如给上面的这个 btn 元素绑定 3 个点击事件），是不被允许的。DOM 0 级事件绑定，给元素的事件行为绑定方法，这些方法都是在当前元素事件行为的冒泡阶段（或者目标阶段）执行的。`**
+
+
+
+### 2. DOM 2 级事件
+
+**`el.addEventListener(event-name, callback, useCapture)`**
+
+* **`event-name：事件名称，可以是标准的 DOM 事件`** 
+* **`callback：回调函数，当事件触发时，函数会被注入要给参数为当前的事件对象 event`** 
+* **`useCapture：默认是 false，代表事件句柄在冒泡阶段执行`** 
+
+```javascript
+var btn = document.getElementById("btn");
+
+btn.addEventListener("click", test, false);
+
+function test(e) {}
+```
+
+
+
+### 3. DOM 3 级事件
+
+**`在 DOM 2 级事件的基础上添加了更多的事件类型。`** 
+
+* **`UI 事件：当用户与页面上的元素交互时触发，如：load、scroll`** 
+* **`焦点事件：当元素获得或失去焦点时触发，如 blur、focus`** 
+* **`鼠标事件：当用户通过鼠标在页面执行操作时触发如：dblclick、mouseup`** 
+* **`滚轮事件：当使用鼠标滚轮或类似设备时触发，如：mousewheel`** 
+* **`文本事件：当在文档输入文本时触发，如：textInput`** 
+* **`键盘事件：当用户通过键盘在页面上执行操作时触发，如：keydown、keypress`** 
+* **`合成事件：当为 IME（输入法编辑器）输入字符时触发，如：compositionstart`** 
+* **`变动事件：当底层 DOM 结构发生变化时触发，如：DOMsubtreeModified`** 
+* **`同时 DOM3 级事件也允许使用者自定义一些事件。`** 
+
+
+
+
+
+## 二、DOM 事件模型和事件流
+
+**`DOM 事件模型分为捕获和冒泡。一个事件发生后，会在子元素和父元素之间传播。这种传播分成三个阶段。`**
+
+**`(1) 捕获阶段：事件从 window 对象自上而下向目标节点传播的阶段`**
+
+**`(2) 目标阶段：真正的目标节点正在处理事件的阶段`**
+
+**`(3) 冒泡阶段：事件从目标节点自下而上向 window 对象传播的阶段`**
+
+
+
+### DOM 事件捕获的具体流程
+
+**`捕获从上到下，事件先从 window 对象，然后再到 document（对象），然后是 html 标签，然后是 body 标签，然后按照普通的 html 结构一层一层往下传，最后到达目标元素。`** 
+
+**`而事件冒泡的流程刚好是事件捕获的逆过程。`** 
+
+**`接下来我们看个事件冒泡的例子：`** 
+
+```html
+<div id="outer">
+    <div id="inner"></div>
+</div>
+
+<script>
+window.onclick = function() {
+    console.log("window");
+};
+    
+document.onclick = function() {
+    console.log("document");
+};
+    
+document.documentElement.onclick = function() {
+    console.log("html");
+};
+    
+document.body.onclick = function() {
+    console.log("body");
+}
+
+outer.onclick = function(ev) {
+    console.log("outer");
+};
+
+inner.onclick = function(ev) {
+  console.log("inner");  
+};   
+</script>
+```
+
+
+
+
+
+## 三、事件代理（事件委托）
+
+**`由于事件会在冒泡阶段向上传播到父节点，因此可以把子节点的监听函数定义在父节点上，由父节点的监听函数统一处理多个子元素的事件。这种方法叫做事件代理。`** 
+
+
+
+### 1. 优点
+
+* **`减少内存消耗，提高性能`** 
+
+**`假设有一个列表，列表之中有大量的列表项，我们需要在点击每个列表项的时候响应一个事件
+
+```html
+<ul id="list">
+    <li>item 1</li>
+    <li>item 2</li>
+    <li>item 3</li>
+    <li>item 4</li>
+    <li>item 5</li>
+</ul>
+```
+
+**`如果给每个列表项都绑定一个函数，那对于内存消耗来说是非常大的，效率上需要消耗很多性能。借助事件代理，我们只需要给父容器 ul 绑定方法即可，这样不管点击的是哪一个后代元素，都会根据冒泡传播的传递机制，把容器的 click 行为触发，然后把对应的方法执行，根据事件源，我们可以知道点击的是谁，从而完成不同的事。`** 
+
+* **`动态绑定事件`** 
+
+**`在很多时候，我们需要通过用户操作动态的增删列表项元素，如果一开始给每个子元素绑定事件，那么在列表发生变化时，就需要重新给新增的元素绑定事件，给即将删去的元素解绑事件，如果用事件代理就会省去很多这样的麻烦。`** 
+
+
+
+### 2. 如何实现
+
+接下来我们来实现上例中父层元素 #list 下的 li 元素的事件委托到它的父层元素上：
+
+```javascript
+document.getElementById("list").addEventListener("click", function (e) {
+    var event = e || window.event;
+    var target = event.target || event.srcElement;
+    
+    if (target.nodeName.toLocaleLowerCase === "li") {
+        console.log("the content is: ", target.innerHTML);
+    }
+})
+```
+
+
+
+
+
+## 四、Event 对象常见的应用
+
+* **`event.preventDefault()`** 
+
+**`如果调用这个方法，默认事件行为将不再触发。什么是默认事件呢？例如表单点击提交按钮（submit）跳转页面、a 标签默认页面跳转或是锚点定位等。`** 
+
+**`很多时候我们使用 a 标签仅仅是想当做一个普通的按钮，点击实现一个功能，不想页面跳转，也不想锚点定位。`** 
+
+```html
+// 方法一：
+<a href="javascript:;">链接</a>
+```
+
+**`也可以通过 JS 方法来阻止，给其 click 事件绑定方法，当我们点击 a 标签的时候，先触发 click 事件，其次才会执行自己的默认行为。`** 
+
+```html
+// 方法二：
+<a id="test" href="http://www.cnblogs.com">链接</a>
+
+<script>
+test.onclick = function(e) {
+    e = e || window.event;
+    return false;
+}
+</script>
+```
+
+```html
+// 方法三：
+<a id="test" href="http://www.cnblogs.com">链接</a>
+
+<script>
+test.onclick = function(e) {
+    e = e || window.event;
+    e.preventDefault();
+}
+</script>
+```
+
+**`接下来我们看个例子：输入框最多只能输入六个字符，如何实现？`** 
+
+```html
+<input type="text" id="tempInp">
+
+<script>
+    tempInp.onkeydown = function(ev) {
+        ev = ev || window.event;
+        let val = this.value.trim();
+        let len = val.length;
+        
+        if(len >= 6) {
+            this.value = val.substr(0, 6);
+            let code = ev.which || ev.keyCode;
+            if (!/^(46|8|37|38|39|40)$/.test(code)) {
+                ev.preventDefault();
+            }
+        }
+    }
+</script>
+```
+
+
+
+* **`event.stopPropagation() & event.stopImmediatePropagation()`** 
+
+**`event.stopPropagation() 方法阻止事件冒泡到父元素，阻止任何父事件处理程序被执行。上面提到事件冒泡阶段是指事件从目标节点自下而上向 window 对象传播的阶段。`**
+
+**`我们在例3 的 inner 元素 click 事件上，添加 event.stopPropagation() 这句话后，就阻止了父事件的执行，最后只打印了 inner`**
+
+```javascript
+inner.onclick = function(ev) {
+    console.log("inner");
+    ev.stopPropagation();
+};
+```
+
+**`stopImmediatePropagation 既能阻止事件向父元素冒泡，也能阻止元素同事件类型的其他监听器被触发。而 stopPropagation 只能实现前者的效果。我们来看个例子：`**
+
+```html
+<body>
+    <button id="btn">Click me to stop propagation</button>
+</body>
+
+<script>
+const btn = document.querySelector("#btn");
+btn.addEventListener("click", event => {
+    console.log("btn click 1");
+    event.stopImmediatePropagation();
+});
+    
+btn.addEventListener("click", event => {
+    console.log("btn click 2");
+});
+    
+document.body.addEventListener("click", () => {
+    console.log("body click");
+});
+</script>
+```
+
+**`如上所示，使用 stopImmediatePropagation 后，点击按钮时，不仅 body 绑定事件不会触发，与此同时按钮的另一个点击事件也不触发。`**
+
+* **`event.target & event.currentTarget`** 
+
+**`老实说这两者的区别，并不好用文字描述，我们先来看个例子：`** 
+
+```html
+<div id="a">
+    <div id="b">
+        <div id="c">
+            <div id="d"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("a").addEventListener("click", function(e) {
+        console.log("target: " + e.target.id + "&currentTarget: " + e.currentTarget.id);
+    })
+    
+    document.getElementById("b").addEventListener("click", function(e) {
+         console.log("target: " + e.target.id + "&currentTarget: " + e.currentTarget.id);
+    }) 
+    
+    document.getElementById("c").addEventListener("click", function(e) {
+        console.log("target: " + e.target.id + "&currentTarget: " + e.currentTarget.id);
+    }) 
+    
+    document.getElementById("d").addEventListener("click", function(e) {
+        console.log("target: " + e.target.id + "&currentTarget: " + e.currentTarget.id);
+    })
+    
+</script>
+```
+
+**`当我们点击最里层的元素 d 的时候，会依次输出：`** 
+
+target:d&currentTarget:d
+
+target:d&currentTarget:c
+
+target:d&currentTarget:b
+
+target:d&currentTarget:a
+
+**`从输出中我们可以看到，event.target 指向引起触发事件的元素，而 event.currentTarget 则是事件绑定的元素，只有被点击的那个目标元素的 event.target 才会等于 event.currentTarget。也就是说，event.currentTarget 始终是监听事件者，而 event.target 是事件的真正发出者。`** 
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 九种跨域方式实现原理
+
+
+
+## 一、什么是跨域？
+
+
+
+### 1. 什么是同源策略及其限制内容？
+
+
+
+### 2. 常见跨域场景
+
+
+
+
+
+## 二、跨域解决方案
+
+
+
+### 1. jsonp
+
+
+
+#### 1. JSONP 原理
+
+**`利用 <script> 标签没有跨域限制的漏洞，网页可以得到从其他来源动态产生的 JSON 数据。JSON 请求一定需要对方的服务器做支持才可以。`**
+
+
+
+#### 2. JSONP 和 AJAX 对比
+
+**`JSONP 和 AJAX 相同，都是客户端向服务器端发送请求，从服务器端获取数据的方式。但 AJAX 属于同源策略，JSONP 属于非同源策略（跨域请求）。`** 
+
+
+
+#### 3. JSONP 优缺点
+
+**`JSONP 优点是简单兼容性好，可用于解决主流浏览器的跨域数据访问的问题。缺点是仅支持 get 方法具有局限性，不安全可能会遭受 XSS 攻击。`** 
+
+
+
+#### 4. JSONP 的实现流程
+
+* **`声明一个回调函数，其函数名（如 show）当做参数值，要传递给跨域请求数据的服务器，函数形参要获取目标数据（服务器返回的 data）。`** 
+* **`创建一个 <script> 标签，把那个跨域的 API 数据接口地址，赋值给 script 的 src，还要在这个地址中向服务器传递该函数名（可以通过问号传参 ?callback=show）。`** 
+* **`服务器接收到请求后，需要进行特殊的处理：把传递进来的函数名和它需要给你的数据拼接成一个字符串。例如：传递进去的函数名是 show，它准备好的数据是 show("我不爱你")。`** 
+* **`最后服务器把准备的数据通过 HTTP 协议返回给客户端，客户端再调用执行之前声明的回调函数（show），对返回的数据进行操作。`** 
+
+**`在开发中可能会遇到多个 JSONP 请求的回调函数名是相同的，这时候就需要自己封装一个 JSONP 函数`**。
+
+```javascript
+function jsonp({ url, params, callback }) {
+    return new Promise((resolve, reject) => {
+        
+        let script = document.createElement("script");
+        
+        window[callback] = function(data) {
+            resolve(data);
+            document.body.removeChild(script);
+        }
+        
+        params = { ...params, callback };
+        
+        let arrs = [];
+        for (let key in params) {
+            arrs.push(`${key}=${params[key]}`);
+        }
+        
+        script.src = `${url}?${arrs.join("&")}`;
+        
+        document.body.appendChild(script);
+    })
+}
+
+jsonp({
+    url: "http://localhost:3000/say",
+    params: { wd: "Iloveyou" },
+    callback: "show"
+}).then(data => {
+    console.log(data);
+})
+```
+
+**`上面这段代码相当于向 http://localhost:3000/say?wd=Iloveyou&callback=show 这个地址请求数据，然后后台返回 show("我不爱你")，最后会运行 show() 这个函数，打印出我不爱你`** 
+
+```javascript
+let express = require("express");
+let app = express();
+app.get("/say", function(req, res) {
+    let { wd, callback } = req.queryl
+    console.log(wd); // Iloveyou
+    console.log(callback); // show
+    res.end(`${callback}("我不爱你")`);
+});
+
+app.listen(3000);
+```
+
+
+
+
+
+### 2. cors
+
+
+
+
+
+### 3. postMessage
+
+
+
+
+
+### 4. websocket
+
+
+
+### 5. node 中间件代理
+
+
+
+### 6. nginx 反向代理
+
+
+
+
+
+### 7. window.name + iframe
+
+
+
+
+
+### 8. location.hash + iframe
+
+
+
+
+
+### 9. document.domain + iframe
 
 
