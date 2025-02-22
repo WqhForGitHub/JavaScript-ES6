@@ -2468,7 +2468,7 @@ inner.onclick = function(ev) {
 
 ### 2. 如何实现
 
-接下来我们来实现上例中父层元素 #list 下的 li 元素的事件委托到它的父层元素上：
+**`接下来我们来实现上例中父层元素 #list 下的 li 元素的事件委托到它的父层元素上：`** 
 
 ```javascript
 document.getElementById("list").addEventListener("click", function (e) {
