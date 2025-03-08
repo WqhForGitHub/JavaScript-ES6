@@ -48,4 +48,70 @@
 
 
 
-​                                                                         
+## 3. 属性节点
+
+```html
+<p title="a gentle reminder">Don't forget to but this stuff. </p>
+```
+
+
+
+
+
+
+
+## 4. CSS
+
+
+
+### 1. class 属性
+
+```html
+<p class="special">This paragraph has the special class</p>
+<h2 class="special">So does this headline</h2>
+```
+
+
+
+```css
+.special {
+    font-style: italic;
+}
+
+h2.special {
+    text-transform: uppercase;
+}
+```
+
+
+
+
+
+### 2. id 属性
+
+```html
+<ul id="purchases"></ul>
+```
+
+
+
+```css
+#purchases {
+    border: 1px solid white;
+    background-color: #333;
+    color: #ccc;
+    padding: 1em;
+}
+```
+
+
+
+
+
+
+
+​                                                         
+
+
+
+​                                                                                                                                                        
