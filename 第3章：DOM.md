@@ -110,6 +110,105 @@ h2.special {
 
 
 
+# 3.5 获取元素
+
+
+
+## 1. getElementById
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Shopping list</title>
+    </head>
+    
+    <body>
+        <h1>What to buy</h1>
+        <p title="a gentle reminder">Don't forget to buy this stuff.</p>
+        <ul id="purchases">
+            <li>A tin of beans</li>
+            <li class="sale">Cheese</li>
+            <li class="sale important">Milk</li>
+        </ul>
+        
+        <script>
+            typeof document.getElementById("purchases");
+        </script>
+    </body>                                                                                                                                                
+</html>
+```
+
+
+
+
+
+## 2. getElementsByTagName
+
+```                                                                                                                                                                           javascript
+let items = document.getElementsByTagName("li");
+
+for (let i = 0; i < items.length; i++) {
+    console.log(typeof items[i]);
+}
+```
+
+
+
+
+
+## 3. getElementsByClassName 
+
+```javascript
+document.getElementsByClassName("sale");
+```
+
+
+
+
+
+
+
+# 3.5 获取和设置属性
+
+
+
+## 1. getAttribute
+
+```javascript
+var paras = document.getElementsByTagName("p");
+
+for(let i = 0; i < paras.length; i++) {
+    console.log(paras[i].getAttribute("title"));
+}
+```
+
+
+
+
+
+## 2. setAttribute
+
+```javascript
+var paras = document.getElementsByTagName("p");
+
+for(var i = 0; i < paras.length; i++) {
+    var title_text = paras[i].getAttribute("title");
+    
+    if (title_text) {
+        paras[i].setAttribute("title", "brand new title text");
+        console.log(paras[i].getAttribute("title"));
+    }
+}
+```
+
+​                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+
+
+
+
+
 ​                                                         
 
 
