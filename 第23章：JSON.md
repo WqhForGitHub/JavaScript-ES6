@@ -174,7 +174,13 @@ let values = [25, "hi", true];
 
 ```javascript
 // 转换一个简单的对象
-const obj = { name: "张三", age: 30, city: "北京" };
+const obj = {
+  name: "张三",
+  age: 30,
+  city: "北京",
+};
+
+
 const jsonString = JSON.stringify(obj);
 console.log(jsonString); // 输出: {"name":"张三","age":30,"city":"北京"}
 ```
@@ -192,9 +198,16 @@ console.log(jsonString); // 输出: {"name":"张三","age":30,"city":"北京"}
 **`如果第二个参数是一个数组，那么 JSON.stringify() 返回的结果只会包含该数组中列出的对象属性。比如下面的例子：`**
 
 ```javascript
-const obj3 = { name: "王五", age: 35, city: "深圳", profession: "工程师" };
+const obj3 = {
+  name: "王五",
+  age: 35,
+  city: "深圳",
+  profession: "工程师",
+};
+
+
 const jsonString3 = JSON.stringify(obj3, ["name", "age"]);
-console.log(jsonString3); // 输出: {"name":"王五","age":35}                               
+console.log(jsonString3); // 输出: {"name":"王五","age":35}                              
 ```
 
 
@@ -202,13 +215,21 @@ console.log(jsonString3); // 输出: {"name":"王五","age":35}
 **`如果第二个参数是一个函数，则行为又有不同。提供的函数接收两个参数：属性名和属性值。为了改变对象的序列化，返回的值就是相应 key 应该包含的结果。注意，返回 undefined 会导致属性被忽略。下面看一个例子：`**
 
 ```              javascript
-const obj2 = { name: "李四", age: 25, city: "上海", salary: 8000 };
+const obj2 = {
+  name: "李四",
+  age: 25,
+  city: "上海",
+  salary: 8000,
+};
+
+
 const jsonString2 = JSON.stringify(obj2, (key, value) => {
   if (key === "salary") {
     return undefined; // 移除 salary 属性
   }
   return value;
 });
+
 
 console.log(jsonString2); // 输出: {"name":"李四","age":25,"city":"上海"}
 ```
@@ -224,7 +245,13 @@ console.log(jsonString2); // 输出: {"name":"李四","age":25,"city":"上海"}
 **`最大缩进值为 10，大于 10 的值会自动设置为 10。`**
 
 ```javascript
-const obj4 = { name: "赵六", age: 40, city: "广州" };
+const obj4 = {
+  name: "赵六",
+  age: 40,
+  city: "广州",
+};
+
+
 const jsonString4 = JSON.stringify(obj4, null, 2); // 使用 2 个空格缩进
 console.log(jsonString4);
 
@@ -293,6 +320,7 @@ const person = {
   }
 };
 
+
 console.log(JSON.stringify(person));
 // 输出: {"name":"张三","age":30}
 ```
@@ -329,6 +357,7 @@ const obj = JSON.parse(jsonString, (key, value) => {
   }
   return value;
 });
+
 
 console.log(obj.name);        // 输出: 李四
 console.log(obj.age);         // 输出: 25 (number)
