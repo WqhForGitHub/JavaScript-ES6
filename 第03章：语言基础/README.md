@@ -1933,6 +1933,246 @@ console.log('barfoobaz'.replace(new StringReplacer('foo'), 'qux'));
 // "barquxbaz"
 ```
 
+给这个方法传入非正则表达式值会导致该值被转换为 RegExp 对象。如果想改变这种行为，让方法直接使用参数，可以重新定义 Symbol.replace 函数以取代默认对正则表达式求值的行为，从而让 replace() 方法使用非正则表达式实例。Symbol.replace 函数接收两个参数，即调用 replace() 方法的字符串实例和替换字符串。返回的值没有限制：
+
+```javascript
+class FooReplacer {
+    static [Symbol.replace](target, replacement) {
+        return target.split('foo').join(replacement);
+    }
+}
+
+console.log('barfoobaz'.replace(FooReplacer, 'qux'));;
+// "barquxbaz"
+
+class StringReplacer {
+    constructor(str) {
+        this.str = str;
+    }
+    
+    [Symbol.replace](tareget, replacement) {
+        return target.split(this.str).join(replacement);
+    }
+}
+
+console.log('barfoobaz'.replace(new StringReplacer('foo'), 'qux'));
+```
+
+<br>
+
+#### 7. Symbol.search
+
+这个符号表示一个作为属性的正则表达式方法，该方法返回字符串中匹配正则表达式的索引，在底层由 String.prototype.search() 方法使用。String.prototype.search() 方法会使用以 Symbol.search 为键的函数来对正则表达式求值。正则表达式的原型上默认有这个函数的定义，因此所有正则表达式实例默认是这个 String 方法的有效参数：
+
+```javascript
+console.log(RegExp.prototype[Symbol.search]);
+// f [Symbol.search]() { [native code] }
+
+console.log('foobar'.search(/bar/));
+// 3
+```
+
+给这个方法传入非正则表达式值会导致该值被转换为 RegExp 对象。如果想改变这种行为，让方法直接使用参数，可以重新定义 Symbol.search 函数以取代默认对正则表达式求值的行为，从而让 search() 方法使用非正则表达式实例。Symbol.search 函数接收一个参数，就是调用 search() 方法的字符串实例。返回的值没有限制：
+
+```javascript
+class FooSearcher {
+    static [Symbol.search](target) {
+        return target.indexOf('foo');
+    }
+}
+
+console.log('foobar'.search(FooSearcher)); // 0
+console.log('barfoo'.search(FooSearcher)); // 3
+console.log('barbaz'.search(FooSearcher)); // -1
+
+class StringSearcher {
+    constructor(str) {
+        this.str = str;
+    }
+    
+    [Symbol.search](target) {
+        return target.indexOf(this.str);
+    }
+}
+
+console.log('foobar'.search(new StringSearcher('foo'))); // 0
+console.log('barfoo'.search(new StringSearcher('foo'))); // 3
+console.log('barbaz'.search(new StringSearcher('qux'))); // -1
+```
+
+<br>
+
+#### 8. Symbol.species
+
+这个符号表示作为一个属性的函数值，该函数作为创建派生对象的构造函数。这个属性在内置类型值中最常用，用于对内置类型实例方法的返回值暴露实例化派生对象的方法。用 Symbol.species 定义静态的获取器（getter）方法，可以覆盖新创建实例的原型定义：
+
+```javascript
+class Bar extends Array {}
+class Baz extends Array {
+    static get [Symbol.species]() {
+        return Array;
+    }
+}
+
+let bar = new Bar();
+console.log(bar instanceof Array); // true
+console.log(bar instanceof Bar); // true
+
+bar = bar.concat('bar');
+console.log(bar instanceof Array); // true
+console.log(bar instanceof Bar); // true
+
+let baz = new Baz();
+console.log(baz instanceof Array); // true
+console.log(baz instanceof Baz); // true
+baz = baz.concat('baz');
+console.log(baz instanceof Array); // true
+console.log(baz instanceof Baz); // false
+```
+
+<br>
+
+#### 9. Symbol.split
+
+这个符号表示一个作为属性的正则表达式方法，该方法在匹配正则表达式的索引位置拆分字符串，在底层由 String.prototype.split() 方法使用。String.prototype.split() 方法会使用以 Symbol.split 为键的函数来对正则表达式求值。正则表达式的原型上默认有这个函数的定义，因此所有正则表达式实例默认是这个 String 方法的有效参数：
+
+```javascript
+console.log(RegExp.prototype[Symbol.split]);
+// f [Symbol.split]() { [native code] }
+
+console.log('foobarbaz'.split(/bar/));
+// ['foo', 'baz']
+```
+
+给这个方法传入非正则表达式值会导致该值被转换为 RegExp 对象。如果想改变这种行为，让方法直接使用参数，可以重新定义 Symbol.split 函数以取代默认对正则表达式求值的行为，从而让 split() 方法使用非正则表达式实例。Symbol.split 函数接收一个参数，就是调用 split() 方法的字符串实例。返回的值没有限制：
+
+```javascript
+class FooSplitter {
+    static [Symbol.split](target) {
+        return target.split('foo');
+    }
+}
+
+console.log('barfoobaz'.split(FooSpliter));
+// ["Bar", "baz"]
+
+class StringSplitter {
+    constructor(str) {
+        this.str = str;
+    }
+    
+    [Symbol.split](target) {
+        return target.split(this.str);
+    }
+}
+
+console.log('barfoobaz'.split(new StringSplitter('foo')));
+// ["bar", "baz"]
+```
+
+<br>
+
+#### 10. Symbol.toPrimitive
+
+这个符号表示一个作为属性的方法，该方法将对象转换为相应的原始值，由 ToPrimitive 抽象操作使用。很多内置操作会尝试强制将对象转换为原始值，包括字符串、数值和未指定的原始类型。对于一个自定义对象实例，通过在这个实例的 Symbol.toPrimitive 属性上定义一个函数可以改变默认行为。
+
+根据提供给这个函数的参数（"string"、"number" 或 "default"），可以控制返回的原始值：
+
+```javascript
+class Foo {}
+let foo = new Foo();
+
+console.log(3 + foo); // "3[object Object]"
+console.log(3 - foo); // NaN
+console.log(String(foo)); // "[object Object]"
+
+class Bar {
+    constructor() {
+        this[Symbol.toPrimitive] = function(hint) {
+            switch (hint) {
+                case 'number':
+                    return 3;
+                case 'string':
+                    return 'string bar';
+                case 'default':
+                default:
+                    return 'default bar';
+            }
+        }
+    }
+}
+
+let bar = new Bar();
+
+console.log(3 + bar); // "3default bar"
+console.log(3 - bar); // 0
+console.log(String(bar)); // "string bar"
+```
+
+<br>
+
+#### 11. Symbol.toStringTag
+
+这个符号表示一个作为属性的字符串，该字符串用于创建对象的默认字符串描述，由内置方法 Object.prototype.toString() 在底层使用。
+
+通过 toString() 方法获取对象标识时，会检索由 Symbol.toStringTag 指定的实例标识符，默认为 "Object"。内置类型已经指定了这个值，但自定义类实例还需要明确定义：
+
+```javascript
+let s = new Set();
+
+console.log(s); // Set(0) {}
+console.log(s.toString()); // [object Set]
+console.log(s[Symbol.toStringTag]); // Set
+
+class Foo {}
+let foo = new Foo();
+
+console.log(foo); // Foo {}
+console.log(foo.toString()); // [object Object]
+console.log(foo[Symbol.toStringTag]); // undefined
+
+class Bar {
+    constructor() {
+        this[Symbol.toStringTag] = 'Bar';
+    }
+}
+let bar = new Bar();
+
+console.log(bar); // Bar {}
+console.log(bar.toString()); // [object Bar]
+console.log(bar[Symbol.toStringTag]); // Bar
+```
+
+<br>
+
+#### 12. Symbol.unscopeables
+
+这个符号表示一个作为属性的对象，该对象所有的以及继承的属性，都会从关联对象的 with 环境绑定中排除。设置这个符号并让其映射对应属性的键值为 true，就可以阻止该属性出现在 with 环境绑定中，如下例所示：
+
+```javascript
+let o = { foo: 'bar' };
+
+with (o) {
+    console.log(foo); // bar
+}
+
+o[Symbol.unscopables] = {
+    foo: true;
+};
+
+with (o) {
+    console.log(foo); // ReferenceError
+}
+```
+
+>注意
+>
+>不推荐使用 with，因此也不推荐使用 Symbol.unscopeables。
+
+
+
+
+
 
 
 
