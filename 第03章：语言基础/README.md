@@ -1333,6 +1333,628 @@ append(); // abcabc
 append(); // abcabcabc
 ```
 
+<br>
+
+### 6. 模板字面量标签函数
+
+模板字面量也支持定义标签函数（tag function），而通过标签函数可以自定义插值行为。标签函数会接收被插值记号分隔后的模板和对表达式求值的结果。
+
+标签函数本身是一个常规函数，通过前缀到模板字面量来应用自定义行为，如下例所示。标签函数接收到额参数依次是原始字符串数组和对每个表达式求值的结果。这个函数的返回值是对模板字面量求值得到的字符串。
+
+最好通过一个例子来理解：
+
+```javascript
+let a = 6;
+let b = 9;
+
+function simpleTag(strings, aValExpression, bValExpression, sumExpression) {
+    console.log(strings);
+    console.log(aValExpression);
+    console.log(bValExpression);
+    console.log(sumExpression);
+    
+    return 'foobar';
+}
+
+let untaggedResult = `${ a } + ${ b } = ${ a + b }`;
+let taggedResult = simpleTag`${ a } + ${ b } = ${ a + b }`;
+// ["", " + ", " = ", ""]
+// 6
+// 9
+// 15
+
+console.log(untaggedResult); // "6 + 9 = 15"
+console.log(taggedResult); // "foobar"
+```
+
+因为表达式参数的数量是可变的，所以通常应该使用剩余操作符（rest operator）将它们收集到一个数组中：
+
+```javascript
+let a = 6;
+let b = 9;
+
+function simpleTag(strings, ...expressions) {
+    console.log(strings);
+    for(const expression of expressions) {
+        console.log(expression);
+    }
+    
+    return 'foobar';
+}
+let taggedResult = simpleTag`${ a } + ${ b } = ${ a + b }`;
+// ["", " + ", " = ", ""]
+// 6
+// 9
+// 15
+
+console.log(taggedResult); // "foobar"
+```
+
+对于有 n 个插值的模板字面量，传给标签函数的表达式参数的个数始终是 n，而传给标签安徽念书的第一个参数所包含的字符串个数则始终是 n+1。因此，如果你想把这些字符串和对表达式求值的结果拼接起来作为默认返回的字符串，可以这样做：
+
+```javascript
+let a = 6;
+let b = 9;
+
+function zipTag(strings, ...expressions) {
+    return strings[0] +
+        expressions.map((e, i) => `${e}${strings[i + 1]}`);
+}
+
+let untaggedResult = `${ a } + ${ b } = ${ a + b }`;
+let taggedResult = zipTag`${ a } + ${ b } = ${ a + b }`;
+
+console.log(untaggedResult); // "6 + 9 = 15"
+console.log(taggedResult); // "6 + 9 = 15"
+```
+
+<br>
+
+### 7. 原始字符串
+
+使用模板字面量也恶意直接获取原始的模板字面量内容（如换行符或 Unicode 字符），而不是被转换后的字符表示。为此，可以使用默认的 String.raw 标签函数：
+
+```javascript
+// Unicode 示例
+// \u00A9 是版权符号
+console.log(`\u00A9`);
+console.log(String.raw`\u00A9`); // \u00A9
+
+// 换行符示例
+console.log(`first line\nsecond line`);
+// first line
+// second line
+
+console.log(String.raw`first line\nsecond line`); // "first line\nsecond line"
+
+// 对实际的换行符来说是不行的
+// 它们不会被转换成转义序列的形式
+console.log(`first line
+second line`);
+// first line
+// second line
+
+console.log(String.raw`first line
+second line`);
+// first line
+// second line
+```
+
+另外，也可以通过标签函数的第一个参数，即字符串数组的 .raw 属性取得每个字符串的原始内容：
+
+```javascript
+function printRaw(strings) {
+    console.log('Actual characters:');
+    for (const string of strings) {
+        console.log(string);
+    }
+    
+    console.log('Escaped characters:');
+    for (const rawString of strings.raw) {
+        console.log(rawString);
+    }
+}
+
+printRaw`\u00A9${ 'and' }\n`;
+// Actual characters:
+// 
+// (换行符)
+// Escaped characters:
+// \u00A9
+// \n
+```
+
+<br>
+
+## 8. Symbol 类型
+
+符号是原始值，且符号实例是唯一、不可变的。符号的用途是确保对象属性使用唯一标识符，不会发生属性冲突的危险。
+
+尽管听起来跟私有属性有点类似，但符号并不是为了提供私有属性的行为才增加的（尤其是因为 Object API 提供了方法，可以更方便地发现符号属性）。相反，符号就是用来创建唯一记号，进而用作非字符串形式的对象属性。
+
+### 1. 符号的基本用法
+
+符号需要使用 Symbol() 函数初始化。因为符号本身是原始类型，所以 typeof 操作符对符号返回 "symbol"。
+
+```javascript
+let sym = Symbol();
+console.log(typeof sym); // symbol
+```
+
+调用 Symbol() 函数时，也可以传入一个字符串参数作为符号的描述（description），将来可以通过这个字符串来调试代码。但是，这个字符串参数与符号定义或标识完全无关：
+
+```javascript
+let genericSymbol = Symbol();
+let otherGenericSymbol = Symbol();
+
+let fooSymbol = Symbol('foo');
+let otherFooSymbol = Symbol('foo');
+
+console.log(genericSymol == otherGenericSymbol); // false
+console.log(fooSymbol == otherFooSymbol); // false
+```
+
+符号没有字面量语法，这也是它们发挥作用的关键。按照规范，你只要创建 Symbol() 实例并将其用作对象的新属性，就可以保证它不会覆盖已有的对象属性，无论符号属性还是字符串属性。
+
+```javascript
+let genericSymbol = Symbol();
+console.log(genericSymbol); // Symbol()
+
+let fooSymbol = Symbol('foo');
+console.log(fooSymbol); // Symbol(foo);
+```
+
+最重要的是，Symbol() 函数不能与 new 关键字一起作为构造函数使用。这样做是为了避免创建符号包装对象，像使用 Boolean、String 或 Number 那样，它们支持构造函数且可用于初始化包含原始值的包装对象：
+
+```javascript
+let myBoolean - new Boolean();
+console.log(typeof myBoolean); // "object"
+
+let myString = new String();
+console.log(typeof myString); // "object"
+
+let myNumber = new Number();
+console.log(typeof myNumber); // "object"
+
+let mySymbol = new Symbol(); // TypeError: Symbol is not a constructor
+```
+
+如果你确实想使用符号包装对象，可以借用 Object() 函数：
+
+```javascript
+let mySymbol = Symbol();
+let myWrappedSymbol = Object(mySymbol);
+console.log(typeof myWrappedSymbol); // "object"
+```
+
+<br>
+
+### 2. 使用全局符号注册表
+
+如果运行时的不同部分需要共享和重用符号实例，那么可以用一个字符串作为键，在全局符号注册表中创建并重用符号。
+
+为此，需要使用 Symbol.for() 方法：
+
+```javascript
+let fooGlobalSymbol = Symbol.for('foo');
+console.log(typeof gooGlobalSymbol); // symbol
+```
+
+Symbol.for() 对每个字符串键都执行幂等操作。第一次使用某个字符串调用时，它会检查全局运行时注册表，发现不存在对应的符号，于是就会生成一个新符号实例并添加到注册表中。后续使用相同字符串的调用同样会检查注册表，发现存在与该字符串对应的符号，然后就会返回该符号实例。
+
+```javascript
+let fooGlobalSymbol = Symbol.for('foo'); // 创建新符号
+let otherFooGlobalSymbol = Symbol.for('foo'); // 重用已有符号
+
+console.log(fooGlobalSymbol === otherFooGlobalSymbol); // true
+```
+
+即使采用相同的符号描述，在全局注册表中定义符号跟使用 Symbol() 定义的符号也并不等同：
+
+```javascript
+let localSymbol = Symbol('foo');
+let globalSymbol = Symbol.for('foo');
+
+console.log(localSymbol === globalSymbol); // false
+```
+
+全局注册表中的符号必须使用字符串键来创建，因此作为参数传给 Symbol.for() 的任何值都会被转换为字符串。此外，注册表中使用的键同时也会被用作符号描述。
+
+```javascript
+let emptyGlobalSymbol = Symbol.for();
+console.log(emptyGlobalSymbol); // Symbol(undefined)
+```
+
+还可以使用 Sybol.keyFor() 来查询全局注册表，这个方法接收符号，返回该全局符号对应的字符串键。如果查询的不是全局符号，则返回 undefined。
+
+```javascript
+// 创建全局符号
+let s = Symbol.for('foo');
+console.log(Symbol.keyFor(s)); // foo
+
+// 创建普通符号
+le s2 = Symbol('bar');
+console.log(Symbol.keyFor(s2)); // undefined
+```
+
+如果传给 Symbol.keyFor() 的不是符号，则该方法抛出 TypeError：
+
+```javascript
+Symbol.keyFor(123); // TypeError: 123 is not a symbol
+```
+
+<br>
+
+### 3. 使用符号作为属性
+
+凡是可以使用字符串或数值作为属性的地方，都可以使用符号。这就包括了对象字面量属性和 Object.defineProperty() / Object.defineProperties() 定义的属性。对象字面量只能在计算属性语法中使用符号作为属性。
+
+```javascript
+let s1 = Symbol('foo'),
+    s2 = Symbol('bar'),
+    s3 = Symbol('baz'),
+    s4 = Symbol('qux');
+
+let o = {
+    [s1]: 'foo val';
+};
+// 这样也可以: o[s1] = 'foo val';
+
+console.log(o);
+// {Symbol(foo): foo val}
+
+Object.defineProperty(o, s2, { value: 'bar val' });
+
+console.log(o);
+// {Symbol(foo): foo val, Symbol(bar): bar val}
+
+Object.defineProperties(o, {
+    [s3]: {value: 'baz val'},
+    [s4]: {value: 'qux val'}
+});
+
+console.log(o);
+// {Symbol(foo): foo val, Symbol(bar): bar val,
+// Symbbol(baz): baz val, Symbol(qux): qux val}
+```
+
+类似于 Object.getOwnPropertyNames() 返回对象实例的常规属性数组，Object.getOwnPropertySymbols() 返回对象实例的符号属性数组。这两个方法的返回值彼此互斥。Object.getOwnPropertyDescriptors() 会返回同时包含常规和符号属性描述符对象。Reflect.ownKeys() 会返回两种类型的键：
+
+```javascript
+let s1 = Symbol('foo'),
+    s2 = Symbol('bar');
+
+let o = {
+    [s1]: 'foo val',
+    [s2]: 'bar val',
+    baz: 'baz val',
+    qux: 'qux val'
+};
+
+console.log(Object.getOwnPropertySymbols(o));
+// [Symbol(foo), Symbol(bar)]
+
+console.log(Object.getOwnPropertyNames(o));
+// ["baz", "qux"]
+
+console.log(Object.getOwnPropertyDescriptors(o));
+// {baz: {...}, qux: {...}, Symbol(foo): {...}, Symbol(bar): {...}}
+
+console.log(Reflect.ownKeys(o));
+// ["baz", "qux", Symbol(foo), Symbol(bar)]
+```
+
+因为符号属性是对内存中符号的一个引用，所以直接创建并用作属性的符号不会丢失。但是，如果没有显式地保存对这些属性的引用，那么遍历对象的所有符号属性才能找到相应的属性键：
+
+```javascript
+let o = {
+    [Symbol('foo')]: 'foo val',
+    [Symbol('bar')]: 'bar val'
+};
+
+console.log(o);
+// {Symbol(foo): "foo val", Symbol(bar): "bar val"}
+
+let barSymbol = Object.getOwnPropertySymbols(o).find((symbol => symbol.toString().match(/bar/)));
+
+console.log(barSymbol);
+// Symbol(bar)
+```
+
+<br>
+
+### 4. 常用内置符号
+
+ECMAScript 定义了一批常用内置符号（well-known symbol），用于暴露语言内部行为，开发者可以直接访问、重写或模拟这些行为。这些内置符号都以 Symbol 工厂函数字符串属性的形式存在。
+
+这些内置符号最重要的用途之一是重新定义它们，从而改变原生结构的行为。比如，我们知道 for-of 循环会在相关对象上使用 Symbol.iterator 属性，那么就可以通过在自定义对象上重新定义 Symbol.iterator 的值，来改变 for-of 在迭代该对象时的行为。
+
+这些内置符号也没有什么特别之处，它们就是全局函数 Symbol 的普通字符串属性，指向一个符号的实例。所有内置符号属性都是不可写、不可枚举、不可配置的。
+
+>注意
+>
+>在提到 ECMAScript 规范时，经常会引用符号在规范中的名称，前缀为 @@。比如，@@iterator 指的就是 Symbol.iterator。
+
+#### 1. Symbol.asyncIterator
+
+这个符号表示一个作为属性的方法，该方法返回对象默认的 AsyncIterator，在底层由 for-await-of 语句使用。换句话说，这个符号表示实现异步迭代器 API 的函数。
+
+for-await-of 循环会利用这个函数执行异步迭代操作。循环时，它们会调用 Symbol.asyncIterator 为键的函数，并期望这个函数会返回一个实现迭代器 API 的对象。很多时候，返回的对象是实现该 API 的 AsyncGenerator：
+
+```javascript
+class Foo {
+    async *[Symbol.asyncIterator]() {}
+}
+
+let f = new Foo();
+
+console.log(f[Symbol.asyncIterator]());
+// AsyncGenerator {<suspended>}
+```
+
+技术上，这个由 Symbol.asyncIterator 函数生成的对象应该通过其 next() 方法陆续返回 Promise 实例。可以通过显式地调用 next() 方法返回，也可以隐式地通过异步生成器函数返回：
+
+```javascript
+class Emitter {
+    constructor(max) {
+        this.max = max;
+        this.asyncIdx = 0;
+    }
+    
+    async *[Symbol.asyncIterator]() {
+        while(this.asyncIdx < this.max) {
+            yield new Promise((resolve) => resolve(this.asyncIdx++));
+        }
+    }
+}
+
+async function asyncCount() {
+    let emitter = new Emitter(5);
+    
+    for await(const x of emitter) {
+        console.log(x);
+    }
+}
+
+asyncCount();
+// 0
+// 1
+// 2
+// 3
+// 4
+```
+
+<br>
+
+#### 2. Symbol.hasIntance
+
+这个符号表示一个作为属性的方法，该方法决定一个构造器对象是否认可一个对象是它的实例，由 instanceof 操作符在底层使用。instanceof 操作符可以用来确定一个对象实例的原型链上是否有原型。instanceof 的典型使用场景如下：
+
+```javascript
+function Foo() {}
+let f = new Foo();
+console.log(f instanceof Foo); // true
+
+class Bar {}
+let b = new Bar();
+console.log(b instanceof Bar); // true
+```
+
+在 ES6 中，instanceof 操作符会使用 Symbol.hasIntance 函数来确定关系。以 Symbol.hasIntance 为键的函数会执行同样的操作，只是操作数对调了一下：
+
+```javascript
+function Foo() {}
+let f = new Foo();
+console.log(Foo[Symbol.hasIntance](f)); // true
+
+class Bar {}
+let b = new Bar();
+console.log(Bar[Symbol.hasInstance](b)); // true
+```
+
+这个属性定义在 Function 的原型上，因此默认在所有函数和类上都可以调用。由于 instanceof 操作符会在原型链上寻找这个属性定义，就跟在原型链上寻找其他属性一样，因此可以在继承的类上通过静态方法重新定义这个函数：
+
+```javascript
+class Bar {}
+class Baz extends Bar {
+    static [Symbol.hasInstance]() {
+        return false;
+    }
+}
+
+lket b = new Baz();
+console.log(Bar[Symbol.hasInstance](b)); // true
+console.log(b instanceof Bar); // true
+console.log(Baz[Symbol.hasInstance](b)); // false
+console.log(b instanceof Baz); // false
+```
+
+<br>
+
+#### 3. Symbol.isConcatSpreadable
+
+这个符号表示一个作为属性的布尔值，如果是 true，则意味着对象应该用 Array.prototype.concat() 打平其数组元素。ES6  中的 Array.prototype.concat() 方法会根据接收到的对象类型选择如何将一个类数组对象拼接成数组实例。覆盖 Symbol.isConcatSpreadable 的值可以修改这个行为。
+
+数组对象默认情况下会被打平到已有数组，false 或假值会导致整个对象被追加到数组末尾。类数组对象默认情况下会被追加到数组末尾，true 或真值会导致这个类数组对象被打平到数组实例。其他不是类数组对象的对象在 Symbol.isConcatSpreadable 被设置为 true 的情况下将被忽略。
+
+```javascript
+let initial = ['foo'];
+
+let array = ['bar'];
+console.log(array[Symbol.isConcatSpreadable]); // undefined
+console.log(initial.concat(array)); // ['foo', 'bar']
+array[Symbol.isConcatSpreadable] = false;
+console.log(initial.concat(array)); // ['foo', Array(1)]
+
+let arrayLikeObject = { length: 1, 0: 'baz' };
+console.log(arrayLikeObject[Symbol.isConcatSpreadable]); // undefined
+console.log(initial.concat(arrayLikeObject)); // ['foo', {...}]
+arraylikeObject[Symbol.isConcatSpreadable] = true;
+console.log(initial.concat(arrayLikeObject)); // ['foo', 'baz']
+
+let otherObject - new Set().add('qux');
+console.log(otherObject[Symbol.isConcatSpreadable]); // undefined
+console.log(initial.concat(otherObject)); // ['foo', Set(1)]
+otherObject[Symbol.isConcatSpreadable] = true;
+console.log(initial.concat(otherObject)); // ['foo']
+```
+
+<br>
+
+#### 4. Symbol.iterator
+
+这个符号表示一个作为属性的方法，该方法返回对象默认的迭代器，由 for-of 语句在底层使用。换句话说，这个符号表示实现迭代器 API 的函数。
+
+for-of 循环这样的语言结构会利用这个函数执行迭代操作。循环时，它们会调用以 Symbol.iterator 为键的函数，并默认这个函数会返回一个实现迭代器 API 的对象。很多时候，返回的对象是实现该 API 的 Generator：
+
+```javascript
+class Foo {
+    *[Symbol.iterator]() {}
+}
+
+let f = new Foo();
+
+console.log(f[Symbol.iterator]());
+// Generator {<suspended>}
+```
+
+技术上，这个由 Symbol.iterator 函数生成的对象应该通过其 next() 方法陆续返回值。可以通过显式地调用 next() 方法返回，也可以隐式地通过生成器函数返回：
+
+```javascript
+class Emitter {
+    constructor(max) {
+        this.max = max;
+        this.idx = 0;
+    }
+    
+    *[Symbol.iterator]() {
+        while(this.idx < this.max) {
+            yield this.idx++;
+        }
+    }
+}
+
+function count() {
+    let emitter = new Emitter(5);
+    
+    for (const x of emitter) {
+        console.log(x);
+    }
+}
+
+count();
+// 0
+// 1
+// 2
+// 3
+// 4
+```
+
+>注意
+>
+>迭代器的相关内容将在第 7 章详细介绍
+
+<br>
+
+#### 5. Symbol.match
+
+这个符号表示一个作为属性的正则表达式方法，该方法用正则表达式去匹配字符串，在底层由 String.prototype.match() 方法使用。String.prototype.match() 方法会使用以 Symbol.match 为键的函数来对正则表达式求值。正则表达式的原型上默认有这个函数的定义，因此所有正则表达式实例默认是这个 String 方法的有效参数：
+
+```javascript
+console.log(RegExp.prototype[Symbol.match]);
+// f [Symbol.match]() { [native code] }
+
+console.log('foobar'.match(/bar/));
+// ["bar", index: 3, input: "foobar", groups: undefined]
+```
+
+给这个方法传入非正则表达式值会导致该值被转换为 RegExp 对象。如果想改变这种行为，让方法直接使用参数，则可以重新定义 Symbol.match 函数以取代默认对正则表达式求值的行为，从而让 match() 方法使用正则表达式实例。Symbol.match 函数接收一个参数，就是调用 match() 方法的字符串实例。返回的值没有限制：
+
+```javascript
+class FooMatcher {
+    static [Symbol.match](target) {
+        return target.includes('foo');
+    }
+}
+console.log('foobar'.match(FooMatcher)); // true
+console.log('barbaz'.match(FooMatcher)); // false
+
+class StringMatcher {
+    constructor(str) {
+        this.str = str;
+    }
+    
+    [Symbol.match](target) {
+        return target.includes(this.str);
+    }
+}
+
+console.log('foobar'.match(new StringMatcher('foo'))); // true
+console.log('barbaz'.match(new StringMatcher('qux'))); // false
+```
+
+<br>
+
+#### 6. Symbol.replace
+
+这个符号表示一个作为属性的正则表达式方法，该方法替换一个字符串中匹配的子串，在底层由 String.prototype.replace() 方法使用。String.prototype.replace() 方法会使用以 Symbol.replace 为键的函数来对正则表达式求值。正则表达式的原型上默认有这个函数的定义，因此所有正则表达式实例默认是这个 String 方法的有效参数：
+
+```javascript
+console.log(RefExp.prootype[Symbol.replace]);
+// f [Symbol.replace]() { [native code] }
+
+console.log('foobarbaz'.replace(/bar/, 'qux'));
+// 'fooquxbaz'
+```
+
+给这个方法传入非正则表达式值会导致该值被转换为 RegExp 对象。如果想改变这种行为，让方法直接使用参数，可以重新定义 Symbol.replace 函数以取代默认对正则表达式的行为，从而让 replace() 方法使用非正则表达式实例。Symbol.replace 函数接收两个参数，即调用 replace() 方法的字符串实例和替换字符串。返回的值没有限制：
+
+```javascript
+class FooReplacer {
+    static [Symbol.replace](target, replacement) {
+        return target.split('foo').join(replacement);
+    }
+}
+
+console.log('barfoobaz'.replace(FooReplacer, 'qux'));
+// "barquxbaz"
+
+class StringReplacer {
+    constructor(str) {
+        this.str = str;
+    }
+    
+    [Symbol.replace](target, replacement) {
+        return target.split(this.str).join(replacement);
+    }
+}
+
+console.log('barfoobaz'.replace(new StringReplacer('foo'), 'qux'));
+// "barquxbaz"
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
