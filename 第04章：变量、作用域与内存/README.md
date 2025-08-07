@@ -744,7 +744,329 @@ console.log(c); // ReferenceError: c 没有定义
 console.log(d); // ReferenceError: d 没有定义
 ```
 
+let 与 var 的另一个不同之处是在同一作用域内不能声明两次。重复的 var 声明会被忽略，而重复的 let 声明会抛出 SyntaxError。
 
+```javascript
+var a;
+var a;
+// 不会出错
+
+{
+	let b;
+    let b;
+}
+// SyntaxError：标识符 b 已经声明过了
+```
+
+let 的行为非常适合在循环中声明迭代变量。使用 var 声明的迭代变量会泄露到循环外部，这种情况应该避免。来看下面两个例子：
+
+```javascript
+for (var i = 0; i < 10; ++i) {}
+console.log(i); // 10
+
+for (let j =- 0; j < 10; ++j) {}
+console.log(j); // ReferenceError：j 没有定义
+```
+
+严格来讲，let 在 JavaScript 运行时中也会被提升，但由于暂时性死区（temporal dead zone）的缘故，实际上不能在声明之前使用 let 变量。因此，从写 JavaScript 代码的角度说，let 的提升跟 var 是不一样的。
+
+<br>
+
+### 3. 使用 const 的常量声明
+
+使用 const 声明的变量必须同时初始化为某个值。一经声明，在其生命周期的任何时候都不能再重新赋予新值。
+
+```javascript
+const a; // SyntaxError：常量声明时没有初始化
+
+const b = 3;
+console.log(b); // 3
+b = 4; // TypeError: 给常量赋值
+```
+
+const 除了要遵循以上规则，其他方面与 let 声明是一样的：
+
+```javascript
+if (true) {
+    const a = 0;
+}
+console.log(a); // ReferenceError：a 没有定义
+
+while (true) {
+    const b = 1;
+}
+console.log(b); // ReferenceError：b 没有定义
+
+function foo() {
+    const c = 2;
+}
+console.log(c); // ReferenceError：c 没有定义
+
+{
+    const d = 3;
+}
+console.log(d); // ReferenceError：d 没有定义
+```
+
+const 声明只应用到顶级原语或者对象。换句话说，赋值为对象的 const 变量不能再被重新赋值为其他引用值，但对象的键则不受限制。
+
+```javascript
+const o1 = {};
+o1 = {}; // TypeError：给常量赋值
+
+const o2 = {};
+o2.name = 'Jake';
+console.log(o2.name); // 'Jake'
+```
+
+如果想让整个对象都不能修改，可以使用 Object.freeze()，这样再给属性赋值时虽然不会报错，但会静默失败：
+
+```javascript
+const o3 = Object.freeze({});
+o3.name = 'Jake';
+console.log(o3.name); // undefined
+```
+
+由于 const 声明暗示变量的值是单一类型且不可修改，JavaScript 运行时编译器可以将其所有实例都替换成实际的值，而不会通过查找表进行变量查找。谷歌的 V8 引擎就执行这种优化。
+
+>注意
+>
+>开发实践表明，如果开发流程并不会受到很大影响，就应该尽可能地多使用 const 声明，除非确实需要一个将来会重新赋值的变量。这样可以从根本上保证提前发现重新赋值导致的 bug。
+
+<br>
+
+### 4. 标识符查找
+
+当在特定上下文中为读取或写入而引用一个标识符时，必须通过搜索确定这个标识符表示什么。搜索开始于作用域链前端，以给定的名称搜索对应的标识符。乳沟在局部上下文中找到该标识符，则搜索停止，变量确定。如果没有找到变量名，则继续沿作用域链搜索。（注意，作用域链中的对象也有原型链，因此搜索可能涉及每个对象的原型链），这个过程一直持续到搜索至全局上下文的变量对象。如果仍然没有找到标识符，则说明其未声明。
+
+为更好地说明标识符查找，我们来看一个例子：
+
+```javascript
+var color = 'blue';
+
+function getColor() {
+    return color;
+}
+
+console.log(getColor()); // 'blue'
+```
+
+在这个例子中，调用函数 getColor() 时会引用变量 color。为确定 color 的值会进行两步搜索。第一步，搜索 getColor() 的变量对象，查找名为 color 的标识符。结果没找到，于是继续搜索下一个变量对象（来自局部上下文），然后就找到了名为 color 的标识符。因为全局变量对象上有 color 的定义，所以搜索结束。
+
+对这个搜索过程而言，引用布局变量会让搜索自动停止，而不继续搜索下一级变量对象。也就是说，如果局部上下文中有一个同名的标识符，那就不能在该上下文中引用父上下文的同名标识符，如下面的例子所示：
+
+```javascript
+var color = 'blue';
+
+function getColor() {
+    let color = 'red';
+    return color;
+}
+
+console.log(getColor()); // 'red'
+```
+
+使用块级作用域声明并不会改变搜索流程，但可以给词法层级添加额外的层次：
+
+```javascript
+var color = 'blue';
+
+function getColor() {
+    let color = 'red';
+    {
+        let color = 'green';
+        return color;
+    }
+}
+
+console.log(getColor()); // 'green'
+```
+
+在这个修改后的例子中，getColor() 内部声明了一个名为 color 的局部变量。在调用这个函数时，变量会被声明。在执行到函数返回的语句时，代码引用了变量 color。于是开始在局部上下文中搜索这个标识符，结果找到了值为 'green' 的变量 color。因为变量已找到，搜索随即停止，所以就使用这个局部变量。这意味着函数会返回 'green'。在局部变量 color 声明之后的任何代码都无法访问全局变量 color，除非使用完全限定的写法 window.color。
+
+>注意
+>
+>标识符查找并给没有代价。访问局部变量比访问全局变量要快，因为不用切换作用域。不过，JavaScript 引擎在优化标识符查找上做了很多工作，将来这个差异可能就微不足道了。
+
+<br>
+
+# 3. 垃圾回收
+
+JavaScript 是使用垃圾回收的语言，也就是说执行环境负责在代码执行时管理内存。在 C 和 C++ 等语言中，跟踪内存使用对开发者来说是个很大的负担，也是很多问题的来源。JavaScript 为开发者卸下了这个负担，通过自动内存管理实现内存分配和闲置资源回收。基本思路很简单：确定哪个变量不会再使用，然后释放它占用的内存。这个过程是周期性的，即垃圾回收程序每隔一定时间（或者说再代码执行过程中某个预定的收集时间）就会自动运行。垃圾回收过程是一个近似且不完美的方案，因为某块内存是否还有用，属于不可判定的我呢提，意味着靠算法是解决不了的。
+
+我们以函数中局部变量的正常生命周期为例。函数中的局部变量会再函数执行时存在。此时，栈（或堆）内存会分配空间以保存相应的值。函数在内部使用了变量，然后退出。此时，就不再需要那个局部变量了，它占用的内存可以释放，供后面使用。这种情况下显然不再需要局部变量了，但并不是所有时候都这么明显。垃圾回收程序必须跟踪记录哪个变量还会使用，以及哪个变量不会再使用，以便回收内存。标记未使用的变量有不同的实现方式。
+
+## 1. 性能
+
+垃圾回收程序会周期性运行，如果内存中分配了很多变量，则可能造成性能损失，因此垃圾回收的时间调度很重要。尤其是在内存有限的移动设备上，垃圾回收有可能会明显拖慢渲染的速度和帧速率。开发者不知道什么时候运行时会收集垃圾，因此最好的办法是在写代码时就做到：无论什么时候开始收集垃圾，都能让它尽快结束工作。
+
+现代垃圾回收程序会基于对 JavaScript 运行时环境的探测来决定何时运行。探测机制因引擎而异，但基本上都是根据已分配对象的大小和数量来判断的。比如，根据 V8 团队 2016 年的一篇博文的说法：在一次完整的垃圾回收之后，V8 的堆增长策略会根据活跃对象的数量外加一些余量来确定何时再次进行垃圾回收。
+
+<br>
+
+## 2. 内存管理
+
+在使用垃圾回收的编程环境中，开发者通常无须关心内存管理。不过，JavaScript 运行在一个内存管理与垃圾回收都很特殊的环境。分配给浏览器的内存通常比分配给桌面软件的要少很多，分配给移动浏览器的就更少了。这更多出于安全考虑而不是别的，就是为了避免运行大量 JavaScript 的网页耗尽系统内存而导致操作系统崩溃。这个内存限制不仅影响变量分配，也影响调用栈以及能够同时在一个线程中执行的语句数量。
+
+将内存占用量保持在一个较小的值可能让页面性能更好。优化内存占用的最佳手段就是保证在执行代码时只保存必要的数据。如果数据不再必要，那么把它设置为 null，从而释放其引用。这也可以叫作解除引用。这个建议最适合全局变量和全局对象的属性。局部变量在超出作用域后会被自动解除引用，如下面的例子所示：
+
+```javascript
+function createPerson(name) {
+    let localPerson = new Object();
+    localPerson.name = name;
+    return localPerson;
+}
+
+let globalPerson = createPerson("Alice");
+
+// 解除 globalPerson 对值的引用
+
+globalPerson = null;
+```
+
+在上面的代码中，变量 globalPerson 保存着 createPerson() 函数调用返回的值。在 createPerson() 内部，localPerson 创建了一个对象并给它添加了一个 name 属性。然后，localPerson 作为函数值被返回，并被赋值给 globalPerson。localPerson 在 createPerson() 执行完成、超出上下文后会自动被解除引用，不需要显式处理。但 globalPerson 是一个全局变量，应该在不再需要时手动解除其引用，最后一行就是这么做的。
+
+不过要注意，解除对一个值的引用并不会自动导致相关内存被回收。解除引用的关键在于确保相关的值已经不在上下文里了，因此它在下次垃圾回收会被回收。
+
+<br>
+
+### 1. 通过 const 和 let 声明提升性能
+
+因为 const 和 let 都以块（而非函数）为作用域，所以相比于使用 var，使用这两个新关键字可能会更早地让垃圾回收程序介入，尽早回收应该回收的内存。在块作用域比函数作用域更早终止的情况下，这就有可能发生。
+
+<br>
+
+### 2. 隐藏类和删除操作
+
+最流行的浏览器引擎是 V8 JavaScript 引擎。V8 在将解释后的 JavaScript 代码编译为实际的机器码时会利用隐藏类。如果你的代码非常注重性能，那么这一点可能对你很重要。
+
+运行期间，V8 会将创建的对象与隐藏类关联起来，以跟踪它们的属性特征。能够共享相同隐藏类的对象性能会更好，V8 会针对这种情况进行优化，但不一定总能够做到。比如下面的代码：
+
+```javascript
+function Article() {
+    this.title = 'Inauguration Ceremony Features Kazoo Band';
+}
+
+let a1 = new Article();
+let a2 = new Article();
+```
+
+V8 会在后台配置，让这两个实例共享相同的隐藏类，因为这两个实例共享同一个构造函数和原型。假设之后又添加了下面这行代码：
+
+```javascript
+a2.author = 'Jake';
+```
+
+此时两个 Article 实例就会对应两个不同的隐藏类。根据这种操作的频率和隐藏类的大小，这有可能对性能产生明显影响。
+
+当然，解决方案就是避免 JavaScript 的先创建再补充（ready-fire-aim）式的动态属性赋值，并在构造函数中一次性声明所有属性，如下所示：
+
+```javascript
+function Article(opt_author) {
+    this.title = 'Inauguration Ceremony Features Kazoo Brand';
+    this.author = opt_author;
+}
+
+let a1 = new Article();
+let a2 = new Article('Jake');
+```
+
+这样，两个实例基本上就一样了（不考虑 hasOwnProperty 的返回值），因此可以共享一个隐藏类，从而带来潜在的性能提升。不过要记住，使用 delete 关键字会导致生成相同的隐藏类片段。看一下这个例子：
+
+```javascript
+function Article() {
+    this.title = 'Inauguration Ceremony Features Kazoo Band';
+    this.author = 'Jake';
+}
+
+let a1 = new Article();
+let a2 = new Article();
+
+delete a1.author;
+```
+
+在代码结束后，即使两个实例使用了同一个构造函数，它们也不再共享一个隐藏类。动态删除属性与动态添加属性导致的后果一样。最佳实践是把不想要的属性设置为 null。这样可以保持隐藏类不变和继续共享，同时也能达到删除引用值供垃圾回收程序回收的效果。比如：
+
+```javascript
+function Article() {
+    this.title = 'Inauguration Ceremony Features Kazoo Band';
+    this.author = 'Jake';
+}
+
+let a1 = new Article();
+let a2 = new Article();
+
+a1.author = null;
+```
+
+<br>
+
+### 3. 内存泄漏
+
+写得不好的 JavaScript 可能出现难以察觉且有害的内存泄露问题。在内存有限的设备上，或者在函数会被调用很多次的情况下，内存泄漏可能是个大问题。JavaScript 中的内存泄露大部分是由不合理的引用导致的，
+
+意外声明全局变量是最常见也最容易修复的内存泄露问题。下面的代码没有使用任何关键字声明变量 name：
+
+```javascript
+function setName() {
+    name = 'Jake';
+}
+```
+
+此时，解释器会把变量 name 当作 window 的属性来创建（相当于 window.name = 'Jake'）。可想而知，在 window 对象上创建的属性，只要 window 本身不被清理就不会消失。这个问题很容易解决，只要在变量声明前头加上 var、let 或 const 关键字即可，这样变量就会在函数执行完毕后离开作用域。
+
+定时器也可能会悄悄地导致内存泄露。下面的代码中，定时器的回调通过闭包引用了外部变量：
+
+```javascript
+let name = 'Jake';
+setInterval(() => {
+    console.log(name);
+}, 100);
+```
+
+只要定时器一直运行，回调函数中引用的 name 就会一直占用内存。垃圾回收程序当然知道这一点，因而就不会清理外部变量。
+
+使用 JavaScript 闭包很容易在不知不觉间造成内存泄露。请看下面的例子：
+
+```javascript
+let outer = function() {
+    let name = 'Jake';
+    return function() {
+        return name;
+    };
+};
+```
+
+调用 outer() 会导致分配给 name 的内存被泄露。以上代码执行后创建了一个内部闭包，只要返回的函数存在就不能清理 name，因为闭包一直在引用着它。假如 name 的内容很大（不止是一个小字符串），那可能就是个大问题了。
+
+<br>
+
+### 4. 静态分配与对象池
+
+为了提升 JavaScript 性能，最后要考虑的一点往往就是压榨浏览器了。此时，一个关键问题就是如何减少浏览器执行垃圾回收的次数。开发者无法直接控制什么时候开始收集垃圾，但可以间接控制触发垃圾回收的条件。理论上，如果能够合理使用分配的内存，同时避免多余的垃圾回收，那就可以保住因释放内存而损失的性能。
+
+浏览器决定何时运行垃圾回收程序的一个标准就是对象更替的速度。如果有很多对象被初始化，然后一下子又都超出了作用域，那么浏览器就会采用更激进的方式调度垃圾回收程序运行，这样当然会影响性能。看一看下面的例子，这是一个计算向量加法的函数：
+
+```javascript
+function addVentor(a, b) {
+    let resultant = new Vector();
+    resultant.x = a.x + b.x;
+    resultant.y = a.y + b.y;
+    return resultant;
+}
+```
+
+调用这个函数时，会在堆上创建一个新对象，然后修改它，最后再把它返回给调用者。如果这个向量对象的生命周期很短，那么它会很快失去所有对它的引用，成为可以被回收的值。假如这个向量加法函数频繁被调用，那么垃圾回收调度程序会发现这里对象更替的速度很快，从而会更频繁地安排垃圾回收。
+
+该问题地解决方案是不要动态创建向量对象，比如可以修改上面的函数，让它使用一个已有的向量对象：
+
+```javascript
+function addVentor(a, b, resultant) {
+    resultant.x = a.x + b.x;
+    resultant.y = a.y + b.y;
+    return resultant;
+}
+```
 
 
 
