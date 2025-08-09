@@ -83,11 +83,11 @@ console.log(date1 > date2); // false
 
 <br>
 
-## 2. RegExp
+# 2. RegExp
 
 
 
-## 3. 原始值包装类型
+# 3. 原始值包装类型
 
 为了方便操作原始值，ECMAScript 提供了 3 种特殊的引用类型：Boolean、Number 和 String。这些类型具有本章介绍的其他引用类型一样的特点，但也具有与各自原始类型对应的特殊行为。每当用到某个原始值的方法或属性时，后台都会创建一个相应原始包装类型的对象，从而暴露出操作原始值的各种方法。来看下面的例子：
 
@@ -148,7 +148,7 @@ console.log(typeof obj); // "object"
 
 <br>
 
-### 1. Boolean
+## 1. Boolean
 
 Boolean 是对应布尔值的引用类型。要创建一个 Boolean 对象，就使用 Boolean 构造函数并传入 true 或 false，如下例所示：
 
@@ -183,7 +183,7 @@ console.log(falseValue instanceof Boolean); // false
 
 <br>
 
-### 2. Number
+## 2. Number
 
 Number 是对应数值的引用类型。要创建一个 Number 对象，就使用 Number 构造函数并传入一个数值，如下例所示：
 
@@ -204,7 +204,7 @@ console.log(num.toString(16)); // "a"
 
 除了继承的方法，Number 类型还提供了几个用于将数值格式化为字符串的方法。
 
-#### **toFixed()**
+### **toFixed()**
 
 该方法返回包含指定小数点位数的数值字符串，如：
 
@@ -226,7 +226,7 @@ toFixed() 自动舍入的特点可以用于处理货币。不过要注意的是�
 >
 >toFixed() 方法可以表示有 0~20 个小数位的数值。某些浏览器可能支持更大的范围，但这是通常被支持的范围。
 
-#### toExponential()
+### toExponential()
 
 另一个用于格式化数值的方法是 toExponential()，返回以科学计数法（也称为指数计数法）表示的数值字符串。与 toFixed() 一样，toExponential() 也接收一个参数，表示结果中小数的位数。来看下面的例子：
 
@@ -237,7 +237,7 @@ console.log(num.toExponential(1)); // "1.0e+1"
 
 这段代码的输出为 "1.0e+1"。一般来说，这么小的数不用表示为科学记数法形式。如果想得到数值最适当的形式，那么可以使用 toPrecision()。
 
-#### toPrecision() 
+### toPrecision() 
 
 toPrecision() 方法会根据情况返回最合理的输出结果，可能是固定长度，也可能是科学记数法形式。这个方法接收一个参数，表示结果中数字的总位数（不包含指数）。来看几个例子：
 
@@ -269,9 +269,9 @@ console.log(numberValue instanceof Number); // false
 
 <br>
 
-#### isInteger() 方法与安全整数
+### isInteger() 方法与安全整数
 
-##### Number.isInteger()
+#### Number.isInteger()
 
 Number.isInteger() 方法用于辨别一个数值是否保存为整数。有时候，小数位的 0 可能会让人误以为数值是一个浮点值：
 
@@ -281,7 +281,7 @@ console.log(Number.isInteger(1.00)); // true
 console.log(Number.isInteger(1.01)); // false
 ```
 
-##### Number.isSafeInteger()
+#### Number.isSafeInteger()
 
 IEEE 754 数值格式有一个特殊的数值范围，在这个范围内二进制值可以表示一个整数值。这个数值范围从 Number.MIN_SAFE_INTEGER（-2^53 + 1）到 Number.MAX_SAFE_INTEGER（2^53 - 1）。对超出这个范围的数值，即使尝试保存为整数，IEEE 754 编码格式也意味着二进制值可能会表示一个完全不同的数值。为了鉴别整数是否在这个范围内，可以使用 .isSafeInteger() 方法：
 
@@ -295,7 +295,7 @@ console.log(Number.isSafeInteger((2 ** 53) - 1)); // true
 
 <br>
 
-### 3. String
+## 3. String
 
 String 是对应字符串的引用类型。要创建一个 String 对象，使用 String 构造函数并传入一个数值，如下例所示：
 
@@ -316,9 +316,9 @@ console.log(stringValue.length); // "11"
 
 String 类型提供了很多方法来解析和操作字符串。
 
-#### 1. JavaScript 字符
+### 1. JavaScript 字符
 
-##### length
+#### length
 
 JavaScript 字符串由 16 位码元（code unit）组成。对多数字符串来说，每 16 位码元对应一个字符。换句话说，字符串的 length 属性表示字符串包含多少 16 位码元：
 
@@ -328,7 +328,7 @@ let message= "abcde";
 console.log(message.length); // 5
 ```
 
-##### charAt()
+#### charAt()
 
 此外，charAt() 方法返回给定索引位置的字符，由传给方法的整数参数指定。具体来说，这个方法查找指定索引位置的 16 位码元，并返回该码元对应的字符：
 
@@ -340,7 +340,7 @@ console.log(message.charAt(2)); // "c"
 
 JavaScript 字符串使用了两种 Unicode 编码混合的策略：UCS-2 和 UTF-16。对于可以采用 16 位编码的字符（U+0000~U+FFFF），这两种编码实际上是一样的。
 
-##### charCodeAt()
+#### charCodeAt()
 
 使用 charCodeAt() 方法可以查看指定码元的字符编码。这个方法返回指定索引位置的码元值，索引以整数指定。比如：
 
@@ -354,7 +354,7 @@ console.log(message.charCodeAt(2)); // 99
 console.log(99 == 0x63); // true
 ```
 
-##### String.fromCharCode()
+#### String.fromCharCode()
 
 fromCharCoe() 方法用于根据给定的 UTF-16 码元创建字符串中的字符。这个方法可以接受任意多个数值，并返回将所有数值对应的字符拼接下来的字符串：
 
@@ -408,7 +408,7 @@ console.log(String.fromCharCode(87, 98, 55357, 56842, 100, 101)); // ab😊de
 
 这些方法仍然将 16 位码元当作一个字符，事实上索引 2 和索引 3 对应的码元应该被看成一个代理对，只对应一个字符。fromCharCode() 方法仍然返回正确的结果，因为它实际上是基于提供的二进制表示直接组合成字符串，浏览器可以正确解析代理对（由两个码元构成），并正确地将其识别为一个 Unicode 笑脸字符。
 
-##### codePointAt()
+#### codePointAt()
 
 为正确解析既包含单码元字符又包含代理对字符的字符串，可以使用 codePointAt() 来代替 charCodeAt()。跟使用 charCodeAt() 时类似，codePointAt() 接收 16 位码元的索引并返回该索引位置上的码点（code point）。码点是 Unicode 中一个字符的完整标识。比如，"c" 的码点是 0x0063，而 "😊" 的码点是 0x1F60A。码点可能是 16 位，也可能是 32 位，而 codePointAt() 方法可以从指定码元位置识别完整的码点。
 
@@ -427,7 +427,7 @@ console.log(message.codePointAt(4)); // 100
 console.log([..."ab😊de"]); // ["a", "b", "😊", "d", "e"]
 ```
 
-##### String.fromCodePoint()
+#### String.fromCodePoint()
 
 与 charCodeAt() 有对应的 codePointAt() 一样，fromCharCode() 也有一个对应的 fromCodePoint()。这个方法接受任意数量的码点，返回对应字符拼接起来的字符串：
 
@@ -438,7 +438,7 @@ console.log(String.fromCodePoint(87, 98, 128522, 100, 101)); // ab😊de
 
 <br>
 
-#### 2. normalize() 方法
+### 2. normalize() 方法
 
 某些 Unicode 字符可以有多种编码方式。有的字符既可以通过一个 BMP 字符表示，也可以通过一个代理对表示。比如：
 
@@ -470,7 +470,7 @@ console.log(a2 === a3); // false
 
 `normalize()` 方法支持四种 Unicode 正规化形式，每种形式都有不同的处理方式和用途：
 
-##### 1. NFC 
+#### 1. NFC 
 
 **规范分解后再规范组合**
 
@@ -484,7 +484,7 @@ console.log(str.normalize('NFC')); // é (组合形式)
 console.log(str.normalize('NFC').length); // 1
 ```
 
-##### 2. NFD
+#### 2. NFD
 
 **规范分解**
 
@@ -498,7 +498,7 @@ console.log(str.normalize('NFD')); // e + ́ (分解形式)
 console.log(str.normalize('NFD').length); // 2
 ```
 
-##### 3. NFKC
+#### 3. NFKC
 
 **兼容性分解后再规范组合**
 
@@ -514,7 +514,7 @@ const fullWidth = 'Ａ'; // 全角 A (U+FF21)
 console.log(fullWidth.normalize('NFKC')); // 'A' (半角 A)
 ```
 
-##### 4. NFKD
+#### 4. NFKD
 
 **兼容性分解**
 
@@ -530,7 +530,7 @@ const superscript = '²'; // 上标 2 (U+00B2)
 console.log(superscript.normalize('NFKD')); // '2' (普通数字 2)
 ```
 
-##### 实际应用对比
+#### 实际应用对比
 
 ```javascript
 // 测试字符串：包含重音字符、连字符、全角字符
@@ -543,29 +543,29 @@ console.log('NFKC:', testStr.normalize('NFKC')); // café file A2
 console.log('NFKD:', testStr.normalize('NFKD')); // café file A2 (分解形式)
 ```
 
-##### 选择指南
+#### 选择指南
 
-###### 使用 NFC：
+##### 使用 NFC：
 - 需要紧凑的字符串表示
 - 进行一般的字符串比较
 - 存储或传输文本数据
 
-###### 使用 NFD：
+##### 使用 NFD：
 - 需要分析字符的组成部分
 - 处理重音字符的基字符
 - 进行字符级别的操作
 
-###### 使用 NFKC：
+##### 使用 NFKC：
 - 进行文本搜索（忽略格式差异）
 - 用户输入标准化
 - 需要统一全角/半角字符
 
-###### 使用 NFKD：
+##### 使用 NFKD：
 - 进行最彻底的文本分析
 - 需要移除所有格式信息
 - 创建搜索索引
 
-##### 注意事项
+#### 注意事项
 
 1. **不可逆性**: NFKC 和 NFKD 会丢失格式信息，转换是不可逆的
 2. **性能**: 兼容性分解（NFKC/NFKD）比规范分解（NFC/NFD）更耗时
@@ -575,9 +575,9 @@ console.log('NFKD:', testStr.normalize('NFKD')); // café file A2 (分解形式)
 
 <br>
 
-#### 3. 字符串操作方法
+### 3. 字符串操作方法
 
-##### concat()
+#### concat()
 
 本节介绍几个操作字符串值的方法。首先是 concat()，用于将一个或多个字符串拼接成一个新字符串。来看下面的例子：
 
@@ -601,11 +601,11 @@ console.log(stringValue); // "hello"
 
 这个修改后的例子将字符串 "world" 和 "!" 追加到了 "hello" 后面。虽然 concat() 方法可以拼接字符串，但更常用的方式是使用加号操作符（+）。而且多数情况下，对于拼接多个字符串来说，使用加号更方便。
 
-##### slice()
+#### slice()
 
-##### substr()
+#### substr()
 
-##### substring()
+#### substring()
 
 ECMAScript 提供了 3 个从字符串中提取子字符串的方法：slice()、substr()、和 substring()。这 3 个方法都返回调用它们的字符串的一个子字符串，而且都接收一或两个参数。第一个参数表示子字符串开始的位置，第二个参数表示子字符串结束的位置。对 slice() 和 substring() 而言，第二个参数是提取结束的位置（即该位置之前的字符会被提出出来）。对 substr() 而言，第二个参数表示返回的子字符串长度。任何情况下，省略第二个参数都意味着提取到字符串末尾。与 concat() 方法一样，slice()、substr() 和 substring() 也不会修改调用它们的字符串，而只会返回提取到的原始新字符串值。来看下面的例子：
 
@@ -641,11 +641,11 @@ console.log(stringValue.substr(3, -4)); // ""（empty string）
 
 <br>
 
-#### 4. 字符串位置方法
+### 4. 字符串位置方法
 
-##### indexof
+#### indexof
 
-##### lastIndexOf
+#### lastIndexOf
 
 有两个方法用于在字符串中定位子字符串：indexOf() 和 lastIndexOf()。这两个方法从字符串中搜索传入的字符串，并返回位置（如果没找到，则返回 -1）.两者的区别在于，indexOf() 方法从字符串开头查找子字符串，而 lastIndexOf() 方法从字符串末尾开始查找子字符串。来看下面的例子：
 
@@ -684,13 +684,13 @@ console.log(positions); // [3, 24, 32, 35, 52]
 
 <br>
 
-#### 5. 字符串包含方法
+### 5. 字符串包含方法
 
-##### startsWith()
+#### startsWith()
 
-##### endsWith()
+#### endsWith()
 
-##### includes()
+#### includes()
 
 ECMAScript 包含 3 个用于判断字符串中是否包含另一个字符串的方法：startsWith()、endsWith() 和 includes()。这些方法都会从字符串中搜索传入的字符串，并返回一个表示是否包含的布尔值。它们的区别在于，startsWith() 检查开始于索引 0 的匹配项，endsWith() 检查开始于索引（string.length - substring.length）的匹配项，而 includes() 检查整个字符串：
 
@@ -730,7 +730,7 @@ console.log(message.endsWith("bar", 6)); // true
 
 <br>
 
-#### 6. trim() 方法
+### 6. trim() 方法
 
 ECMAScript 在所有字符串上都提供了 trim() 方法。这个方法会创建字符串的一个副本，删除前、后所有空格符，再返回结果。比如：
 
@@ -747,13 +747,13 @@ console.log(trimmedStringValue); // "hello world"
 
 trimStart() 和 trimEnd() 用于删除目标位置的空格符。这两个方法是为了代替 trimLeft() 和 trimRight() 才出现的，它们在阿拉伯语和希伯来语等从右向左的语言中有着重要意义。
 
-##### trimLeft()
+#### trimLeft()
 
-#####  trimRight()
+####  trimRight()
 
-##### trimStart()
+#### trimStart()
 
-##### trimEnd()
+#### trimEnd()
 
 这两个方法是以空格为第二个参数的 padStart() 和 padEnd() 方法的反方法。下面的例子先给字符串添加了一些空格，然后又从两边空格删掉：
 
@@ -766,7 +766,7 @@ console.log(s.trimEnd()); // "  foo"
 
 <br>
 
-#### 7. repeat() 方法
+### 7. repeat() 方法
 
 ECMAScript 在所有字符串上都提供了 repeat() 方法。这个方法接收一个整数参数，表示要将字符串复制多少次，然后返回拼接所有副本后的结果。
 
@@ -778,7 +778,7 @@ console.log(stringValue.repeat(16) + "batman");
 
 <br>
 
-#### 8. padStart() 和 padEnd() 方法
+### 8. padStart() 和 padEnd() 方法
 
 padStart() 和 padEnd() 方法会复制字符串，如果小于指定长度，则在相应一边填充字符，直至满足长度条件。这两个方法的第一个参数是长度，第二个参数是可选的填充字符串，默认为空格（U+0020）。
 
@@ -806,7 +806,7 @@ console.log(stringValue.padEnd(2)); // "foo"
 
 <br>
 
-#### 9. 字符串迭代与解构
+### 9. 字符串迭代与解构
 
 字符串的原型上暴露了一个 @@iterator 方法，表示可以迭代字符串的每个字符。可以下面这样手动使用迭代器：
 
@@ -844,15 +844,15 @@ console.log([...message]); // ["a", "b", "c", "d", "e"]
 
 <br>
 
-#### 10. 字符串大小写转换
+### 10. 字符串大小写转换
 
-##### toLowerCase()
+#### toLowerCase()
 
-##### toLocaleLowerCase()
+#### toLocaleLowerCase()
 
-##### toUpperCase()
+#### toUpperCase()
 
-##### toLocalUpperCase()
+#### toLocalUpperCase()
 
 下一组方法涉及大小写转换，包括 4 个方法：toLowerCase()、toLocaleLowerCase()、toUpperCase() 和 toLocaleUpperCase()。toLowerCase() 和 toUpperCase() 方法是原来就有的方法，与 java.lang.String 中的方法同名。toLocaleLowerCase() 和 toLocaleUpperCase() 方法旨在基于特定地区实现。在很多地区，地区特定的方法与通用的方法是一样的。但在少数语言中（如土耳其语），Unicode 大小写转换需应用特殊规则，要使用地区特定的方法才能实现正确转换。下面是几个例子：
 
@@ -868,11 +868,11 @@ console.log(stringValue.toLowerCase()); // "hello world"
 
 <br>
 
-#### 11. 字符串模式匹配方法
+### 11. 字符串模式匹配方法
 
-##### match()
+#### match()
 
-##### matchAll()
+#### matchAll()
 
 String 类型专门为在字符串中实现模式匹配哦设计了几个方法。第一个就是 match() 方法，这个方法本质上跟 RegExp 对象的 exec() 方法相同。match() 方法接收一个参数，可以是一个正则表达式字符串，也可以是一个 RegExp 对象。来看下面的例子：
 
@@ -907,7 +907,7 @@ console.log([...text.matchAll(/a(.)c)/g)]);
 // ]
 ```
 
-##### search()
+#### search()
 
 另一个查找模式的字符串方法是 search()。这个方法唯一的参数与 match() 方法一样：正则表达式字符串或 RegExp 对象。这个方法返回模式第一个匹配的位置索引，如果没找到则返回 -1。search() 始终从字符串开头向后匹配模式。看下面的例子：
 
@@ -919,9 +919,9 @@ console.log(pos); // 1
 
 这里，search(/at/) 返回 1，即 "at" 在字符串中第一次出现的位置。
 
-##### replace()
+#### replace()
 
-##### replaceAll()
+#### replaceAll()
 
 为简化子字符串替换操作，ECMAScript 提供了 replace() 方法。这个方法接受两个参数，第一个参数可以是一个 RegExp 对象或一个字符串（这个字符串不会转换为正则表达式），第二个参数可以是一个字符串或一个函数。如果 replace() 的第一个参数是字符串，那么只会替换第一个子字符串。要想替换所有子字符串有两种方式，首先是第一个参数用正则表达式并且带全局标记，其次是使用 replaceAll() 方法，如下面的例子所示：
 
@@ -983,6 +983,243 @@ console.log(htmlEscape("<p class=\"greeting\">Hello world!<p>"));
 ```
 
 这里，函数 thmlEscape() 用于将一段 HTML 中的 4 个字符替换成对应的实体：小于号、大于号、和号，还有双引号（都必须经过转义）。实现这个任务最简单的方法就是用一个正则表达式查找这些字符，然后定义一个函数，根据匹配的每个字符分别返回特定的 HTML 实体。
+
+#### split()
+
+最后一个与模式匹配相关的字符串方法是 split()。这个方法会根据传入的分隔符将字符串分成数组。作为分隔符的参数可以是字符串，也可以是 RegExp 对象。（字符串分隔符不会被这个方法当成正则表达式）。还可以传入第二个参数，即数组大小，确保返回的数组不会超过指定大小，来看下面的例子：
+
+```javascript
+let colorText = "red,blue,green,yellow";
+let colors1 = colorText.split(","); // ["red", "blue", "green", "yellow"]
+let colors2 = colorText.split(",", 2); // ["red", "blue"]
+let colors3 = colorText.split(/[^,]+/); // ["", ",", ",", ",", ""]
+```
+
+在这里，字符串 colorText 是一个逗号分隔的颜色名称字符串。调用 split(",") 会得到包含这些颜色名的数组，基于逗号进行拆分。要把数组元素限制为 2 个，传入第二个参数 2 即可。最后，使用正则表达式可以得到一个包含逗号的数组。注意在最后一次调用 split() 时，返回的数组前后包含两个空字符串。这是因为正则表达式指定的分隔符出现在了字符串开头（"red"）和末尾（"yellow"）。
+
+<br>
+
+### 12. localeCompare() 方法
+
+最后一个方法是 localCompare()，这个方法比较两个字符串，返回如下 3 个值中的一个。
+
+* 如果按照字母表顺序，字符串应该排在字符串参数前头，则返回负值。（通常是 -1，具体还要看与实际值相关的实现）。
+* 如果字符串与字符串参数相等，则返回 0。
+* 如果按照字母表顺序，字符串应该排在字符串参数后头，则返回正值。（通常是 1，具体还要看与实际值相关的实现）。
+
+下面是一个例子：
+
+```javascript
+let stringValue = "yellow";
+console.log(stringValue.localCompare("brick")); // 1
+console.log(stringValue.localCompare("yellow")); // 0
+console.log(stringValue.localCompare("zoo")); // -1
+```
+
+在这里，字符串 "yellow" 与 3 个不同的值进行了比较："brick"、"yellow" 和 "zoo"。"brick" 按字母表顺序应该排在 "yellow" 前头，因此 localeCompare() 返回 1。"yellow" 等于 "yellow"，因此 localeCompare() 返回 0。最后，"zoo" 在 "yellow" 后面，因此 localeCompare() 返回 -1。强调一下，因为返回的具体值可能因具体实现而异，所以最好像下面的示例中一样使用 localeCompare()：
+
+```javascript
+function determineOrder(value) {
+    let result = stringValue.localeCompare(value);
+    if (result < 0) {
+        console.log(`The string 'yellow' comes before the string '${value}'.`);
+    } else if (result > 0) {
+        console.log(`The string 'yellow' comes after the string '${value}'.`);
+    } else {
+        console.log(`The string 'yellow' is equal to the string '${value}'.`);
+    }
+}
+
+determineOrder("brick");
+determineOrder("yellow");
+determineOrder("zoo");
+```
+
+这样一来，就可以保证在所有实现中都能正确判断字符串的顺序了。
+
+localeCompare() 的独特之处在于，实现所在的地区（国家和语言）决定了这个方法如何比较字符串。在美国，英语是 ECMAScript 实现的标准语言，localeCompare() 区分大小写，大写字母排在小写字母前面。但其他地区未必是这种情况。
+
+<br>
+
+# 4. 单例内置对象
+
+ECMA-262 对内置对象的定义是任何由 ECMAScript 实现提供、与宿主环境无关，并在 ECMAScript 程序开始执行时就存在的对象。这就意味着，开发者不用显式地实例化内置对象，因为它们已经实例化好了。前面我们已经接触了大部分内置对象，包括 Object、Array 和 String。本节介绍 ECMA-262 定义的另外两个单例内置对象：Global 和 Math。
+
+## 1. Global
+
+Global 对象是 ECMAScript 中最特别的对象，因为代码不会显式地访问它。ECMA-262 规定 Global 对象为一种兜底对西安给，它所针对地是不属于任何对象地属性和方法。事实上，不存在全局变量或全局函数这种东西。在全局作用域中定义的变量和函数都会变成 Global 对象的属性。本书前面介绍的函数，包括 isNaN()、isFinite()、parseInt() 和 parseFloat()，实际上都是 Global 对象的方法。除了这些，Global 对象上还有另外一些方法。
+
+### 1. URI 编码方法
+
+#### encodeURI()
+
+#### encodeURIComponent()
+
+#### decodeURI()
+
+#### decodeURIComponent()
+
+encodeURI() 和 encodeURIComponent() 方法用于编码统一资源标识符（URI），以便传给浏览器。有效的 URI 不能包含某些字符，比如空格。使用 URI 编码方法来编码 URI 可以让浏览器能够理解它们，同时又以特殊的 UTF-8 编码替换掉所有无效字符。
+
+encodeURI() 方法用于对整个 URI 进行编码，比如 "www.wiley.com/illegal value.js"。而 encodeURIComponent() 方法用于编码 URI 中单独的组件，比如前面 URI 中的 "illegal value.js"。这两个方法的主要区别是，encodeURI() 不会编码属于 URI 组件的特殊字符，比如冒号、斜杠、问号、井号，而 encodeURIComponent() 会编码它发现的所有非标准字符。来看下面的例子：
+
+```javascript
+let uri = "http://www.wiley.com/illegal value.js#start";
+
+// "http://www.wiley.com/illegal%20value.js#start"
+console.log(encodeURI(uri));
+
+// "http%3A%2F%2Fwww.wiley.com%2Fillegal%20value.js%23start"
+console.log(encodeURIComponent(uri));
+```
+
+这里使用 encodeURI() 编码后，除空格被替换成 %20 之外，没有任何变化。而 encodeURIComponent() 方法将所有非字母字符都替换成了相应的编码形式。这就是使用 encodeURI() 编码整个 URI，但只使用 encodeURIComponent() 编码那些会追加到已有 URI 后面的字符串的原因。
+
+>注意
+>
+>一般来说，使用 encodeURIComponent() 应该比使用 encodeURI() 的频率更高，这是因为编码查询字符串参数比编码基准 URI 的次数更多。
+
+与 encodeURI() 和 encodeURIComponent() 相对的是 decodeURI() 和 decodeURIComponent()。decodeURI() 只对使用 encodeURI() 编码过的字符解码。例如，%20 会被替换为空格，但 %23 不会被替换为井号（#），因为井号不是由 encodeURI() 替换的。类似地，decodeURIComponent() 解码所有被 encodeURIComponent() 编码的字符，基本上就是解码所有特殊值。来看下面的例子：
+
+```javascript
+let uri = "http%3A%2F%2Fwww.wiley.com%2Fillegal%20value.js%23start";
+
+// http%3A%2F%2Fwww.wiley.com%2Fillegal value.js%23start
+console.log(decodeURI(uri));
+
+// http:// www.wiley.com/illegal value.js#start
+console.log(decodeURIComponent(uri));
+```
+
+这里，uri 变量中包含一个使用 encodeURIComponent() 编码过的字符串。首先输出的是使用 decodeURI() 解码的结果，可以看到只用空格替换了 %20。然后是使用 decodeURIComponent() 解码的结果，其中替换了所有特殊字符，并输出了没有包含任何转义的字符串。（这个字符串是有效的 URI）。
+
+>注意
+>
+>URI 方法 encodeURI()、encodeURIComponent()、decodeURI() 和 decodeURIComponent() 取代了 escape() 和 unescape() 方法，后者在 ECMA-262 第 3 版中就已经废弃了。URI 方法始终是首选方法，因为它们对所有 Unicode 字符进行编码，而原来的方法只能正确编码 ASCII 字符。不要在生产环境中使用 escape() 和 unescape()。
+
+<br>
+
+### 2. eval() 方法
+
+最后一个方法可能是整个 ECMAScript 语言中最强大的了，它就是 eval()。这个方法就是一个完整的 ECMAScript 解释器，它接受一个参数，即一个要执行的 ECMAScript（JavaScript）字符串。来看一个例子：
+
+```javascript
+eval("console.log('hi')");
+```
+
+上面这行代码的功能与下面这一行等价：
+
+```javascript
+console.log("hi");
+```
+
+当解释器发现 eval() 调用时，会将参数解释为实际的 ECMAScrpt 语句，然后将其插入到该位置。通过 eval() 执行的代码属于该调用所在上下文，被执行的代码与该上下文拥有相同的作用域链。这意味着定义在包含上下文中的变量可以在 eval() 调用内部被引用，比如下面这个例子：
+
+```javascript
+let msg = "hello world";
+eval("console.log(msg)"); // "hello world"
+```
+
+这里，变量 msg 是在 eval() 调用的外部上下文中定义的，而 console.log() 显示了文本 "hello world"。这是因为第二行会被替换成一行真正的函数调用代码。类似地，可以在 eval() 内部定义一个函数或变量，然后在外部代码中引用，如下所示：
+
+```javascript
+eval("function sayHi() { console.log('hi'); }");
+sayHi();
+```
+
+这里，函数 sayHi() 是在 eval() 内部定义的。因为该调用会被替换为真正的函数定义，所以才可能在下一行代码中调用 sayHi()。对于变量也是一样的：
+
+```javascript
+eval("let msg = 'hello world';");
+console.log(msg); // "hello world"
+```
+
+通过 eval() 定义的任何变量和函数都不会被提升，这是因为在解析代码的时候，它们是被包含在一个字符串中的。它们只是在 eval() 执行的时候才会被创建的。
+
+在严格模式下，在 eval() 内部创建的变量和函数无法被外部访问。换句话说，最后两个例子会报错。同样，在严格模式下，赋值给 eval 也会导致报错：
+
+```javascript
+"use strict";
+eval = "hi"; // 导致错误
+```
+
+>注意
+>
+>解释代码字符串的能力是非常强大的，但也非常危险。在使用 eval() 的时候必须极为慎重，特别是在解释用户输入的内容时，因为这个方法会对 XSS 利用暴露出很大的攻击面。恶意用户可能插入会导致你网站或应用崩溃的代码。
+
+<br>
+
+### 3. Global 对象属性
+
+Global 对象有很多属性，其中一些前面已经提到过了。像 undefined、NaN 和 Infinity 等特殊值都是 Global 对象的属性。此外，所有原生引用类型构造函数，比如 Object 和 Function，也都是 Global 对象的属性。下表列出了所有这些属性。
+
+| 属性           | 说明                      |
+| -------------- | ------------------------- |
+| undefined      | 特殊值 undefined          |
+| NaN            | 特殊值 NaN                |
+| Infinity       | 特殊值 Infinity           |
+| Object         | Object 的构造函数         |
+| Array          | Array 的构造函数          |
+| Function       | Function 的构造函数       |
+| Boolean        | Boolean 的构造函数        |
+| String         | String 的构造函数         |
+| Number         | Number 的构造函数         |
+| Date           | Date 的构造函数           |
+| RegExp         | RegExp 的构造函数         |
+| Symbol         | Symbol 的伪构造函数       |
+| Error          | Error 的构造函数          |
+| EvalError      | EvalError 的构造函数      |
+| RangeError     | RangeError 的构造函数     |
+| ReferenceError | ReferenceError 的构造函数 |
+| SyntaxError    | SyntaxError 的构造函数    |
+| TypeError      | TypeError 的构造函数      |
+| URIError       | URIError 的构造函数       |
+
+<br>
+
+### 4. window 对象
+
+虽然 ECMA-262 没有规定直接访问 Global 对象的方式，但浏览器将 window 对象实现为 Global 对象的代理。因此，所有全局作用域中声明的变量和函数都变成了 window 的属性。来看下面的例子：
+
+```javascript
+var color = "red";
+
+function sayColor() {
+    console.log(window.color);
+}
+
+window.sayColor(); // "red"
+```
+
+这里定义了一个名为 color 的全局变量和一个名为 sayColor() 的全局变量。在 sayColor() 内部，通过 window.color 访问了 color 变量，说明全局变量变成了 window 的属性。接着，又通过 window 对象直接调用了 window.sayColor() 函数，从而输出字符串。
+
+>注意
+>
+>window 对象在 JavaScript 中远不止实现了 ECMAScript 的 Global 对象那么简单。关于 window 对象的更多介绍，请参考第 12 章。
+
+另一种获取 Global 对象的方式是使用如下的代码：
+
+```javascript
+let global = function() {
+    return this;
+}();
+```
+
+这段代码创建了一个立即调用的函数表达式，返回 this 的值。如前所述，当一个函数在没有明确（通过成为某个对象的方法，或者通过 call()/apply()）指定 this 值得情况下执行时，this 值等于 Global 对象。因此，调用一个简单返回 this 的函数是在任何执行上下文中获取 Global 对象的通用方式。
+
+<br>
+
+## 2. Math
+
+ECMAScript 提供了 Math 对象作为保存数学公式、信息和计算的地方。Math 对象提供了一些辅助计算的属性和方法。
+
+>注意
+>
+>Math 对象上提供的计算要比直接在 JavaScript 中实现的快得多，因为 Math 对象上的计算使用了 JavaScript 引擎中更高效的实现和处理器指令。但使用 Math 计算的问题是精度会因浏览器、操作系统、指令集和硬件而异。
+
+
+
+
 
 
 
