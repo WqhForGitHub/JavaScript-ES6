@@ -1217,13 +1217,174 @@ ECMAScript 提供了 Math 对象作为保存数学公式、信息和计算的地
 >
 >Math 对象上提供的计算要比直接在 JavaScript 中实现的快得多，因为 Math 对象上的计算使用了 JavaScript 引擎中更高效的实现和处理器指令。但使用 Math 计算的问题是精度会因浏览器、操作系统、指令集和硬件而异。
 
+### 1. Math 对象属性
 
+Math 对象有一些属性，主要用于保存数学中的一些特殊值。下表列出了这些属性。
 
+| 属性         | 说明                  |
+| ------------ | --------------------- |
+| Math.E       | 自然对数的基数 e 的值 |
+| Math.LN10    | 10 为底的自然对数     |
+| Math.LN2     | 2 为底的自然对数      |
+| Math.LOG2E   | 以 2 为底 e 的对数    |
+| Math.LOG10E  | 以 10 为底 e 的对数   |
+| Math.PI      | Π的值                 |
+| Math.SQRT1_2 | 1/2 的平方根          |
+| Math.SQRT2   | 2 的平方根            |
 
+这些值的含义和用法超出而来本书的范畴，但都是 ECMAScript 规范定义的，并可以在你需要时使用。
 
+<br>
 
+### 2. min() 和 max() 方法
 
+#### Math.min()
 
+#### Math.max()
+
+Math 对象也提供了很多辅助执行简单或复杂数学计算的方法。
+
+min() 和 max() 方法用于确定一组数值中的最小值和最大值。这两个方法都接收任意多个参数，如下面的例子所示：
+
+```javascript
+let max = Math.max(3, 54, 32, 16);
+console.log(max); // 54
+
+let min = Math.min(3, 54, 32, 16);
+console.log(min); // 3
+```
+
+在 3、54、32 和 16 中，Math.max() 返回 54，Math.min() 返回 3。使用这两个方法可以避免使用额外的循环和 if 语句来确定一组数值的最大或最小值。
+
+要知道数组中的最大值和最小值，可以像下面这样使用扩展运算符：
+
+```javascript
+let values = [1, 2, 3, 4, 5, 6, 7, 8];
+let max = Math.max(...values);
+```
+
+<br>
+
+### 3. 舍入方法
+
+#### Math,ceil()
+
+#### Math.floor()
+
+#### Math.round()
+
+#### Math.fround()
+
+接下来是用于把小数值舍入为整数的 4 个方法：Math.ceil()、Math.floor()、Math.round() 和 Math.fround()。这几个方法处理舍入的方式如下所述。
+
+* Math.ceil() 方法始终向上舍入为最接近的整数。
+* Math.floor() 方法始终向下舍入为最接近的整数。
+* Math.round() 方法执行四舍五入。
+* Math.fround() 方法返回数值最接近的单精度（32 位）浮点中表示。
+
+以下示例展示了这个方法的用法：
+
+```javascript
+console.log(Math.ceil(25.9)); // 26
+console.log(Math.ceil(25.5)); // 26
+console.log(Math.ceil(25.1)); // 26
+
+console.log(Math.round(25.9)); // 26
+console.log(Math.round(25.5)); // 26
+console.log(Math.round(25.1)); // 25
+
+console.log(Math.fround(0.4)); // 0.4000000059604645
+console.log(Math.fround(0.5)); // 0.5
+console.log(Math.frond(25.9)); // 25.899999618530273
+
+console.log(Math.floor(25.9)); // 25
+console.log(Math.floor(25.5)); // 25
+console.log(Math.floor(25.1)); // 25
+```
+
+对于 25 和 26（不包含）之间的所有值，Math.ceil() 都会返回 26，因为它始终向上舍入。Math,round() 只在数值大于等于 25.5 时返回 26，否则返回 25。最后，Math.floor() 对所有 25 和 26（不包含）之间的值都返回 25。
+
+<br>
+
+### 4. random() 方法
+
+#### Math.random()
+
+Math.random() 方法返回一个 0~1 范围内的随机数，其中包含 0 但不包含 1。对于希望显示随机名言或随机新闻的网页，这个方法是非常方便的。可以基于如下公式使用 Math.random() 从一组整数中随机选择一个数：
+
+```javascript
+number = Math.floor(Math.random() * total_number_of_choices + first_possible_value)
+```
+
+这里使用了 Math.floor() 方法，因为 Math.random() 始终返回小数，即便乘以一个数再加上一个数也是小数。因此，如果想从 1~10 范围内随机选择一个数，代码就是这样的：
+
+```javascript
+let num = Math.floor(Math.random() * 10 + 1);
+```
+
+这样就有 10 个可能的值（1~10），其中最小的值是 1。如果想选择一个 2~10 范围内的值，则代码要写成这样：
+
+```javascript
+let num = Math.floor(Math.random() * 9 + 2);
+```
+
+2~10 只有 9 个数，所以可选总数（total_number_of_choices）是 9，而最小可能的值（first_possible_value）是 2。很多时候，通过函数来算出可选总数和最小可能的值可能更方便，比如：
+
+```javascript
+function selectFrom(lowerValue, upperValue) {
+    let choices - upperValue - lowerValue;
+    return Math.floor(Math.random() * choices + lowerValue);
+}
+
+let num = selectFrom(2, 10);
+console.log(num); // 2~10 范围内的值，其中包含 2 和 10
+```
+
+这里的函数 selectFrom() 接收两个参数：应该返回的最小值和最大值。通过将这两个值相减再加 1 得到可选总数，然后再套用上面的公式。于是，调用 selectFrom(2, 10) 就可以从 2~10（包含）范围内选择一个值了。使用这个函数，从一个数组中随机选择一个元素就很容易，比如：
+
+```javascript
+let colors = ["red", "green", "blue", "yellow", "black", "purple", "brown"];
+let color = colors[selectFrom(0, colors.length - 1)];
+```
+
+在这个例子中，传给 selectFrom() 的第二个参数是数组长度减 1，即数组最大的索引值。
+
+>注意
+>
+>Math.random() 方法在这里出于演示目的是没有问题的。如果是为了加密而需要生成随机数（传给生成器的输入需要较高的不确定性），那么建议使用 window.crypto.getRandomValues()。
+
+<br>
+
+### 5. 其他方法
+
+Math 对象还有很多涉及各种简单或高阶数运算的方法。讨论每种方法的具体细节或者它们的适用场景超出了本书的范畴。不过，下表还是总结了 Math 对象的其他方法。
+
+| 方法                | 说明                              |
+| ------------------- | --------------------------------- |
+| Math.abs(x)         | 返回 x 的绝对值                   |
+| Math.exp(x)         | 返回 Math.E 的 x 次幂             |
+| Math.expm1(x)       | 等于 Math.exp(x) - 1              |
+| Math.log(x)         | 返回 x 的自然对数                 |
+| Math.log1p(x)       | 等于 1 + Math.log(x)              |
+| Math.pow(x, power)  | 返回 x 的 power 次幂              |
+| Math.hypot(...nums) | 返回 nums 中每个数平方和的平方根  |
+| Math.clz32(x)       | 返回 32 位整数 x 的前缀零的数量   |
+| Math.sign(x)        | 返回表示 x 的符号的 1、0、-0 或 1 |
+| Math.trunc(x)       | 返回 x 的整部部分，删除所有小数   |
+| Math.sqrt(x)        | 返回 x 的平方根                   |
+| Math.cbrt(x)        | 返回 x 的立方根                   |
+| Math.acos(x)        | 返回 x 的反余弦                   |
+| Math.acosh(x)       | 返回 x 的反双曲余弦               |
+| Math.asin(x)        | 返回 x 的 反正弦                  |
+| Math.asinh(x)       | 返回 x 的反双曲正弦               |
+| Math.atan(x)        | 返回 x 的反正切                   |
+| Math.atanh(x)       | 返回 x 的双曲正切                 |
+| Math.atan2(y, x)    | 返回 y/x 的反正切                 |
+| Math.cos(x)         | 返回 x 的余弦                     |
+| Math.sin(x)         | 返回 x 的正弦                     |
+| Math.tan(x)         | 返回 x 的正切                     |
+
+即便这些方法都是由 ECMA-262 定义的，对正弦、余弦、正切等计算的实现仍然取决于浏览器，因为计算这些值的方式有很多种。结果，这些方法的精度可能因实现而异。
 
 
 
