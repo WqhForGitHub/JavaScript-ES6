@@ -380,6 +380,180 @@ console.log(colors.at(100)); // undefined
 console.log(colors.at(-100)); // undefined
 ```
 
+<br>
+
+## 4. 检测数组
+
+### instanceof
+
+### Array.isArray()
+
+一个经典的 ECMAScript  问题是判断一个对象是不是数组。在只有一个网页（因而只有一个全局作用域）的情况下，使用 instanceof 操作符就足矣：
+
+```javascript
+if (value instanceof Array) {
+    // 操作数组
+}
+```
+
+使用 instanceof 的问题是假定只有一个全局执行上下文。如果网页里有多个框架，则可能涉及两个不同的全局执行上下文，因此就会有两个不同版本的 Array 构造函数。如果要把数组从一个框架传给另一个框架，则这个数组的构造函数将有别于在第二个框架内本地创建的数组。
+
+为解决这个问题，ECMAScript 提供了 Array.isArray() 方法。这个方法的目的就是确定一个值是否为数组，而不用管它是在哪个全局执行上下文中创建的。来看下面的例子：
+
+```javascript
+if (Array.isArray(value)) {
+    // 操作数组
+}
+```
+
+<br>
+
+## 5. 迭代器方法
+
+### keys()
+
+### values()
+
+### entries()
+
+Array 的原型上暴露了 3 个用于检索数组内容的方法：keys()、values() 和 entries()。keys() 返回数组索引的迭代器，values() 返回数组元素的迭代器，而 entries() 返回索引/值对的迭代器：
+
+```javascript
+const a = ["foo", "bar", "baz", "qux"];
+
+// 因为这些方法都返回迭代器，所以可以将它们的内容
+// 通过 Array.from() 直接转换为数组实例
+const aKeys = Array.from(a.keys());
+const aValues = Array.from(a.values());
+const aEntries = Array.from(a.entries());
+
+console.log(aKeys); // [0, 1, 2, 3]
+console.log(aValues); // ["foo", "bar", "baz", "qux"]
+console.log(aEntries); // [[0, "foo"], [1, "bar"], [2, "baz"], [3, "qux"]]
+```
+
+使用解构可以非常容易地在循环中拆分键值对：
+
+```javascript
+const a = ["foo", "bar", "baz", "qux"];
+
+for (const [idx, element] of a.entries()) {
+    alert(idx);
+    alert(element);
+}
+// 0
+// foo
+// 1
+// bar
+// 2
+// baz
+// 3
+// qux
+```
+
+<br>
+
+## 6. 复制和填充方法
+
+### copyWithin()
+
+### fill()
+
+再看两个方法：批量复制方法 copyWithin()，以及填充数组方法 fill()。这两个方法的函数签名类似，都需要指定既有数组实例上的一个范围，包含开始索引，不包含结束索引。使用这个方法不会改变数组的大小。
+
+使用 fill() 方法可以向一个已有的数组中插入全部或部分相同的值。开始索引引用于指定开始填充的位置，它是可选的。如果不提供结束索引，则一直填充到数组末尾。负值索引从数组末尾开始计算。也可以将负索引想象成数组长度加上它得到的一个正索引：
+
+```javascript
+const zeroes = [0, 0, 0, 0, 0];
+
+// 用 5 填充整个数组
+zeroes.fill(5);
+console.log(zeroes); // [5, 5, 5, 5, 5]
+zeroes.fill(0); // 重置
+
+// 用 6 填充索引大于等于 3 的元素
+zeros.fill(6, 3);
+console.log(zeros); // [0, 0, 0, 6, 6]
+zeros.fill(0); // 重置
+
+// 用 7 填充索引大于等于且小于 3 的元素
+zeros.fill(7, 1, 3);
+console.log(zeros); // [0, 7, 7, 0, 0]
+zeros.fill(0); // 重置
+
+// 用 8 填充索引大于等于 1 且小于 4 的元素
+// (-4 + zeros.length = 1)
+// (-1 + zeros.length = 4)
+zeros.fill(8, -4, -1);
+console.log(zeros); // [0, 8, 8, 8, 0]
+```
+
+fill() 静默忽略超出数组边界、零长度及方向相反的索引范围：
+
+```javascript
+const zeros = [0, 0, 0, 0, 0];
+
+// 索引过低，忽略
+zeros.fill(1, -10, -6);
+console.log(zeros); // [0, 0, 0, 0, 0]
+
+// 索引过高，忽略
+zeros.fill(1, 10, 15);
+console.log(zeros); // [0, 0, 0, 0, 0]
+
+// 索引反向，忽略
+zeros.fill(2, 4, 2);
+console.log(zeros); // [0, 0, 0, 0, 0]
+
+// 索引部分可用，填充可用部分
+zeros.fill(4, 3, 10)
+console.log(zeros); // [0, 0, 0, 4, 4]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
