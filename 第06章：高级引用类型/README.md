@@ -166,7 +166,35 @@ let values = [1, 2,]; // 创建一个包含 2 个元素的数组
 
 ### Array.from()
 
+#### 参数
+
+- `arrayLike`
+
+  想要转换成数组的类数组或可迭代对象。
+
+- `mapFn` 可选
+
+  调用数组每个元素的函数。如果提供，每个将要添加到数组中的值首先会传递给该函数，然后将 `mapFn` 的返回值增加到数组中。使用以下参数调用该函数：`element` 数组当前正在处理的元素。`index` 数组当前正在处理的元素的索引。
+
+- `thisArg` 可选
+
+  执行 `mapFn` 时用作 `this` 的值。
+
+#### 返回值
+
+一个新的数组实例。
+
 ### Array.of()
+
+#### 参数
+
+- `elementN`
+
+  用于创建数组的元素。
+
+#### 返回值
+
+新的 `Array` 实例。
 
 Array 构造函数还有两个用于创建数组的静态方法：from() 和 of()。from() 用于将类数组结构转换为数组实例，而 of() 用于将一组参数转换为数组实例。
 
@@ -455,9 +483,45 @@ for (const [idx, element] of a.entries()) {
 
 ## 6. 复制和填充方法
 
+### fill()
+
+#### 参数
+
+- `value`
+
+  用来填充数组元素的值。注意所有数组中的元素都将是这个确定的值：如果 `value` 是个对象，那么数组的每一项都会引用这个元素。
+
+- `start` 可选
+
+  基于零的索引，从此开始填充，转换为整数。负数索引从数组的末端开始计算，如果 `start < 0`，则使用 `start + array.length`。如果 `start < -array.length` 或 `start` 被省略，则使用 `0`。如果 `start >= array.length`，没有索引被填充。
+
+- `end` 可选
+
+  基于零的索引，在此结束填充，转换为整数。`fill()` 填充到但不包含 `end` 索引。负数索引从数组的末端开始计算，如果 `end < 0`，则使用 `end + array.length`。如果 `end < -array.length`，则使用 `0`。如果 `end >= array.length` 或 `end` 被省略，则使用 `array.length`，导致所有索引都被填充。如果经标准化后，`end` 的位置在 `start` 之前或之上，没有索引被填充。
+
+#### 返回值
+
+经 `value` 填充修改后的数组。
+
 ### copyWithin()
 
-### fill()
+#### 参数
+
+- `target`
+
+  序列开始替换的目标位置，以 0 为起始的下标表示，且将被转换为整数负索引将从数组末尾开始计数——如果 `target < 0`，则实际是 `target + array.length`。如果 `target < -array.length`，则使用 `0`。如果 `target >= array.length`，则不会拷贝任何内容。如果 `target` 位于 `start` 之后，则复制只会持续到 `array.length` 结束（换句话说，`copyWithin()` 永远不会扩展数组）。
+
+- `start` 可选
+
+  要复制的元素序列的起始位置，以 0 为起始的下标表示，且将被转换为整数负索引将从数组末尾开始计数——如果 `start < 0`，则实际是 `start + array.length`。如果省略 `start` 或 `start < -array.length`，则默认为 `0`。如果 `start >= array.length`，则不会拷贝任何内容。
+
+- `end` 可选
+
+  要复制的元素序列的结束位置，以 0 为起始的下标表示，且将被转换为整数。`copyWithin` 将会拷贝到该位置，但不包括 `end` 这个位置的元素。负索引将从数组末尾开始计数——如果 `end < 0`，则实际是 `end + array.length`。如果 `end < -array.length`，则使用`0`。如果省略 `end` 或 `end >= array.length`，则默认为 `array.length`，这将导致直到数组末尾的所有元素都被复制。如果 `end` 位于 `start` 之前，则不会拷贝任何内容。
+
+#### 返回值
+
+改变后的数组。
 
 再看两个方法：批量复制方法 copyWithin()，以及填充数组方法 fill()。这两个方法的函数签名类似，都需要指定既有数组实例上的一个范围，包含开始索引，不包含结束索引。使用这个方法不会改变数组的大小。
 
@@ -510,107 +574,529 @@ zeros.fill(4, 3, 10)
 console.log(zeros); // [0, 0, 0, 4, 4]
 ```
 
+与 fill() 不同，copyWithin() 会按照指定范围浅复制数组中的部分内容，然后将它们插入到指定索引开始的位置。开始索引和结束索引则与 fill() 使用同样的计算方法：
 
+```javascript
+let ints, reset = () => ints = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+reset();
 
+// 从 ints 中复制索引 0 开始的内容，
+// 插入到索引 5 开始的位置
+// 在源索引或目标索引到达数组边界时停止
+ints.copyWithin(5);
+console.log(ints); // [0, 1, 2, 3, 4, 0, 1, 2, 3, 4]
+reset();
 
+// 从 ints 中复制索引 5 开始的内容，
+// 插入到索引 0 开始的位置
+ints.copyWithin(0, 5);
+console.log(ints); // [5, 6, 7, 8, 9, 5, 6, 7, 8, 9]
+reset();
 
+// 从 ints 中复制索引 0 开始到索引 3 结束的内容
+// 插入到索引 4 开始的位置
+ints.copyWithin(4, 0, 3);
+alert(ints); // [0, 1, 2, 3, 0, 1, 2, 7, 8, 9]
+reset();
 
+// JavaScript 引擎在插值浅完整复制范围内的值
+// 因此复制期间不存在重写的风险
+ints.copyWithin(2, 0, 6);
+alert(ints); // [0, 1, 0, 1, 2, 3, 4, 5, 8, 9]
+reset();
 
+// 支持负索引值，与 fill() 相对于数组末尾计算正向索引的过程是一样的
+ints.copyWithin(-4, -7, -3);
+alert(ints); // [0, 1, 2, 3, 4, 5, 3, 4, 5, 6]
+```
 
+copyWithin() 静默忽略超出数组边界、零长度及方向相反的索引范围：
 
+```javascript
+let ints, reset = () => ints = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+reset();
 
+// 索引过低，忽略
+ints.copyWithin(1, -15, -12);
+alert(ints); // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+reset();
 
+// 索引过高，忽略
+ints.copyWithin(1, 12, 15);
+alert(ints); // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+reset();
 
+// 索引反向，忽略
+ints.copyWithin(2, 4, 2);
+alert(ints); // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
+// 索引部分可用，复制、填充可用部分
+ints.copyWithin(4, 7, 10);
+alert(ints); // [0, 1, 2, 3, 7, 8, 9, 7, 8, 9]
+```
 
+<br>
 
+## 7. 扩展运算符
 
+使用扩展运算符可以将数组的元素逐个展开，从而更容易将元素从一个数组合并、复制或插入到另一个数组中。使用扩展运算符，可以将两个或多个数组合并为一个数组：
 
+```javascript
+let array1 = [1, 2, 3];
+let array2 = [4, 5, 6];
 
+let mergedArray = [...array1, ...array2];
+console.log(mergedArray); // [1, 2, 3, 4, 5, 6]
+```
 
+扩展运算符也可用于创建数组的浅拷贝：
 
+```javascript
+let originalArray = [1, 2, 3];
+let copiedArray = [...originalArray];
 
+console.log(copiedArray); // [1, 2, 3]
+```
 
+扩展操作符的灵活语法支持复杂的数组操作。例如，可以混合使用切片和扩展构造交错数组：
 
+```javascript
+let array1 = [1, 2, 4];
+let array2 = [3];
 
+let combinedArray = [...array1.slice(0, 2), ...array2, ...array1.slice(2)];
+console.log(combinedArray); // [1, 2, 3, 4]
+```
 
+<br>
 
+## 8. 剩余操作符
 
+剩余操作符用于将数组的剩余元素收集到一个新数组中，通常用于函数参数或解构赋值。
 
+下面是使用剩余操作符将未知数量的函数参数收集到数组中的例子：
 
+```javascript
+function sum(...numbers) {
+    return numbers.reduce((total, num) => total + num, 0);
+}
 
+console.log(sum(1, 2, 3, 4, 5)); // 15
+```
 
+剩余操作符也可用于解构赋值，以收集剩余的元素数组：
 
+```javascript
+let [first, second, ...reset] = [1, 2, 3, 4, 5];
 
+console.log(first); // 1
+console.log(second); // 2
+console.log(rest); // [3, 4, 5]
+```
 
+<br>
 
+## 9. 转换方法
 
+### toLocaleString()
 
+#### 返回值
 
+一个字符串，表示数组中的所有元素。
 
+### toString()
 
+#### 返回值
 
+一个表示数组元素的字符串。
 
+### join()
 
+#### 参数
 
+- `separator` 可选
 
+  指定一个字符串来分隔数组的每个元素。如果需要，将分隔符转换为字符串。如果省略，数组元素用逗号（`,`）分隔。如果 `separator` 是空字符串（`""`），则所有元素之间都没有任何字符。
 
+#### 返回值
 
+一个所有数组元素连接的字符串。如果 `arr.length` 为 `0`，则返回空字符串。
 
+#### 描述
 
+所有数组元素被转换成字符串并连接到一个字符串中。如果一个元素是 `undefined` 或 `null`，它将被转换为空字符串，而不是字符串 `"undefined"` 或 `"null"`。
 
+`Array.prototype.toString()`会在内部访问 `join` 方法，不带参数。覆盖一个数组实例的 `join` 也将覆盖它的 `toString` 行为。
 
+当在稀疏数组上使用时，`join()` 方法迭代空槽，就像它们的值为 `undefined` 一样。
 
+`join()` 方法是通用的。它只期望 `this` 值具有 `length` 属性和整数键属性。
 
+### array.valueOf()
 
+#### 返回值
 
+返回数组对象本身，与直接引用数组相同。
 
+#### 特点
 
+1. 返回数组本身 ： `valueOf()` 方法返回的是数组对象本身，而不是数组的副本
+2. 很少直接使用 ：通常不需要显式调用此方法，JavaScript 引擎会在需要时自动调用
+3. 类型转换 ：当数组需要转换为原始值时会被调用
 
+前面提到过，所有对象都有 toLocaleString()、toString() 和 valueOf() 方法，其中 valueOf() 返回的还是数组本身。而 toString() 返回由数组中每个值得等效字符串拼接而成得一个逗号分隔的字符串。也就是说，对数组的每个值都会调用 toString() 方法，以得到最终的字符串。来看下面的例子：
 
+```javascript
+let colors = ["red", "blue", "green"]; // 创建一个包含 3 个字符串的数组
+alert(colors.toString()); // red,blue,green
+alert(colors.valueOf()); // red,blue,green
+alert(colors); // red,blue,green
+```
 
+首先是被显式调用的 toString() 和 valueOf() 方法，它们分别返回了数组的字符串表示，即将所有字符串自组合起来，以逗号分隔。最后一行代码直接用 alert() 显示数组，因为 alert() 期待字符串，所以会在后台调用数组的 toString() 方法，从而得到跟前面一样的结果。
 
+toLocaleString() 方法也可能返回跟 toString() 和 valueOf() 相同的结果，但也不一定。在调用数组的 toLocaleString() 方法时，会得到一个逗号分隔的数组值得字符串。与另外两个方法唯一的区别是，为了得到最终的字符串，它会调用数组每个值的 toLocaleString() 方法，而不是 toString() 方法。看下面的例子：
 
+```javascript
+let person1 = {
+    toLocaleString() {
+        return "Matthew";
+    },
+    
+    toString() {
+        return "Matt";
+    }
+};
 
+let person2 = {
+    toLocaleString() {
+        return "Grigorios";
+    },
+    
+    toString() {
+        return "Greg";
+    }
+};
 
+let people = [person1, person2];
+alert(people); // Matt,Greg
+alert(people.toString()); // Matt,Greg
+alert(people.toLocaleString()); // Nikelaos,Grigories
+```
 
+这里定义了两个对象 person1 和 person2，它们都定义了 toString() 和 toLocaleString() 方法，而且返回不同的值。然后又创建了一个包含这两个对象的数组 people。在将数组传给 alert() 时，输出的是 "Matt,Greg"，这是因为会在数组每一项上调用 toString() 方法（与下一行显式调用 toString() 方法结果一样）。而在调用数组的 toLocaleString() 方法时，结果变成了 "Mattew,Grigorios"，这是因为调用了数组每一项的 toLocaleString() 方法。
 
+继承的方法 toLocaleString() 以及 toString() 都返回数组的逗号分隔的字符串。如果想使用不同的分隔符，则可以使用 join() 方法。join() 方法接受一个参数，即字符串分隔符，返回包含所有项的字符串。来看下面的例子：
 
+```javascript
+let colors = ["red", "green", "blue"];
+alert(colors.join(",")); // red,green,blue
+alert(colors.join("||")); // red||green||blue
+```
 
+这里是 colors 数组上调用了 join() 方法，得到了与调用 toString() 方法相同的结果。传入逗号，结果就是逗号分隔的字符串。最后一行给 join() 传入了双竖线，得到了字符串 "red||green||blue"，如果不给 join() 传入任何参数，或者传入 undefined，则仍然使用逗号作为分隔符。
 
+>注意
+>
+>如果数组中某一项是 null 或 undefined，则在 join()、toLocaleString()、toString() 和 valueOf() 返回的结果中会以空字符串表示。
 
+<br>
 
+## 10. 栈方法
 
+### push()
 
+### pop()
 
+ECMAScript 给数组提供几个方法，让它看起来是另外一种数据结构。数组对象可以像栈一样，也就是一种限制插入和删除项的数据结构。栈式一种后进先出的结构，也就是最近添加的项先被删除。数据项的插入（成为推入）和删除（成为弹出）只在栈的一个地方发生，即栈顶。ECMAScript 数组提供了 push() 和 pop() 方法，以实现类似栈的行为。
 
+push() 方法接收任意数量的参数，并将它们添加到数组的末尾，返回数组的最新长度。pop() 方法则用于删除数组的最后一项，同时减少数组的 length 只，返回被删除的项。来看下面的例子：
 
+```javascript
+let colors = new Array(); // 创建一个数组
+let count = colors.push("red", "green"); // 推入两项
+alert(count); // 2
 
+count = colors.push("black"); // 再推入一项
+alert(count); // 3
 
+let item = colors.pop(); // 取得最后一项
+alert(item); // black
+alert(colors.length); // 2
+```
 
+这里创建一个当作栈来使用的数组（注意不需要任何额外的代码，push() 和 pop() 都是数组的默认方法）。首先，使用 push() 方法把两个字符串推入数组末尾，将结果保存在变量 count 中（结果为 2）。然后，再推入另一个值，再把结果保存在 count 中。因为现在数组中有 3 个元素，所以 push() 返回 3。在调用 pop() 时，会返回数组的最后一项，即字符串 "black"。此时数组还有两个元素。
 
+栈方法可以与数组的其他任何方法一起使用，如下例所示：
 
+```javascript
+let colors = ["red", "blue"];
+colors.push("brown"); // 再添加一项
+colors[3] = "black"; // 添加一项
+alert(colors.length); // 4
 
+let item = colors.pop(); // 取得最后一项
+alert(item); // black
+```
 
+这里先初始化了包含两个字符串的数组，然后通过 push() 添加了第三个值，第四个值是通过直接在位置 3 上赋值添加的。调用 pop() 时，返回了字符串 "black"，也就是最后添加到数组的字符串。
 
+<br>
 
+## 11. 队列方法
 
+### shift()
 
+### unshift()
 
+就像栈是以 LIFO 形式限制访问的数据结构一样，队列以先进先出（FIFO）形式限制访问。队列在列表末尾添加数据，但从列表开头获取数据。因为有了在数据末尾添加数据的 push() 方法，所以要模拟队列就差一个从数组开头取得数据的方法了。这个数组方法叫 shift()，它会删除数组的第一项并返回它，然后数组长度减 1。使用 shift() 和 push()，可以把数组当成队列来使用：
 
+```javascript
+let colors = new Array(); // 创建一个数组
+let count = colors.push("red", "green"); // 推入两项
+alert(count); // 2
 
+count = colors.push("black"); // 再推入一项
+alert(count); // 3
 
+let item = colors.shift(); // 取得第一项
+alert(item); // red
+alert(colors.length); // 2
+```
 
+这个例子创建了一个数组并用 push() 方法推入三个值。加粗的那行代码使用 shift() 方法取得了数组的第一项，即 "red"。删除这一项之后，"green" 成为第一个元素，"black" 成为第二个元素，数组此时就包含两项。
 
+ECMAScript 也为数组提供了 unshift() 方法。顾名思义，unshift() 就是执行跟 shift() 相反的操作：在数组开头添加任意多个值，然后返回新的数组长度。通过使用 unshift() 和 pop()，可以在相反方向上模拟队列，即在数组开头添加新数组，在数组末尾取得数据，如下例所示：
 
+```javascript
+let colors = new Array(); // 创建一个数组
+let count = clors.unshift("red", "green"); // 从数组开头推入两项
+alert(count); // 2
 
+count = colors.unshift("black"); // 再推入一项
+alert(count); // 3
 
+let item = colors.pop(); // 取得最后一项
+alert(item); // green
+alert(colors.length); // 2
+```
 
+这里，先创建一个数组，再通过 unshift() 填充数组。首先，给数组添加 "red" 和 "green"，再添加 "black"，得到 ["black", "red", "green"]。调用 pop() 时，删除最后一项 "green" 并返回它。
 
+<br>
 
+## 12. 反转与排序方法
 
+### reverse()
 
+### sort()
 
+数组有两个方法可以用来对元素进行排序：reverse() 和 sort()。顾名思义，reverse() 方法就是将数组元素反向排列。比如：
 
+```javascript
+let values = [1, 2, 3, 4, 5];
+values.reverse();
+alert(values); // 5,4,3,2,1
+```
 
+这里，数组 values 的初始状态为 [1,2,3,4,5]。通过调用 reverse() 反向排序，得到了 [5,4,3,2,1]。这个方法很直观，但不够灵活，所以才有了 sort() 方法。
 
+默认情况下，sort() 会按照升序重新排列数组元素，即最小的值在前面，最大的值在后面。为此，sort() 会在每一项上调用 String() 转型函数，然后比较字符串来决定顺序。即使数组的元素都是数值，也会先把数组转换为字符串再比较、排序。比如：
+
+```javascript
+let values = [0, 1, 5, 10, 15];
+values.sort();
+alert(values); // 0,1,10,15,5
+```
+
+一开始数组中数值的顺序是正确的，但调用 sort() 会按照这些数值的字符串形式重新排序。因此，即使 5 小于 10，但字符串 "10" 在字符串 "5" 的前头，所以 10 还是会排到 5 前面。很明显，这在多数情况下都不是最合适的。为此，sort() 方法可以接收一个比较函数，用于判断哪个值应该排在前面。
+
+比较函数接收两个参数，如果第一个参数应该排在第二个参数前面，就返回负值。如果两个参数相等，就返回 0。如果第一个参数应该排在第二个参数后面，就返回正值。下面是使用简单比较函数的一个例子：
+
+```javascript
+function compare(value1, value2) {
+    if (value1 < value2) {
+        return -1;
+    } else if (value1 > value2) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+```
+
+这个比较函数可以适用于大多数数据类型，可以把它当作参数传给 sort() 方法，如下所示：
+
+```javascript
+let values = [0, 1, 5, 10, 15];
+values.sort(compare);
+alert(values); // 0, 1, 5, 10, 15
+```
+
+在给 sort() 方法传入比较函数后，数组中的数值在排序后保持了正确的顺序。当然，比较函数也可以产生降序效果，只要把返回值交换一下即可：
+
+```javascript
+function compare(value1, value2) {
+    if (value1 < value2) {
+        return 1;
+    } else if (value1 > value2) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+let values = [0, 1, 5, 10, 15];
+values.sort(compare);
+alert(values); // 15, 10, 5, 1, 0
+```
+
+此外，这个比较函数还可简写为一个箭头函数：
+
+```javascript
+let values = [0, 1, 5, 10, 15];
+values.sort((a, b) => a < b ? 1 : a > b ? -1 : 0);
+alert(values); // 15,10,5,1,0
+```
+
+在这个修改版函数中，如果第一个值应该排在第二个值后面则返回 1，如果第一个值应该排在第二个值前面则返回 -1。交换这两个返回值之后，较大的值就会排在前头，数组就会按照降序排序。当然，如果只是想反转数组的顺序，reverse() 更简单也更快。
+
+>注意
+>
+>reverse() 和 sort() 都返回调用它们的数组的引用。
+
+如果数组的元素是数值，或者是其 valueOf() 方法返回数值的对象（如 Date 对象），这个比较函数还可以写得更简单，因为这时可以直接用第二个值减去第一个值：
+
+```javascript
+function compare(value1, value2) {
+    return value2 - value1;
+}
+```
+
+比较函数就是要返回小于 0、0 和大于 0 的数值，因此减法操作完全可以满足要求。
+
+>注意
+>
+>ECMAScript 的 sort() 方法是稳定的，这意味着未排序列表中的相等项在已排序列表中仍然保持相同的相对顺序。
+
+很多开发人员觉得 ECMAScript 的 sort() 方法不够直观，下表列出了常见的排序模式：
+
+| 排序顺序                     | 代码示例                                                     | 排序结果                             |
+| ---------------------------- | ------------------------------------------------------------ | ------------------------------------ |
+| 数值升序                     | arr.sort((a, b) => a - b)                                    | [1, 2, 3]                            |
+| 数值降序                     | arr.sort((a, b) => b - a)                                    | [3, 2, 1]                            |
+| 字符串升序                   | arr.sort((a, b) => a.localeCompare(b))                       | ["a", "b", "c"]                      |
+| 字符串降序                   | arr.sort((a, b) => b.localeCompare(a))                       | ["c", "b", "a"]                      |
+| 数值属性升序                 | arr.sort((a, b) => a.foo - b.foo)                            | [{foo: 1}, {foo: 2}, {foo: 3}]       |
+| 字符串属性升序               | arr.sort((a, b) => a.foo.localeCompare(b.foo))               | [{foo: "a"}, {foo: "b"}, {foo: "c"}] |
+| 字符串属性升序，空值排在最后 | `arr.sort((a, b) => { if (a.foo === "") return 1; if (b.foo === "") return -1; return a.foo.localeCompare(b.foo);)})` | [{foo: "a"}, {foo: "b"}, {foo: ""}]  |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+就
