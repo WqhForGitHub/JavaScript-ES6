@@ -1527,6 +1527,387 @@ ECMAScript 支持 10 种不同的 ElementType 值（见下表）。
 | Big Int64   | 8    | 64 位有符号整数       | signed long long<br>int64_t    | -2⁶³~2⁶³-1          |
 | BigU Int64  | 8    | 64 位无符号整数       | unsigned long long<br>uint64_t | 0~2⁶⁴-1             |
 
+DataView 为上表中的每种类型都暴露了 get 和 set 方法，这些方法使用 byteOffset（字节偏移量）定位要读取或写入值的位置。类型是可以互换使用的，如下例所示：
+
+```javascript
+// 在内存中分配 2 字节并声明一个 DataView
+const buf = new ArrayBuffer(2);
+const view = new DataView(buf);
+
+// 说明整个缓冲确实所有二进制位都是 0
+// 检查第一个和第二个字符
+alert(view.getInt8(0)); // 0
+alert(view.getInt8(1)); // 0
+// 检查整个缓冲
+alert(view.getInt16(0)); // 0
+
+// 将整个缓冲都设置为 1
+// 255 的二进制表示是 11111111(2^8 - 1)
+view.setUint8(0, 255);
+
+// DataView 会自动将数据转换为特定的 ElementType
+// 255 的十六进制表示是 0xFF
+view.setUint8(1, 0xFF);
+
+// 现在，缓冲里都是 1 了
+// 如果把它当成二补数的有符号整数，则应该是 -1
+alert(view.getInt16(0)); // -1
+```
+
+<br>
+
+### 2. 字节序
+
+前面例子中的缓冲有意回避了字节序的问题。字节序指的是计算系统维护的一种字节顺序的约定。DataView 只支持两种约定：大端字节序和小端字节序。大端字节序也称为网络字节序，意思是最高有效位保存在第一个字节，而最低有效位保存在最后一个字节。小端字节序正好相反，即最低有效位保存在第一个字节，最高有效位保存在最后一个字节。
+
+JavaScript 运行时所在系统的原生字节序决定了如何读取或写入字节，但 DataView 并不遵守这个约定。对一段内存而言，DataView 是一个中立接口，它会遵循你指定的字节序。DataView 的所有 API 方法都以大端字节序作为默认值，但接收一个可选的布尔值参数，设置为 true 即可启用小端字节序。
+
+```javascript
+// 在内存中分配 2 字节并声明一个 DataView
+const buf = new ArrayBuffer(2);
+const view = new DataView(buf);
+
+// 填充缓冲，让第一位和最后一位都是 1
+view.setUint8(0, 0x80); // 设置最左边的位等于 1
+view.setUint8(1, 0x01); // 设置最右边的位等于 1
+
+// 缓冲内容（为方便阅读，人为加了空格）
+// 0x8	0x0	0x0	0x1
+// 1000 0000 0000 0001
+
+// 按大端字节序读取 Uint16
+// 0x80 是高字节，0x80 是低字节
+// 0x8001 = 2^15 + 2^0 = 32768 + 1 = 32769
+alert(view.getUint16(0)); // 32769
+
+// 按小端字节序读取 Uint16
+// 0x01 是高字节，0x01 是低字节
+// 0x0180 = 2^8 + 2^7 = 256 + 128 = 384
+alert(view.getUint16(0, true)); // 384
+
+// 按大端字节序写入 Uint16
+view.setUint16(0, 0x0004);
+
+// 缓冲内容（为方便阅读，人为加了空格）
+// 0x0 0x0 0x0 0x4
+// 0000 0000 0000 0100
+alert(view.getUint8(0)); // 0
+alert(view.getUint8(1)); // 4
+
+// 按小端字节序写入 Uint16
+view.setUint16(0, 0x0002, true);
+
+// 缓冲内容（为方便阅读，人为加了空格）
+alert(view.getUint8(0)); // 2
+alert(view.getUint8(1)); // 0
+```
+
+<br>
+
+# 4. Map
+
+ECMAScript Map 是一种新的集合引用类型，为这门语言带来了真正的键值存储机制。Map 的大多数特性都可以通过 Object 类型实现，但二者之间还是存在一些细微的差异。实践中具体使用哪一个，还是值得细细甄别。
+
+## 1. 基本 API
+
+### size()
+
+### set()
+
+### get()
+
+### has()
+
+### delete()
+
+### clear()
+
+使用 new 关键字和 Map 构造函数可以创建一个空映射：
+
+```javascript
+const m = new Map();
+```
+
+如果想在创建的同时初始化实例，可以给 Map 构造函数传入一个可迭代对象，需要包含键值对数组。可迭代对象中的每个键值对都会按照迭代顺序插入到新映射实例中：
+
+```javascript
+// 使用嵌套数组初始化映射
+const m1 = new Map([
+    ["key1", "val1"],
+    ["key2", "val2"],
+    ["key3", "val3"]
+]);
+alert(m1.size); // 3
+
+// 使用自定义迭代器
+const m2 = new Map({
+    [Symbol.iterator]: function*() {
+        yield ["key1", "val1"];
+        yield ["key2", "val2"];
+        yield ["key3", "val3"];
+    }
+});
+alert(m2.size); // 3
+
+// 映射期待值为键值对，无论是否提供
+const m3 = new Map([[]]);
+alert(m3.has(undefined)); // true
+alert(m3.get(undefined)); // undefined
+```
+
+初始化之后，可以使用 set() 方法再添加键值对。另外，可以使用 get() 和 has() 进行查询，可以通过 size 属性获取映射中的键值对的数量，还可以使用 delete() 和 clear() 删除值。
+
+```javascript
+const m = new Map();
+
+alert(m.has("firstName")); // false
+alert(m.get("firstName")); // undefined
+alert(m.size); // 0
+
+m.set("firstName", "Matt").set("lastName", "Frisbie");
+
+alert(m.has("firstName")); // true
+alert(m.get("firstName")); // Matt
+alert(m.size); // 2
+
+m.delete("firstName"); // 只删除着一个键值对
+
+alert(m.has("firstName")); // false
+alert(m.has("lastName")); // false
+alert(m.size); // 1
+
+m.clear(); // 清除这个映射实例中的所有键值对
+
+alert(m.has("firstName")); // false
+alert(m.has("lastName")); // false
+alert(m.size); // 0
+```
+
+set() 方法返回映射实例，因此可以把多个操作连缀起来，包括初始化声明：
+
+```javascript
+const m = new Map().set("key1", "val1");
+
+m.set("key2", "val2").set("key3", "val3");
+
+alert(m.size); // 3
+```
+
+与 Object 只能使用数值、字符串或符号作为键不同，Map 可以使用任何 JavaScript 数据类型作为键。Map 内部使用 SameValueZero 比较操作（ECMAScript 规范内部定义，语言中不能使用），基本上相当于使用严格对象相等的标准来检查键的匹配性。与 Object 类似，映射的值是没有限制的。
+
+```javascript
+const m = new Map();
+
+const functionKey = function() {};
+const symbolKey = Symbol();
+const objectKey = new Object();
+
+m.set(functionKey, "functionValue");
+m.set(symbolKey, "symbolValue");
+m.set(objectKey, "objectValue");
+
+alert(m.get(functionKey)); // functionValue
+alert(m.get(symbolKey)); // symbolValue
+alert(m.get(objectKey)); // objectValue
+
+// SameValueZero 比较意味着独立实例不冲突
+alert(m.get(function() {})); // undefined
+```
+
+与严格相等一样，在映射中用作键和值的对象及其他集合类型，在自己的内容或属性被修改时仍然保持不变：
+
+```javascript
+const m = new Map();
+
+const objKey = {},
+      objVal = {},
+      arrkey = [],
+      arrVal = [];
+
+m.set(objKey. objVal);
+m.set(arrKey, arrVal);
+
+objKey.foo = "foo";
+objVal.bar = "bar";
+arrkey.push("foo");
+arrVal.push("bar");
+
+console.log(m.get(objKey)); // { bar: "bar" }
+console.log(m.get(arrKey)); // ["bar"]
+```
+
+SameValueZero 比较也可能导致意想不到的冲突：
+
+```javascript
+const m = new Map();
+
+const a = 0/"", // NaN
+      b = 0/"", // NaN
+      pz = +0,
+      nz = -0;
+
+alert(a === b); // false
+alert(pz === nz); // true
+
+m.set(a, "foo");
+m.set(pz, "bar");
+
+alert(m.get(b)); // foo
+alert(m.get(nz)); // bar
+```
+
+>注意
+>
+>关于 SameValueZero 和 ECMAScript 的相等性比较，可以参考 MDN 文档中的文章 "Equality Comparisons and Sameness"。
+
+<br>
+
+## 2. 顺序与迭代
+
+### entries()
+
+### keys()
+
+### values()
+
+与 Object 类型的一个主要差异是，Map 实例会维护键值对的插入顺序，因此可以根据插入顺序执行迭代操作。
+
+映射实例可以提供一个迭代器，这个迭代器能以插入顺序生成 [key, value] 形式的数组。可以通过 entries() 方法（或者 Symbol.iterator 属性，它引用 entries()）取得这个迭代器：
+
+```javascript
+const m = new Map([
+    ["key1", "val1"],
+    ["key2", "val2"],
+    ["key3", "val3"]
+]);
+
+alert(m.entries() === m[Symbol.iterator]); // true
++
+for (let pair of m.entries()) {
+    alert(pair);
+}
+// [key1, val1]
+// [key2, val2]
+// [key3, val3]
+
+for (let pair of m[Symbol.iterator]()) {
+    alert(pair);
+}
+// [key1, val1]
+// [key2, val2]
+// [key3, val3]
+```
+
+因为 entries() 是默认迭代器，所以可以直接对映射实例使用扩展操作，把映射转换为数组：
+
+```javascript
+const m = new Map([
+    ["key1", "val1"],
+    ["key2", "val2"],
+    ["key3", "val3"]
+]);
+
+console.log([...m]); // [[key1, val1], [key2, val2], [key3, val3]]
+```
+
+如果不使用迭代器，而是使用回调方式，则可以回调用映射的 forEach(callback, opt_thisArg) 方法并传入回调，依次迭代每个键值对。传入的回调接收可选的第二个参数，这个参数用于重写回调内部 this 的值：
+
+```javascript
+const m = new Map([
+    ["key1", "val1"],
+    ["key2", "val2"],
+    ["key3", "val3"]
+]);
+
+m.forEach((val, key) => alert(`${key} -> ${val}`));
+// key1 -> val1
+// key2 -> val2
+// key3 -> val3
+```
+
+keys() 和 values() 分别返回以插入顺序生成键和值的迭代器：
+
+```javascript
+const m = new Map([
+    ["key1", "val1"],
+    ["key2", "val2"],
+    ["key3", "val3"]
+]);
+
+for (let key of m.keys()) {
+    alert(key);
+}
+// key1
+// key2
+// key3
+
+for (let key of m.values()) {
+    alert(key);
+}
+// value1
+// value2
+// value3
+```
+
+键和值在迭代器遍历时是可以修改的，但映射内部的引用则无法修改。当然，这并妨碍修改作为键或值的对象内部的属性，因为这样并不影响它们在映射实例中的标识：
+
+```javascript
+const m1 = new Map([
+    ["key1", "val1"]
+]);
+
+// 作为键的字符串原始值是不能修改的
+for (let key of m1.keys()) {
+    key = "newKey";
+    alert(key); // newKey
+    alert(m1.get("key1")); // val1
+}
+
+const keyObj = { id: 1 };
+
+const m = new Map([
+    [keyObj, "val1"]
+]);
+
+// 修改了作为键的对象的属性，但对象在映射内部仍然引用相同的值
+for (let key of m.keys()) {
+    key.id = "newKey";
+    alert(key); // {  id: "newKey" }
+    alert(m.get(keyObj)); // val1
+}
+alert(keyObj); // { id: "newKey" }
+```
+
+<br>
+
+## 3. 选择 Object 还是 Map
+
+对象和映射存在显著的区别，了解这些才能做出正确的选择。
+
+### 1. 键
+
+Object 类型只能使用整数、字符串或符号作为键。Map 可以使用任何类型作为键。
+
+### 2. 内存占用
+
+Object 和 Map 的工程级实现在不同浏览器间存在明显差异，但存储单个键值对所占用的内存数量都会随键的数量线性增加。批量添加或删除键值对取决于各浏览器对该类型内存分配的工程实现。不同浏览器的情况不同，但给定固定大小的内存，Map 大约可以比 Object 多存储 50% 的键值对。
+
+### 3. 插入性能
+
+向 Object 和 Map 中插入新键值对的消耗大致相当，不过插入 Map 在所有浏览器中一般会稍微快一点儿。对这两个类型来说，插入时间并不会随着既有键值对数量的增加而线性增加。如果代码涉及大量插入操作，那么显然 Map 的性能更佳。
+
+### 4. 查找速度
+
+与插入不同，从大型 Object 和 Map 中查找键值对的性能差异极小，但如果只包含少量键值对，则 Object 有时候速度更快。在把 Object 当成数组使用的情况下（比如使用连续整数作为属性），浏览器引擎可以进行优化，在内存中使用更高效的布局。这对 Map 来说是不可能的。对这两个类型而言，查找时间不会随着键值对数量增加而线性增加。如果代码涉及大量查找操作，那么某些情况下可能选择 Object 更好一些。
+
+### 5. 删除性能
+
+使用 delete 删除 Object 属性的性能一直以来饱受诟病，目前在很多浏览器中仍然如此。为此，出现了一些伪删除对象属性的操作，包括把属性值设置为 undefined 或 null。但很多时候，这都是一种讨厌的或不适宜的折中。而对大多数浏览器引擎来说，Map 的 delete() 操作都比插入和查找更快。如果代码涉及大量删除操作，那么毫无疑问应该选择 Map。
+
+-
+
+
+
 
 
 
