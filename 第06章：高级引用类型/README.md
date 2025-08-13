@@ -1610,7 +1610,7 @@ ECMAScript Map 是一种新的集合引用类型，为这门语言带来了真�
 
 ## 1. 基本 API
 
-### size()
+### size
 
 ### set()
 
@@ -1904,60 +1904,724 @@ Object 和 Map 的工程级实现在不同浏览器间存在明显差异，但�
 
 使用 delete 删除 Object 属性的性能一直以来饱受诟病，目前在很多浏览器中仍然如此。为此，出现了一些伪删除对象属性的操作，包括把属性值设置为 undefined 或 null。但很多时候，这都是一种讨厌的或不适宜的折中。而对大多数浏览器引擎来说，Map 的 delete() 操作都比插入和查找更快。如果代码涉及大量删除操作，那么毫无疑问应该选择 Map。
 
--
+<br>
 
+# 5. Set
 
+Set 作为一种新的引用类型为这门语言带来了集合数据结构。Set 在很多方面都像是加强的 Map，这是因为它们的大多数 API 和行为是共有的。
 
+## 1. 基本 API
 
+使用 new 关键字和 Set 构造函数可以创建一个空集合：
 
+```javascript
+const m = new Set();
+```
 
+如果想在创建的同时初始化实例，则可以给 Set 构造函数传入一个可迭代对象，其中需要包含插入到新集合实例中的元素：
 
+```javascript
+// 使用数组初始化集合
+const s1 = new Set(["val1", "val2", "val3"]);
+alert(s1.size); // 3
 
+// 使用自定义迭代器初始化集合
+const s2 = new Set({
+    [Symbol.iterator]: function*() {
+        yield "val1";
+        yield "val2";
+        yield "val3";
+    }
+});
+alert(s2.size); // 3
+```
 
+### size
 
+### add()
 
+### has()
 
+### delete()
 
+### clear()
 
+初始化之后，可以使用 add() 增加值，使用 has() 查询，通过 size 取得元素数量，以及使用 delete() 和 clear() 删除元素：
 
+```javascript
+const s = new Set();
 
+alert(s.has("Matt")); // false
+alert(s.size); // 0
 
+s.add("Matt").add("Frisbie");
 
+alert(s.has("Matt")); // true
+alert(s.size); // 2
 
+s.delete("Matt");
 
+alert(s.has("Matt")); // false
+alert(s.has("Frisbie")); // true
+alert(s.size); // 1
 
+s.clear(); // 销毁集合实例中的所有值
 
+alert(s.has("Matt")); // false
+alert(s.has("Frisbie")); // false
+alert(s.size); // 0
+```
 
+add() 返回集合的实例，所以可以将多个添加操作连缀起来，包括初始化：
 
+```javascript
+const s = new Set().add("val1");
 
+s.add("val2").add("val3");
 
+alert(s.size); // 3
+```
 
+与 Map 类似，Set 可以包含任何 JavaScript 数据类型作为值。集合也使用 SameValueZero 操作（ECMAScript 内部定义，无法在语言中使用），基本上相当于使用严格对象相等的标准来检查值的匹配性。
 
+```javascript
+const s = new Set();
 
+const functionVal = function() {};
+const symbolVal = Symbol();
+const objectVal = new Object();
 
+s.add(functionVal);
+s.add(symbolVal);
+s.add(objectVal);
 
+alert(s.has(functionVal)); // true
+alert(s.has(symbolVal)); // true
+alert(s.has(objectVal)); // true
 
+// SameValueZero 检查意味着独立的实例不会冲突
+alert(s.has(function() {})); // false
+```
 
+与严格相等一样，用作值得对象和其他集合类型在自己的内容或属性被修改时也不会改变：
 
+```javascript
+const s = new Set();
 
+const objVal = {},
+      arrVal = [];
 
+s.add(objVal);
+s.add(arrVal);
 
+objVal.bar = "bar";
+arrVal.push("bar");
 
+alert(s.has(objVal)); // true
+alert(s.has(arrVal)); // true
+```
 
+add() 和 delete() 操作是幂等的。delete() 返回一个布尔值，表示集合中是否存在要删除的值：
 
+```javascript
+const s = new Set();
 
+s.add('foo');
+alert(s.size); // 1
+s.add('foo');
+alert(s.size); // 1
 
+// 集合里有这个值
+alert(s.delete('foo')); // true
 
+// 集合里没有这个值
+alert(s.delete('foo')); // false
+```
 
+<br>
 
+## 2. 顺序与迭代
 
+### keys()
 
+### values()
 
+### entries()
 
+Set 会维护值插入时的顺序，因此支持按顺序迭代。
 
+集合实例可以提供一个迭代器，这个迭代器能以插入顺序生成集合内容。可以通过 values() 方法及其别名方法 keys()（或者 Symbol.iterator 属性，它引用 values()）取得这个迭代器：
 
+```javascript
+const s = new Set(["val1", "val2", "val3"]);
 
+alert(s.values === s[Symbol.iterator]); // true
+alert(s.keys === s[Symbol.iterator]); // true
 
+for (let value of s.values()) {
+    alert(value);
+}
+// val1
+// val2
+// val3
+
+for (let value of s[Symbol.iterator]()) {
+    alert(value);
+}
+// val1
+// val2
+// val3
+```
+
+因为 values() 是默认迭代器，所以可以直接对集合实例使用扩展操作，把集合转换为数组：
+
+```javascript
+const s = new Set(["val1", "val2", "val3"]);
+
+console.log([...s]); // ["val1", "val2", "val3"]
+```
+
+集合的 entries() 方法返回一个迭代器，可以按照插入顺序产生包含两个元素的数组，这两个元素是集合中每个值的重复出现：
+
+```javascript
+const s = new Set(["val1", "val2", "val3"]);
+
+for (let pair of s.entries()) {
+    console.log(pair);
+}
+// ["val1", "val1"]
+// ["val2", "val2"]
+// ["val3", "val3"]
+```
+
+如果不使用迭代器，而是使用回调方式，则可以调用集合的 forEach() 方法并传入回调，依次迭代每个键值对。传入的回调接口可选的第二个参数，这个参数用于重写回调内部 this 的值：
+
+```javascript
+const s = new Set(["val1", "val2", "val3"]);
+
+s.forEach((val, dupVal) => alert(`${val} -> ${dupVal}`));
+// val1 => val1
+// val2 -> val2
+// val3 -> val3
+```
+
+修改集合中值的属性不会影响其作为集合值的身份：
+
+```javascript
+const s1 = new Set(["val1"]);
+
+// 字符串原始值作为值不会被修改
+for (let value of s1.values()) {
+    value = "newVal";
+    alert(value); // newVal
+    alert(s1.has("val1")); // true
+}
+
+const valObj = { id: 1 };
+
+const s2 = new Set([valObj]);
+
+// 修改值对象的属性，但对象仍然存在于集合中
+for (let value of s2.entries()) {
+    value.id = "newVal";
+    alert(value); // { id: "newVal" }
+    alert(s2.has(valObj)); // true
+}
+alert(valObj); // { id: "newVal" }
+```
+
+<br>
+
+# 6. 弱引用
+
+JavaScript 是有垃圾回收的语言，也就是说引擎会自动管理内存中对象的分配和回收。当某个对象不再使用时，垃圾收集器就会释放它占用的内存，以便用于其他目的。然而，在某些情况下，我们可能希望保持对某个对象的引用，但又不阻止它被当作垃圾回收。这种引用称为弱引用。弱引用就是不会阻止对象被作为垃圾回收的引用。换句话说，如果指向某个对象的唯一引用是个弱引用，垃圾回收器会释放该对象所占用的内存。
+
+## 1. WeakRef
+
+在 JavaScript 中，通过 WeakRef 类可以创建对象的弱引用。这个构造函数只有一个参数，即弱引用的目标对象：
+
+```javascript
+let obj = { name: "Matt" };
+let weakRef = new WeakRef(obj);
+```
+
+目标对象在实例化之后不能改变。要访问被弱引用的目标对象，使用其 deref() 方法。这个方法返回目标对象，或者在目标对象被当作垃圾回收后返回 undefined。下面的例子展示了在垃圾回收前后我们能看到什么：
+
+```javascript
+let obj = { name: "Matt" };
+let weakRef = new WeakSet(obj);
+
+console.log(weakRef.deref()); // { name: "Matt" }
+obj = null;
+
+// 然后，浏览器将目标对象作为垃圾回收了
+
+// 垃圾回收之后：
+console.log(weakRef.deref()); // undefined
+```
+
+>注意
+>
+>如果你运行前面的例子，不会看到浏览器垃圾回收目标对象。浏览器在执行垃圾回收前会尽可能等待更长时间，而开发工具的控制台也会阻止浏览器执行垃圾回收。
+
+<br>
+
+## 2. FinalizationRegistry
+
+有时候，我们可能hi在某个对象将要被垃圾回收时做一些清理或终结操作。这时候就可以使用 FinalizationRegistry 对象。使用 FinalizationRegistry 可以定义一个回调函数，这个函数将在注册的对象被回收之前执行。注册或注销对象可以使用 register() 和 unregister() 方法。
+
+要注册对象，将对象作为参数传给 register() 方法，另外再传一个持有值（held value），这个值在垃圾回收前将被传给处理函数。下面看个例子：
+
+```javascript
+let obj = { name: "Matt" };
+let finalizationRegistry = new FinalizationRegistry((heldValue) => {
+    console.log(`Cleaning up object: ${heldValue}`);
+});
+
+finalizationRegistry.register(obj, "My held value");
+
+obj = null;
+
+finalizatonRegistry.register(obj, "My held value");
+
+obj = null;
+
+finalizationRegistry.unregister(obj);
+```
+
+// 垃圾回收
+
+// <无输出>
+
+FinalizationRegistry 是一个需要谨慎对待的特性，应该尽可能不用。以下是几个原因。
+
+* JavaScript 中的垃圾回收行为是不能保证的，可能会因引擎及版本而异。
+* 不推荐在关键的逻辑中使用清理回调，因为它们的执行的时机取决于 JavaScript 引擎的实现。
+* 主流实现有可能在程序执行过程中执行清理回调，但可能在相关对象被回收之后很晚。
+* 某些情况下，比如完全停止程序执行，可能导致清理回调完全没有机会执行。
+
+<br>
+
+# 7. WeakMap
+
+弱映射（WeakMap）是一种新的集合引用类型，为这门语言带来了增强的键值对存储机制。WeakMap 是 Map 的兄弟类型，其 API 也是 Map 的子集。WeakMap 中的 weak（弱），描述的是 JavaScript 垃圾回收程序对待弱映射中键的方式。
+
+## 1. 基本 API
+
+### set()
+
+### get()
+
+### has()
+
+### delete()
+
+可以使用 new 关键字实例化一个空的 WeakMap：
+
+```javascript
+const vm = new WeakMap();
+```
+
+弱映射中的键只能是 Object 或者继承自 Object 的类型，尝试使用非对象设置键会抛出 TypeError。值的类型没有限制。
+
+如果想在初始化时填充弱映射，则构造函数可以接收要给可迭代对象，其中需要包含键值对数组。可迭代对象中的每个键值都会按照迭代顺序插入新实例中：
+
+```javascript
+const key1 = { id: 1 },
+      key2 = { id: 2 },
+      key3 = { id: 3 };
+
+// 使用嵌套数组初始化弱映射
+const wm1 = new WeakMap([
+    [key1, "val1"],
+    [key2, "val2"],
+    [key3, "val3"]
+]);
+alert(wm1.get(key1)); // val1
+alert(wm1.get(key2)); // val2
+alert(wm1.get(key3)); // val3
+
+// 初始化是全有或全无的操作
+// 只要有一个键无效就会抛出错误，导致整个初始化失败
+const vm2 = new WeakMap([
+    [key1, "val1"],
+    ["BRADKEY", "val2"],
+    [key3, "val3"]
+]);
+// TypeError: Invalid value used as WeakMap key
+typeof vm2;
+// ReferenceError: wm2 is not defined
+
+// 原始值可以先包装成对象再用作键
+const stringKey = new String("key1");
+const vm3 = new WeakMap([
+    stringKey, "val1"
+]);
+alert(wm3.get(stringKey)); // "val1"
+```
+
+初始化之后可以使用 set() 再添加键值对，可以使用 get() 和 has() 查询，还可以使用 delete() 删除：
+
+```javascript
+const vm = new WeakMap();
+
+const key1 = { id: 1 },
+      key2 = { id: 2 };
+
+alert(wm.has(key1)); // false
+alert(wm.get(key1)); // undefined
+
+wm.set(key1, "Matt").set(key2, "Frisbie");
+
+alert(wm.has(key1)); // true
+alert(wm.get(key1)); // Matt
+
+wm.delete(key1); // 只删除这一个键值对
+
+alert(wm.has(key1)); // false
+alert(wm.has(key2)); // true
+```
+
+set() 方法返回弱映射实例，因此可以把多个操作连缀起来，包括初始化声明：
+
+```javascript
+const key1 = { id: 1 },
+      key2 = { id: 2 },
+      key3 = { id: 3 };
+
+const vm = new WeakMap().set(key1, "val1");
+
+wm.set(key2, "val2").set(key3, "val3");
+
+alert(wm.get(key1)); // val1
+alert(wm.get(key2)); // val2
+alert(wm.get(key3)); // val3
+```
+
+<br>
+
+## 2. 弱键
+
+WeakMap 中 weak 表示弱映射的键是弱弱地拿着的。意思就是，这些键不属于正式的引用，不会阻止垃圾回收。但要注意的是，弱映射中值的引用可不是弱弱地拿着的。只要键存在，键值对就会存在映射中，并被当作值的引用，因此就不会被当作垃圾回收。
+
+来看下面的例子：
+
+```javascript
+const vm = new WeakMap();
+
+wm.set({}, "val");
+```
+
+set() 方法初始化了一个新对象并将它用作一个字符串的键。因为没有指向这个对象的其他引用，所以当这行代码执行完成后，这个对象键就会被当作垃圾回收。然后，这个键值对就从弱映射中消失了，使其成为一个空映射。在这个例子中，因为值也没有被引用，所以这对键值被破环以后，值本身也会成为垃圾回收的目标。
+
+再看一个稍微不同的例子：
+
+```javascript
+const vm = new WeakMap();
+
+const container = {
+    key: {}
+};
+
+wm.set(container.key, "val");
+
+function removeReference() {
+    container.key = null;
+}
+```
+
+这一次，container 对象维护着一个对弱映射键的引用，因此这个对象键不会成为垃圾回收的目标。不过，如果调用了 removeReference()，就会摧毁键对象的最后一个引用，垃圾回收程序就可以把这个键值对清理掉。
+
+<br>
+
+## 3. 不可迭代键
+
+因为 WeakMap 中的键值对任何时候都可能被销毁，所以没必要提供迭代其键值对的能力。当然，也用不着像 clear() 这样一次性销毁所有键值的方法。WeakMap 确实没有这个方法。因为不可能迭代，所以也不可能在不知道对象引用的情况下从弱映射中取得值。即便代码可以访问 WeakMap 实例，也没办法看到其中的内容。
+
+WeakMap 实例之所以限制只能用对象作为键，是为了保证只有通过键对象的引用才能取得值。如果允许原始值，那就没办法区分初始化时使用的字符串字面量和初始化之后使用的一个相等的字符串了。
+
+<br>
+
+## 4. 使用弱映射
+
+因为 WeakMap 实例不会妨碍垃圾回收，所以非常适合保存关联元数据。来看下面这个例子，其中使用了常规的 Map：
+
+```javascript
+const m = new Map();
+
+const loginButton = document.querySelector('#login');
+
+// 给这个节点关联一些元数据
+m.set(loginButton, { disabled: true });
+```
+
+假设在上面的代码执行后，页面被 JavaScript 改变了，原来的登录按钮从 DOM 树种被删掉了。但由于映射中还保存着按钮的引用，所以对应的 DOM 节点仍然会逗留在内存中，除非明确将其从映射中删除或者等到映射本身被销毁。
+
+如果这里使用的是弱映射，如以下代码所示，那么当节点从 DOM 树中被删除后，垃圾回收程序就可以立即释放其内存（假设没有其他地方引用这个对象）：
+
+```javascript
+const vm = new WeakMap();
+
+const loginButton = document.querySelectorAll('#login');
+
+// 给这个节点关联一些元数据
+wm.set(loginButton, { disabled: true });
+```
+
+<br>
+
+# 8. WeakSet
+
+弱集合（WeakSet）是一种新的集合引用类型，为这门语言带来了集合数据结构。WeakSet 是 Set 的兄弟类型，其 API 也是 Set 的子集。WeakSet 中的 weak（弱），描述的是 JavaScript 垃圾回收程序对待弱集合中值的方式。
+
+## 1. 基本 API
+
+### has()
+
+### add()
+
+### delete()
+
+可以使用 new 关键字实例化一个空的 WeakSet：
+
+```javascript
+const ws = new WeakSet();
+```
+
+弱集合中的值只能是 Object 或者继承自 Object 的类型，尝试使用非对象设置值会抛出 TypeError。如果想在初始化时填充弱集合，则构造函数可以接收一个可迭代对象，其中需要包含有效的值。可迭代对象中的每个值都会按照迭代顺序插入到新实例中：
+
+```javascript
+const val1 = { id: 1 },
+      val2 = { id: 2 },
+      val3 = { id: 3 };
+
+// 使用数组初始化弱集合
+const ws1 = new WeakSet([val1, val2, val3]);
+
+alert(ws1.has(val1)); // true
+alert(ws1.has(val2)); // true
+alert(ws1.has(val3)); // true
+
+// 初始化是全有或全无操作
+// 只要有一个值无效就会抛出错误，导致整个初始化失败
+const ws2 = new WeakSet([val1, "BASVAL", val3]);
+// TypeError: Invalid value used in WeakSet
+typeof ws2;
+// ReferenceError: ws2 is not defined
+
+// 原始值可以先包装成对象再用作值
+const stringVal = new String("val1");
+const ws3 = new WeakSet([stringVal]);
+alert(ws3.has(stringVal)); // true
+```
+
+初始化之后可以使用 add() 再添加新值，可以使用 has() 查询，还可以使用 delete() 删除：
+
+```javascript
+const ws = new WeakSet();
+
+const val1 = { id: 1 },
+      val2 = { id: 2 };
+
+alert(ws.has(val1)); // false
+
+ws.add(val1).add(val2);
+
+alert(ws.has(val1)); // true
+alert(ws.has(val2)); // true
+
+ws.delete(val1); // 只删除这一个值
+
+alert(ws.has(val1)); // false
+alert(ws.has(val2)); // true
+```
+
+add() 方法返回弱集合实例，因此可以把多个操作连缀起来，包括初始化声明：
+
+```javascript
+const val1 = { id: 1 },
+      val2 = { id: 2 },
+      val3 = { id：3 };
+
+const ws = new WeakSet().add(val1);
+
+ws.add(val2).add(val3);
+
+alert(ws.has(val1)); // true
+alert(ws.has(val2)); // true
+alert(ws.has(val3)); // true
+```
+
+<br>
+
+## 2. 弱值
+
+WeakSet 中 "weak" 表示弱集合的值是弱弱地拿着的。意思就是，这些值不属于正式的引用，不会阻止垃圾回收。
+
+来看下面的例子：
+
+```javascript
+const ws = new WeakSet();
+
+ws.add({});
+```
+
+add() 方法初始化了一个新对象，并将它用作一个值。因为没有指向这个对象的其他引用，所以当这行代码执行完成后，这个对象就会被当作垃圾回收。然后，这个值就从弱集合中消失了，使其成为一个空集合。
+
+再看一个稍微不同的例子：
+
+```javascript
+const ws = new WeakSet();
+
+const container = {
+    val: {}
+};
+
+ws.add(container.val);
+
+function removeReference() {
+    container.val = null;
+}
+```
+
+这一次，container 对象维护着一个对弱集合值的引用，因此这个对象值不会成为垃圾回收的目标。不过，如果调用了 removeReference()，就会摧毁值对象的最后一个引用，垃圾回收程序就可以把这个值清理掉。
+
+<br>
+
+## 3. 不可迭代值
+
+因为 WeakSet 中的值任何时候都可能被销毁，所以没必要提供迭代其的能力。当然，也用不着像 clear() 这样一次性销毁所有值的方法。WeakSet 确实没有这个方法。因为不可能迭代，所以也不可能在不知道对象引用的情况下从弱集合中取得值。即便代码可以访问 WeakSet 实例，也没办法看到其中的内容。
+
+WeakSet 之所以限制只能用对象作为值，是为了保证只有通过值对象的引用才能取得值。如果允许原始值，那就没办法区分初始化时使用的字符串字面量和初始化之后使用的一个相等的字符串了。
+
+<br>
+
+## 4. 使用弱集合
+
+与 WeakMap 类似，WeakSet 适合在不妨碍垃圾回收的情况下跟踪对象。来看下面的例子，这里使用了一个普通 Set：
+
+```javascript
+const disabledElements = new Set();
+
+const loginButton = document.querySelector('#login');
+
+// 通过加入对应集合，给这个节点打上禁用标签
+disabledElements.add(loginButton);
+```
+
+这样，通过查询元素在不在 disabledElements 中，就可以知道它是不是被禁用了。不过，假如元素从 DOM 树中被删除了，它的引用却仍然保存在 Set 中，因此垃圾回收程序也不能回收它。
+
+为了让垃圾回收程序回收元素的内存，可以在这里使用 WeakSet：
+
+```javascript
+const disabledElements = new WeakSet();
+
+const loginButton = document.querySelector('#login');
+
+// 通过加入对应集合，给这个节点打上禁用标签
+disabledElements.add(loginButton);
+```
+
+这样，只要 WeakSet 中任何元素从 DOM 树中被删除，垃圾回收程序就可以忽略其存在，而立即释放其内存（假设没有其他地方引用这个对象）。
+
+<br>
+
+# 9. 迭代与扩展操作
+
+迭代器和扩展操作符对集合引用类型特别有用。这些新特性让集合引用类型之间相互操作、复制和修改变得异常方便。
+
+>注意
+>
+>第 7 章会更详细地介绍迭代器和生成器。
+
+如本章前面所示，Array、Map、Set 和所有定型数组定义了默认迭代器。这意味着上述所有类型都支持顺序迭代，都可以传入 for-of 循环：
+
+```javascript
+let iterableThings = [
+    Array.of(1, 2),
+    typedArr = Int16Array.of(3, 4),
+    new Map([[5, 6], [7, 8]]),
+    new Set([9, 10])
+];
+
+for (const iterableThing of iterableThings) {
+    for (const x of iterableTing) {
+        console.log(x);
+    }
+}
+// 1
+// 2
+// 3
+// 4
+// [5, 6]
+// [7, 8]
+// 9
+// 10
+```
+
+这也意味着所有这些类型都兼容扩展操作符。扩展操作符在对可迭代对象执行浅复制时特别有用，只需简单的语法就可以复制整个对象：
+
+```javascript
+let arr1 = [1, 2, 3];
+let arr2 = [...arr1];
+
+console.log(arr1); // [1, 2, 3]
+console.log(arr2); // [1, 2, 3]
+console.log(arr1 === arr2); // false
+```
+
+对于期待可迭代对象的构造函数，只要传入一个可迭代对象就可以实现复制：
+
+```javascript
+let map1 = new Map([[1, 2], [3, 4]]);
+let map2 = new Map(map1);
+
+console.log(map1); // Map { 1 => 2, 3 => 4 }
+console.log(map2); // Map { 1 => 2, 3 => 4 }
+```
+
+当然，也可以构建数组的部分元素：
+
+```javascript
+let arr1 = [1, 2, 3];
+let arr2 = [0, ...arr1, 4, 5];
+
+console.log(arr2); // [0, 1, 2, 3, 4, 5]
+```
+
+浅复制意味着只会复制对象引用：
+
+```javascript
+let arr1 = [{}];
+let arr2 = [...arr1];
+
+arr1[0].foo = 'bar';
+console.log(arr2[0]); // { foo: 'bar' }
+```
+
+上面的这些类型都支持多种构建方法，比如 Array.of() 和 Array.from() 静态方法。在与扩展操作符一起使用时，可以方便地实现互操作：
+
+```javascript
+let arr1 = [1, 2, 3];
+
+// 把数组复制到定型数组
+let typedArr1 = Int16Array.of(...arr1);
+let typedArr2 = Int16Array.from(arr1);
+console.log(typedArr1); // Int16Array [1, 2, 3]
+console.log(typedArr2); // Int16Array [1, 2, 3]
+
+// 把数组复制到映射
+let map = new Map(arr1.map(x) => [x, 'val' + x]);
+console.log(map); // Map { 1 => 'val 1', 2 => 'val 2', 3 => 'val 3' }
+
+// 把数组复制到集合
+let set = new Set(typedArr2);
+console.log(set); // Set {1, 2, 3}
+
+// 把集合复制回数组
+let arr2 = [...set];
+console.log(arr2); // [1, 2, 3]
+```
 
 
 
