@@ -141,6 +141,348 @@ console.log(book.edition); // 2
 
 在不支持 Object.defineProperty() 的浏览器中没有办法修改 [[Configurable]] 或 [[Enumerable]]。
 
+<br>
+
+## 2. 访问对象属性
+
+要读取对象属性，可以使用点号或方括号语法。点号是最常见也是最直观的方式，需要先写出对象然后加上点号（.）再写出属性名：
+
+```javascript
+const person = {
+    name: "Alice",
+    age: 30
+};
+
+console.log(person.name); // Alice
+console.log(person.age); // 30
+```
+
+此外，也可以使用方括号，传入字符串形式的属性名：
+
+```javascript
+console.log(person["name"]); // Alice
+console.log(person["age"]); // 30
+```
+
+这两种方式的结果相同，但方括号适合属性名需要动态确定或者包含特殊字符或空格的情形。不过，静态代码分析工具不一定总认为 person.name 和 person["name"] 是一样的，因此推荐使用点号语。
+
+<br>
+
+## 3. 连缀属性
+
+### ?.
+
+在一个对象中嵌套另一个对象在 JavaScript 编程中是司空见惯的。从父对象访问子对象的属性非常简单，只要连续写出属性名即可，这称为属性链。比如下面的例子：
+
+```javascript
+const person = {
+    name: "Alice",
+    address: {
+        city: "Chicago",
+        street: "1060 W Addison St"
+    }
+};
+
+console.log(person.address.city); // Chicago
+console.log(person.address.postalCode); // undefined
+
+console.log(person.address.postalCode.length);
+// TypeError: Cannot read property 'length' of undefined
+```
+
+在这个例子中，通过连缀属性可以轻松访问子对象 address 的属性。这就相当于以下逻辑：
+
+```javascript
+const person = {};
+const address = person.address;
+console.log(address.city); // Chicago
+```
+
+连缀属性非常适合嵌套对象结构完整的情形，但如果某个中间对象不存在就会出问题，就像上面示例最后一行所展示的：抛出了 TypeError。为避免这个问题，需要检查属性链中涉及的每个对象是否存在，结果代码可能会非常冗长：
+
+```javascript
+const person = {};
+if (person.address) {
+    if (person.address.postalCode) {
+        console.log(person.address.postalCode.length);
+    }
+}
+```
+
+为简化这种逻辑，可以使用可选连缀操作符，即在想要访问的属性名后面加上问号（?.）。这样如果属性对应的对象不存在，即访问链中相应部分是 undefined 或 null，则求值就会短路并返回 undefined：
+
+```javascript
+console.log(person.address?.postalCode?.length); // undefined
+
+// 只要可选连缀的属性发生短路
+// 就不再对操作符右侧表达式求值
+console.log(person.address?.postalCode?.foo.bar.baz); // undefined
+```
+
+要注意，可选连缀操作符只会短路属性链中特定的部分：
+
+```javascript
+console.log(person.address.postalCode?.length); // undefined
+
+console.log(person.address?.postalCode.length); // TypeError: Cannot read property 'length' of undefined
+```
+
+<br>
+
+## 4. 对象静态方法
+
+Object 类提供了非常多的静态方法，用于检视和操作对象。因为 JavaScript 中所有的非原始值都继承 Object，所以这些方法可以用于任何对象。下表总结了这些方法并简单描述了每个方法的行为。
+
+| 方法                               | 行为                                                         |
+| ---------------------------------- | ------------------------------------------------------------ |
+| Object.assign()                    | 从一个或多个源对象向目标对象复制所有可枚举属性的值           |
+| Object.create()                    | 基于指定的原型对象和属性创建新对象                           |
+| Object.defineProperties()          | 使用多个属性描述符定义或修改对象的多个属性                   |
+| Object.defineProperty()            | 使用属性描述符定义或修改对象的属性                           |
+| Object.entries()                   | 返回对象自有可枚举字符串属性的键值对数组                     |
+| Object\.freeze()                   | 冻结对象，防止再添加新属性及修改或删除已有属性               |
+| Object.fromEntries()               | 基于传入的键值对可迭代对象（如数组或映射）返回一个新对象     |
+| Object.getOwnPropertyDescriptor()  | 返回描述对象上指定属性配置的描述符                           |
+| Object.getOwnPropertyDescriptors() | 返回描述对象上多个指定属性配置的描述符对象                   |
+| Object.getOwnPropertyNames()       | 返回对象所有自有属性名（包括不可枚举属性）的数组             |
+| Object.getOwnPropertySymbols()     | 返回对象所有自有符号属性（包括不可枚举属性）的数组           |
+| Object.getPrototypeOf()            | 返回指定对象的原型（即内部的 [[Proptotype]]属性）            |
+| Object.hasOwn()                    | 确定对象是否拥有指定的自有属性                               |
+| Object.is()                        | 确定两个值是不是同一个值，考虑边界情形 NaN 和 -0             |
+| Object.isExtensible()              | 确定对象是否可以扩展，即是否可以添加新属性                   |
+| Object.isFrozen()                  | 确定对象是否被冻结，即是否不可扩展且所有属性都不可配置       |
+| Object.isSealed()                  | 确定对象是否被封存，即是否不可扩展且所有属性都不可配置       |
+| Object.keys()                      | 返回对象自有可枚举属性名的数组                               |
+| Object.preventExtensions()         | 将对象设置为不可扩展，即不能添加新属性                       |
+| Object.seal()                      | 封存对象，防止再添加新属性及删除或配置已有属性               |
+| Object.setPrototypeOf()            | 将对象的原型（即内部的 [[Prototype]] 属性）设置为指定对象或 null |
+| Object.values()                    | 返回对象自有可枚举属性值的数组                               |
+
+<br>
+
+## 5. 控制对象是否可修改
+
+Object 提供了控制和操作对象可修改能力的静态方法。开发者可以冻结对象，让对象完全不可修改，决定对象是否可以被添加新属性，也可以封存对象以防止添加和删除属性，但允许修改属性。
+
+### Object.freeze()
+
+### Object.isFrozen()
+
+### Object.seal()
+
+### Object.isSealed()
+
+### Object.preventExtensions()
+
+### Object.isExtensible()
+
+### 1. 冻结对象
+
+Object.freeze() 方法主要用于冻结对象，把对象变成完全不可修改的状态。被冻结对象变得不能扩展，其全部已有属性变得不能配置。对象被冻结后，不能再添加新属性，已有属性也不能被修改或删除，对象的原型也不能改变。对冻结对象的任何修改操作都会导致错误或失败。可以使用 Object.isFrozen() 检测对象是否被冻结。
+
+```javascript
+const person = {
+    name: "Alice",
+    age: 30
+};
+
+console.log(Object.isFrozen(person)); // false
+Object.freeze(person);
+console.log(Object.isFrozen(person)); // true
+
+person.name = "Bob";
+// 非严格模式下会被忽略
+// 严格模式下会抛出错误
+```
+
+冻结不能撤销，是一个永久性不可逆操作。
+
+>注意
+>
+>冻结仅限于被冻结对象的直接属性。如果其中某个属性的值是对象，则该对象的属性仍然是可以修改的。要想深度冻结嵌套的对象，必须递归冻结其所有非原始值属性。
+
+<br>
+
+### 2. 封存对象
+
+Object.seal() 方法提供了封存对象的途径，让对象变得不可扩展，并将其全部已有属性标记为不可配置。封存对象可以阻止对属性的添加或删除，同时仍然允许修改已有属性的值。对象被封存后，不能再添加新属性，但仍然可以修改已有属性的值。可以使用 Object.isSealed() 检测对象是否被封存。
+
+```javascript
+const person = {
+    name: "Alice",
+    age: 30
+};
+
+console.log(Object.isSealed(person)); // false
+Object.seal(person);
+console.log(Object.isSealed(person)); // true
+
+person.name = "Bob"; // 封存后仍然允许修改已有属性
+person.height = "6 feet";
+// 非严格模式下会被忽略
+// 严格模式下会抛出错误
+
+delete person.age;
+// 非严格模式下会被忽略
+// 严格模式下会抛出错误
+```
+
+封存对象不会限制对已有属性值的修改，但会阻止添加新属性和删除已有的属性。相对于使用 Object.freeze() 冻结对象，封存相对宽松一些。
+
+<br>
+
+### 3. 控制可扩展能力
+
+Object.preventExtensions() 方法用于将对象设置为不可扩展，也就是不能添加新属性。默认情况下，JavaScript 对象都是可以扩展的，也就是可以添加新属性。可以使用 Object.isExtensible() 方法检测对象是否可扩展。
+
+```javascript
+const person = {
+    name: "Alice",
+    age: 30
+};
+
+console.log(Object.isExtensible(person)); // true
+Object.preventExtensions(person);
+console.log(Object.isExtensible(person)); // false
+
+person.name = "Bob"; // 仍然允许修改已有的属性
+person.gender = "Female";
+// 非严格模式下会被忽略
+// 严格模式下会抛出错误
+
+delete person.age;
+// 非严格模式下会被忽略
+// 严格模式下会抛出错误i+
+```
+
+Object.preventExtensions() 方法可以让对象变得不可扩展，阻止添加新属性，但仍然允许修改和删除已有的属性。相较于 Object.seal()，它不会讲已有属性标记为不可配置，因此还允许修改已有属性。
+
+<br>
+
+## 6. 定义多个属性
+
+### Object.defineProperties()
+
+要在一个对象上同时定义多个属性，可以使用 ECMAScript 提供的 Object.defineProperties() 方法。这个方法可以通过多个描述符一次性定义多个属性。它接收两个参数：要为之添加或修改属性的对象和另一个描述符对象，其属性与要添加或修改的属性一一对应。比如：
+
+```javascript
+let book = {};
+Object.defineProperties(book, {
+    year_: {
+        value: 2023
+    },
+    edition: {
+        value: 1
+    },
+    year: {
+        get() {
+            return this.year_
+        },
+        set(newValue) {
+            if (newValue > 2023) {
+                this.year_ = newValue;
+                this.edition += newValue - 2023;
+            }
+        }
+    }
+})
+```
+
+这段代码在 book 对象上定义了两个数据属性 year_ 和 edition，还定义了一个访问器属性 year。最终的对象跟上一节示例中的一样，并且数据属性的 configurable、enumerable 和 writable 特性值都是 false。
+
+<br>
+
+## 7. 读取属性的特性
+
+### Object.getOwnPropertyDescriptor()
+
+### Object.getOwnPropertyDescriptors()
+
+使用 Object.getOwnPropertyDescriptor() 方法可以取得指定属性的属性描述符。这个方法接收两个参数：属性所在的对象和要取得其描述符的属性名。返回值是一个对象，对于访问器属性包含 configurable、enumerable、get 和 set 属性，对于数据属性包含 configurable、enumerable、writable 和 value 属性。比如：
+
+```javascript
+let book = {};
+Object.defineProperties(book, {
+    year_: {
+        value: 2023
+    },
+    edition: {
+        value: 1
+    },
+    year: {
+        get: function() {
+            return this.year_;
+        },
+        set: function(newValue) {
+            if (newValue > 2023) {
+                this.year_ = newValue;
+                this.edition += newValue - 2023;
+            }
+        }
+    }
+});
+
+let descriptor = Object.getOwnPropertyDescriptor(book, "year_");
+console.log(descriptor.value); // 2023
+console.log(descriptor.configurable); // false
+console.log(typeof descriptor.get); // "undefined"
+let descriptor = Object.getOwnPropertyDescriptor(book, "year");
+console.log(descriptor.value); // undefined
+console.log(descriptor.enumerable); // false
+console.log(typeof descriptor.get); // "function"
+```
+
+对于数据属性 year_，value 等于原来的值，configurable 是 false，get 是 undefined。对于访问器属性 year，value 是 undefined，enumerable 是 false，get 是一个指向获取函数的指针。
+
+Object.getOwnPropertyDescriptors() 静态方法实际上会在每个自有属性上调用 Object.getOwnPropertyDescriptor() 并在一个新对象中返回它们。自有属性指的是直接在对象上定义的属性，不是从原型链傻瓜继承来的属性。
+
+对于前面的例子，使用这个静态方法会返回如下对象：
+
+```javascript
+let book = {};
+Object.defineProperties(book, {
+    year_: {
+        value: 2023
+    },
+    edition: {
+        value: 1
+    },
+    year: {
+        get: function() {
+            return this.year_
+        },
+        set: function(newValue) {
+            if (newValue > 2023) {
+                this.year_ = newValue;
+                this.edition += newValue - 2023;
+            }
+        }
+    }
+});
+
+console.log(Object.getOwnPropertyDescriptors(book));
+// {
+//    edition: {
+//        configurable: false,
+//        enumerable: false,
+//        value: 1,
+//        writable: false
+//    },
+//    year: {
+//        configurable: false,
+//        enumerable: false,
+//        get: f(),
+//        set: f(newValue)
+//    },
+//    year_: {
+//        configurable: false,
+//        enumerable: false,
+//        value: 2017,
+//        writable: false
+//    }
+//}
+```
+
 
 
 
