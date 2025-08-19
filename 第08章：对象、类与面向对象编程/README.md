@@ -795,6 +795,56 @@ console.log(person); // { name_0: 'Matt', age_1: 27, job_2: 'Software engineer' 
 >
 >可计算属性表达式中抛出任何错误都会中断对象创建。如果计算属性的表达式有副作用，那就要小心了，因为如果表达式抛出错误，那么之前完成的计算是不能回滚的。
 
+<br>
+
+### 3. 简写方法名
+
+在给对象定义方法时，通常都要写一个方法名、冒号，然后再引用一个匿名函数表达式，如下所示：
+
+```javascript
+let person = {
+    sayName: function(name) {
+        console.log(`My name is ${name}`);
+    }
+};
+
+person.sayName('Matt'); // My name is Matt
+```
+
+简写方法名对获取函数和设置函数也是适用的：
+
+```javascript
+let person = {
+    name_: '',
+    get name() {
+        return this.name_;
+    },
+    set name(name) {
+        this.name_ = name;
+    },
+    sayName() {
+        console.log(`My name is ${this.name_}`);
+    }
+};
+
+person.name = 'Matt';
+person.sayName(); // My name is Matt
+```
+
+简写方法名与可计算属性键可以一起使用：
+
+```javascript
+const methodKey = 'sayName';
+
+let person = {
+    [methodKey](name) {
+        console.log(`My name is ${name}`);
+    }
+}
+
+person.sayName('Matt'); // My name is Matt
+```
+
 
 
 
