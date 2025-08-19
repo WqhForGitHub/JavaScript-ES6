@@ -483,11 +483,317 @@ console.log(Object.getOwnPropertyDescriptors(book));
 //}
 ```
 
+<br>
 
+## 8. 合并对象
 
+### Object.assign()
 
+JavaScript 开发者经常觉得合并（merge）两个对象很有用。更具体地说，就是把源对象所有地本地属性一起复制到目标对象上，而在遇到冲突时源对象上的属性优先。
 
+Object.assign() 方法接收一个目标对象和一个或多个源对象作为参数，然后将每个源对象中可枚举（Object.propertyIsEnumerable() 返回 true）和自有（Object.hasOwnProperty() 返回 true）属性复制到目标对象。以字符串和符号为键的属性会被复制。对每个符合条件的属性，这个方法会使用源对象上的 [[Get]] 取得属性的值，然后使用目标对象上的 [[Set]] 设置属性的值。
 
+```javascript
+let dest, src, result;
+
+/**
+ * 简单复制
+ */
+dest = {};
+src = { id： 'src' };
+
+result = Object.assign(dest, src);
+
+// Object.assign 修改目标对象
+// 也会返回修改后的目标对象
+console.log(dest === result); // true
+console.log(dest !== src); // true
+console.log(result); // { id: src }
+console.log(dest); // { id: src }
+
+/**
+ * 多个源对象
+ */
+dest = {};
+
+result = Object.assign(dest, { a: 'foo' }, { b: 'bar' });
+console.log(result); // { a: foo, b: bar }
+
+/**
+ * 获取函数与设置函数
+ */
+dest = {
+    set a(val) {
+        console.log(`Invoked dest setter with param ${val}`);
+    }
+};
+src = {
+    get a() {
+        console.log(`Invoked src getter`);
+        return 'foo';
+    }
+};
+
+Object.assign(dest, src);
+// 调用 src 的获取方法
+// 调用 dest 的设置方法并传入参数 "foo"
+
+// 因为这里的设置函数不执行赋值操作
+// 所以实际上并没有把值转移过来
+console.log(dest); // { set a(val) {...} }
+```
+
+Object.assign() 实际上对每个源对象执行的是浅复制。如果多个源对象都有相同的属性，则使用最后一个复制的值。此外，从源对象访问器属性取得的值，比如获取函数，会作为一个静态值赋给目标对象。换句话说，不能在两个对象间转移获取函数和设置函数。
+
+```javascript
+let dest, src, result;
+
+/**
+ * 覆盖属性
+ */
+dest = { id: 'dest' };
+
+result = Object.assign(dest, { id: 'src1', a: 'foo' }, { id: 'src2', b: 'bar' });
+
+// Object.assign 会覆盖重复的属性
+console.log(result); // { id: src2, a: foo, b: bar }
+
+// 可以通过目标对象上的设置函数观察到覆盖的过程：
+dest = {
+    set id(x) {
+        console.log(x);
+    }
+};
+
+Object.assign(dest, { id: 'first' }, { id: 'second' }, { id: 'third' });
+// first
+// second
+// third
+
+/**
+ * 对象引用
+ */
+dest = {};
+src = { a: {} };
+
+Object.assign(dest, src);
+
+// 浅复制意味着只会复制对象的引用
+console.log(dest); // { a: {} }
+console.log(dest.a === src.a); // true
+```
+
+如果赋值期间出错，则操作会中止并退出，同时抛出错误。Object.assign() 没有回滚之前赋值的概念，因此它是一个尽力而为、可能只会完成部分复制的方法。
+
+```javascript
+let dest, src, result;
+
+/**
+ * 错误处理
+ */
+dest = {};
+src = {
+    a: 'foo',
+    get b() {
+        // Object.assign 在调用这个获取函数时会抛出错误
+        throw new Error();
+    },
+    c: 'bar'
+};
+
+try {
+    Object.assign(dest, src);
+} catch(e) {}
+
+// Object.assign() 没办法回滚已经完成的修改
+// 因此在抛出错误之前，目标对象上已经完成的修改会继续存在
+console.log(dest); // { a: foo }
+```
+
+<br>
+
+## 9. 对象标识及相等判定
+
+### Object.is()
+
+在某些边界情况下，=== 操作符会表现出不符合预期的行为：
+
+```javascript
+// 这些是 === 符合预期的情况
+console.log(true === 1); // false
+console.log({} === {}); // false
+conosole.log("2" === 2); // false
+
+// 这些情况在不同 JavaScript 引擎中表现不同，但仍被认为相等
+console.log(+0 === -0); // true
+console.log(+0 === 0); // true
+console.log(-0 === 0); // true
+
+// 要确定 NaN 的相等性，必须使用极为讨厌的 isNaN()
+console.log(NaN === NaN); // false
+console.log(isNaN(NaN)); // true
+```
+
+为解决这类情况，ECMAScript 定义了 Object.is()，这个方法与 === 很像，但同时也考虑到了上述边界情形。这个方法必须接收两个参数：
+
+```javascript
+console.log(Object.is(true, 1)); // false
+console.log(Object.is({}, {})); // false
+console.log(Object.is("2", 2)); // false
+
+// 正确的 0、-0、+0 相等/不等判定
+console.log(Object.is(+0, -0)); // false
+console.log(Object.is(+0, 0)); // true
+console.log(Object.is(-0, 0)); // false
+
+// 正确的 NaN 相等判定
+console.log(Object.is(NaN, NaN)); // truej
+```
+
+要检查超过两个值，递归地利用相等性传递即可：
+
+```javascript
+function recursiveCheckEqual(x, ...rest) {
+    return Object.is(x, rest[0]) && (rest.length < 2 || recursivelyCheckEqual(...rest));
+}
+```
+
+这一行包含了整个函数的核心逻辑，可以分解为几个部分：
+
+1. Object.is(x, rest[0]) - 使用 Object.is() 方法比较第一个参数 x 和剩余参数数组的第一个元素 rest[0] 是否严格相等
+
+2. && - 逻辑与操作符，只有当左侧条件为真时，才会执行右侧的表达式
+   (rest.length < 2 || recursivelyCheckEqual(...rest)) - 这是一个括号内的逻辑或表达式
+
+- rest.length < 2 - 检查剩余参数数组的长度是否小于2（即只有0个或1个元素）
+- || - 逻辑或操作符
+- recursivelyCheckEqual(...rest) - 递归调用自身，传入剩余的所有参数
+
+<br>
+
+## 10. 增强的对象语法
+
+ECMAScript 为定义和操作对象提供了很多极其有用的语法糖特性。这些特性都没有改变现有引擎的行为，但极大地提升了处理对象的方便程度。
+
+本节介绍的所有对象语法同样适用于 ECMAScript 的类，本章后面会讨论。
+
+>注意：
+>
+>相比以往的替代方案，本节介绍的增强对象语法更加简洁，表达力更强。因此本章及本书会默认使用这些新语法特性。
+
+### 1. 属性值简写
+
+在给对象添加变量的时候，开发者经常会发现属性名和变量名是一样的。例如：
+
+```javascript
+let name = 'Matt';
+
+let person = {
+    name: name
+};
+
+console.log(person); // { name: 'Matt' }
+```
+
+为此，简写属性值语法出现了。简写属性值只要使用变量名（不用再写冒号）就会自动被解释为同名的属性键。如果没有找到同名变量，则会抛出 ReferenceError。
+
+以下代码使用了简单语法：
+
+```javascript
+let name = 'Matt';
+
+let person = {
+    name
+};
+
+console.log(person); // { name: 'Matt' }
+```
+
+代码压缩程序足够聪明，能在不同作用域间保留属性名，以防止找不到引用。以下面的代码为例：
+
+```javascript
+function makePerson(name) {
+    return {
+        name
+    };
+}
+
+let person = makePerson('Matt');
+console.log(person.name); // Matt
+```
+
+在这里，即使参数标识符只限定于函数作用域，编译器也会保留初始的 name 标识符。比如，如果使用 Google Closure 编译器压缩，那么函数参数会被缩短，而属性名不变：
+
+```javascript
+function makePerson(a) {
+    return {
+        name: a
+    };
+}
+
+var person = makePerson("Matt");
+console.log(person.name); // Matt
+```
+
+<br>
+
+### 2. 可计算属性
+
+在引入可计算属性之前，如果想使用变量的值作为属性，那么必须先声明对象，然后使用中括号语法来添加属性。换句话说，不能在对象字面量中直接动态命名属性。比如：
+
+```javascript
+const nameKey = 'name';
+const ageKey = 'age';
+const jobKey = 'job';
+
+let person = {};
+person[nameKey] = 'Matt';
+person[ageKey] = 27;
+person[jobKey] = 'Software engineer';
+
+console.log(person); // { name: 'Matt', age: 27, job: 'Softwware engineer' }
+```
+
+有了可计算属性，就可以在对象字面量中完成动态属性赋值。中括号包围的对象属性键告诉运行时将其作为 JavaScript 表达式而不是字符串来求值：
+
+```javascript
+const nameKey = 'name';
+const agekey = 'age';
+const jobKey = 'job';
+
+let person = {
+    [nameKey]: 'Matt',
+    [ageKey]: 27,
+    [jobKey]: 'Software engineer'
+};
+
+console.log(person); // { name: 'Matt', age: 27, job: 'Software engineer' }
+```
+
+因为被当作 JavaScript 表达式求值，所以可计算属性本身可以是复杂的表达式，在实例化时再求值：
+
+```javascript
+const nameKey = 'name';
+const ageKey = 'age';
+const jobKey = 'job';
+let uniqueToken = 0;
+
+function getUniqueKey(key) {
+    return `${key}_${uniqueToken++}`;
+}
+
+let person = {
+    [getUniqueKey(nameKey)]: 'Matt',
+    [getUniqueKey(agekey)]: 27,
+    [getUniqueKey(jobKey)]: 'Software engineer'
+};
+
+console.log(person); // { name_0: 'Matt', age_1: 27, job_2: 'Software engineer' }
+```
+
+>注意
+>
+>可计算属性表达式中抛出任何错误都会中断对象创建。如果计算属性的表达式有副作用，那就要小心了，因为如果表达式抛出错误，那么之前完成的计算是不能回滚的。
 
 
 
