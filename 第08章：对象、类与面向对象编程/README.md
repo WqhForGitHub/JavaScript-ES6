@@ -845,25 +845,556 @@ let person = {
 person.sayName('Matt'); // My name is Matt
 ```
 
+<br>
 
+## 11. 对象解构
 
+对象解构让我们可以在一条语句中使用嵌套数据实现一个或多个赋值操作。简单地说，对象解构就是使用与对象匹配的结构来实现对象属性赋值。
 
+下面的例子展示了两端等价的代码，首先是不使用对象解构的：
 
+```javascript
+// 不使用对象解构
+let person = {
+    name: 'Matt',
+    age: 27
+};
 
+let personName = person.name,
+    personAge = person.age;
 
+console.log(personName); // Matt
+console.log(personAge); // 27
+```
 
+然后，是使用对象解构的：
 
+```javascript
+// 使用对象解构
+let person = {
+    name: 'Matt',
+    age: 27
+};
 
+let { name: personName, age: personAge } = person;
 
+console.log(personName); // Matt
+console.log(personAge); // 27
+```
 
+使用解构，可以同时声明多个变量并执行多个赋值操作。如果想让变量直接使用属性的名称，那么可以使用简写语法，比如：
 
+```javascript
+let person = {
+    name: 'Matt',
+    age: 27
+};
 
+let { name, age } = person;
 
+console.log(name); // Matt
+console.log(age); // 27
+```
 
+解构赋值不一定与对象的属性匹配。赋值的时候可以忽略某些属性，而如果引用的属性不存在，则该变量的值就是 undefined：
 
+```javascript
+let person = {
+    name: 'Matt',
+    age: 27
+};
 
+let { name, job } = person;
 
+console.log(name); // Matt
+console.log(job); // undefined
+```
 
+也可以在解构赋值的同时定义默认值，这适用于前面刚提到的引用的属性不存在源对象中的情况：
+
+```javascript
+let person = {
+    name: 'Matt',
+    age: 27
+};
+
+let { name, job = 'Software engineer' } = person;
+
+console.log(name); // Matt
+console.log(job); // Software engineer
+```
+
+解构在内部使用函数 ToObject()（不能在运行时环境中直接访问）把源数据结构转换为对象。这意味着在对象解构的上下文中，原始值会被当成对象。这也意味着 null 和 undefined 不能被解构，否则会抛出错误。
+
+```javascript
+let { length } = 'foobar';jjjjjjjjjjjjjjjj
+console.log(length); // 6
+
+let { constructor: c } = 4;
+console.log(c === Number); // true
+
+let { _ } = null; // TypeError
+
+let { _ } = undefined; // TypeError
+```
+
+解构并不要求变量必须在解构表达式中声明。不过，如果是给事先声明的变量赋值，则赋值表达式必须包含在一对括号中：
+
+```javascript
+let personName, personAge;
+
+let person = {
+    name: 'Matt',
+    age: 27
+};
+
+({ name: personName, age: personAge } = person);
+
+console.log(personName, personAge); // Matt, 27
+```
+
+<br>
+
+### 1. 嵌套解构
+
+解构对于引用嵌套的属性或赋值目标没有限制。为此，可以通过解构来复制对象属性：
+
+```javascript
+let person = {
+    name: 'Matt',
+    age: 27,
+    job: {
+        title: 'Software engineer'
+    }
+};
+let personCopy = {};
+
+({
+    name: personCopy.name,
+    age: personCopy.age,
+    job: personCopy.job
+} = person);
+
+// 因为一个对象的引用被赋值给 personCopy，所以修改
+// person.job 对象的属性也会影响 personCopy
+person.job.title = 'Hacker';
+
+console.log(person);
+// { name: 'Matt', age: 27, job: { title: 'Hacker' } }
+
+console.log(personCopy);
+// { name: 'Matt', age: 27, job: { title: 'Hacker' } }
+```
+
+解构赋值可以使用嵌套结构，以匹配嵌套的属性：
+
+```javascript
+let person = {
+    name: 'Matt',
+    age: 27,
+    job: {
+        title: 'Software engineer'
+    }
+};
+
+// 声明 title 变量并将 person.job.title 的值赋给它
+let { job: { title } } = person;
+
+console.log(title); // Software engineer
+```
+
+在外层属性没有定义的情况下不能使用嵌套解构。无论源对象还是目标对象都一样：
+
+```javascript
+let person = {
+    job: {
+        title: 'Software engineer'
+    }
+};
+let personCopy = {};
+
+// foo 在源对象上是 undefined
+({
+    foo: {
+        bar: personCopy.bar
+    }
+} = person);
+// TypeError: Cannot destructure property 'bar' of 'undefined' or 'null'.
+
+// job 在目标对象上是 undefined
+({
+    job: {
+        title: personCopy.job.title
+    }
+} = person);
+// TypeError: Cannot set property 'title' of undefined
+```
+
+<br>
+
+### 2. 部分解构
+
+需要注意的是，涉及多个属性的解构赋值是一个输出无关的顺序化操作。如果一个解构表达式涉及多个赋值，开始的赋值成功而后面的赋值出错，则整个解构赋值只会完成一部分：
+
+```javascript
+let person = {
+    name: 'Matt',jjjjjjjjjj
+    age: 27
+};
+
+let personName, personBar, personAge;
+
+try {
+    // person.foo 是 undefined，因此会抛出错误
+    ({ name: personName, foo: { bar: personBar }, age: personAge } = person);
+} catch(e) {}
+
+console.log(personName, personBar, personAge);
+// Matt, undefined, undefined
+```
+
+<br>
+
+### 3. 参数上下文匹配
+
+在函数参数列表中可以进行解构赋值。对参数的解构赋值不会影响 arguments 对象，但可以在函数签名中声明在函数体内使用局部变量：
+
+```javascript
+let person = {
+    name: 'Matt',
+    age: 27
+};
+
+function printPerson(foo, { name, age }, bar) {
+    console.log(arguments);
+    console.log(name, age);
+}
+
+function printPerson2(foo, { name: personName, age: personAge }, bar) {
+    console.log(arguments);
+    console.log(personName, personAge);
+}
+
+printPerson('1st', person, '2nd');
+// ['1st', { name: 'Matt', age: 27 }, '2nd']
+// 'Matt', 27
+
+printPerson2('1st', person, '2nd');
+// ['1st', { name: 'Matt', age: 27 }, '2nd']
+// 'Matt', 27
+```
+
+<br>
+
+## 12. 剩余操作符
+
+在重新构造对象时，可以使用剩余操作符把所有未明确列出的可枚举属性都收集一个对象中。来看下面的例子：
+
+```javascript
+const person = {
+    name: 'Matt',
+    age: 27,
+    job: 'Engineer'
+};
+
+const { name, ...remainingData } = person;
+
+console.log(name); // Matt
+console.log(remainingData); // { age: 27, job: 'Engineer' } 
+```
+
+在每个对象字面量中，最多只能使用一次剩余操作符，而且必须放在最后面。因为每个对象字面量只能用一个剩余操作符，所以就有了嵌套剩余操作符的可能。在嵌套的时候，因为不存在把某个属性子树的元素分配到任意指定剩余操作符的可能，所以得到的对象永远不会出现内容重叠的情况：
+
+```javascript
+const person = {
+    name: 'Matt',
+    age: 27,
+    job: {
+        title: 'Engineer',
+        level: 10
+    }
+};
+
+const { name, job: { title, ...remainingJobData }, ...remianingPersonData } = person;
+
+console.log(name); // Matt
+console.log(title); // Engineer
+console.log(remainingPersonData); // { age: 27 }
+console.log(remainingJobData); // { level: 10 }
+
+const { ...a, job } = person;
+// SyntaxError: Rest element must be last element
+```
+
+剩余操作符在对象间执行浅拷贝，因此对象的引用会被拷贝，而非克隆整个对象：
+
+```javascript
+const person = {
+    name: 'Matt',
+    age: 27,
+    job: {
+        title: 'Engineer',
+        level: 10
+    }
+};
+
+const { ...remainingData } = person;
+
+console.log(person === remainingData); // false
+console.log(person.job === remainingData.job); // truejj
+```
+
+剩余操作符会拷贝所有可枚举的自有属性，包括符号：
+
+```javascript
+const s = Symbol();
+const foo = { a: 1, [s]: 2, b: 3 };
+
+const { a, ...remainingData } = foo;
+
+console.log(remainingData);
+// { b: 3, Symbol(): 2 }
+```
+
+<br>
+
+## 13. 扩展操作符
+
+扩展操作符可以让我们把两个对象以类似数组拼接的方式组合到一起。应用到内部对象的扩展操作符会将所有可枚举的自有属性（包括符号）浅拷贝到外部对象：
+
+```javascript
+const s = Symbol();
+const foo = { a: 1 };
+const bar = { [s]: 2 };
+
+const foobar = { ...foo, c: 3, ...bar };
+
+console.log(foobar);
+// { a: 1, c: 3, [Symbol()]: 2 }
+```
+
+扩展对象列出的顺序很重要，主要有两个原因。
+
+* 对象会记录插入顺序。从扩展对象拷贝出来的属性将按照它们在对象字面量中被列出来的顺序执行赋值。
+* 对象会在遇到重名时覆盖属性。后出现的属性将覆盖先出来的属性。
+
+下面的代码示例展示了顺序的重要性：
+
+```javascript
+const foo = { a: 1 };
+const bar = { b: 2 };
+
+const foobar = { c: 3, ...bar, ...foo };
+
+console.log(foobar);
+// { c: 3, b: 2, a: 1 }
+
+const baz = { c: 4 };
+
+const foobarbaz = { ...foo, ...bar, c: 3, ...baz };
+
+console.log(foobarbaz);
+// { a: 1, b: 2, c: 4 }
+```
+
+与剩余操作符一样，所有拷贝都是浅拷贝：
+
+```javascript
+const foo = { a: 1 };
+const bar = { b: 2, c: { d: 3 } };
+
+const foobar = { ...foo, ...bar };
+
+console.log(foobar.c === bar.c); // true
+```
+
+<br>
+
+# 2. 创建对象
+
+虽然使用 Object 构造函数或对象字面量可以方便地创建对象，但这些方式也有明显不足：创建具有同样接口地多个对象需要重复编写很多代码。
+
+## 1. 概述
+
+综观 ECMAScript 规范的历次发布，每个版本的特性似乎都出人意料。ECMAScript 5.1 并没有正式支持面向对象的结构，比如类或继承。但是，正如接下来几节会介绍的，巧妙地运用原型式继承可以成功地模拟同样的行为。
+
+ECMAScript 6 开始正式支持类和继承。ECMAScript 的类旨在完全涵盖之前规范设计的基于原型的继承模式。不过，无论从哪方面看，类都仅仅式封装了 ES5.1 构造函数加原型继承的语法糖而已。
+
+>注意
+>
+>编写面向对象编程模式的 JavaScript 代码还是应该使用 ECMAScript 类。但不管怎么说，理解 ES6 类出现之前的惯例总是有益无害的。特别是 ECMAScript 类定义本身就相当于对原有结构的封装。因此，在介绍类之前，本书会循序渐进地介绍被类取代的那些底层概念。
+
+<br>
+
+## 2. 构造函数模式
+
+前几章提到过，ECMAScript 中的构造函数是用于创建特定类型对象的。像 Object 和 Array 这样的原生构造函数，运行时可以直接在执行环境中使用。当然也可以自定义构造函数，以函数的形式为自己的对象类型定义属性和方法。
+
+来看一个使用构造函数模式的例子：
+
+```javascript
+function Person(nmae, age, job) {
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    this.sayName = function() {
+        console.log(this.name);
+    };
+}
+
+let person1 = new Person("Alice", 29, "Software Engineer");
+let person2 = new Person("Greg", 27, "Doctor");
+
+person1.sayName(); // Alice
+person2.sayName(); // Greg
+```
+
+对于这个例子，要注意以下几点。
+
+* 没有显式地创建对象。
+* 属性和方法直接赋值给了 this。
+* 没有 return。
+
+另外，要注意函数名 Person 的首字母大写了。按照惯例，构造函数名称的首字母都是要大写的，非构造函数则以小写字母开头。这是从面向对象编程语言那里借鉴的，有助于在 ECMAScript 中区分构造函数和普通函数。毕竟 ECMAScript 的构造函数就是能创建对象的函数。
+
+要创建 Person 的实例，应使用 new 操作符。以这种方式调用构造函数会执行如下操作。
+
+1. 在内存中创建一个新对象
+2. 这个新对象内部的 [[Prototype]] 特性被赋值为构造函数的 prototype 属性。
+3. 构造函数内部的 this 被赋值为这个新对象（即 this 指向新对象）。
+4. 执行构造函数内部的代码（给新对象添加属性）。
+5. 如果构造函数返回非空对象，则返回该对象。否则，返回刚创建的新对象。
+
+上一个例子的最后，person1 和 person1 分别保存着 Person 的不同实例。这两个对象都有一个 constructor 属性指向 Person，如下所示：
+
+```javascript
+console.log(person1.constructor == Person); // true
+console.log(person2.constructor == Person); // true
+```
+
+constructor 本来是用于标识对象类型的。不过，一般认为 instanceof 操作符是确定对象类型更可靠的方式。前面例子中的每个对象都是 Object 的实例，同时也是 Person 的实例，如下面调用 instanceof 操作符的结果所示：
+
+```javascript
+console.log(person1 instanceof Object); // true
+console.log(person1 instanceof Person); // true
+console.log(person2 instanceof Object); // true
+console.log(person2 instanceof Person); // true
+```
+
+定义自定义构造函数可以确保实例被标识为特定类型。在这个例子中，person1 和 person2 之所以也被认为是 Object 的实例，是因为所有自定义对象都继承自 Object（后面再详细讨论这一点）。
+
+构造函数不一定要写成函数声明的形式。赋值给变量的函数表达式也可以作为构造函数：
+
+```javascript
+let Person = function(name, age, job) {
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    this.sayName = function() {
+        console.log(this.name);
+    };
+}
+
+let person1 = new Person("Alice", 29, "Software Engineer");
+let person2 = new Person("Greg", 27, "Doctor");
+
+person1.sayName(); // Alice
+person2.sayName(); // Greg
+
+console.log(person1 instanceof Object); // true
+console.log(person1 instanceof Person); // true
+console.log(person2 instanceof Object); // true
+console.log(person2 instanceof Person); // true
+```
+
+在实例化时，如果不想传参数，那么构造函数后面的括号可加可不加。只要有 new 操作符，就可以调用相应的构造函数：
+
+```javascript
+function Person() {
+    this.name = 'Jake';
+    this.sayName = function() {
+        console.log(this.name);
+    };
+}
+
+let person1 = new Person();
+let person2 = new Person;
+
+person1.sayName(); // Jake
+person2.sayName(); // Jake
+
+console.log(person1 instanceof Object); // true
+console.log(person1 instanceof Person); // true
+console.log(person2 instanceof Object); // true
+console.log(person2 instanceof Person); // true
+```
+
+<br>
+
+### 1. 构造函数也是函数
+
+构造函数与普通函数唯一的区别就是调用方式不同。除此之外，构造函数也是函数。并没有把某个函数定义为构造函数的特殊语法。任何函数只要使用 new 操作符调用就是构造函数，而不使用 new 操作符调用的函数就是普通函数。比如，前面的例子中定义的 Person() 可以像下面这样调用：
+
+```javascript
+// 作为构造函数
+let person = new Person("Alice", 29, "Software Engineer");
+person.sayName(); // "Alice"
+
+// 作为函数调用
+Person("Greg", 27, "Doctor"); // 添加到 window 对象
+window.sayName(); // "Greg"
+
+// 在另一个对象的作用域中调用
+let o = new Object();
+Person.call(o, "Kristen", 25, "Nurse");
+o.sayName(); // "Kristen"
+```
+
+这个例子一开始展示了典型的构造函数调用方式，即使用 new 操作符创建一个新对象。然后是普通函数的调用方式，这时候没有使用 new 操作符调用 Person()，结果会将属性和方法添加到 window 对象。这里要记住，在调用一个函数而没有明确设置 this 值得情况下（即没有作为某个对象得方法调用，或者没有使用 call() / apply() 调用），this 始终指向 Global 对象（在浏览器中就是 window 对象）。因此在上面的调用之后，window 对象上就有一个 sayName() 方法，调用它会返回 "Greg"。最后展开的调用方式是通过 call()（或 apply()）调用函数，同时将特定对象指定为作用域。这里的调用将对象 o 指定为 Person() 内部的 this 中，因此执行完函数代码后，所有属性和 sayName() 方法都会添加到对象 o 上面。
+
+<br>
+
+### 2. 构造函数的问题
+
+构造函数虽然有用，但也不是没有问题。构造函数的主要问题在于，其定义的方法会在每个实例上都创建一遍。因此对前面的例子而言，person1 和 person2 都有名为 sayName() 的方法，但这两个方法不是同一个 Function 实例。我们知道，在 ECMAScript 中的函数是对象，因此每次定义函数都会初始化一个对象。逻辑上讲，这个构造函数应该类似这样：
+
+```javascript
+function Person(name, age, job) {
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    this.sayName = new Function("console.log(this.name)"); // 逻辑等价
+}
+```
+
+这样理解这个构造函数可以更清楚地知道，每个 Person 实例都会有自己的 Function 实例用于显示 name 属性。当然了，以这种方式创建函数会带来不同的作用域链和标识符解析。但创建新 Function 实例的机制是一样的。因此不同实例上的函数虽然同名却不相等，如下所示：
+
+```javascript
+console.log(person1.sayName == person2.sayName); // false
+```
+
+因为都是做一样的事，所以没必要定义两个不同的 Function 实例。况且，this 对象可以把函数与对象的绑定推迟到运行时。
+
+要解决这个问题，可以把函数定义转移到构造函数的外部：
+
+```javascript
+function Person(name, age, job) {
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    this.sayName = sayName;
+}
+
+function sayName() {
+    console.log(this.name);
+}
+
+let person1 = new Person("Alice", 29, "Software Engineer");
+let person2 = new Person("Greg", 27, "Doctor");
+
+person1.sayName(); // Alice
+person2.sayName(); // Greg
+```
 
 
 
