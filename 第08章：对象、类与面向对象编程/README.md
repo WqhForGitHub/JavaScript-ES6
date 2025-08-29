@@ -1396,6 +1396,338 @@ person1.sayName(); // Alice
 person2.sayName(); // Greg
 ```
 
+在这里，sayName() 被定义在了构造函数外部。在构造函数内部，sayName 属性等于全局 sayName() 函数。因为第一次 sayName 属性包含的只是一个指向外部函数的指针，所以 person1 和 person2 共享了定义在全局作用域上的 sayName() 函数。这样虽然解决了相同逻辑的函数重复定义的问题，但全局作用域也因此被搞乱了，因为那个函数实际上只能在一个对象上调用。如果这个对象需要多个方法，那么就要在全局作用域中定义多个函数。这会导致自定义类型引用的代码不能很好地聚集一起。这个新问题可以通过原型模式来解决。
+
+<br>
+
+## 3. 原型模式
+
+每个函数都会创建一个 prototype 属性，这个属性是一个对象，包含应该由特定引用类型地实例共享的属性和方法。实际上，这个对象就是通过调用构造函数创建的对象的原型。使用原型对象的好处是，在它上面定义的属性和方法可以被对象实例共享。原来在构造函数中直接赋给对象实例的值，可以直接赋值给它们的原型，如下所示：
+
+```javascript
+function Person() {}
+
+Person.prototype.name = "Alice";
+Person.prototype.age = 29;
+Person.prototype.job = "Software Engineer";
+Person.prototype.sayName = function() {
+    console.log(this.name);
+};
+
+let person1 = new Person();
+person1.sayName(); // "Alice"
+
+let person2 = new Person();
+person2.sayName(); // "Alice"
+
+console.log(person1.sayName == person2.sayName); // true
+```
+
+使用函数表达式也可以：
+
+```javascript
+let person = function() {};
+
+Person.prototype.name = "Alice";
+Person.prototype.age = 29;
+Person.prototype.job = "Software Engineer";
+Person.prototype.sayName = function() {
+    console.log(this.name);
+};
+
+let person1 = new Person();
+person1.sayName(); // "Alice"
+
+let person2 = new Person();
+person2.sayName(); // "Alice"
+
+console.log(person1.sayName == person2.sayName); // true
+```
+
+这里，所有属性和 sayName() 方法都直接添加到了 Person 的 prototype 属性上，构造函数体中什么也没有。但这样定义之后，调用构造函数创建的新对象仍然拥有相应的属性和方法。与构造函数模式不同，使用这种原型模式定义的属性和方法是由所有实例共享的。因此 person1 和 person2 访问的都是相同的属性和相同的 sayName() 函数。要理解这个过程，就必须理解 ECMAScript 中原型的本质。
+
+### 1. 理解原型
+
+#### isPrototypeOf()
+
+#### Object.getPrototypeOf()
+
+#### Object.setPrototypeOf()
+
+#### Object.create()
+
+#### hasOwnProperty()
+
+#### Object.hasOwn()
+
+#### Object.getOwnPropertyDescriptor()
+
+无论何时，只要创建一个函数，就会按照特定的规则为这个函数创建一个 prototype 属性（指向原型对象）。默认情况下，所有原型对象自动获得一个名为 constructor 的属性，指向与之关联的构造函数。对前面的例子而言，Person.prototype.constructor 指回 Person。然后，因构造函数而异，可能会给原型对象添加其他属性和方法。
+
+在自定义构造函数时，原型对象默认只会获得 constructor 属性，其他的所有方法都继承自 Object。每次调用构造函数创建一个新实例，新实例都会有一个指针指向构造函数的原型对象。在 ECMA-262 规范中，这个指针叫做 [[Prototype]]。我们在脚本不能直接访问这个 [[Prototype]] 特性，但现代浏览器会在每个对象上暴露 `__proto__` 属性，通过这个属性可以访问对象的原型。关键是要理解这一点：实例与构造函数原型之间有直接的联系，但实例与构造函数之间没有。
+
+这种关系不好可视化，但我们可以通过下面的代码片段表格来理解构造函数、原型与实例的关系。
+
+| 概念                                                         | 代码片段                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 构造函数声明与函数表达式                                     | function Person() {}<br>let Person = function() {}           |
+| 构造函数的 prototype 对象                                    | console.log(typeof Person.prototype);<br>console.log(Person.prototype);<br>`// {`<br>`//	constructor: f Person(),` <br>`//	__proto__: Object`<br>`// }` |
+| 构造函数与 prototype 对象间的循环引用<br>原型链终止于 Object 的原型 | console.log(Person.prototype.constructor === Person);<br>// true<br>console.log(`Person.prototype.__proto__` === Object.prototype);<br>// true<br>console.log(`Person.prototype.__proto__.constructor` === Object);<br>// true<br>console.log(`Person.prototype.__proto__.__proto__` === null);<br>// true<br><br>console.log(`Person.prototype.__proto__`);<br>`// {`<br>`//  constructor: f Object(),`<br>`//  toString: ...`<br>`//  hasOwnProperty: ...`<br>`//  isPrototypeOf: ...`<br>`//  ...`<br>`// }` |
+| 创建构造函数的实例                                           | let person1 = new Person(),<br>     person2 = new Person();  |
+| 区分对象实例、构造函数、以及 prototype 对象                  | console.log(person1 !== Person);<br>// true<br><br>console.log(person1 !== Person.prototype);<br>// true<br>console.log(person.prototype !== Person);<br>// true |
+| 实例、constructor 和 prototype 的关系                        | console.log(`person1.__proto__ === Person.prototype`);<br>// true<br><br>console.log(`person1.__proto__.constructor === Person`); |
+| 实例共享同一个 prototype                                     | console.log(`person1.__proto__` === `person2.__proto__`);<br>// true |
+| 使用 instanceof 操作符                                       | console.log(person1 instanceof Person);<br>// true<br><br>console.log(person1 instanceof Object);<br>// true<br><br>console.log(Person.prototype instanceof Object);<br>// true |
+
+对于前面例子中的 Person 构造函数和 Person.prototype，可以通过下图看出各个对象之间的关系。
+
+![](https://front-end-1257950569.cos.ap-guangzhou.myqcloud.com/JavaScript%20%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%EF%BC%88%E7%AC%AC5%E7%89%88%EF%BC%89/%E7%AC%AC8%E7%AB%A0%EF%BC%9A%E5%AF%B9%E8%B1%A1%E3%80%81%E7%B1%BB%E4%B8%8E%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/%E5%8F%AF%E8%A7%86%E5%8C%96%20constructor%E3%80%81prototype%20%E5%92%8C%E5%AE%9E%E4%BE%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB.png)
+
+上图展示了 Person 构造函数、Person 的原型对象和 Person 现有两个实例之间的关系。注意，Person.prototype 指向原型对象，而 Person.prototype.constructor 指回 Person 构造函数。原型对象包含 constructor 属性和其他后来添加的属性。Person 的两个实例 person1 和 person2 都只有一个内部属性指回 Person.prototype，而且两者都与构造函数没有直接联系。另外要注意，虽然这两个实例都没有属性和方法，但 person1.sayName() 可以正常调用。这是由于对象属性查找机制的原因。
+
+虽然不是所有实现都对外暴露了 [[Prototype]]，但可以使用 isPrototypeOf() 方法确定两个对象之间的这种关系。本质上，isPrototypeOf() 会在传入参数的 [[Prototype]] 指向调用它的对象时返回 true，如下所示：
+
+```javascript
+console.log(Person.prototype.isPrototypeOf(person1)); // true
+console.log(Person.prototype.isPrototypeOf(person2)); // true
+```
+
+这里通过原型对象调用 isPrototypeOf() 方法检查了 person1 和 person2。因为这两个例子内部都有链接指向 Person.prototype，所以结果都返回 true。
+
+ECMAScript 的 Object 类型有一个方法叫 Object.getPrototypeOf()，返回参数的内部特性 [[Prototype]] 的值。例如：
+
+```javascript
+console.log(Object.getPrototypeOf(person1) == Person.prototype); // true
+console.log(Object.getPrototypeOf(person1).name); // "Alice"
+```
+
+第一行代码简单确认了 Object.getPrototypeOf() 返回的对象就是传入对象的原型对象。第二行代码则取得了原型对象上 name 属性的值，即 "Alice"。使用 Object.getPrototypeOf() 可以方便地取得一个对象的原型，而这在通过原型实现继承时显得尤为重要（本章后面会介绍）。
+
+Object 类型还有一个 setPrototypeOf() 方法，可以向实例的私有属性 [[Prototype]] 写入一个新值。这样就可以重写要给对象的原型继承关系：
+
+```javascript
+let biped = {
+    numLegs: 2
+};
+let person = {
+    name: 'Matt'
+};
+
+Object.setPrototypeOf(person, biped);
+
+console.log(person.name); // Matt
+console.log(person.numLegs); // 2
+console.log(Object.getPrototypeOf(person) === biped); // true
+```
+
+>注意
+>
+>Object.setPrototypeOf() 可能会严重影响代码性能。Mozilla 文档是这样说的：在所有浏览器和 JavaScript 引擎中，修改继承关系对性能的影响都是微妙且深远的。这种影响并不仅是执行 Object.setPrototypeOf() 语句这么简单，而是涉及所有会访问那些被修改过 [[Prototype]] 的对象的代码。
+
+为避免使用 Object.setPrototypeOf() 可能造成的性能下降，可以通过 Object.create() 来创建一个新对象，同时为其指定原型：
+
+```javascript
+let biped = {
+    numLegs: 2
+};
+let person = Object.create(biped);
+person.name = 'Matt';
+
+console.log(person.name); // Matt
+console.log(person.numLegs); // 2
+console.log(Object.getPrototypeOf(person) === biped); // true
+```
+
+<br>
+
+### 2. 原型层级
+
+在通过对象访问属性时，会按照这个属性的名称开始搜索。搜索开始于对象实例本身。如果在这个实例上发现了给定的名称，则返回该名称对应的值。如果没有找到这个属性，则搜索会沿着指针进入原型对象，然后在原型对象上找到属性后，再返回对应的值。
+
+在调用 person1.sayName() 时，会发生两步搜索。首先，JavaScript 引擎会检查：person1 实例有 sayName 属性吗？答案是没有。然后，继续搜索并检查：person1 的原型有 sayName 属性吗？答案是有。于是就返回了保存在原型上的这个函数。在调用 person2.sayName() 时，会发生同样的搜索过程，而且也会返回相同的结果。
+
+这就是原型用于在多个对象实例间共享属性和方法的原理。
+
+>注意
+>
+>前面提到的 constructor 属性只存在于原型对象，因此通过实例对象也是可以访问到的。
+
+虽然可以通过实例读取原型对象上的值，但不可能通过实例重写这些值。如果在实例上添加了一个与原型对象中同名的属性，那就会在实例上创建这个属性，这个属性会遮盖原型对象上的同名属性。下面看一个例子：
+
+```javascript
+function Person() {}
+
+Person.prototype.name = "Alice";
+Person.prototype.age = 29;
+Person.prototype.job = "Software Engineer";
+Person.prototype.sayName = function() {
+    console.log(this.name);
+};
+
+let person1 = new Person();
+let person2 = new Person();
+
+person1.name = "Greg";
+console.log(person1.name); // "Greg"，来自实例
+console.log(person2.name); // "Alice"，来自原型
+```
+
+在这个例子中，person1 的 name 属性遮盖了原型对象上的同名属性。虽然 person1.name 和 person2.name 都返回了值，但前者返回的是 "Greg"（来自实例），后者返回的是 "Alice"（来自原型）。当访问 person1.name 时，会先在实例上搜索这个属性。因为这个属性在实例上存在，所以就不会再搜索原型对象了。而在访问 person2.name 时，并没有在实例上找到这个属性，所以会继续搜索原型对象并使用定义在原型上的属性。
+
+只要给对象实例添加一个属性，这个属性就会遮盖原型对象上的同名属性，也就是虽然不会修改它，但会屏蔽对它的访问。即使在实例上把这个属性设置为 null，也不会恢复它和原型的联系。不过，使用 delete 操作符可以完全删除实例上的这个属性，从而让标识符解析过程能够继续搜索原型对象。
+
+```javascript
+function Person() {}
+
+Person.prototype.name = "Alice";
+Person.prototype.age = 29;
+Person.prototype.job = "Software Engineer";
+Person.prototype.sayName = function() {
+    console.log(this.name);
+};
+
+let person1 = new Person();
+let person2 = new Person();
+
+person1.name = "Greg";
+console.log(person1.name); // "Greg"，来自实例
+console.log(person2.name); // "Alice"，来自原型
+
+delete person1.name;
+console.log(person1.name); // "Alice"，来自原型
+```
+
+这个修改后的例子中使用 delete 删除了 person1.name，这个属性之前以 "Greg" 遮盖了原型上的同名属性。然后原型上 name 属性的联系就恢复了，因此再访问 person1.name 时，就会返回原型对象上这个属性的值。
+
+hasOwnProperty() 方法用于确定某个属性是存在实例上还是存在原型对象上。这个方法是继承自 Object 的，会在属性存在于调用它的对象实例上时返回 true，如下面的例子所示：
+
+```javascript
+function Person() {}
+
+Person.prototype.name = "Alice";
+Person.prototype.age = 29;
+Person.prototype.job = "Software Engineer";
+Person.prototype.sayName = function() {
+    console.log(this.name);
+};
+
+let person1 = new Person();
+let person2 = new Person();
+console.log(person1.hasOwnProperty("name")); // false
+
+person1.name = "Greg";
+console.log(person1.name); // "Greg"，来自实例
+console.log(person1.hasOwnProperty("name")); // true
+
+console.log(person2.name); // "Alice"，来自原型
+console.log(person2.hasOwnProperty("name")); // false
+
+delete person1.name;
+console.log(person1.name); // "Alice"，来自原型
+console.log(person1.hasOwnProperty("name")); // false
+```
+
+在这个例子中，通过调用 hasOwnProperty() 能够清楚地看到访问的是实例属性还是原型属性。调用 person1.hasOwnProperty("name") 只在重写 person1 上 name 属性的情况下才返回 true，表明此时 name 是一个实例属性，不是原型属性。下图形象地展示了上面例子中各个步骤的状态。（为简单起见，图中省略了 Person 构造函数）。
+
+![](https://front-end-1257950569.cos.ap-guangzhou.myqcloud.com/JavaScript%20%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%EF%BC%88%E7%AC%AC5%E7%89%88%EF%BC%89/%E7%AC%AC8%E7%AB%A0%EF%BC%9A%E5%AF%B9%E8%B1%A1%E3%80%81%E7%B1%BB%E4%B8%8E%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/%E8%B5%8B%E5%80%BC%E5%92%8C%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C%E7%9A%84%E5%BD%B1%E5%93%8D.png)
+
+Object.hasOwn() 方法是 Object.prototype.hasOwnProperty() 的替代简写方法。因此下面两行代码是等价的：
+
+```javascript
+person.hasOwnProperty("name");
+Object.hasOwn(person, "name");
+```
+
+>注意
+>
+>ECMAScript 的 Object.getOwnPropertyDescriptor() 方法只对实例属性有效。要取得原型属性的描述符，必须直接在原型对象上调用 Object.getOwnPropertyDescriptor()。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
