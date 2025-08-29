@@ -36,7 +36,7 @@ Singleton.prototype.getName = function() {
     alert(this.name);
 };
 
-Singleton.getInstance - (function() {
+Singleton.getInstance = (function() {
     var instance = null;
     return function(name) {
         if (!instance) {
