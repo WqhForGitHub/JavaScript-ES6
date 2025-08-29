@@ -1402,6 +1402,38 @@ person2.sayName(); // Greg
 
 ## 3. 原型模式
 
+### isPrototypeOf()
+
+### Object.getPrototypeOf()
+
+### Object.setPrototypeOf()
+
+### Object.create()
+
+### hasOwnProperty()
+
+### Object.hasOwn()
+
+### Object.getOwnPropertyDescriptor()
+
+### in 操作符
+
+### for-in 循环
+
+### Object.keys()
+
+### Object.getOwnPropertyNames()
+
+### Object.getOwnPropertySymbols()
+
+### Object.assign()
+
+### Object.values()
+
+### Object.entries()
+
+### Object.fromEntries()
+
 每个函数都会创建一个 prototype 属性，这个属性是一个对象，包含应该由特定引用类型地实例共享的属性和方法。实际上，这个对象就是通过调用构造函数创建的对象的原型。使用原型对象的好处是，在它上面定义的属性和方法可以被对象实例共享。原来在构造函数中直接赋给对象实例的值，可以直接赋值给它们的原型，如下所示：
 
 ```javascript
@@ -1447,20 +1479,6 @@ console.log(person1.sayName == person2.sayName); // true
 这里，所有属性和 sayName() 方法都直接添加到了 Person 的 prototype 属性上，构造函数体中什么也没有。但这样定义之后，调用构造函数创建的新对象仍然拥有相应的属性和方法。与构造函数模式不同，使用这种原型模式定义的属性和方法是由所有实例共享的。因此 person1 和 person2 访问的都是相同的属性和相同的 sayName() 函数。要理解这个过程，就必须理解 ECMAScript 中原型的本质。
 
 ### 1. 理解原型
-
-#### isPrototypeOf()
-
-#### Object.getPrototypeOf()
-
-#### Object.setPrototypeOf()
-
-#### Object.create()
-
-#### hasOwnProperty()
-
-#### Object.hasOwn()
-
-#### Object.getOwnPropertyDescriptor()
 
 无论何时，只要创建一个函数，就会按照特定的规则为这个函数创建一个 prototype 属性（指向原型对象）。默认情况下，所有原型对象自动获得一个名为 constructor 的属性，指向与之关联的构造函数。对前面的例子而言，Person.prototype.constructor 指回 Person。然后，因构造函数而异，可能会给原型对象添加其他属性和方法。
 
@@ -1641,6 +1659,277 @@ Object.hasOwn(person, "name");
 >注意
 >
 >ECMAScript 的 Object.getOwnPropertyDescriptor() 方法只对实例属性有效。要取得原型属性的描述符，必须直接在原型对象上调用 Object.getOwnPropertyDescriptor()。
+
+### 3. 原型和 in 操作符
+
+有两种方式使用 in 操作符：单独使用和在 for-in 循环中使用。单独使用时，in 操作符会在可以通过对象访问指定属性时返回 true，无论该属性是在实例上还是在原型上。来看下面的例子：
+
+```javascript
+function Person() {}
+
+Person.prototype.name = "Alice";
+Person.prototype.age = 29;
+Person.prototype.job = "Software Engineer";
+Person.prototype.sayName = function() {
+    console.log(this.name);
+};
+
+let person1 = new Person();
+let person2 = new Person();
+
+console.log(person1.hasOwnProperty("name")); // false
+console.log("name" in person1); // true
+
+person1.name = "Greg";
+console.log(person1.name); // "Greg"，来自实例
+console.log(person1.hasOwnProperty("name")); // true
+console.log("name" in person1); // true
+
+console.log(person2.name); // "Alice"，来自原型
+console.log(person2.hasOwnProperty("name")); // false
+console.log("name" in person2); // true
+
+delete person1.name;
+console.log(person1.name); // "Alice"，来自原型
+console.log(person1.hasOwnProperty("name")); // false
+console.log("name" in person1); // true
+```
+
+在上面整个例子中，name 随时可以通过实例或通过原型访问到。因此，调用 "name" in person1 时始终返回 true，无论这个属性是否在实例上。如果要确定某个属性是否存在于原型上，可以像下面这样同时使用 hasOwnProperty() 和 in 操作符：
+
+```javascript
+function hasPrototypeProperty(object, name) {
+    return !object.hasOwnProperty(name) && (name in object);
+}
+```
+
+只要通过对象可以访问，in 操作符就返回 true，而 hasOwnProperty() 只有属性存在于实例上时才返回 true。因此，只要 in 操作符返回 true 且 hasOwnProperty() 返回 false，就说明该属性是一个原型属性。来看下面的例子：
+
+```javascript
+function Person() {}
+
+Person.prototype.name = "Alice";
+Person.prototype.age = 29;
+Person.prototype.job = "Software Engineer";
+Person.prototype.sayName = function() {
+    console.log(this.name);
+};
+
+let person = new Person();
+console.log(hasPrototypeProperty(person, "name")); // true
+
+person.name = "Greg";
+console.log(hasPrototypeProperty(person, "name")); // false
+```
+
+在这里，name 属性首先只存在于原型上，所以 hasPrototypeProperty() 返回 true。而在实例上重写这个属性后，实例上也有了这个属性，因此 hasPrototypeProperty() 返回 false。即便此时原型对象还有 name 属性，但因为实例上的属性遮盖了它，所以不会用到该属性。
+
+在 for-in 循环中使用 in 操作符时，可以通过对象访问且可以被枚举的属性都会返回，包括实例属性和原型属性。遮盖原型中不可枚举（[[Enumeralbe]] 特性被设置为 false）属性的实例属性也会在 for-in 循环中返回，因为默认情况下我们手动定义的属性都是可枚举的。
+
+要获得对象上所有可枚举的实例属性，可以使用 Object.keys() 方法。这个方法接收一个对象作为参数，返回包含该对象所有可枚举属性名称的字符串数组。比如：
+
+```javascript
+function Person() {}
+
+Person.prototype.name = "Alice";
+Person.prototype.age = 29;
+Person.prototype.job = "Software Engineer";
+Person.prototype.sayName = function() {
+    console.log(this.name);
+};
+
+let keys = Object.keys(Person.prototype);
+console.log(keys); // "name,age,job,sayName"
+let p1 = new Person();
+p1.name = "Rob";
+p1.age = 31;
+let p1keys = Object.keys(p1);
+console.log(p1keys); // "[name,age]"
+```
+
+这里，keys 变量保存的数组中包含 "name"、"age"、"job" 和 "sayName"。这是正常情况下通过 for-in 返回的顺序。而在 Person 的实例上调用时，Object.keys() 返回的数组中只包含 "name" 和 "age" 两个属性。
+
+如果想列出所有实例属性（包括不可枚举的属性），可以使用 Object.getOwnPropertyNames()：
+
+```javascript
+let keys = Object.getOwnPropertyNames(Person.prototype);
+console.log(keys); // "[constructor,name,age,job,sayName]"
+```
+
+注意，返回的结果中包含了一个不可枚举的属性 constructor。Object.keys() 和 Object.getOwnPropertyNames() 在适当的时候都可用来代替 for-in 循环。
+
+因为以符号为键的属性没有名称的概念，所以就需要一个与 getOwnPropertyNames() 类似的方法。Object.getOwnPropertySymbols() 与 Object.getOwnPropertyNames() 类似，只是针对符号而已：
+
+```javascript
+let k1 = Symbol('k1'),
+    k2 = Symbol('k2');
+
+let o = {
+    [k1]: 'k1',
+    [k2]: 'k2'
+};
+
+console.log(Object.getOwnPropertySymbols(o));
+// [Symbol(k1), Symbol(k2)]
+```
+
+<br>
+
+### 4. 属性枚举顺序
+
+for-in 循环、Object.keys()、Object.getOwnPropertyNames()、Object.,getOwnPropertySymbols() 以及 Object.assign() 在属性枚举顺序方面有很大区别。for-in 循环和 Object.keys() 的枚举顺序是不确定的，取决于 JavaScript 引擎，可能因浏览器而异。
+
+Object.getOwnPropertyNames()、Object.getOwnPropertySymbols() 和 Object.assign() 的枚举顺序是确定性的。先以升序枚举数值键，然后以插入顺序枚举字符串键和符号键。在对象字面量中定义的键以它们逗号分隔的顺序插入。
+
+```javascript
+let k1 = Symbol('k1'),
+    k2 = Symbol('k2');
+
+let o = {
+    1: 1,
+    first: 'first',
+    [k1]: 'sym2',
+    second: 'second',
+    0: 0
+};
+
+o[k2] = 'sym2';
+o[3] = 3;
+o.third = 'third';
+o[2] = 2;
+
+console.log(Object.getOwnPropertyNames(o));
+// ["0", "1", "2", "3", "first", "second", "third"]
+
+console.log(Object.getOwnPropertySymbols(o));
+// [Symbol(k1), Symbol(k2)]
+```
+
+<br>
+
+### 5. 对象迭代
+
+静态方法 Object.values() 和 Object.entries() 用于将对象内容转换为序列化且可迭代的格式。这两个方法都接收对象，返回数组。Object.values() 返回对象值的数组，Object.entries() 返回键值对的数组。
+
+下面的示例展示了这两个方法：
+
+```javascript
+const o = {
+    foo: 'bar',
+    baz: 1,
+    qux: {}
+};
+
+console.log(Object.values(o));
+// ["bar", 1, {}]
+
+console.log(Object.entries(o));
+// [["foo", "bar"], ["baz", 1], ["qux", {}]]
+```
+
+注意，非字符串属性会被转换为字符串输出。另外，这两个方法执行对象的浅复制：
+
+```javascript
+const o = {
+    qux: {}
+};
+
+console.log(Object.values(o)[0] === o.qux);
+// true
+
+console.log(Object.entries(o)[0][1] === o.qux);
+// true
+```
+
+符号属性会被忽略：
+
+```javascript
+const sym = Symbol();
+const o = {
+    [sym]: 'foo'
+};
+
+console.log(Object.values(o));
+// []
+
+console.log(Object.entries(o));
+// []
+```
+
+ECMAScript 也提供了静态方法 Object.fromEntries()，可以基于键值对的集合构建对象。这个方法执行与 Object.entries() 相反的操作，如下所示：
+
+```javascript
+const obj = {
+    foo: 'bar',
+    baz: 'qux'
+};
+
+const objEntries = Object.entries(obj);
+
+console.log(objEntries);
+// [["foo", "bar"], ["baz", "qux"]]
+
+console.log(Object.fromEntries(objEntries));
+// { foo: "bar", baz: "qux" }
+```
+
+这个静态方法的参数是一个可迭代对象，包含任意个数大小为 2 的可迭代对象。在需要把 Map 实例转换为 Object 实例时，这个方法非常方便。因为 Map 迭代器的输出恰好与 fromEntries() 参数的签名完全匹配：
+
+```javascript
+const map = new Map().set('foo', 'bar');
+
+console.log(Object.fromEntries(map));
+// { foo: "bar" }
+```
+
+<br>
+
+### 6. 原型的动态性
+
+因为从原型上搜索值得过程是动态得，所以即使实例在修改原型之前已经存在，任何时候对原型对象所做的修改也会在实例上反映出来。下面是一个例子：
+
+```javascript
+let friend = new Person();
+
+Person.prototype.sayHi = function() {
+    console.log("hi");
+};
+
+friend.sayHi(); // "hi"，没问题
+```
+
+以上代码先创建一个 Person 实例并保存在 friend 中。然后一条语句在 Person.prototype 上添加了一个名为 sayHi() 的方法。虽然 friend 实例是在添加方法之前创建的，但它仍然可以访问这个方法。之所以会这样，主要原因是实例与原型之间松散的联系。在调用 friend.sayHi() 时，首先会从这个实例中搜索名为 sayHi 的属性。在没有找到的情况下，运行时会继续搜索原型对象。因为实例和原型之间的链接就是简单的指针，而不是保存的副本，所以会在原型上找到 sayHi 属性并返回这个属性保存的函数。
+
+虽然随时能给原型添加属性和方法，并能够立即反映在所有对象实例上，但这跟重写这个原型是两回事。实例的 [[Prototype]] 指针是在调用构造函数时自动赋值的，这个指针即使把原型修改为不同的对象也不会变。重写整个原型会切断最初原型与构造函数的联系，但实例引用的仍然是最初的原型。记住，实例只有指向原型的指针，没有指向构造函数的指针。来看下面的例子：
+
+```javascript
+function Person() {}
+
+let friend = new Person();
+Person.prototype = {
+    constructor: Person,
+    name: "Alice",
+    age: 29,
+    job: "Software Engineer",
+    sayName() {
+        console.log(this.name);
+    }
+};
+
+friend.sayName(); // 错误
+```
+
+在这个例子中，Person 的新实例是在重写原型对象之间创建的。在调用 friend.sayName() 的时候，会导致错误。这是因为 friend 指向的原型还是最初的原型，而这个原型上并没有 sayName 属性。下图展示了这里的原因。
+
+![](https://front-end-1257950569.cos.ap-guangzhou.myqcloud.com/JavaScript%20%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%EF%BC%88%E7%AC%AC5%E7%89%88%EF%BC%89/%E7%AC%AC8%E7%AB%A0%EF%BC%9A%E5%AF%B9%E8%B1%A1%E3%80%81%E7%B1%BB%E4%B8%8E%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/%E5%8E%9F%E5%9E%8B%E8%B5%8B%E5%80%BC%E5%89%8D%E5%90%8E.png)
+
+重写构造函数上的原型之后再创建的实例才会引用新的原型。而在此之前创建的实例仍然还会引用最初的原型。
+
+
+
+
+
+
 
 
 
