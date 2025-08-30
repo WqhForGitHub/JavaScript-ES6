@@ -1925,7 +1925,488 @@ friend.sayName(); // 错误
 
 重写构造函数上的原型之后再创建的实例才会引用新的原型。而在此之前创建的实例仍然还会引用最初的原型。
 
+### 7. 原生对象原型
 
+原型模式之所以重要，不仅体现在自定义类型上，还因为它也是实现所有原生引用类型的模式。所有原生引用类型的构造函数（包括 Object、Array、String 等）都在原型上定义了实例方法。比如，数组实例的 sort() 方法就是 Array.prototype 上定义的，而字符串包装对象的 substring() 方法也是在 String.prototype 上定义的，如下所示：
+
+```javascript
+console.log(typeof Array.prototype.sort); // "function"
+console.log(typeof String.prototype.substring); // "function"
+```
+
+通过原生对象的原型可以取得所有默认方法的引用，也可以给原生类型的实例定义新的方法。可以像修改自定义对象原型一样修改原生对象原型，因此随时可以添加方法。比如，下面的代码就给 String 原始值包装类型的实例添加了一个 startsWith() 方法：
+
+```javascript
+String.prototype.startsWith = function(text) {
+    return this.indexOf(text) === 0;
+};
+
+let msg = "Hello world!";
+console.log(msg.startsWith("Hello")); // true
+```
+
+如果给定字符串的开头出现了调用 startsWith() 方法时传入的文本，那么该方法会返回 true。因为这个方法是被定义在 String.prototype 上，所以当前环境下所有的字符串都可以使用这个方法。msg 是个字符串，在读取它的属性时，后台会自动创建 String 的包装实例，从而找到并调用 startsWith() 方法。
+
+> 注意
+>
+> 尽管可以这么做，但并不推荐在产品环境中修改原生对象原型。这样做很可能造成误会，而且可能引发命名冲突（比如一个名称在某个浏览器实现中不存在，在另一个实现中却存在）。另外还有可能意外重写原生的方法。推荐的做法是创建一个自定义的类，继承原生类型。
+
+### 8. 原型的问题
+
+原型模式也不是没有问题。首先，它弱化了向构造函数传递初始化参数的能力，会导致所有实例默认都取得相同的属性值。虽然这会带来不便，但还不是原型的最大问题。原型最主要的问题源自它的共享特性。
+
+我们知道，原型上的所有属性是在实例间共享的，这对函数来说比较合适。另外包含原始值的属性也还好，如前面的例子中所示，可以通过在实例上添加同名属性来简单地遮盖原型上的属性。真正的问题来自包含引用值的属性。来看下面的例子：
+
+```javascript
+function Person() {}
+
+Person.prototype = {
+    constructor: Person,
+    name: "Alice",
+    age: 29,
+    job: "Software Engineer",
+    friends: ["Shelby", "Court"],
+    sayName() {
+        console.log(this.name);
+    }
+};
+
+let person1 = new Person();
+let person2 = new Person();
+
+person1.friends.push("Van");
+
+console.log(person1.friends); // ["Shelby","Court","Van"]
+console.log(person2.friends); // ["Shelby","Court","Van"]
+console.log(person1.friends === person2.friends); // true
+```
+
+这里，Person.prototype 有一个名为 friends 的属性，它包含一个字符串数组。然后这里创建了两个 Person 的实例。person1.friends 通过 push 方法向数组中添加了一个字符串。由于这个 friends 属性存在于 Person.prototype 而非 person1 上，新加的这个字符串也会在（指向同一个数组的）person2.friends 上反映出来。如果这是有意在多个实例间共享数组，那没什么问题。但一般来说，不同的实例应该有属于自己的属性副本。这就是实际开发中通常不单独使用原型模式的原因。
+
+### 4. 原型继承
+
+继承是面向对象编程中讨论最多的话题。很多面向对象语言支持两种继承：接口继承和实现继承。前者只继承方法签名，后者继承实际的方法。接口继承在 ECMAScript 中是不可能的，因为函数没有签名。实现继承是 ECMAScript 唯一支持的继承方式，而这主要是通过原型链实现的。
+
+#### 1. 原型链
+
+ECMA-262 把原型链定义为 ECMAScript 的主要继承方式。其基本思想就是通过原型继承多个引用类型的属性和方法。重温一下构造函数、原型和实例的关系：每个构造函数都有一个原型对象，原型有一个属性指回构造函数，而实例有一个内部指针指向原型。如果原型是另一个类型的实例呢？那就意味着这个原型本身有一个内部指针指向另一个原型，相应地另一个原型也有一个指针指向另一个构造函数。这样就在实例和原型之间构造了一条原型链。这就是原型链的基本构想。
+
+实现原型链涉及如下代码模式：
+
+```javascript
+function SuperType() {
+    this.property = true;
+}
+
+SuperType.prototype.getSuperValue = function() {
+    return this.property;
+};
+
+function SubType() {
+    this.subproperty = false;
+}
+
+// 继承 SuperType
+SubType.prototype = new SuperType();
+
+SubType.prototype.getSubValue = function() {
+    return this.subproperty;
+};
+
+let instance = new SubType();
+console.log(instance.getSuperValue()); // true
+```
+
+以上代码定义了两个类型：SuperType 和 SubType。这两个类型分别定义了一个属性和一个方法。这两个类型的主要区别是 SubType 通过创建 SuperType 的实例并将其赋值给自己的原型 SubType.prototype 实现了对 SuperType 的继承。这个赋值重写了 SubType 最初的原型，将其替换为 SuperType 的实例。这意味着 SuperType 实例可以访问的所有属性和方法也会存在于 SubType.prototype。这样实现继承之后，代码紧接着又给 SubType.prototype，也就是这个 SuperType 的实例添加了一个新方法。最后又创建了 SubType 的实例并调用了它继承的 getSuperValue() 方法。下图展示了子类的实例与两个构造函数及其对应的原型之间的关系。
+
+![](https://front-end-1257950569.cos.ap-guangzhou.myqcloud.com/JavaScript%20%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%EF%BC%88%E7%AC%AC5%E7%89%88%EF%BC%89/%E7%AC%AC8%E7%AB%A0%EF%BC%9A%E5%AF%B9%E8%B1%A1%E3%80%81%E7%B1%BB%E4%B8%8E%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/%E5%AE%9E%E4%BE%8B%E3%80%81%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%92%8C%E5%8E%9F%E5%9E%8B%E7%9A%84%E5%85%B3%E7%B3%BB.png)
+
+这个例子中实现继承的关键，是 SubType 没有使用默认原型，而是将其替换成一个新的对象。这个新的对象恰好是 SuperType 的实例。这样一来，SubType 的实例不仅能从 SuperType 的实例中继承属性和方法，而且还与 SuperType 的原型挂上了钩。于是 instance（通过内部的 [[Prototype]]）指向 SubType.prototype，而 SubType.prototype（作为 SuperType 的实例又通过内部的 [[Prototype]]）指向 SuperType.prototype。注意，getSuperValue() 方法还在 SuperType.prototype 对象上，而 property 属性则在 SubType.prototype 上。这是因为 getSuperValue() 是一个原型方法，而 property 是一个实例属性。SubType.prototype 现在是 SuperType 的一个实例，因此 property 才会存储在它上面。还要注意，由于 SubType.prototype 的 constructor 属性被重写为指向 SuperType，所以 instance.constructor 也指向 SuperType。
+
+原型链扩展了前面描述的原型搜索机制。我们知道，在读取实例上的属性时，首先会在实例上搜索这个属性。如果没找到，则会继承搜索实例的原型。在通过原型链实现继承之后，搜索就可以继续向上，搜索原型的原型。对前面的例子而言，调用 instance.getSuperValue() 经过了 3 步搜索：instance、SubType.prototype 和 SuperType.prototype，最后一步才找到这个方法。对属性和方法的搜索会一致持续到原型链的末端。
+
+#### 2. 默认原型
+
+到现在为止，我们一直未提及原型链的最后一环。默认情况下，所有引用类型都继承自 Object，这也是通过原型链实现的。任何函数的默认原型都是一个 Object 的实例，这意味着这个实例有一个内部指针指向 Object.prototype。这也是为什么自定义类型能够继承包括 toString()、valueOf() 在内的所有默认方法的原因。因此前面的例子还有额外一层继承关系，下图展示了完整的原型链。
+
+![](https://front-end-1257950569.cos.ap-guangzhou.myqcloud.com/JavaScript%20%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%EF%BC%88%E7%AC%AC5%E7%89%88%EF%BC%89/%E7%AC%AC8%E7%AB%A0%EF%BC%9A%E5%AF%B9%E8%B1%A1%E3%80%81%E7%B1%BB%E4%B8%8E%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/%E5%AE%8C%E6%95%B4%E7%9A%84%E5%8E%9F%E5%9E%8B%E9%93%BE.png)
+
+SubType 继承 SuperType，而 SuperType 继承 Object。在调用 instance.toString() 时，实际上调用的是保存在 Object.prototype 上的方法。
+
+#### 3. 原型与继承关系
+
+原型与实例的关系可以通过两种方式来确定。第一种方式是使用 instanceof 操作符，如果一个实例的原型链种出现过相应的构造函数，则 instanceof 返回 true。如下例所示：
+
+```javascript
+console.log(instance instanceof Object); // true
+console.log(instance instanceof SuperType); // true
+console.log(instance instanceof SubType); // true
+```
+
+严格来讲，instance 是 Object、SuperType 和 SubType 的实例，因为 instance 的原型链中包含这些构造函数的原型。结果就是 instanceof 对所有这些构造函数都返回 true。
+
+确定这种关系的第二种方式是使用 isPrototypeOf() 方法。原型链中的每个原型都可以调用这个方法，如下例所示，只要原型链中包含这个原型，这个方法就返回 true：
+
+```javascript
+console.log(Object.prototype.isPrototypeOf(instance)); // true
+console.log(SuperType.prototype.isPrototypeOf(instance)); // true
+console.log(SubType.prototype.isPrototypeOf(instance)); // true
+```
+
+#### 4. 关于方法
+
+子类有时候需要覆盖父类的方法，或者增加父类没有的方法。为此，这些方法必须在原型赋值之后再添加到原型上。来看下面的例子：
+
+```javascript
+function SuperType() {
+    this.property = true;
+}
+
+SuperType.prototype.getSuperValue = function() {
+    return this.property;
+}
+
+function SubType() {
+    this.subproperty = false;
+}
+
+// 继承 SuperType
+SubType.prototype = new SuperType();
+
+// 新方法
+SubType.prototype.getSubValue = function() {
+    return this.subproperty;
+};
+
+// 覆盖已有的方法
+SubType.prototype.getSuperValue = function() {
+    return false;
+};
+
+let instance = new SubType();
+console.log(instance.getSuperValue()); // false
+```
+
+#### 5. 原型链的问题
+
+原型链虽然是实现继承的强大工具，但它有问题。主要问题出现在原型中包含引用值的时候。前面在谈到原型的问题时也提到过，原型中包含的引用值会在所有实例间共享，这也是为什么属性通常会在构造函数中而不是在原型上定义的原因。在使用原型实现继承时，原型实际上变成了另一个类型的实例。这意味着原先的实例属性摇身一变变成为了原型属性。下面的例子揭示了这个问题：
+
+```javascript
+function SuperType() {
+    this.colors = ["red", "blue", "green"];
+}
+
+function SubType() {}
+
+// 继承 SuperType
+SubType.prototype = new SuperType();
+
+let instance1 = new SubType();
+instance1.colors.push("black");
+console.log(instance1.colors); // ["red", "blue", "green", "black"]
+
+let instance2 = new SubType();
+console.log(instance2.colors); // ["red", "blue", "green", "black"]
+```
+
+在这个例子中，SuperType 构造函数定义了一个 colors 属性，其中包含一个数组（引用值）。每个 SuperType 的实例都会有自己的 colors 属性，包含自己的数组。但是，当 SuperType 通过原型继承 SuperType 后，SubType.prototype 变成了 SuperType 的一个实例，因而也获得了自己的 colors 属性。这类似于创建了 SubType.prototype.colors 属性。最终结果是，SubType 的所有实例都会共享这个 colors 属性。这一点通过 instance1.colors 上修改也能反映到 instance2.colors 上就可以看出来。
+
+原型链的第二个问题是，子类型在实例化时不能给父类型的构造函数传参。事实上，我们无法在不影响所有对象实例的情况下把参数传进父类的构造函数。再加上之前提到的原型中包含引用值得问题，就导致原型链基本不会被单独使用。
+
+# 3. 类
+
+前几节深入讲解了如何只使用 ECMAScript 5 的特性来模拟类似于类的行为。不难看出，各种策略都有自己的问题，也有相应的妥协。正因为如此，实现继承的代码也显得非常冗长和混乱。
+
+为解决这些问题，ECMAScript 通过 class 关键字提供了正式定义类的能力。虽然 ECMAScript 类可以支持正式的面向对象编程，但实际上它背后使用的仍然是原型和构造函数的概念。
+
+## 1. 类定义
+
+与函数类型相似，定义类也有两种主要方式：类声明和类表达式。这两种方式都使用 class 关键字加大括号：
+
+```javascript
+// 类声明
+class Person {}
+
+// 类表达式
+const Animal = class {};
+```
+
+与函数表达式类似，类表达式在它们被求值前也不能引用。不过，与函数定义不同的是，虽然函数声明可以提升，但类定义不能：
+
+```javascript
+console.log(FunctionExpression); // undefined
+var FunctionExpression = function() {};
+console.log(FunctionExpression); // function() {}
+
+console.log(FunctionDeclaration); // FunctionDeclaration() {}
+function FunctionDeclaration() {}
+console.log(FunctionDeclaration); // FunctionDeclaration() {}
+
+console.log(ClassExpression); // undefined
+var ClassExpression = class {};
+console.log(ClassExpression); // class {}
+
+console.log(ClassDeclaration); // ReferenceError: ClassDeclaration is not defined
+class ClassDeclaration {}
+console.log(ClassDeclaration); // class ClassDeclaration
+```
+
+虽然函数声明具有函数作用域，但类具有块作用域：
+
+```javascript
+{
+    function FunctionDeclaration() {}
+    class ClassDeclaration {}
+}
+
+console.log(FunctionDeclaration); // FunctionDeclaration() {}
+console.log(ClassDeclaration); // RefererenceError: ClassDeclaration is not defined
+```
+
+## 2. 类的构成
+
+类可以包含构造函数方法、实例方法、获取函数、设置函数和静态类方法，但这些都不是必需的。空的类定义照样有效。默认情况下，类定义中的代码都在严格模式下执行。
+
+与函数构造函数一样，多数编程风格建议类名的首字母要大写，以区别于通过它创建的实例（比如，通过 class Foo {} 创建实例 foo）：
+
+```javascript
+// 空类定义，有效
+class Foo {}
+
+// 有构造函数的类，有效
+class Bar {
+    constructor() {}
+}
+
+// 有获取函数的类，有效
+class Baz {
+    get myBaz() {}
+}
+
+// 有静态方法的类，有效
+class Qux {
+    static myQux() {}
+}
+```
+
+类表达式的名称是可选的。在把类表达式赋值给变量后，可以通过 name 属性取得类表达式的名称字符串。但不能在类表达式作用域外部访问这个标识符。
+
+```javascript
+let Person = class PersonName {
+    identify() {
+        console.log(Person.name, PersonName.name);
+    }
+}
+
+let p = new Person();
+
+p.identify(); // PersonName PersonName
+
+console.log(Person.name); // PersonName
+console.log(PersonName); // ReferenceError: PersonName is not defined
+```
+
+>注意
+>
+>大多数代码库会使用类声明而不是类表达式，因为类声明的语法写起来和用起来更自然。
+
+## 3. 类构造函数
+
+constructor 关键字用于在类定义块内部创建类的构造函数。方法名 constructor 会告诉解释器在使用 new 操作符创建类的新实例时，应该调用这个函数。构造函数的定义不是必需的，不定义构造函数相当于将构造函数定义为空函数。
+
+### 1. 实例化
+
+使用 new 操作符实例化 Person 的操作等于使用 new 调用其构造函数。唯一可感知的不同之处就是，JavaScript 解释器知道使用 new 和类意味着应该使用 constructor 函数进行实例化。
+
+使用 new 调用类的构造函数会执行如下操作。
+
+1. 在内存中创建一个新对象
+2. 这个新对象内部的 [[Prototype]] 指针被赋值为构造函数的 prototype 属性。
+3. 构造函数内部的 this 被赋值为这个新对象（即 this 指向新对象）。
+4. 执行构造函数内部的代码（给新对象添加属性）。
+5. 如果构造函数返回非空对象，则返回该对象。否则，返回刚创建的新对象。
+
+来看下面的例子：
+
+```javascript
+class Animal {}
+
+
+class Person {
+    constructor() {
+        console.log('person ctor');
+    }
+}
+
+class Vegetable {
+    constructor() {
+        this.color = 'orange';
+    }
+}
+
+let a = new Animal();
+
+let p = new Person(); // person ctor
+
+let v = new Vegetable();
+consoe.log(v.color); // orange
+```
+
+类实例化时传入的参数会用作构造函数的参数。如果不需要参数，则类名后面的括号也是可选的：
+
+```javascript
+class Person {
+    constructor(name) {
+        console.log(arguments.length);
+        this.name = name || null;
+    }
+}
+
+let p1 = new Person; // 0
+console.log(p1.name); // null
+
+let p2 = new Person(); // 0
+console.log(p2.name); // null
+
+let p3 = new Person('Jake'); // 1
+console.log(p3.name); // Jake
+```
+
+默认情况下，类构造函数会在执行之后返回 this 对象。构造函数返回的对象会被用作实例化的结果对象，如果没有什么引用新创建的 this 对象，那么这个对象会被销毁。不过，如果返回的不是 this 对象，而是其他对象，那么这个对象不会通过 instanceof 操作符检测出跟类有关联，因为这个对象的原型指针并没有被修改。
+
+```javascript
+class Person {
+    constructor(override) {
+        this.foo = 'foo';
+        if (override) {
+            return {
+                bar: 'bar'
+            };
+        }
+    }
+}
+
+let p1 = new Person(),
+    p2 = new Person(true);
+
+console.log(p1); // Person{ foo: 'foo' }
+console.log(p1 instanceof Person); // true
+
+console.log(p2); // { bar: 'bar' }
+console.log(p2 instanceof Person); // false
+```
+
+类构造函数与构造函数的主要区别是，调用类构造函数必须使用 new 操作符。而普通构造函数如果不使用 new 调用，那么就会以全局的 this（通常是 window）作为内部对象。调用类构造函数时如果忘了使用 new 则会抛出错误：
+
+```javascript
+function Person() {}
+
+class Animal {}
+
+// 把 window 作为 this 来构建实例
+let p = Person();
+
+let a = Animal();
+// TypeError：class constructor Animal cannot be invoked without 'new'
+```
+
+类构造函数没有什么特殊之处，实例化之后，它会成为普通的实例方法（但作为类构造函数，仍然要使用 new 调用）。因此，实例化之后可以在实例上引用它：
+
+```javascript
+class Person {}
+
+// 使用类创建一个新实例
+let p1 = new Person();
+
+p1.constructor();
+// TypeError: Class constructor Person cannot be invoked without 'new'
+
+// 使用对类构造函数的引用创建一个新实例
+let p2 = new p1.constructor();
+```
+
+### 2. 把类当成特殊函数
+
+ECMAScript 中没有正式的 Class 类型。从各方面来看，ECMAScript 类就是一种特殊函数。声明一个类之后，通过 typeof 操作符检测类标识符，表明它是一个函数：
+
+```javascript
+class Person {}
+
+console.log(Person); // class Person {}
+console.log(typeof Person); // function
+```
+
+类标识符有 prototype 属性，而这个原型也有一个 constructor 属性指向类自身：
+
+```javascript
+class Person {}
+
+console.log(Person.prototype); // { constructor: f() }
+console.log(Person === Person.prototype.constructor); // true
+```
+
+与普通构造函数一样，可以使用 instanceof 操作符检查构造函数原型是否存在于实例的原型链中：
+
+```javascript
+class Person {}
+
+let p = new Person();
+
+console.log(p instanceof Person); // true
+```
+
+由此可知，可以使用 instanceof 操作符检查一个对象与类构造函数，以确定这个对象是不是类的实例。只不过此时的类构造函数要使用类标识符，比如在前面的例子中要检查 p 和 Person。
+
+如前所述，类本身具有与普通构造函数一样的行为。在类的上下文中，类本身在使用 new 调用时就会被当成构造函数。重点在于，类中定义的 constructor 方法不会被当成构造函数，在对它使用 instanceof 操作符时会返回 false。但是，如果在创建实例时直接将类构造函数当成普通构造函数来使用，那么 instanceof 操作符的返回值会反转：
+
+```javascript
+class Person {}
+
+let p1 = new Person();
+
+console.log(p1.constructor === Person); // true
+console.log(p1 instanceof Person); // true
+console.log(p1 instanceof Person.constructor); // false
+
+let p2 = new Person.constructor();
+
+console.log(p2.constructor === Person); // false
+console.log(p2 instanceof Person); // false
+console.log(p2 instanceof Person.constructor); // true
+```
+
+类是 JavaScript 的一等公民，因此可以像其他对象或函数引用一样把类作为参数传递：
+
+```javascript
+// 类可以像函数一样在任何地方定义，比如在数组中
+let classList = [
+    class {
+        constructor(id) {
+            this.id_ = id;
+            console.log(`instance ${this.id_}`);
+        }
+    }
+];
+
+function createInstance(classDefinition, id) {
+    return new classDefinition(id);
+}
+
+let foo = createInstance(classList[0], 3141); // instance 3141
+```
+
+与立即调用函数表达式相似，类也可以立即实例化：
+
+```javascript
+// 因为是一个类表达式，所以类名是可选的
+let p = new class Foo {
+    constructor(x) {
+        console.log(x);
+    }
+}('bar'); // bar
+
+console.log(p); // Foo {}
+```
 
 
 
