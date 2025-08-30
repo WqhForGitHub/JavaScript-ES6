@@ -47,7 +47,192 @@ Singleton.getInstance = (function() {
 })();
 ```
 
+我们通过 Singleton.getInstance 来获取 Singleton 类的唯一对象，这种方式相对简单，但有一个问题，就是增加了这个类的不透明性，Singleton 类的使用者必须知道这是一个单例类，跟以往通过 new XXX 的方式来获取对象不同，这里偏要使用 Singleton.getInstance 来获取对象。
 
+接下来顺便进行一些小测试，来证明这个单例类是可以信赖的：
+
+```javascript
+var a = Singleton.getInstance('sven1');
+var b = Singleton.getInstance('sven2');
+
+alert(a === b); // true
+```
+
+虽然现在已经完成了一个单例模式的编写，但这段单例模式代码的意义并不大。从下一节开始，我们将一步步编写出更好的单例模式。
+
+<br>
+
+# 2. 透明的单例模式
+
+我们现在的目标是实现一个透明的单例类，用户从这个类中创建对象的时候，可以像使用其他任何普通类一样。在下面的例子中，我们将使用 CreateDiv 单例类，它的作用是负责在页面中创建唯一的 div 节点，代码如下：
+
+```javascript
+var CreateDiv = (function() {
+    var instance;
+    
+    var CreateDiv = function(html) {
+        if (instance) {
+            return instance;
+        }
+        this.html = html;
+        this.init();
+        return instance = this;
+    };
+    
+    CreateDiv.prototype.init = function() {
+        var div = document.createElement('div');
+        div.innerHTML = this.html;
+        document.body.appendChild(div);
+    };
+    
+    return CreateDiv;
+})();
+
+var a = new CreateDiv('sven1');
+var b = new CreateDiv('sven2');
+
+alert(a === b); // true
+```
+
+虽然现在完成了一个透明的单例类的编写，但它同样有一些缺点。
+
+为了把 instance 封装起来，我们使用了自执行的匿名函数和闭包，并且让这个匿名函数返回真正的 Singleton 构造方法，这增加了一些程序的复杂度，阅读起来也不是很舒服。
+
+观察现在的 Singleton 构造函数：
+
+```javascript
+var CreateDiv = function(html) {
+    if (instance) {
+        return instance;
+    }
+    this.html = html;
+    this.init();
+    return instance = this;
+};
+```
+
+在这段代码中，CreateDiv 的构造函数实际上负责了两件事情。第一是创建对象和执行初始化 init 方法，第二是保证只有要给对象。虽然我们目前还没有接触过单一职责原则的概念，但可以明确的是，这是一种不好的做法，至少这个构造函数看起来很奇怪。
+
+假设我们某天需要利用这个类，在页面中创建千千万万的 div，即要让这个类从单例类编程一个普通的可产生多个实例的类，那我们必须得改写 CreateDiv 构造函数，把控制创建唯一对象的那一段去掉，这种修改会给我们带来不必要的烦恼。
+
+<br>
+
+# 3. 用代理实现单例模式
+
+现在我们通过引入代理类的方式，来解决上面提到的问题。
+
+我们依然使用 4.2 节中的代码，首先在 CreateDiv 构造函数中，把负责管理单例的代码移除出去，使它成为一个普通的创建 div 的类：
+
+```javascript
+var CreateDiv = function(html) {
+    this.html = html;
+    this.init();
+};
+
+CreateDiv.prototype.init = function() {
+    var div = document.createElement('div');
+    div.innerHTML = this.html;
+    document.body.appendChild(div);
+};
+```
+
+接下来引入代理类 proxySingletonCreateDiv:
+
+```javascript
+var ProxySingletonCreateDiv = (function() {
+    var instance;
+    return function(html) {
+        if (!instance) {
+            instance = new CreateDiv(html);
+        }
+        return instance;
+    }
+})();
+
+var a = new ProxySingletonCreateDiv('sven1');
+var b = new ProxySingletonCreateDiv('sven2');
+
+alert(a === b);
+```
+
+通过引入代理类的方式，我们同样完成了一个单例模式的编写，跟之前不同的是，现在我们把负责管理单例的逻辑移到了代理类 proxySingletonCreateDiv 中。这样一来，CreateDiv 就变成了一个普通的类，它跟 proxySingletonCreateDiv 组合起来可以达到单例模式的效果。
+
+本例是缓存代理的应用之一，在第 6 章中，我们将继续了解代理带来的好处。
+
+<br>
+
+# 4. JavaScript 中的单例模式
+
+## 1. 使用命名空间
+
+适当地使用命名空间，并不会杜绝全局变量，但可以减少全局变量的数量。
+
+最简单的方法依然是用对象字面量的方式：
+
+```javascript
+var namespace1 = {
+    a: function() {
+        alert(1);
+    },
+    b: function() {
+        alert(2);
+    }
+};
+```
+
+把 a 和 b 都定义为 namespace1 的属性，这样可以减少变量和全局作用域打交道的机会。另外我们还可以动态地创建命名空间，代码如下：
+
+```javascript
+var MyApp = {};
+
+MyApp.namespace = function(name) {
+    var parts = name.split('.');
+    var current - MyApp;
+    for (var i in parts) {
+        if (!current[parts[i]]) {
+            current[parts[i]] = {};
+        }
+        current = current[parts[i]];
+    }
+};
+
+MyApp.namespace('event');
+MyApp.namespace('dom.style');
+
+console.dir(MyApp);
+```
+
+上述代码等价于：
+
+```javascript
+var MyApp = {
+    event: {},
+    dom: {
+        style: {}
+    }
+};
+```
+
+## 2. 使用闭包封装私有变量
+
+这种方法把一些变量封装在闭包的内部，只暴露一些接口跟外界通信：
+
+```javascript
+var user = (function() {
+    var __name = 'sven',
+        __age = 29;
+    
+    return {
+        getUserInfo: function() {
+            return __name + '-' + __age;
+        }
+    }
+})();
+```
+
+我们用下划线来约定私有变量 `__name` 和 `__age`，它们被封装在闭包产生的作用域中，外部是访问不到这两个变量的，这就避免了对全局的命令污染。
+
+<br>
 
 # deepseek
 
