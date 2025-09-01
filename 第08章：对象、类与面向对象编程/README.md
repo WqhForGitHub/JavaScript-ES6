@@ -2408,6 +2408,853 @@ let p = new class Foo {
 console.log(p); // Foo {}
 ```
 
+<br>
+
+## 4. 实例、原型和类成员
+
+类的语法可以非常方便地定义应该存在于实例上的成员、应该存在于原型上的成员，以及应该存在于类本身的成员。
+
+### 1. 实例成员
+
+每次通过 new 调用类标识符都会执行类构造函数。在构造函数内部，可以为新创建的实例（this）添加自有属性。至于添加什么样的属性，没有限制。另外，在构造函数执行完毕后，仍然可以给实例继续添加新成员。
+
+每个实例都对应一个唯一的成员对象，这意味着所有成员都不会在原型上共享：
+
+```javascript
+class Person {
+    constructor() {
+        // 这个例子先使用对象包装类型定义一个字符串
+        // 为的是在下面测试两个对象的相等性
+        this.name = new String('Jack');
+        this.sayName = () => console.log(this.name);
+        this.nicknames = ['Jake', 'J-Dog'];
+    }
+}
+
+let p1 = new Person(),
+    p2 = new Person();
+
+p1.sayName(); // Jack
+p2.sayName(); // Jack
+
+console.log(p1.name === p2.name); // false
+console.log(p1.sayName === p2.sayName); // false
+console.log(p1.nicknames === p2.nicknames); // false
+
+p1.name = p1.nicknames[0];
+p2.name = p2.nicknames[1];
+
+p1.sayName(); // Jake
+p2.sayName(); // J-Dog
+```
+
+### 2. 类字段声明
+
+鉴于在构造函数中为每个实例的初始成员赋值是非常常见的模式，ECMAScript 增加了类字段声明作为快捷方式。这样就可以直接在类体而非构造函数中初始化实例成员。下面这两种写法的结果相同：
+
+```javascript
+class PersonWithConstructor {
+    constructor() {
+        this.friendCount = 0;
+    }
+}
+
+class PersonWithClassFields {
+    friendCount = 0;
+}
+```
+
+如果定义了构造函数，则在构造函数中可以访问类字段声明：
+
+```javascript
+class Person {
+    friendCount;
+    
+    constructor() {
+        console.log(this.friendCount); // undefined
+    }
+}
+```
+
+### 3. 原型方法与访问器
+
+为了在实例间共享方法，类定义语法把在类块中定义的方法作为原型方法。
+
+```javascript
+class Person {
+    constructor() {
+        // 添加到 this 的所有内容都会存在于不同的实例上
+        this.locate = () => console.log('instance');
+    }
+    
+    // 在类块中定义的所有内容都会定义在类的原型上
+    locate() {
+        console.log('prototype');
+    }
+}
+
+let p = new Person();
+
+p.locate(); // instance
+Person.prototype.locate(); // prototype
+```
+
+可以把方法定义在类构造函数中或者类块中，但不能在类块中给原型添加原始值或对象作为成员数据：
+
+```javascript
+class Person {
+    name: 'Jake'
+}
+// Uncaught SyntaxError: Unexpected token
+```
+
+类方法等同于对象属性，因此可以使用字符串、符号或计算的值作为键：
+
+```javascript
+const symbolKey = Symbol('symbolKey');
+
+class Person {
+    stringKey() {
+        console.log('invoked stringKey');
+    }
+    [symbolKey]() {
+        console.log('invoked symbolKey');
+    }
+    ['computed' + 'Key']() {
+        console.log('invoked computedKey');
+    }
+}
+
+let p = new Person();
+
+p.stringKey(); // invoked stringKey
+p[symbolKey](); // invoked symbolKey
+p.computedKey(); // invoked computedKey
+```
+
+类定义也支持获取和设置访问器。语法和行为跟普通对象一样：
+
+```javascript
+class Person {
+    set name(newName) {
+        this.name+ = newName;
+    }
+    
+    get name() {
+        return this.name_;
+    }
+}
+
+let p = new Person();
+p.name = 'Jake';
+console.log(p.name); // Jake
+```
+
+### 4. 私有类成员
+
+JavaScript 中的私有类成员用于定义只能在类自身中访问的属性和方法。私有成员体现了类的封装性和信息隐藏，能防止在类外部直接访问和修改。要声明私有类成员，需要在成员名前面加上 #。下面的例子对比了公有和私有类成员：
+
+```javascript
+class Person {
+    #name = "Alice";
+    age = 30;
+    
+    getName() {
+        return this.#name;
+    }
+}
+
+const person = new Person();
+console.log(person.age); // 30
+console.log(person.getName()); // Alice
+```
+
+这个例子声明了公有成员 age 和私有成员 #name。公有方法 getName() 用于访问私有成员，这是保护 #name 的值只能间接访问的常见模式。
+
+为验证这个成员的确是私有的，下面的代码尝试了几种访问私有成员的方法，但都无法拿到值。
+
+```javascript
+console.log(person.#name);
+// SyntaxError: Private field '#name' must be declared in an enclosing class
+
+console.log(person['age']); // 30
+console.log(person['#name']); // undefined
+```
+
+私有类成员前面的 # 预示着特殊行为，JavaScript 在执行编译检查时会检查这个字符并为匹配的属性应用特殊规则。
+
+* 私有成员只能在定义它们的类中访问，不能在类外部访问和修改。
+* 私有成员不能被子类继承，仅限于定义它们的类使用。
+* 私有成员不能由派生类中的同名方法和属性访问或覆盖。
+* 构造函数不能私有。
+* 私有成员必须在类体内声明，不能在构造函数被调用期间或调用之后添加。
+
+下面的例子展示了针对私有成员的一些不正确的操作：
+
+```javascript
+class Person {
+    #age;
+    
+    constructor() {
+        this.#age = 30;
+        
+        // 不能删除私有成员
+        delete this.#age; // SyntaxError
+        
+        // 必须在类体重声明私有成员
+        this.#name = "Alice"; // SyntaxError
+    }
+}
+
+new Person();
+```
+
+字段、方法、获取方法、设置方法、异步函数和静态成员都可以私有。下面的例子展示了这些可能的私有成员：
+
+```javascript
+class Person {
+    #name;
+    #age;
+    static #counter = 0;
+	
+	constructor(name, age) {
+        this.#name = name;
+        this.#age = age;
+        Person.#incrementCounter();
+    }
+
+	// 私有方法
+	#getNameInUpperCase() {
+        return this.#name.toUpperCase();
+    }
+
+	// 私有获取方法
+	get #capitalizedName() {
+        return this.#getNameInUpperCase();
+    }
+	
+	// 公有获取方法
+	get name() {
+        return this.#name;
+    }
+
+	// 公有获取方法访问私有获取方法
+	get capitalizedName() {
+        return this.#capitalizeName;
+    }
+
+	// 静态方法
+	static getCounter() {
+        return Person.#counter;
+    }
+
+	// 私有静态方法
+	static #incrementCounter() {
+        Person.#counter += 1;
+    }
+}
+
+let p = new Person("Alice", 30);
+console.log(p.name); // Alice
+console.log(p.capitalizedName); // ALICE
+console.log(Person.getCounter()); // 1
+```
+
+### 5. 静态类方法
+
+可以在类上定义静态成员。这些成员通常用于执行不特定于实例的操作，也不要求存在类的实例。与原型成员类似，静态成员每个类上只能有一个。
+
+静态类成员在类定义中使用 static 关键字作为前缀。在静态方法中，this 引用类自身。其他所有约定跟原型成员一样：
+
+```javascript
+class Person {
+    // 定义在类上
+    static species = "sapiens";
+    
+    constructor() {
+        // 添加到 this 的所有内容都会存在于不同的实例上
+        this.locate = () => console.log('instance', this);
+    }
+    
+    // 定义在类的原型对象上
+    locate() {
+        console.log('prototype', this);
+    }
+    
+    // 定义在类上
+    static locate() {
+        console.log('class', this);
+    }
+}
+
+let p = new Person();
+
+console.log(Person.species); // sapiens
+
+p.locate(); // instance, Person {}
+Person.prototype.locate(); // prototype, {constructor: ...}
+Person.locate(); // class, class Person {}
+```
+
+静态类方法适合作为实例工厂：
+
+```javascript
+class Person {
+    constructor(age) {
+        this.age_ = age;
+    }
+    
+    sayAge() {
+        console.log(this.age_);
+    }
+    
+    static create() {
+        // 使用随机年龄创建并返回一个 Person 实例
+        return new Person(Math.floor(Math.random() * 100));
+    }
+}
+
+console.log(Person.create()); // Person { age_: ... }
+```
+
+### 6. 静态初始化块
+
+在静态初始化比较重要的时候，类也支持通过静态初始化块来编写复杂的代码以初始化静态成员。下面是一个简单的例子：
+
+```javascript
+class Person {
+    static name = "Alice"l
+    static age;
+    
+    static {
+        this.age = 30;
+    }
+}
+```
+
+静态初始化块提供了一种方式在类求值期间声明和执行任意初始化逻辑。在必须计算复杂静态值或检查已有静态值的情况下，初始化块可以派上用场。在使用静态初始化块时，要注意以下几点。
+
+* 可以在类中使用任意多个初始化块，多个块按出现的顺序求值。
+* 初始化块必须同步求值。
+* 初始化块的作用域按正常词法作用域对待。
+* 初始化块中的 this 引用类的构造函数。
+
+### 7. 迭代器与生成器方法
+
+类定义语法支持在原型和类本身定义生成器方法：
+
+```javascript
+class Person {
+    // 在原型上定义生成器方法
+    *createNicknameIterator() {
+        yield 'Jack';
+        yield 'Jake';
+        yield 'J-Dog';
+    }
+    
+    // 在类上定义生成器方法
+    static *createJobIterator() {
+        yield 'Butcher';
+        yield 'Baker';
+        yield 'Candlestick maker';
+    }
+}
+
+let jobIter = Person.createJobIterator();
+console.log(jobIter.next().value); // Butcher
+console.log(jobIter.next().value); // Baker
+console.log(jobIter.next().value); // Candlestick maker
+
+let p = new Person();
+let nicknameIter = p.createNickNameIterator();
+console.log(nicknameIter.next().value); // Jack
+console.log(nicknameIter.next().value); // Jake
+console.log(nicknameIter.next().value); // J-Dog
+```
+
+因为支持生成器方法，所以可以通过添加一个默认的迭代器把类实例变成可迭代对象：
+
+```javascript
+class Person {
+    constructor() {
+        this.nicknames = ['Jack', 'Jake', 'J-Dog'];
+    }
+    
+    *[Symbol.iterator]() {
+        yield *this.nicknames.entries();
+    }
+}l
+
+let p = new Person();
+for (let [idx, nickname] of p) {
+    console.log(nickname);
+}
+// Jack
+// Jake
+// J-Dog
+```
+
+也可以只返回迭代器实例：
+
+```javascript
+class Person {
+    constructor() {
+        this.nicknames = ['Jack', 'Jake', 'J-Dog'];
+    }
+    
+    [Symbol.iterator]() {
+        return this.nicknames.entries();
+    }
+}
+
+let p = new Person();
+for (let [idx, nickname] of p) {
+    console.log(nickname);
+}
+// Jack
+// Jake
+// J-Dog
+```
+
+## 5. 类继承
+
+本章前面花了大量篇幅讨论如何使用 ES5 的机制实现继承，而 ECMAScript 类原生支持了类继承机制。虽然继承使用的是新语法，但背后依旧使用的是原型链。
+
+### 1. 继承基础
+
+ECMAScript 类只继承单继承，也就是只能有一个父类。使用 extends 关键字可以继承任何拥有 [[Construct]] 和原型的对象。很大程度上，这意味着不仅可以继承类，也可以继承普通的构造函数（保持向后兼容）：
+
+```javascript
+class Vehicle {}
+
+// 继承类
+class Bus extends Vehicle {}
+
+let b = new Bus();
+console.log(b instanceof Bus); // true
+console.log(b instanceof Vehicle); // true
+
+function Person() {}
+
+// 继承普通构造函数
+class Engineer extends Person {}
+
+let e = new Engineer();
+console.log(e instanceof Engineer); // true
+console.log(e instanceof Person); // true
+```
+
+派生类都会通过原型链访问到类和原型上定义的方法。this 的值会反映调用相应方法的实例或者类：
+
+```javascript
+class Vehicle {
+    identityPrototype(id) {
+        console.log(id, this);
+    }
+    
+    static identifyClass(id) {
+        console.log(id, this);
+    }
+}
+
+class Bus extends Vehicle {}
+
+let v = new Vehicle();
+let b = new Bus();
+
+b.identifyPrototype('bus'); // bus, Bus {}
+v.identifyPrototype('vehicle'); // vehicle, Vehicle {}
+
+Bus.identifyClass('bus'); // bus, class Bus {}
+Vehicle.identifyClass('vehicle'); // vehicle, class Vehicle {}
+```
+
+>注意
+>
+>extends 关键字也可以在类表达式中使用，因此 let Bar = class extends Foo {} 是有效的语法。
+
+### 2. 构造函数、HomeObject 和 super()
+
+派生类的方法可以通过 super 关键字引用它们的原型。这个关键字只能在派生类中使用，而且仅限于构造函数、实例方法和静态方法内部。在类构造函数中使用 super 可以调用父类构造函数。
+
+```javascript
+class Vehicle {
+    constructor() {
+        this.hasEngine = true;
+    }
+}
+
+class Bus extends Vehicle {
+    constructor() {
+        // 不要在调用 super() 之前引用 this，否则会抛出 ReferenceError
+        super();
+        console.log(this instanceof Vehicle);
+        console.log(this);
+    }
+}
+
+new Bus();
+```
+
+在静态方法中可以通过 super 调用继承的类上定义的静态方法：
+
+```javascript
+class Vehicle {
+    static identify() {
+        console.log('vehicle');
+    }
+}
+
+class Bus extends Vehicle {
+    static identify() {
+        super.identify();
+    }
+}
+
+Bus.identify(); // vehicle
+```
+
+>注意
+>
+>ECMAScript 给类构造函数和静态方法添加了内部特性 [[HomeObject]]，这个特性是一个指针，指向定义该方法的对象。这个指针式自动赋值的，而且只能在 JavaScript 引擎内部访问。super 始终会定义为 [[HomeObject]] 的原型。
+
+在使用 super 时要注意几个问题。
+
+* super 只能在派生类构造函数和静态方法中使用。
+
+```javascript
+class Vehicle {
+    constructor() {
+        super();
+        // SyntaxError: 'super' keyword unexpected
+    }
+}
+```
+
+* 不能单独引用 super 关键字，要么用它调用构造函数，要么用它引用静态方法。
+
+```javascript
+class Vehicle {}
+
+class Bus extends Vehicle {
+    constructor() {
+        console.log(super);
+        // SyntaxError: 'super' keyword unexpected here
+    }
+}
+```
+
+* 调用 super() 会调用父类构造函数，并将返回的实例赋值给 this。
+
+```javascript
+class Vehicle {}
+
+class Bus extends Vehicle {
+    constructor() {
+        super();
+        
+        console.log(this instanceof Vehicle);
+    }
+}
+
+new Bus(); // true
+```
+
+* super() 的行为如同构造函数，如果需要给父类构造函数传参，则需要手动传入。
+
+```javascript
+class Vehicle {
+    constructor(licenssePlate) {
+        this.licenssePlate = licensePlate;
+    }
+}
+
+class Bus extends Vehicle {
+    constructor(licensePlate) {
+        super(licensePlate);
+    }
+}
+
+console.log(new Bus('1337H4X')); // Bus { licensePlate: '1337H4X' }
+```
+
+* 如果没有定义类构造函数，在实例化派生类时会隐式调用 super()，而且会传入所有传给派生类的参数。
+
+```javascript
+class Vehicle {
+    constructor(licensePlate) {
+        this.licensePlate = licensePlate;
+    }
+}
+
+class Bus extends Vehicle {}
+
+console.log(new Bus('1337H4X')); // Bus { licensePlate: '1337H4X' }
+```
+
+* 在类构造函数中，不能在调用 super() 之前引用 this。
+
+```javascript
+class Vehicle {}
+
+class Bus extends Vehicle {
+    constructor() {
+        console.log(this);
+    }
+}
+
+new Bus();
+// ReferenceError: Must call super constructor in derived class
+// before accessing 'this' or returning from derived constructor
+```
+
+* 如果在派生类中显式定义了构造函数，则要么必须在其中调用 super()，要么必须在其中返回一个对象。
+
+```javascript
+class Vehicle {}
+
+class Car extends Vehicle {}
+
+class Bus extends Vehicle {
+    constructor() {
+        super();
+    }
+}
+
+class Van extends Vehicle {
+    constructor() {
+        return {};
+    }
+}
+
+console.log(new Car()); // Car {}
+console.log(new Bus()); // Bus {}
+console.log(new Van()); // {}
+```
+
+### 3. 抽像基类
+
+有时候可以需要定义这样一个类：它可供其他类继承，但本身不会被实例化，这就是抽象基类。虽然 ECMAScript 没有专门支持这种类的语法，但通过 new.target 也很容易实现。new.target 保存通过 new 关键字调用的类或函数。通过在实例化时检测 new.target 是不是抽象基类，可以阻止对抽象基类的实例化：
+
+```javascript
+// 抽象基类
+class Vehicle {
+    constructor() {
+        console.log(new.target);
+        if (new.target === Vehicle) {
+            throw new Error('Vehicle cannot be directoy instantiated');
+        }
+    }
+}
+
+// 派生类
+class Bus extends Vehicle {}
+
+new Bus(); // class Bus {}
+new Vehicle(); // class Vehicle {}
+// Error: Vehicle cannot be directly instantiated
+```
+
+另外，通过在抽象基类构造函数中进行检查，可以要求派生类必须定义某个方法。因为原型方法在调用类构造函数之前就已经存在了，所以可以通过 this 关键字来检查相应的方法：
+
+```javascript
+// 抽象基类
+class Vehicle {
+    constructor() {
+        if (new.target === Vehicle) {
+            throw new Error('Vehicle cannot be directly instantiated');
+        }
+        
+        if (!this.foo) {
+            throw new Error('Inheriting class must define foo()');
+        }
+        
+        console.log('success!');
+    }
+}
+
+// 派生类
+class Bus extends Vehicle {
+    foo() {}
+}
+
+// 派生类
+class Van extends Vehicle {
+    foo() {}
+}
+
+// 派生类
+class Van extends Vehicle {}
+
+new Bus(); // success!
+new Van(); // Error: Inheriting class must define foo()
+```
+
+### 4. 继承内置类型
+
+ECMAScript 类为继承内置引用类型提供了顺畅的机制，开发者可以方便地扩展内置类型：
+
+```javascript
+class SuperArray extends Array {
+    shuffle() {
+        // 洗牌算法
+        for (let i = this.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this[i], this[j]] = [this[j], this[i]];
+        }
+    }
+}
+
+let a = new SuperArray(1, 2, 3, 4, 5);
+
+console.log(a instanceof Array); // true
+console.log(a instanceof SuperArray); // true
+```
+
+有些内置类型的方法会返回新实例。默认情况下，返回实例的类型与原始实例的类型是一致的：
+
+```javascript
+class SuperArray extends Array {}
+
+let a1 = new SuperArray(1, 2, 3, 4, 5);
+let a2 = a.filter(x => !!(x % 2));
+
+console.log(a1); // [1, 2, 3, 4, 5]
+console.log(a2); // [1, 3, 5]
+console.log(a1 instanceof SuperArray); // true
+console.log(a2 instanceof SuperArray); // true
+```
+
+如果想覆盖这个默认行为，则可以覆盖 Symbol.species 访问器，这个访问器决定在创建返回的实例时使用的类：
+
+```javascript
+class superArray extends Array {
+    static get [Symbol.species]() {
+        return Array;
+    }
+}
+
+let a1 = new SuperArray(1, 2, 3, 4, 5);
+let a2 = a1.filter(x => !!(x % 2));
+
+console.log(a1); // [1, 2, 3, 4, 5]
+console.log(a2); // [1, 3, 5]
+console.log(a1 instanceof SuperArray); // true
+console.log(a2 instanceof SuperArray); // false
+```
+
+### 5. 类混入
+
+把不同类的行为集中到一个类是一种常见的 JavaScript 模式。虽然 ECMAScript 没有显式支持多类继承，但通过现有特性可以轻松地模拟这种行为。
+
+>注意
+>
+>Object.assign() 方法是为了混入对象行为而设计地。只有在需要混入类的行为时有必要自己实现混入表达式。如果只是需要混入多个对象的属性，那么使用 Object.assign() 就可以了。
+
+在下面的代码片段中，extends 关键字后面是一个 JavaScript 表达式。任何可以解析为一个类或一个构造函数的表达式都是有效的。这个表达式会在求值类定义时被求值：
+
+```javascript
+class Vehicle {}
+
+function getParentClass() {
+    console.log('evaluated expression');
+    return Vehicle;
+}
+
+class Bus extends getParentClass() {}
+// 可求值的表达式
+```
+
+混入模式可以通过在要给表达式总连缀多个混入元素来实现，这个表达式最终会解析为一个可以被继承的类。如果 Person 类需要组合 A、B、C，则需要某种机制实现 B 继承 A，C 继承 B，而 Person 再继承 C，从而把 A、B、C 组合到这个超类中。实现这种模式有不同的策略。
+
+一个策略是定义一组可嵌套的函数，每个函数分别接收要给超类作为参数，而将混入类定义为这个参数的子类，并返回这个类。这些组合函数可以连缀调用，最终组合成超类表达式：
+
+```javascript
+class Vehicle {}
+
+let FooMixin = (Superclass) => class extends Superclass {
+    foo() {
+        console.log('foo');
+    }
+};
+let BarMixin = (Superclass) => class extends Superclass {
+    bar() {
+        console.log('bar');
+    }
+};
+let BazMixin = (Superclass) => class extends Superclass {
+    baz() {
+        console.log('baz')
+    }
+};
+
+class Bus extends FooMixin(BarMixin(BazMixin(Vehicle))) {}
+
+let b = new Bus();
+b.foo(); // foo
+b.bar(); // bar
+b.baz(); // baz
+```
+
+通过写一个辅助函数，可以把嵌套调用展开：
+
+```javascript
+class Vehicle {}
+
+let FooMixin = (SuperClass) => class extends SuperClass {
+    foo() {
+        console.log('foo');
+    }
+};
+let BarMixin = (Superclass) => class extends Superclass {
+    bar() {
+        console.log('bar');
+    }
+};
+let BazMixin = (Superclass) => class extends Superclass {
+    baz() {
+        console.log('baz');
+    }
+};
+
+function mix(BaseClass. ...Mixins) {
+    return Mixins.reduce((accumulator, current) => current(accumulator), BaseClass);
+}
+
+class Bus extends mix(Vehicle, FooMixin, BarMixin, BazMixin) {}
+
+let b = new Bus();
+b.foo(); // foo
+b.bar(); // bar
+b.baz(); // baz
+```
+
+>注意
+>
+>很多 JavaScript 框架（特别是 React）已经抛弃混入模式，转向了组合模式（把方法提取到独立的类和辅助对象中，然后把它们组合起来，但不使用继承）。这反映了那个众所周知的软件设计原则：组合胜过继承（composition over inheritance）。这个设计原则被很多人遵循，在代码设计中能提供极大的灵活性。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
