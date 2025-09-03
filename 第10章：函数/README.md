@@ -104,6 +104,8 @@ let multiply = (a, b) => return a * b;
 
 # 2. 函数名
 
+## name
+
 因为函数名就是指向函数的指针，所以它们跟其他包含对象指针的变量具有相同的行为。这意味着一个函数可以有多个名称，如下所示：
 
 ```javascript
@@ -160,6 +162,8 @@ console.log(propertyDescriptor.set.name); // set age
 
 # 3. 理解参数
 
+## arguments
+
 ECMAScript 函数的参数跟大多数其他语言不同。ECMAScript 函数既不关心传入的参数个数，也不关心这些参数的数据类型。定义函数时要接收两个参数，并不意味着调用时就传两个参数。你可以传一个、三个、甚至一个也不传，解释器都不会报错。
 
 之所以会这样，主要是因为 ECMAScript 函数的参数在内部表现为一个数组。函数被调用时总会接收一个数组，但函数并不关心这个数组中包含什么。如果数组中什么也没有，那没问题。如果数组的元素超出了要求，那也没问题。事实上，在使用 function 关键字定义（非箭头）函数时，可以在函数内部访问 arguments 对象，从中取得传进来的每个参数值。
@@ -182,7 +186,1117 @@ function sayHi() {
 }
 ```
 
-在重写后的代码中，没有命名参数。name 和 message 参数都不见了，但函数照样可以调用。这就表明，ECMAScript 函数的参数只是为了方便才写出来的，并不是必须写出来。与其他语言不同，在 ECMAScript 中，命名参数不会创建让之后的调用必须匹配的函数签名。这是因为根本不存在验证命名参数的机制。
+在重写后的代码中，没有命名参数。name 和 message 参数都不见了，但函数照样可以调用。这就表明，ECMAScript 函数的参数只是为了方便才写出来的，并不是必须写出来。与其他语言不同，在 ECMAScript 中，命名参数不会创建让之后的调用必须匹配的函数签名。
+
+也可以通过 arguments 对象的 length 属性检查传入的参数个数。下面的例子展示了在每调用一个函数时，都会打印出传入的参数个数：
+
+```javascript
+function howManyArgs() {
+    console.log(arguments.length);
+}
+
+howManyArgs("string", 45); // 2
+howManyArgs(); // 0
+howManyArgs(12); // 1
+```
+
+这个例子分别打印出 2、0 和 1（按顺序）。既然如此，那么开发者可以想传多少参数就传多少参数。比如：
+
+```javascript
+function doAdd() {
+    if (arguments.length === 1) {
+        console.log(arguments[0] + 10);
+    } else if (arguments.lnegth === 2) {
+        console.log(arguments[0] + arguments[1]);
+    }
+}
+
+doAdd(10); // 20
+doAdd(30, 20); // 50
+```
+
+这个函数 doAdd() 在只传一个参数时会加 10，在传两个参数时会将它们相加，然后返回。因此 doAdd(10) 返回 20，而 doAdd(30, 20) 返回 50。虽然不像真正的函数重载那么明确，但这已经足以弥补 ECMAScript 在这方面的缺失了。
+
+还有一个必须理解的重点，那就是 arguments 对象可以跟命名参数一起使用，比如：
+
+```javascript
+function doAdd(num1, num2) {
+    if (arguments.length === 1) {
+        console.log(num1 + 10);
+    } else if (arguments.length === 2) {
+        console.log(arguments[0] + num2);
+    }
+}
+```
+
+这个 doAdd() 函数同时使用了两个命名参数和 arguments 对象。命名参数 num1 保存着与 arguments[0] 一样的值，因此使用谁都无所谓。（同样，num2 也保存着跟 arguments[1] 一样的值。）
+
+arguments 对象的另一个有意思的地方，就是它的值始终会与对应的命名参数同步。来看下面的例子：
+
+```javascript
+function doAdd(num1, num2) {
+    arguments[1] = 10;
+    console.log(arguments[0] + num2);
+}
+```
+
+这个 doAdd() 函数把第二个参数的值重写为 10。因为 arguments 对象的值会自动同步到对应的命名参数，所以修改 arguments[1] 也会修改 num2 的值，因此两者的值都是 10。但这并不意味着它们都访问同一个内存地址，它们在内存中还是分开的，只不过保持同步而已。另外还要记住一点：如果只传了一个参数，然后把 arguments[1] 设置为某个值，那么这个值并不会反映到第二个命名参数。这是因为 arguments 对象的长度是根据传入的参数个数，而非定义函数时给出的命名参数个人确定的。
+
+对于命名参数而言，如果调用函数时没有传这个参数，那么它的值就是 undefined。这就类似于定义了变量而没有初始化。比如只给 doAdd() 传了一个参数，那么 num2 的值就是 undefined。
+
+严格模式下，arguments 会有一些变化。首先，像前面那样给 arguments[1] 赋值不会影响 num2 的值。就算把 arguments[1] 设置为 10，num2 的值仍然还是传入的值。其次，在函数中尝试重写 arguments 对象会导致语法错误。（代码也不会执行。）
+
+## 箭头函数中的参数
+
+如果函数是使用箭头语法定义的，那么传给函数的参数将不能使用 arguments 关键字访问，而只能通过定义的命名参数访问。
+
+```javascript
+function foo() {
+    console.log(arguments[0]);
+}
+foo(5); // 5
+
+let bar = () => {
+    console.log(arguments[0]);
+};
+bar(5); // ReferenceError: argument is not defined
+```
+
+虽然箭头函数中没有 arguments 对象，但可以在包装函数中把它提供给箭头函数：
+
+```javascript
+function foo() {
+    let bar = () => {
+        console.log(arguments[0]); // 5
+    };
+    bar();
+}
+
+foo(5);
+```
+
+>注意
+>
+>ECMAScript 中的所有参数都是按值传递的，不可能按引用传递参数。如果把对象作为参数传递，那么传递的值就是这个对象的引用。
+
+# 4. 没有重载
+
+ECMAScript 函数不能像在传统编程中那样重载。在 Java 等其他语言中，一个函数可以有两个定义，只要签名（接收参数的类型和数量）不同就行。如前所述，ECMAScript 函数没有签名，因为参数是由包含零个或多个值的数组表示的。没有函数签名，自然也就没有重载。
+
+如果在 ECMAScript 中定义了两个同名函数，则后定义的会覆盖先定义的。来看下面的例子：
+
+```javascript
+function addSomeNumber(num) {
+    return num + 100;
+}
+
+function addSomeNumber(num) {
+    return num + 200;
+}
+
+let result = addSomeNumber(100); // 300
+```
+
+这里，函数 addSomeNumber() 被定义了两次。第一个版本给参数加 100，第二个版本加 200。最后一行调用这个函数时，返回了 300，因为第二个定义覆盖了第一个定义。
+
+前面也提到过，可以通过检查参数的类型和数量，然后分别执行不同的逻辑来模拟函数重载。
+
+把函数名当成指针也有助于理解为什么 ECMAScript 没有函数重载。在前面的例子中，定义两个同名的函数显然会导致后定义的重写先定义的。而那个例子几乎跟下面这个是一样的：
+
+```javascript
+let addSomeNumber = function(num) {
+    return num + 100;
+};
+
+addSomeNumber = function(num) {
+    return num + 200;
+};
+
+let result = addSomeNumber(100); // 300
+```
+
+看这段代码应该更容易理解发生了什么。在创建第二个函数时，变量 addSomeNumber 被重写成保存第二个函数对象了。
+
+# 5. 默认参数值
+
+在旧版本 ECMAScript 中，实现默认参数的一种常用方式就是检测某个参数是否等于 undefined，如果是则意味着没有传这个参数，那就给它赋一个值：
+
+```javascript
+function makeKing(name) {
+    name = (typeof name !== 'undefined') ? name : 'Henry';
+    return `King ${name} VIII`;
+}
+
+console.log(makeKing()); // 'King Henry VIII'
+console.log(makeKing('Louis')); // 'King Louis VIII'
+```
+
+现在不用这么麻烦了，我们可以显式定义默认参数。下面就是与前面代码等价的写法，只要在函数定义中的参数后面用 = 就可以为参数赋一个默认值：
+
+```javascript
+function makeKing(name = 'Henry') {
+    return `King ${name} VIII`;
+}
+
+console.log(makeKing('Louis')); // 'King Louis VIII'
+console.log(makeKing()); // 'King Henry VIII'
+```
+
+给参数传 undefined 相当于没有传值，不过这样可以利用多个独立的默认值：
+
+```javascript
+function makeKing(name = "Henry") {
+    name = "Louis";
+    return `King ${arguments[0]}`;
+}
+
+console.log(makeKing()); // 'King undefined'
+console.log(makeKing('Louis')); // 'King Louis'
+```
+
+默认参数值并不限于原始值或对象类型，也可以使用调用函数返回的值：
+
+```javascript
+let romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+let orinality = 0;
+
+function getNumerals() {
+    // 每次调用后递增
+    return romanNumerals[ordinality++];
+}
+
+function makeKing(name = 'Henry', numerals = getNumerals()) {
+    return `King ${name} ${numerals}`;
+}
+
+console.log(makeKing()); // 'King Henry I'
+console.log(makeKing('Louis', 'XVI')); // 'King Louis XVI'
+console.log(makeKing()); // 'King Henry II'
+console.log(makeKing()); // 'King Henry III'
+```
+
+函数的默认参数只有在函数被调用时才会求值，不会在函数定义时求值。而且，计算默认值的函数只有在调用函数但未传相应参数时才会被调用。
+
+箭头函数同样也可以这样使用默认参数，只不过在只有一个参数时，就必须使用括号而不能省略了：
+
+```javascript
+let makeKing = (name = 'Henry') => `King ${name}`;
+
+console.log(makeKing()); // King Henry
+```
+
+## 默认参数作用域与暂时性死区
+
+因为在求值默认参数时可以定义对象，也可以动态调用函数，所以函数参数是在某个作用域中求值的。
+
+给多个参数定义默认值实际上跟使用 let 关键字顺序声明变量一样。来看下面的例子：
+
+```javascript
+function makeKinig(name = 'Henry', numerals = 'VIII') {
+    return `King ${name} ${numerals}`;
+}
+
+console.log(makeKing()); // King Henry VIII
+```
+
+这里的默认参数会按照定义它们的顺序依次被初始化。可以依照如下示例想象一下这个过程：
+
+```javascript
+function makeKing() {
+    let name = 'Henry';
+    let numerals = 'VIII';
+    
+    return `King ${name} ${numerals}`;
+}
+```
+
+因为参数是按顺序初始化的，所以后定义默认值的参数可以引用先定义的参数。看下面这个例子：
+
+```javascript
+function makeKing(name = 'Henry', numerals = name) {
+    return `King ${name} ${numerals}`;
+}
+
+console.log(makeKing()); // King Henry Henry
+```
+
+参数初始化顺序遵循暂时性死区规则，即前面定义的参数不能引用后面定义的。像这样就会抛出错误：
+
+```javascript
+// 调用时不传第一个参数会报错
+function makeKing(name = numerals, numerals = 'VIII') {
+    return `King ${name} ${numerals}`;
+}
+```
+
+参数也存在于自己的作用域中，它们不能引用函数体的作用域：
+
+```javascript
+// 调用时不传第二个参数会报错
+function makeKing(name = 'Henry', numerals = defaultNumeral) {
+    let defaultNumeral = 'VIII';
+    return `King ${name} ${numerals}`;
+}
+```
+
+# 6. 参数扩展与收集
+
+使用扩展操作符（...）可以非常简洁地操作和收集数据。扩展操作符最有用地场景就是函数定义中的参数列表，在这里它可以充分利用这门语言的弱类型及参数长度可变的特点。扩展操作符既可以用于调用函数时传参，也可以用于定义函数参数。
+
+## 1. 扩展参数
+
+在给函数传参时，有时候可能不需要传一个数组，而是要分别传入数组的元素。
+
+假设有如下函数定义，它会将所有传入的参数累加起来：
+
+```javascript
+let values = [1, 2, 3, 4];
+
+function getSum() {
+    let sum = 0;
+    for (let i = 0; i < arguments.length; i++) {
+        sum += arguments[i];
+    }
+    return sum;
+}
+```
+
+这个函数希望将所有加数逐个传进来，然后通过迭代 arguments 对象来实现累加。如果不使用扩展操作符，想把定义在这个函数外面的数组拆开，就得借助于 apply() 方法：
+
+```javascript
+console.log(getSum.apply(null, values)); // 10
+```
+
+通过扩展操作符能够极为简洁地实现这种操作。对可迭代对象应用扩展操作符，并将其作为一个参数传入，可以将可迭代对象拆分，并将迭代返回地每个值单独传入。
+
+比如，使用扩展操作符可以将前面例子中地数组像这样直接传给函数：
+
+```javascript
+console.log(getSum(...values)); // 10
+```
+
+因为数组的长度已知，所以在使用扩展运算符传参的时候，并不妨碍在其前面或后面再传其他的值，包括使用扩展操作符传其他参数：
+
+```javascript
+console.log(getSum(-1, ...values)); // 9
+console.log(getSum(...values. 5)); // 15
+console.log(getSum(-1, ...values, 5)); // 14
+console.log(getSum(...values, ...[5, 6, 7])); // 28
+```
+
+对函数中的 arguments 对象而言，它并不知道扩展操作符的存在，而是按照调用函数时传入的参数接收每一个值：
+
+```javascript
+let values = [1, 2, 3, 4];
+
+function countArguments() {
+    console.log(arguments.length);
+}
+
+countArguments(-1, ...values); // 5
+countArguments(...values, 5); // 5
+countArguments(-1, ...values, 5); // 6
+countArguments(...values, ...[5, 6, 7]); // 7
+```
+
+arguments 对象只是消费扩展操作符的一种方式。在普通函数和箭头函数中，也可以将扩展操作符用于命名参数，当然同时也可以使用默认参数：
+
+```javascript
+function getProduct(a, b, c = 1) {
+    return a * b * c;
+}
+
+let getSum = (a, b, c = 0) => {
+    return a + b + c;
+}
+
+console.log(getProduct(...[1, 2])); // 2
+console.log(getProduct(...[1, 2, 3])); // 6
+console.log(getProduct(...[1, 2, 3, 4])); // 6
+
+console.log(getSum(...[0, 1])); // 1
+console.log(getSum(...[0, 1, 2])); // 3
+console.log(getSum(...[0, 1, 2, 3])); // 3
+```
+
+## 2. 收集参数
+
+在构思函数定义时，可以使用扩展操作符把不同长度的独立参数组合为一个数组。这有点类似 arguments 对象的构造机制，只不过收集参数的结果会得到一个 Array 实例。
+
+```javascript
+function getSum(...values) {
+    // 顺序累加 values 中的所有值
+    // 初始值的总和为 0
+    return values.reduce((x, y) => x + y, 0);
+}
+
+console.log(getSum(1, 2, 3)); // 6
+```
+
+收集参数的前面如果还有命名参数，则只会收集剩余的参数。如果没有则会得到空数组。因为收集参数的结果可变，所以只能把它作为最后一个参数：
+
+```javascript
+// 不可以
+function getProduct(...values, lastValue) {}
+
+// 可以
+function ignoreFirst(firstValue, ...values) {
+    console.log(values);
+}
+
+ignoreFirst(); // []
+ignoreFirst(1); // []
+ignoreFirst(1, 2); // [2]
+ignoreFirst(1, 2, 3); // [2, 3]
+```
+
+箭头函数虽然不支持 arguments 对象，但支持收集参数的定义方式，因此也可以实现与使用 arguments 一样的逻辑：
+
+```javascript
+let getSum = (...values) => {
+    return values.reduce((x, y) => x + y, 0);
+}
+
+console.log(getSum(1, 2, 3)); // 6
+```
+
+另外，使用收集参数并不影响 arguments 对象，它仍然反映调用时传给函数的参数：
+
+```javascript
+function getSum(...values) {
+    console.log(arguments.length); // 3
+    console.log(arguments); // [1, 2, 3]
+    console.log(values); // [1, 2, 3]
+}
+
+console.log(getSum(1, 2, 3));
+```
+
+# 7. 函数声明与函数表达式
+
+我们知道，定义函数有两种方式：函数声明和函数表达式。函数声明是这样的：
+
+```javascript
+function functionName(arg0, arg1, arg2) {
+    // 函数体
+}
+```
+
+函数声明的关键特点在函数声明提升，即函数声明会在代码执行之前获得定义。这意味着函数声明可以出现在调用它的代码之后：
+
+```javascript
+sayHi();
+function sayHi() {
+    console.log("Hi!");
+}
+```
+
+这个例子不会抛出错误，因为 JavaScript 引擎会先读取函数声明，然后再执行代码。
+
+第二种创建函数的方式就是函数表达式。函数表达式有几种不同的形式，最常见的是这样的：
+
+```javascript
+let functionName = function(arg0, arg1, arg2) {
+    // 函数体
+};
+```
+
+函数表达式看起来就像一个普通的变量定义和赋值，即创建一个函数再把它赋值给一个变量 functionName。这样创建的函数叫做匿名函数（anonymous funciton），因为 function 关键字后面没有标识符。（匿名函数有时候也被称为 lambda 函数。）未赋值给其他变量的匿名函数的 name 属性是空字符串。
+
+函数表达式跟 JavaScript 中的其他表达式一样，需要先赋值再使用。下面的例子会导致错误：
+
+```javascript
+sayHi(); // Error! function doesn't exist yet
+let sayHi = function() {
+    console.log("Hi!");
+};
+```
+
+理解函数声明与函数表达式之间的区别，关键是理解函数声明提升。比如，以下代码的执行结果可能会出乎意料：
+
+```javascript
+// 千万别这样做!
+if (condition) {
+    function sayHi() {
+        console.log('Hi!');
+    }
+} else {
+    function sayHi() {
+        console.log('Yo!');
+    }
+}
+```
+
+这段代码看起来很正常，就是如果 condition 为 true，则使用第一个 sayHi() 定义。否则，就使用第二个。事实上，这种写法在 ECMAScript 中不是有效的语法。JavaScript 引擎会尝试将其纠正为适当的声明。问题在于浏览器纠正这个问题的方式并不一致。所以这种写法很危险，不要使用。不过，如果把上面的函数声明换成函数表达式就没问题了：
+
+```javascript
+// 没问题
+let sayHi;
+if (condition) {
+    sayHi = function() {
+        console.log("Hi!");
+    };
+} else {
+    sayHi = function() {
+        console.log("Yo!");
+    };
+}
+```
+
+这个例子可以如预期一样，根据 condition 的值为变量 sayHi 赋予相应的函数。
+
+创建函数并赋值给变量的能力也可以用于在一个函数中把另一个函数当作值返回：
+
+```javascript
+function createComparisonFunction(propertyName) {
+    return function(object1, object2) {
+        let value1 = object[propertyName];
+        let value2 = object[propertyName];
+        
+        if (value1 < value2) {
+            return -1;
+        } else if (value1 > value2) {
+            return 1;
+        } else {
+            return 0;
+        }
+    };
+}
+```
+
+这里的 createComparisonFunction() 函数返回一个匿名函数，这个匿名函数可以被赋值给一个变量，也可以直接调用。但在 createComparsionFunction() 内部，那个函数是匿名的。任何时候，只要函数被当作值来使用，它就是一个函数表达式。本章后面会介绍，这并不是使用函数表达式的唯一方式。
+
+# 8. 函数作为值
+
+因为函数名在 ECMAScript 中就是变量，所以函数可以用在任何可以使用变量的地方。这意味着不仅可以把函数作为参数传给另一个函数，还可以在一个函数中返回另一个函数。来看下面的例子：
+
+```javascript
+function callSomeFunction(someFunction, someArgument) {
+    return someFunction(someArgument);
+}
+```
+
+这个函数接收两个参数。第一个参数应该是一个函数，第二个参数应该是要传给这个函数的参数值。任何函数都可以像下面这样作为参数传递：
+
+```javascript
+function add10(num) {
+    return num + 10;
+}
+
+let result1 = callSomeFunction(add10, 10);
+console.log(result1); // 20
+
+function getGreeting(name) {
+    return "Hello, " + name;
+}
+
+let result2 = callSomeFunction(getGreeting, "Alice");
+console.log(result2); // "Hello, Alice"
+```
+
+callSomeFunction() 函数是通用的，第一个参数传入的是什么函数都可以，而且她始终返回调用作为第一个参数传入的函数的结果。要注意的是，如果是访问函数而不是调用函数，那必须不带括号，所以传给 callSomeFunction() 的必须是 add10 和 getGreeting，而不能是它们的执行结果。
+
+从一个函数中返回另一个函数也是可以的，而且非常有用。假设有一个包含对象的数组，而我们想按照任意对象属性对数组进行排序。为此，可以定义一个 sort() 方法需要的比较函数，它接收两个参数，即要比较的值。但这个比较函数还需要想办法确定根据哪个属性来排序。这个问题可以通过定义一个根据属性名来创建比较函数的函数来解决。比如：
+
+```javascript
+function createComparisonFunction(propertyName) {
+    return function(object1, object2) {
+        let value1 = object1[property];
+        let value2 = object2[property];
+        
+        if (value1 < value2) {
+            return -1;
+        } else if (value1 > value2) {
+            return 1;
+        } else {
+            return 0;
+        }
+    };
+}
+```
+
+这个函数的语法乍一看比较复杂，但实际上就是在一个函数中返回另一个函数，注意那个 return 操作符。内部函数可以访问 propertyName 参数，并通过中括号语法取得比较的对象的相应属性值。取得属性值以后，再按照 sort() 方法的需要返回比较值就行了。这个函数可以像下面这样使用：
+
+```javascript
+let data = [
+    {
+        name: "Bob",
+        age: 28
+    },
+    {
+        name: "Alice",
+        age: 29
+    }
+];
+
+data.sort(createComparisonFunction("name"));
+console.log(daa[0].name); // Alice
+
+data.sort(createComparisonFunction("age"));
+console.log(data[0].name); // Bob
+```
+
+在上面代码中，数组 data 中包含两个结构相同的对象。每个对象都有一个 name 属性和一个 age 属性。默认情况下，sort() 方法要对这两个对象执行 toString()，然后再决定它们的顺序，但这样得不到有意义的结果。而通过调用 createComparisonFunction("name") 来创建一个比较函数，就可以根据每个对象 name 属性的值来排序，结果 name 属性值为 "Alice"、age 属性值为 29 的对象会排在前面。而调用 createComparisonFunction("age") 则会创建一个根据每个对象 age 属性的值来排序的比较函数，结果 name 属性值为 "Bob"、age 属性值为 28 的对象会排在前面。
+
+# 9. 函数内部
+
+## arguments.callee
+
+## arguments.caller
+
+## new.target
+
+在 ECMAScript 中，函数内部存在三个特殊的对象：arguments、this 和 new.target。
+
+## 1. arguments
+
+arguments 对象前面讨论过很多次了，它是一个类数组对象，包含调用函数时传入的所有参数。这个对象只有以 function 关键字定义函数（相对于使用箭头语法创建函数）时才会有。虽然主要用于包含函数参数，但 arguments 对象其实还有一个 callee 属性，是一个指向 arguments 对象所在函数的指针。来看下面这个经典的阶乘函数：
+
+```javascript
+function factorial(num) {
+    if (num <= 1) {
+        return 1;
+    } else {
+        return num * factorial(num - 1);
+    }
+}
+```
+
+阶乘计算是递归性的，只要给函数一个名称，而且这个名称不会变，这样定义就没有问题。但是，这个函数要正确执行必须保证函数名是 factorial，从而导致了紧密耦合。使用 arguments.callee 可以让函数逻辑与函数名解耦：
+
+```javascript
+function factorial(num) {
+    if (num <= 1) {
+        return 1;
+    } else {
+        return num * arguments.callee(num - 1);
+    }
+}
+```
+
+这个重写之后的 factorial() 函数已经用 arguments.callee 代替了之前硬编码的 factorial。这意味着无论函数叫什么名称，都可以引用正确的函数。考虑下面的情况：
+
+```javascript
+let trueFactorial = factorial;
+
+factorial = function() {
+    return 0;
+};
+
+console.log(trueFactorial(5)); // 120
+console.log(factorial(5)); // 0
+```
+
+这里，trueFactorial 变量被赋值为 factorial，实际上把同一个函数的指针又保存到了另一个位置。然后，factorial() 函数又被重写为一个返回 0 的函数。如果像 factorial() 最初的版本那样不使用 arugments.callee，那么像上面这样调用 trueFactorial() 就会返回 0。不过，通过将函数与名称解耦，trueFactorial() 就可以正确计算阶乘，而 factorial() 则只能返回 0。
+
+## 2. this
+
+另一个特殊的对象是 this，它在标准函数和箭头函数中有不同的行为。
+
+在标准函数中，this 引用的是把函数当成方法调用的上下文对象，这时候通常称其为 this 值（在网页的全局上下文中调用函数时，this 指向 window）。来看下面的例子：
+
+```javascript
+window.color = 'red';
+let o = {
+    color: 'blue'
+};
+
+function sayColor() {
+    console.log(this.color);
+}
+
+sayColor(); // 'red'
+
+o.sayColor = sayColor;
+o.sayColor(); // 'blue'
+```
+
+定义在全局上下文中的函数 sayColor() 引用了 this 对象。这个 this 到底引用哪个对象必须到函数被调用时才能确定。因此这个值在代码执行的过程中可能会变。如果在全局上下文中调用 sayColor()，这结果会输出 "red"，因为 this 指向 window，this.color 相当于 window.color。而在把 sayColor() 赋值给 o 之后再调用 o.sayColor()，this 会指向 o，即 this.color 相当于 o.color，所以会显示 "blue"。
+
+在箭头函数中，this 引用的是定义箭头函数的上下文。下面的例子演示了这一点。在对 sayColor() 的两次调用时，this 引用的都是 window 对象，因为这个箭头函数是在 window 上下文中定义的：
+
+```javascript
+window.color = 'red';
+let o = {
+    color: 'blue'
+};
+
+let sayColor = () => console.log(this.color);
+
+sayColor(); // 'red'
+
+o.sayColor = sayColor;
+o.sayColor(); // 'red'
+```
+
+在事件回调或定时回调中调用某个函数时，this 值指向的并非想要的对象。此时将回调函数写成箭头函数就可以解决问题。这是因为箭头函数中的 this 会引用定义该函数时的上下文：
+
+```javascript
+function King() {
+    this.royaltyName = 'Henry';
+    // this 引用 King 的实例
+    setTimeout(() => console.log(this.royaltyName), 1000);
+}
+
+function Queen() {
+    this.royaltyName = 'Elizabeth';
+    
+    // this 引用 window 对象
+    setTimeout(function() {
+        console.log(this.royaltyName);
+    }, 1000);
+}
+
+new King(); // Henry
+new Queen(); // undefined
+```
+
+>注意
+>
+>函数名只是保存指针的变量。因此全局定义的 sayColor() 函数和 o.sayColor() 是同一个函数，只不过执行的上下文不同。
+
+## 3. caller
+
+ECMAScript 也会给函数对象上添加一个属性：caller。这个属性引用的是调用当前函数的函数，或者如果是在全局作用域中调用的则为 null。比如：
+
+```javascript
+function outer() {
+    inner();
+}
+
+function inner() {
+    console.log(inner.caller);
+}
+outer();
+```
+
+以上代码会显示 outer() 函数的源代码。这是因为 outer() 调用来了 inner()，inner.caller 指向 outer()。如果要降低耦合度，则可以通过 arguments.callee.caller 来引用同一个值：
+
+```javascript
+function outer() {
+    inner();
+}
+
+function inner() {
+    console.log(arguments.callee.caller);
+}
+
+outer();
+```
+
+在严格模式下访问 arguments.callee 会报错。ECMAScript 5 也定义了 arguments.caller，但在严格模式下访问它会报错，在非严格模式下则始终是 undefined。这是为了分清 arguments.,caller 和函数的 caller 而故意为之的。而作为对这门语言的安全防护，这些改动也让第三方代码无法检测同一上下文中运行的其他代码。
+
+严格模式下还有一个限制，就是不能给函数的 caller 属性赋值，否则会导致错误。
+
+## 4. new.target
+
+函数始终可以作为构造函数实例化一个新对象，也可以作为普通函数被调用。为此，ECMAScript 支持使用 new.target 属性检测函数是否是使用 new 关键字调用的。假设有下面这个简单的函数：
+
+```javascript
+function foo() {}
+```
+
+如果是函数是使用 foo() 调用的，则 new.target 的值是 undefined。如果是使用 new foo 调用的，则 new.target 将引用被调用的构造函数。
+
+```javascript
+function King() {
+    if (!new.target) {
+        throw 'King must be instantiated using "new"';
+    }
+    console.log('King instantiated using "new"');
+}
+
+new King(); // King instantiated using "new"
+King(); // Error: King must be instantiated using "new"
+```
+
+# 10. 函数属性与方法
+
+## length
+
+## prototype
+
+## apply()
+
+## call()
+
+## bind()
+
+前面提到过，ECMAScript 中的函数是对象，因此有属性和方法。每个函数都有两个属性：length 和 prototype，其中 length 属性保存函数定义的命名参数的个数，如下例所示：
+
+```javascript
+function sayName(name) {
+    console.log(name);
+}
+
+function sum(num1, num2) {
+    return num1 + num2;
+}
+
+function sayHi() {
+    console.log("hi");
+}
+
+console.log(sayName.length); // 1
+console.log(sum.length); // 2
+console.log(sayHi.length); // 0
+```
+
+以上代码定义了 3 个函数，每个函数的命名参数个数都不一样。sayName() 函数有 1 个命名参数，所以其 length 属性为 1。类似地，sum() 函数有两个命名参数，所以其 length 属性是 2。而 sayHi() 没有命名参数，其 length 属性为 0。
+
+prototype 属性也许是 ECMAScript 核心中最有趣的部分。prototype 是保存引用类型所有实例方法的地方，这意味着 toString()、valueOf() 等方法实际上都保存在 prototype 上，进而由所有实例共享。这个属性自定义类型时特别重要。（相关内容已经在第 8 章详细介绍过了。）prototype 属性是不可枚举的，因此使用 for-in 循环不会返回这个属性。
+
+## 1. 使用 apply()、call() 和 bind()
+
+函数还有三个方法：apply()、call() 和 bind()。这些方法会使用不同的策略以指定的 this 值来调用函数，即会设置调用函数时函数体内 this 对象的值。apply() 方法接收两个参数：函数内 this 的值和一个参数数组。第二个参数可以是 Array 的实例，但也可以是 arguments 对象。来看下面的例子：
+
+```javascript
+function sum(num1, num2) {
+    return num1 + num2;
+}
+
+function callSum1(num1, num2) {
+    return sum.apply(this, arguments); // 传入 arguments 对象
+}
+
+function callSum2(num1, num2) {
+    return sum.apply(this, [num1, num2]); // 传入数组
+}
+
+console.log(callSum1(10, 10)); // 20
+console.log(callSum2(10, 10)); // 20
+```
+
+在这个例子中，callSum1() 会调用 sum() 函数，将 this 作为函数体内的 this 值（这里等于 window，因为是在全局作用域中调用的）传入，同时还传入了 arguments 对象。callSum2() 也会调用 sum() 函数，但会传入参数的数组。这两个函数都会执行并返回正确的结果。
+
+>注意
+>
+>在严格模式下，调用函数时如果没有指定上下文对象，则 this 值不会指向 window。除非使用 apply() 或 call() 把函数指定给一个对象，否则 this 的值会变成 undefined。
+
+call() 方法与 apply() 的作用一样，只是传参的形式不同。第一个参数跟 apply() 一样，也是 this 值，而剩下的要传给被调用函数的参数则是逐个传递的。换句话说，通过 call() 向函数传参时，必须将参数一个一个地列出来，比如：
+
+```javascript
+function sum(num1, num2) {
+    return num1 + num2;
+}
+
+function callSum(num1, num2) {
+    return sum.call(this, num1, num2);
+}
+
+console.log(callSum(10, 10)); // 20
+```
+
+这里的 callSum() 函数必须逐个地把参数传给 call() 方法。结果跟 apply() 的例子一样。到底是使用 apply() 还是 call()，完全取决于怎么给要调用的函数传参更方便。如果想直接传 arguments 对象或者一个数组，那就用 apply()。否则，就用 call()。当然，如果不用给被调用的函数传参免责使用哪个方法都一样。
+
+apply() 和 call() 真正强大的地方并不是给函数传参，而是控制函数调用上下文即函数体内 this 值的能力。考虑下面的例子：
+
+```javascript
+window.coloe = 'red';
+let o = {
+    color: 'blue'
+};
+
+function sayColor() {
+    console.log(this.color);
+}
+
+sayColor(); // red
+
+sayColor.call(this); // red
+sayColor.call(window); // red
+sayColor.call(o); // blue
+```
+
+这个例子是在之前那个关于 this 对象的例子基础上修改而成的。同样，sayColor() 是一个全局函数，如果在全局作用域中调用它，那么会显示 "red"。这是因为 this.color 会求值为 window.color。如果在全局作用域中显式调用 sayColor.call(this) 或者 sayColor.call(window)，则同样都会显示 "red"。而在使用 sayColor.call(o) 把函数的执行上下文即 this 切换为对象 o 之后，结果就变成显示 "blue" 了。
+
+使用 call() 和 apply() 的好处是可以将任意对象设置为任意函数的作用域，这样对象可以不用关心方法。在前面例子最初的版本中，为切换上下文需要先把 sayColor() 直接赋值为 o 的属性，然后再调用。而在这个修改后的版本中，就不需要这一步操作了。
+
+bind() 方法会创建一个新的函数实例，其 this 值会被绑定到传给 bind() 的对象。比如：
+
+```javascript
+window.color = 'red';
+var o = {
+    color: 'blue'
+};
+
+function sayColor() {
+    console.log(this.color);
+}
+let objectSayColor = sayColor.bind(o);
+objectSayColor(); // blue
+```
+
+这里，在 sayColor() 上调用 bind() 并传入对象 o 创建了一个新函数 objectSayColor()。objectSayColor() 中的 this 值被设置为 o，因此直接调用这个函数，即使是在全局作用域中调用，也会返回字符串 "blue"。
+
+>注意
+>
+>对 ECMAScript 后来增补的特性，比如箭头函数和新的 Array 方法而言，apply()、call() 和 bind() 的实用性已经很小了。虽然某些情况下还是有用，但它们在现代 JavaScript 代码库中出现的机会总体上会明显减少。
+
+## 2. 序列化函数
+
+### toLocaleString()
+
+### toString()
+
+### valueOf()
+
+对函数而言，继承的方法 toLocaleString() 和 toString() 始终按照 ECMAScript 的定义返回函数的代码。原生函数只返回占位符。下面的例子展示了区别：
+
+```javascript
+function foo(value = "foo") { return value; }
+console.log(foo.toString());
+// function foo(value = "foo") { return value; }
+
+const bar = (value = "bar") => value;
+console.log(bar.toString());
+// (value = "bar") => value
+
+console.log(alert);
+// function alert() { [native code] }
+```
+
+返回代码的具体格式因浏览器而异。有的返回源代码，包含注释，而有的只返回代码的内部形式，会删除注释，甚至代码可能被解释器修改过。由于这些差异，因此不能在重要功能中依赖这些方法返回的值，而只应在调试中使用它们。继承的方法 valueOf() 返回函数本身。
+
+# 11. 递归
+
+递归函数通常的形式是一个函数通过名称调用自己，如下面的例子所示：
+
+```javascript
+function factorial(num) {
+    if (num <= 1) {
+        return 1;
+    } else {
+        return num * factorial(num - 1);
+    }
+}
+```
+
+这是经典的递归阶乘函数。虽然这样写是可以的，但如果把这个函数赋值给其他变量，就会出问题：
+
+```javascript
+let anotherFactorial = factorial;
+factorial = null;
+console.log(anotherFactorial(4)); // 报错
+```
+
+这里把 factorial() 函数保存在了另一个变量 anotherFactorial 中，然后将 factorial 设置为 null，于是只保留了一个对原始函数的引用。而在调用 anotherFactorial() 时，要递归调用 factorial()，但因为它已经不是函数了，所以会出错。在写递归函数时使用 arguments.callee 可以避免这个问题。
+
+arguments.callee 就是一个指向正在执行的函数的指针，因此可以在函数内部递归调用，如下所示：
+
+```javascript
+function factlorial(num) {
+    if (num <= 1) {
+        return 1;
+    } else {
+        return num * arguments.callee(num - 1);
+    }
+}
+```
+
+像这里加粗的这一行一样，把函数名称替换成 arguments.callee，可以确保无论通过什么变量调用这个函数都不会出问题。因此在编写递归函数时，arguments.callee 是引用当前函数的首选。
+
+不过，在严格模式下运行的代码是不能访问 arguments.callee 的，因为访问会出错。此时，可以使用命名函数表达式（named function expression）达到目的。比如：
+
+```javascript
+const factprial = (function f(num) {
+    if (num <= 1) {
+        return 1;
+    } else {
+        return num * f(num - 1);
+    }
+});
+```
+
+这里创建了一个命名函数表达式 f()，然后将它赋值给了变量 factorial。即使把函数赋值给另一个变量，函数表达式的名称 f 也不变，因此递归调用不会有问题。这个模式在严格模式和非严格模式下都可以使用。
+
+# 12. 尾调用优化
+
+JavaScript 引擎会在满足条件时重用栈帧以优化内存管理。具体来说，这项优化非常适合尾调用，即外部函数的返回值是一个内部函数的返回值。比如：
+
+```javascript
+function outerFunction() {
+    return innerFunction(); // 尾调用
+}
+```
+
+在没有优化的情况下，执行这个例子会在内存中发生如下操作。
+
+1. 执行到 outerFuncton 函数体，第一个栈帧被推到栈上。
+2. 执行 outerFunction 函数体，到达 return 语句。计算返回值必须先计算 innerFunction。
+3. 执行到 innerFunction 函数体，第二个栈帧被推到栈上。
+4. 执行 innerFunction 函数体，计算其返回值。
+5. 将返回值传回 outerFunction，然后 outerFunction 再返回值。
+
+6. 将栈帧弹出栈外。
+
+在尾调用优化之后，执行这个例子会在内存中发生如下操作。
+
+1. 执行到 outerFunction 函数体，第一个栈帧被推到栈上。
+2. 执行 outerFunction 函数体，到达 return 语句。为求值返回语句，必须先求值 innerFunction。
+3. 引擎发现把第一个栈帧弹出栈外也没问题，因为 innerFunction 的返回值也是 outerFunction 的返回值。
+4. 弹出 outerFunction 的栈帧。
+5. 执行到 innerFunction 函数体，栈帧被推到栈上。
+6. 执行 innerFunction 函数体，计算其返回值。
+7. 将 innerFunction 的栈帧弹出栈外。
+
+很明显，第一种情况下每多调用一次嵌套函数，就会多增加一个栈帧。而第二种情况下无论调用多少次嵌套函数，都只有一个栈帧。这就是 ES6 尾调用优化的关键：如果函数的逻辑允许基于尾调用将其销毁，则引擎就会那么做。
+
+>注意
+>
+>没有办法检测尾调用优化是否生效。不过，现代浏览器都能保证在代码满足条件的情况下应用这一优化。
+
+## 1. 尾调用优化的条件
+
+尾调用优化的条件就是确定外部栈帧真的没有必要存在了。涉及的条件如下：
+
+* 代码在严格模式下执行
+* 外部函数的返回值是对尾调用函数的调用
+* 尾调用函数返回后不需要执行额外的逻辑。
+* 尾调用函数不是引用外部函数作用域中自由变量的闭包。
+
+下面展示了几个违反上述条件的函数，因此都不符合尾调用优化的要求：
+
+```javascript
+"use strict"
+
+// 无优化：尾调用没有返回
+function outerFunction() {
+    innerFunction();
+}
+
+// 无优化：尾调用没有直接返回
+function outerFunction() {
+    let innerFunctionResult = innerFunction();
+    return innerFunctionResult;
+}
+
+// 无优化：尾调用返回后必须转型为字符串
+function outerFunction() {
+    return innerFunction().toString();
+}
+
+// 无优化：尾调用是一个闭包
+function outerFunction() {
+    let foo = 'bar';
+    function innerFunction() { return foo; }
+    
+    return innerFunction();
+}
+```
+
+下面是几个符合尾调用优化条件的例子：
+
+```javascript
+"use strict"
+
+// 有优化：栈帧销毁前执行参数计算
+function outerFunction(a, b) {
+    return innerFunction(a + b);
+}
+
+// 有优化”初始返回值不涉及栈帧
+function outerFunction(a, b) {
+    if (a < b) {
+        return a;
+    }
+    return innerFunction(a + b);
+}
+
+// 有优化：两个内部函数都在尾部
+function outerFunction(condition) {
+    return condition ? innerFunctionA() : innerFunctionB();
+}
+```
+
+差异化尾调用和递归调用是容易让人混淆的地方。无论递归尾调用还是非递归尾调用，都可以应用优化。引擎并不区分尾调用中调用的是函数自身还是其他函数。不过，这个优化在递归场景下的效果是最明显的，因为递归代码最容易在栈内存中迅速产生大量栈帧。
+
+>注意
+>
+>之所以要求严格模式，主要因为在非严格模式下函数调用中允许使用 f.arguments 和 f.caller，而它们都会引用外部函数的栈帧。显然，这意味着不能应用优化了。因此尾调用优化要求必须在严格模式下有效，以防止引用这些属性。
+
+## 2. 尾调用优化的代码
+
+可以通过把简单的递归函数转换为待优化的代码来加深对尾调用优化的理解。下面是一个通过递归计算斐波那契数列的函数：
+
+```javascript
+function fib(n) {
+    if (n < 2) {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+
+console.log(fib(0)); // 0
+console.log(fib(1)); // 1
+console.log(fib(2)); // 1
+console.log(fib(3)); // 2
+console.log(fib(4)); // 3
+console.log(fib(5)); // 5
+console.log(fib(6)); // 8
+```
+
+显然这个函数不符合尾调用优化的条件，因为返回语句中有一个相加的操作。结果，fib(n) 的栈帧数的内存复杂度是 O(2ⁿ)。因此，即使这么简单的调用也可以给浏览器带来麻烦：
+
+```javascript
+fib(1000);
+```
+
+当然，解决这个问题也有不同的策略，比如把递归改写成迭代循环形式。不过，也可以保持递归实现，但将其重构为满足优化条件的形式。为此可以使用两个嵌套的函数，外部函数作为基础框架，内部函数执行递归：
+
+```javascript
+"use strict"
+
+// 基础框架
+function fib(n) {
+    return fibImp(0, 1, n);
+}
+
+// 执行递归
+function fibImpl(a, b, n) {
+    if (n === 0) {
+        return a;
+    }
+    return fibImpl(b, a + b, n - 1);
+}
+```
+
+这样重构之后，就可以满足尾调用优化的所有条件，再调用 fib(1000) 就不会对浏览器造成威胁了。
+
+# 13. 闭包
+
+匿名函数经常被人误认为是闭包（closure）。闭包指的是那些引用了另一个函数作用域中变量的函数，通常是再嵌套函数中实现的。比如，下面是之前展示的 createComparisonFunction() 函数，注意其中加粗的代码：
+
+```javascript
+function createComparisonFunction(propertyName) {
+    return function(object1, object2) {
+        let value1 = object1[propertyName];
+        let value2 = object2[propertyName];
+        
+        if (value1 < value2) {
+            return -1;
+        } else if (value1 > value2) {
+            return 1;
+        } else {
+            return 0;
+        }
+    };
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
