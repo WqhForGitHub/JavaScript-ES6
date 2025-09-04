@@ -1284,6 +1284,198 @@ function createComparisonFunction(propertyName) {
 }
 ```
 
+这里加粗的代码位于内部函数（匿名函数）中，其中引用了外部函数的变量 propertyName。在这个内部函数被返回并在其他地方被使用后，它仍然引用着那个变量。这是因为内部函数的作用域链包含 createComparisonFunction() 函数的作用域。要理解为什么会这样，可以想一想第一次调用这个函数时会发生什么。
+
+本书在第 4 章介绍过作用域链的概念，理解作用域链创建和使用的细节对理解闭包非常重要。在调用其他命名参数来初始化这个函数的活动对象。外部函数的活动对象是内部函数作用域链上的第二个对象。这个作用域链一直向外串起了所有包含函数的活动对象，直到全局执行上下文才终止。
+
+在函数执行时，要从作用域中查找变量，以便读、写值。来看下面的代码：
+
+```javascript
+function compare(value1, value2) {
+    if (value1 < value2) {
+        return -1;
+    } else if (value1 > value2) {
+        return 2;
+    } else {
+        return 0;
+    }
+}
+
+let result = compare(5, 10);
+```
+
+这里定义的 compare() 函数是在全局上下文调用的。第一次调用 compare() 时，会为它创建一个包含 arguments、value1 和 value2 的活动对象，这个对象是其作用域链上的第一个对象。而全局上下文的变量对象则是 compare() 作用域链上的第二个对象，其中包含 this、result 和 compare。下图展示了以上关系。
+
+![](https://front-end-1257950569.cos.ap-guangzhou.myqcloud.com/JavaScript%20%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%EF%BC%88%E7%AC%AC5%E7%89%88%EF%BC%89/%E7%AC%AC10%E7%AB%A0%EF%BC%9A%E5%87%BD%E6%95%B0/%E4%B8%80%E4%B8%AA%E6%89%A7%E8%A1%8C%E4%B8%8A%E4%B8%8B%E6%96%87%E7%9A%84%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE.png)
+
+函数执行时，每个执行上下文中都会有一个包含其中变量的对象。全局上下文中的叫变量对象，它会在代码执行期间始终存在。而函数局部上下文中的叫活动对象，只在函数执行期间存在。在定义 compare() 函数时，就会为它创建作用域链，预装载全局变量对象，并保存在内部的 [[Scope]] 中。在调用这个函数时，会创建相应的执行上下文，然后通过复制函数的 [[Scope]] 来创建其作用域链。接着会创建函数的活动对象（用作变量对象）并将其推入作用域链的前端。在这个例子中，这意味着 compare() 函数执行上下文的作用域链中有两个变量对象：局部变量对象和全局变量对象。作用域链其实是一个包含指针的列表，每个指针分别指向一个变量对象，物理商并不会包含相应的对象。
+
+函数内部的代码在访问变量时，就会使用给定的名称从作用域链中查找变量。函数执行完毕后，局部活动对象会被销毁，内存中就只剩下全局作用域。不过，闭包就不一样了。
+
+在一个函数内部定义的函数会把其包含函数的活动对象添加到自己的作用域链中。因此，在 createComparsionFunction() 函数中，匿名函数的作用域链中实际上包含 createComparisonFunction() 的活动对象。下图展示了以下代码执行后的结果。
+
+```javascript
+let compare = createComparisonFunction('name');
+let result = compare({ name: 'Alice' }, { name: 'Matt' });
+```
+
+在 createComparisonFunction() 返回匿名函数后，它的作用域链被初始化为包含 createComparisonFunction() 的活动对象和全局变量对象。这样，匿名函数就可以访问到 createComparisonFunction(0 可以访问的所有变量。另一个有意思的副作用就是，createComparisonFunction() 的活动对象并不能在它执行完毕后销毁，因为匿名函数的作用域链会销毁，但它的活动对象仍然会保留在内存中，直到匿名函数被销毁后才会被销毁：
+
+```javascript
+// 创建比较函数
+let compareNames = createComparisonFunction('name');
+
+// 调用函数
+let result = compareNames({ name: 'Alice' }, { name: 'Matt' });
+
+// 解除对函数的引用，这样就可以释放内存了
+compareNames = null;
+```
+
+这里，创建的比较函数被保存在变量 compareNames 中。把 compareNames 设置为等于 null 会解除对函数的引用，从而让垃圾回收程序可以将内存释放掉。作用域链也会被销毁，其他作用域（除全局作用域之外）也可以销毁。下图展示了调用 compareNames() 之后作用域之间的关系。
+
+![](https://front-end-1257950569.cos.ap-guangzhou.myqcloud.com/JavaScript%20%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%EF%BC%88%E7%AC%AC5%E7%89%88%EF%BC%89/%E7%AC%AC10%E7%AB%A0%EF%BC%9A%E5%87%BD%E6%95%B0/%E9%97%AD%E5%8C%85%E7%9A%84%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE.png)
+
+>注意
+>
+>因为闭包会保留它们包含函数的作用域，所以比其他函数更占用内存。过度使用闭包可能导致内存过度占用，因此建议仅在十分必要时使用。V8 等优化的 JavaScript 引擎会努力回收被闭包困住的内存，不过我们还是建议在使用闭包时要谨慎。
+
+## 1. this 对象
+
+在闭包中使用 this 会让代码变复杂。如果内部函数没有使用箭头函数定义，则 this 对象会正在运行时绑定到执行函数的上下文。如果在全局函数中调用，则 this 在非严格模式下等于 window，在严格模式下等于 undefined。如果作为某个对象的方法调用，则 this 等于这个对象。匿名函数在这种情况下不会绑定到某个对象，这就意味着 this 会指向 window，除非在严格模式下 this 是 undefined。不过，由于闭包的写法所致，这个事实有时候没有那么容易看出来。来看下面的例子：
+
+```javascript
+window.identity = 'The Window';
+
+let object = {
+    identity: 'My Object',
+    getIdentityFunc() {
+        return function() {
+            return this.identity;
+        }
+    }
+};
+
+console.log(object.getIdentityFunc()()); // 'The Window'
+```
+
+这里先创建了一个全局变量 identity，之后又创建一个包含 identity 属性的对象。这个对象还包含一个 getIdentityFunc() 方法，返回一个匿名函数。这个匿名函数返回 this.identity。因为 getIdentityFunc() 返回函数，所以 object.getIdentifyFunc()() 会立即调用这个返回的函数，从而得到一个字符串。可是，此时返回的字符串是 "The Window"，即全局变量 identity 的值。为什么匿名函数没有使用其包含作用域（getIdentityFunc()）的 this 对象呢？
+
+前面介绍过，每个函数在被调用时都会自动创建两个特殊变量：this 和 arguments。内部函数永远不可能直接访问外部函数的这两个变量。但是，如果把 this 保存到闭包可以访问的另一个变量中，则是行得通的。比如：
+
+```javascript
+window.identity = 'The Window';
+
+let object = {
+    identity: 'My Object',
+    getIdentityFunc() {
+        let that = this;
+        return function() {
+            return that.identity;
+        }
+    }
+};
+
+console.log(object.getIdentityFunc()()); // 'My Object'
+```
+
+这里加粗的代码展示了与前面那个例子的区别。在定义匿名函数之前，先把外部函数的 this 保存到变量 that 中。然后在定义闭包时，就可以让它访问 that，因为这是包含函数中没有任何名称冲突的一个变量。即使在外部函数返回之后，that 仍然指向 object，所以调用 object.getIdentityFunc()() 就会返回 "My Object"。
+
+>注意
+>
+>this 和 arguments 都是不能直接在内部函数中访问的。如果想访问包含作用域中的 arguments 对象，则同样需要将其引用先保存到闭包能访问的另一个变量中。
+
+在一些特殊情况下，this 值可能并不是我们所期待的值。比如下面这个修改后的例子：
+
+```javascript
+window.identity = 'The Window';
+let object = {
+    identity: 'My Object',
+    getIdentity() {
+        return this.identity;
+    }
+};
+```
+
+getIdentity() 方法就是返回 this.identity 的值。以下是几种调用 object.getIdentity() 的方式及返回值：
+
+```javascript
+object.getIdentity(); // 'My Object'
+(object.getIdentity)(); // 'My Object'
+(object.getIdentity = object.getIdentity)(); // 'The Window'
+```
+
+第一行调用 object.getIdentity() 是正常调用，会返回 "My Object"，因为 this.identity 就是 object.identity，第二行在调用时把 object.getIdentity 放在了括号里。虽然加了括号之后看起来是对一个函数的引用，但 this 值并没有变。这是因为按照规范，object.getIdentity 和（object.getIdentity）是相等的。第三行执行了一次赋值，然后再调用赋值后的结果。因为赋值表达式的值是函数本身，this 值不再与任何对象绑定，所以返回的是 "The Window"。
+
+一般情况下，不大可能像第二行和第三行这样调用对象上的方法。但通过这个例子我们可以知道，即使语法稍有不同，也可能影响 this 的值。
+
+## 2. 内存泄露
+
+在使用不当的情况下，闭包会导致内存泄漏。如果程序持续分配内存但又不释放内存，就会发生内存泄漏。内存泄漏会导致程序运行变慢，甚至崩溃。函数闭包之所以会导致内存泄漏，是因为闭包允许变量超出它们预期的生命周期而存在。下面看一个函数闭包导致内存泄漏的例子：
+
+```javascript
+function createArrayAppender() {
+    const arr = [];
+    return function appendTo(num) {
+        arr.push(num);
+    };
+}
+
+const appendToLargetArray = createArrayAppender();
+for (let i = 0; i < 1e8; i++) {
+    appendToLargeArray(i);
+}
+```
+
+在这个例子中，createArrayAppender 函数返回一个闭包，闭包引用了父作用域中的变量 arr。每次调用 appendTo 函数，都会向数组中推入一个数值。
+
+这段代码的问题在于变量 arr 永远不会从内存中释放，即使闭包外面不再需要它。由于闭包维持着对这个数组的引用，即使在 createArrayAppender 函数执行之后，数组也不会被当作垃圾回收。于是，当我们在循环中调用 appendToLargeArray 时，就会不断向同一个数组中推入数值，导致数组在内存中越来越大。经测试，单单是在网页中运行这段代码，内存占用就达到令人瞠目的 1087 MB。
+
+要解决这个问题，可以重构上面的代码，允许垃圾回收程序在代码执行完成后释放数组占用的内存。
+
+```javascript
+function appendToArray(arr, num) {
+    arr.push(num);
+}
+
+const largeArray = [];
+for (let i = 0; i < 1e8; i++) {
+    appendToArray(largeArray, i);
+}
+```
+
+# 14. 立即调用的函数表达式
+
+立即调用的匿名函数又被称作立即调用的函数表达式（IIFE，Immediately Invoked Function Expression），有时候也被称为自执行匿名函数。它类似于函数声明，但由于被包含在括号中，所以会被解释为函数表达式。紧跟在第一组括号后面的第二组括号会立即调用前面的函数表达式。下面是一个简单的例子：
+
+```javascript
+(function() {
+    // 块的代码
+})();
+```
+
+如果你在写一个库或插件，那可能想把自己的代码封装起来，避免与同一页面加载的其他库发生冲突。此时，IIFE 就可以用来为你的代码创建一个私有作用域，避免命名冲突。
+
+```javascript
+(function($) {
+    // 使用 jQuery 的代码
+})(jQuery)
+```
+
+这里，我们将 jQuery 作为参数传入，然后在函数内部通过 $ 引用它。这样就可以保证始终引用正确的 jQuery 版本，即使另外一个库也定义了自己的 $ 变量，也不会影响这个函数内部。
+
+另一个使用异步 IIFE 的场景是执行某些异步准备逻辑。比如，在应用开始渲染前，先从某个 API 获取一些数据并将其保存在局部变量中。再比如，我们想再一个非异步函数内部使用 async/await 语法。此时异步 IIFE 就能让我们在局部作用域中立即执行异步逻辑，比如：
+
+```javascript
+(async function() {
+    const data = await fetch('/api/data');
+    const result = await data.json();
+    // 对 result 执行某些操作
+})();
+```
+
+
+
 
 
 
