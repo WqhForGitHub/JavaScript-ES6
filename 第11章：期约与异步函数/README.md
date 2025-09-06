@@ -1570,7 +1570,646 @@ p.then(() => console.asyncLog('completed'));
 
 >注意
 >
->期约不支持取消和进度追踪，一个主要原因就是这样会导致期约连锁和期约合成过度复杂。比如在一个期约连锁中，如果某个被其他期约依赖的期约被取消了或者发出了通知，那么接下来应该发生什么完全说不清楚：如果取消了 Promise.all() 中的一个期约，或者期约连锁中前面的期约发送了一个通知，那么接下来应该怎么办才比较合理呢？
+>期约不支持取消和进度追踪，一个主要原因就是这样会导致期约连锁和期约合成过度复杂。比如在一个期约连锁中，如果某个被其他期约依赖的期约被取消了或者发出了通知，那么接下来应该发生什么完全说不清楚：如果取消了 Promise.all() 中的一个期约，或者期约连锁中前面的期约发送了一个通知，那么接下来应该怎么办才比较合理呢》？
+
+# 3. 异步函数
+
+## for-await-of
+
+异步函数，也称为 "async/await"（语法关键字），是期约范式在 ECMAScript 函数中的应用。这个特性从行为和语法上都增强了 JavaScript，让以同步方式写的代码能够异步执行。下面来看一个最简单的例子，这个期约在超时之后会解决为一个值：
+
+```javascript
+let p = new Promise((resolve, reject) => setTimeout(resolve, 1000, 3));
+```
+
+这个期约在 1000 毫秒之后解决为数值 3。如果程序中的其他代码要在这个值可用时访问它，则需要写一个兑现处理程序：
+
+```javascript
+let p = new Promise((resolve, reject) => setTimeout(resolve, 1000, 3));
+
+p.then((x) => console.log(x)); // 3
+```
+
+这其实是很不方便的，因为其他代码都必须塞到期约处理程序中。不过可以把处理程序定位为一个函数：
+
+```javascript
+function handler(x) { console.log(x); }
+
+let p = new Promise((resolve, reject) => setTimeout(resolve, 1000, 3));
+
+p.then(handler); // 3.
+```
+
+这个改进其实也不大。这是因为任何需要访问这个期约所产生值的代码，都需要以处理程序的形式来接收这个值。也就是说，代码照样还是要放到处理程序里。而使用异步（async）函数来等待（await）值，也就是异步函数可以优雅地解决这个问题。
+
+## 1. 异步函数基础
+
+异步函数旨在解决利用异步结构组织代码的问题。为此，ECMAScript 对函数进行了扩展，为其增加了两个新关键字：async 和 await。
+
+### 1. async 关键字
+
+把 async 关键字放在函数前面可以声明异步函数。这个关键字可以用在函数声明、函数表达式、箭头函数和方法上：
+
+```javascript
+async function foo() {}
+
+let bar = async function() {};
+
+let baz = async () => {};
+
+class Qux {
+    async qux() {}
+}
+```
+
+使用 async 关键字可以让函数具有异步特征，但总体上其代码仍然是同步求值的。而在参数或闭包方面，异步函数仍然具有普通 JavaScript 函数的正常行为。正如下面的例子所示，foo() 函数仍然会在后面的指令之前被求值：
+
+```javascript
+async function foo() {
+    console.log(1);
+}
+
+foo();
+console.log(2);
+
+// 1
+// 2
+```
+
+不过，异步函数如果使用 return 关键字返回了值（如果没有 return 则会返回 undefined），这个值会被 Promise.resolve() 包装成一个期约对象。异步函数始终返回期约对象。在函数外部调用这个函数可以得到它返回的期约：
+
+```javascript
+async function foo() {
+    console.log(1);
+    return 3;
+}
+
+// 给返回的期约添加一个兑现处理程序
+foo().then(console.log);
+
+console.log(2);
+
+// 1
+// 2
+// 3
+```
+
+当然，直接返回一个期约对象也是一样的：
+
+```javascript
+async function foo() {
+    console.log(1);
+    return Promise.resolve(3);
+}
+
+// 给返回的期约添加一个兑现处理程序
+foo().then(console.log);
+
+console.log(2);
+
+// 1
+// 2
+// 3
+```
+
+异步函数的返回值最好是（但实际上并不要求）一个实现 thenable 接口的对象，但常规的值也可以。如果返回的是实现 thenable 接口的对象，则这个对象可以由提供给 then() 的处理程序解包。如果不是，则返回值就被当作已经兑现的期约。下面的代码演示了这些情况：
+
+```javascript
+// 返回一个原始值
+async function foo() {
+    return 'foo';
+}
+foo().then(console.log);
+// foo
+
+// 返回一个没有实现 thenable 接口的对象
+async function bar() {
+    return ['bar'];
+}
+bar().then(console.log);
+// ['bar']
+
+// 返回一个实现了 thenable 接口的非期约对象
+async function baz() {
+    const thenable = {
+        then(callback) { callback('baz'); }
+    };
+    return thenable;
+}
+baz().then(console.log);
+// baz
+
+// 返回一个期约
+async function qux() {
+    return Promise.resolve('qux');
+}
+qux().then(console.log);
+// qux
+```
+
+与在期约处理程序中一样，在异步函数中抛出错误会返回拒绝的期约：
+
+```javascript
+async function foo() {
+    console.log(1);
+    throw 3;
+}
+
+// 给返回的期约添加一个拒绝处理程序
+foo().catch(console.log);
+console.log(2);
+
+// 1
+// 2
+// 3
+```
+
+不过，拒绝期约的错误不会被异步函数捕获：
+
+```javascript
+async function foo() {
+    console.log(1);
+    Promise.reject(3);
+}
+
+// 给返回的期约添加一个拒绝处理程序
+foo().catch(console.log);
+console.log(2);
+
+// 1
+// 2
+// Uncaught (in promise): 3
+```
+
+### 2. await 关键字
+
+因为异步函数主要针对不会马上完成的任务，所以自然需要一种暂停和恢复执行的能力。使用 await 关键字可以暂停异步函数代码的执行，等待期约解决。来看下面这个本章开始就出现过的例子：
+
+```javascript
+let p = new Promise((resolve, reject) => setTimeout(resolve, 1000, 3));
+
+p.then((x) => console.log(x)); // 3
+```
+
+使用 asynn/await 可以写成这样：
+
+```javascript
+async function foo() {
+    let p = new Promise((resolve, reject) => setTimeout(resolve, 1000, 3));
+    console.log(await p);
+}
+
+foo();
+// 3
+```
+
+注意，await 关键字会暂停执行异步函数后面的代码，让出 JavaScript 运行时的执行线程。这个行为与生成器函数中的 yield 关键字是一样的。await 关键字同样是尝试解包对象的值，然后将这个值传给表达式，再异步恢复异步函数的执行。
+
+await 关键字的用法与 JavaScript 的一元操作一样。它可以单独使用，也可以在表达式中使用，如下面的例子所示：
+
+```javascript
+// 异步打印 "foo"
+async function foo() {
+    console.log(await Promise.resolve('foo'));
+}
+foo();
+// foo
+
+// 异步打印 "bar"
+async function bar() {
+    return await Promise.resolve('bar');
+}
+bar().then(console.log);
+// bar
+
+// 1000 毫秒后异步打印 "baz"
+async function baz() {
+    await new Promise((resolve, reject) => setTimeout(resolve, 1000));
+    console.log('baz');
+}
+baz();
+// baz（1000 毫秒后）
+```
+
+await 关键字期待（但实际上并不要求）一个实现 thenable 接口的对象，但常规的值也可以。如果是实现 thenable 接口的对象，则这个对象可以由 await 来解包。如果不是，则这个值就被当作已经兑现的期约。下面的代码演示了这些情况：
+
+```javascript
+// 等待一个原始值
+async function foo() {
+    console.log(await 'foo');
+}
+foo();
+// foo
+
+// 等待一个没有实现 thenable 接口的对象
+async function bar() {
+    console.log(await ['bar']);
+}
+bar();
+// ['bar']
+
+// 等待一个实现了 thenable 接口的非期约对象
+async function baz() {
+    const thenable = {
+        then(callback) { callback('baz'); }
+    };
+    console.log(await thenable);
+}
+baz();
+// baz
+
+// 等待一个期约
+async function qux() {
+    console.log(await Promise.resolve('qux'));
+}
+qux();
+// qux
+```
+
+等待抛出错误的同步操作会返回拒绝的期约：
+
+```javascript
+async function foo() {
+    console.log(1);
+    await (() => { throw 3; })();
+}
+
+// 给返回的期约添加一个拒绝处理程序
+foo().catch(console.log);
+console.log(2);
+
+// 1
+// 2
+// 3
+```
+
+如前面的例子所示，单独的 Promise.reject() 不会被异步函数捕获，而会抛出未捕获错误。不过，对拒绝的期约使用 await 则会释放（unwrap）错误值（将拒绝期约返回）：
+
+```javascript
+async function foo() {
+    cosole.log(1);
+    await Promise.reject(3);
+    console.log(4); // 这行代码不会执行
+}
+
+// 给返回的期约添加一个拒绝处理程序
+foo().catch(console.log);
+console.log(2);
+
+// 1
+// 2
+// 3
+```
+
+### 3. await 的限制
+
+await 关键字可以在异步函数或模块的顶级上下文中使用。如果需要在非异步函数中使用 await，可以使用立即调用的异步函数。下面两段代码实际是相同的：
+
+```javascript
+async function foo() {
+    console.log(await Promise.resolve(3));
+}
+foo();
+// 3
+
+// 立即调用的异步函数表达式
+(async function() {
+    console.log(await Promise.resolve(3));
+})();
+// 3
+```
+
+此外，异步函数的行为不会扩展到嵌套函数。因此，await 关键字也只能直接出现在异步函数的定义中。在同步函数内部使用 await 会抛出 SyntaxError。
+
+下面展示了一些会出错的例子：
+
+```javascript
+// 不允许：await 出现在了箭头函数中
+function foo() {
+    const syncFn = () => {
+        return await Pormise.resolve('foo');
+    };
+    console.log(syncFn());
+}
+
+// 不允许：await 出现在了同步函数声明中
+function bar() {
+    function syncFn() {
+        return await promise.resolve('bar')''
+    }
+    console.log(syncFn());
+}
+
+// 不允许：await 出现在了同步函数表达式中
+function baz() {
+    const syncFn = function() {
+        return await Promise.resolve('baz');
+    };
+    console.log(syncFn());
+}
+
+// 不允许：IIFE 使用同步函数表达式箭头函数
+function qux() {
+    (function () { console.log(await promise.resolve('qux')); })();
+    (() => console.log(await Pro,ise.resolve('qux')))();
+}
+```
+
+for-await-of 循环提供了一种在 JavaScript 中方便、简捷地迭代异步数据流的方式。与传统的 for-of 循环类似，只不过不是迭代同步数据或其他可迭代对象，而是在迭代下一项之前先等待异步操作完成。for-await-of 循环的语法如下所示：
+
+```javascript
+for await (let variable of iterable) {
+    // 要执行的代码
+}
+```
+
+在这个语法中，可迭代对象可以是任何异步可迭代对象。我们来看一个通过 for-await-of 迭代异步函数的例子。假设有一个异步函数返回解决为随机数值的期约。我们可以使用 for-await-of 等待这些期约并迭代得到的随机数：
+
+```javascript
+async function getRandomNumber(i) {
+    return new Promise(resolve => {
+        console.log(i);
+        setTimeout(resolve, 1000, Math.random());
+    });
+}
+
+async function printRandomNumbers() {
+    for await (const x of Array.from(Array(5).keys()).map(getRandomNumber)) {
+        console.log(x);
+    }
+    console.log("loop has exited");
+}
+
+printRandomNumbers();
+
+// 立即输出：
+// 0
+// 1
+// 2
+// 3
+// 4
+
+// 1000 毫秒后输出：
+// 0.8748458184008716（依次输出每个随机数）
+// ...
+// loop has exited
+```
+
+在这个例子中，我们定义了异步函数 getRandomNumber()，它返回一个期约，在 1000 毫秒后解决为一个随机数。而 pringRandomNumbers() 函数使用 for-await-of 循环迭代由 getRandomNumber() 返回的期约，并将得到的随机数输出到控制台。
+
+如果我们在前面的代码中删除 async 关键字，并使用常规的 for-of 循环，那就会看到如下输出：
+
+// 立即输出：
+
+// 0
+
+// 1
+
+// 2
+
+// 3
+
+// 4
+
+
+
+// Promise <pending>
+
+// ...
+
+// loop has exited
+
+for-await-of 循环既可以处理常规可迭代对象，也可以处理异步可迭代对象：
+
+```javascript
+const myArray = [1, 2, 3];
+
+for await (const item of myArray) {
+    console.log(item);
+}
+
+// 立即输出：
+// 1
+// 2
+// 3
+```
+
+下面我们重构上面的代码，让 for-await-of 消费由异步迭代器生成的值：
+
+```javascript
+async function* asyncIterable(array) {
+    for (const item of array) {
+        yield item;
+    }
+}
+
+const myArray = [1, 2, 3];
+
+for await (const item of asyncIterable(myArray)) {
+    console.log(item);
+}
+
+// 立即输出：
+// 1
+// 2
+// 3
+```
+
+为观察 for-await-of 循环按顺序消费异步生成的值，可以让异步生成器延迟生成值：
+
+```javascript
+async function* asyncIterable(array) {
+    for (const item of array) {
+        // 延迟 1000 毫秒
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        yield item;
+    }
+}
+
+const myArray = [1, 2, 3];
+
+for await (const item of asyncIterable(myArray)) {
+    console.log(item);
+}
+
+// 1000 毫秒后输出：
+// 1
+
+// 2000 毫秒后输出：
+// 2
+
+// 3000 毫秒后输出：
+// 3
+```
+
+>注意
+>
+>关于生成器函数，可以参考第 7 章。
+
+## 2. 异步函数策略
+
+因为简单实用，所以异步函数很快成为 JavaScript 项目最广泛的特性之一。不过，在使用异步函数时，还是有些问题要注意。
+
+### 1. 实现 sleep()
+
+很多人在刚开始学习 JavaScript 时，想找到一个类似 Java 中 Thread.sleep() 之类的函数，以便程序中加入非阻塞的暂停。有了异步函数之后，一个简单的箭头函数就可以实现 sleep()：
+
+```javascript
+async function sleep(delay) {
+    return new Promise((resolve) => setTimeout(resolve, delay));
+}
+
+async function foo() {
+    const t0 = Date.now();
+    await sleep(1500); // 暂停约 1500 毫秒
+    console.log(Date.now() - t0);
+}
+foo();
+// 1502
+```
+
+### 2. 利用并行执行
+
+如果使用 await 时不留心，则很可能错误并行加速的机会。来看下面的例子，其中顺序等待了 5 个随机的超时：
+
+```javascript
+async function randomDelay(id) {
+    // 延迟 0~1000 毫秒
+    const delay = Math.random() * 1000;
+    return new Promise((resolve) => setTimeout(() => {
+        console.log(`${id} finished`);
+        resolve();
+    }, delay));
+}
+
+async function foo() {
+    const t0 = Date.now();
+    await randomDelay(0);
+    await randomDelay(1);
+    await randomDelay(2);
+    await randomDelay(3);
+    await randomDelay(4);
+    console.log(`${Date.now() - t0}ms elapsed`);
+}
+foo();
+
+// 0 finished
+// 1 finished
+// 2 finished
+// 3 finished
+// 4 finished
+// 877ms elapsed
+```
+
+用一个 for 循环重写，就是：
+
+```javascript
+async function randomDelay(id) {
+    // 延迟 0~1000 毫秒
+    const delay = Math.random() * 1000;
+    return new Promise((resolve) => setTimeout(() => {
+        console.log(`${id} finished`);
+        resolve();
+    }, delay));
+}
+
+async function foo() {
+    const t0 = Date.now();
+    for (let i = 0; i < 5; ++i) {
+        await randomDelay(i);
+    }
+    
+    console.log(`${Date.now() - t0}ms elapsed`);
+}
+foo();
+
+// 0 finished
+// 1 finished
+// 2 finished
+// 3 finished
+// 4 finished
+// 877ms elapsed
+```
+
+就算这些期约之间没有依赖，异步函数也会依次暂停，等待每个超时完成。这样可以保证执行顺序，但总执行时间会变长。
+
+如果顺序不是必须保证的，那么可以先一次性初始化所有期约，然后再分别等待它们的结果。比如：
+
+```javascript
+async function randomDelay(id) {
+    // 延迟 0~1000 毫秒
+    const delay = Math.random() * 1000;
+    return new Promise((resolve) => setTimeout(() => {
+        cnosole.asyncLog(`${id} finished`);
+        resolve();
+    }, delay));
+}
+
+async function foo() {
+    const t0 = Date.now();
+    
+    const p0 = randomDelay(0);
+    const p1 = randomDelay(1);
+    const p2 = randomDelay(2);
+    const p3 = randomDelay(3);
+    const p4 = randomDelay(4);
+    
+    await p0;
+    await p1;
+    await p2;
+    await p3;
+    await p4;
+    
+    console.log(`${Date.now() - t0}ms elapsed`);
+}
+foo();
+
+// 1 finished
+// 4 finished
+// 3 finished
+// 0 finished
+// 2 finished
+// 877ms elapsed
+```
+
+用数组和 for 循环再包装一下就是：
+
+```javascript
+async function randomDelay(id) {
+    // 延迟 0~1000 毫秒
+    const delay = Math.random() * 1000;
+    return new Promise((resolve) => setTimeout(() => {
+        console.log(`${id} finished`);
+        resolve();
+    }, delay));
+}
+
+async function foo() {
+    const t0 = Date.now();
+    
+    const promises = Array(5).fill(null).map((_, i) => randomDelay(i));
+    
+    for (const p of promises) {
+        await p;
+    }
+    
+    console.log(`${Date.now() - t0}ms elapsed`);
+}
+foo();
+
+// 4 finished
+// 2 finished
+// 1 finished
+// 0 finished
+// 3 finished
+// 877ms elapsed
+```
+
+
+
+
+
+
 
 
 
