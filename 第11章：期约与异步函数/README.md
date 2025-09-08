@@ -2205,6 +2205,183 @@ foo();
 // 877ms elapsed
 ```
 
+注意，虽然期约没有按照顺序执行，但 await 按顺序收到了每个兑现期约的至：
+
+```javascript
+async function randomDelay(id) {
+    // 延迟 0~1000 毫秒
+    const delay = Math.random() * 1000;
+    return new Promise((resolve) => setTimeout(() => {
+        console.log(`${id} finished`);
+        resolve(id);
+    }, delay));
+}
+
+async function foo() {
+    const t0 = Date.now();
+    
+    const promises = Array(5).fill(null).map((_, i) => randomDelay(i));
+    
+    for (const p of promises) {
+        console.log(`awaited ${await p}`);
+    }
+    
+    console.log(`${Date.now() - to}ms elapsed`);
+}
+foo();
+// 1 finished
+// 2 finished
+// 4 finished
+// 3 finished
+// 0 finished
+// awaited 0
+// awaited 1
+// awaited 2
+// awaited 3
+// awaited 4
+// 645ms elapsed
+```
+
+### 3. 串行执行期约
+
+在 11.2 节，我们讨论如何串行执行期约并把值传给后续的期约。使用 async/await，期约连锁会变得很简单：
+
+```javascript
+function addTwo(x) { return x + 2; }
+function addThree(x) { return x + 3; }
+function addFive(x) { return x + 5; }
+
+async function addTen(x) {
+    for (const fn of [addTwo, addThree, addFive]) {
+        x = await fn(x);
+    }
+    return x;
+}
+
+addTen(9).then(console.log); // 19
+```
+
+这里，await 直接传递了每个函数的返回值，结果通过迭代产生。当然，这个例子并没有使用期约，如果要使用期约，则可以把所有函数都改成异步函数。这样它们就都返回期约了：
+
+```javascript
+async function addTwo(x) { return x + 2; }
+async function addThree(x) { return x + 3; }
+async function addFive(x) { return x + 5; }
+
+async function addTen(x) {
+    for (const fn of [addTwo, addThree, addFive]) {
+        x = await fn(x);
+    }
+    return x;
+}
+
+addTen(9).then(console.log); // 19
+```
+
+### 4. 栈跟踪与内存管理
+
+期约与异步函数的功能有相当程序的重叠，但它们在内存中的表示则差别很大。看看下面的例子，它展示了拒绝期约的栈跟踪信息：
+
+```javascript
+function fooPromiseExecutor(resolve, reject) {
+    setTimeout(reject, 1000, 'bar');
+}
+
+function foo() {
+    new Promise(fooPromiseExecutor);
+}
+foo();
+// Uncaught (in promise) bar
+// setTimeout
+// setTimeout (async)
+// fooPomiseExecutor
+// foo
+```
+
+根据对期约的不同理解程序，以上栈跟踪信息可能会让某些读者不解。栈跟踪信息应该相当直接地表现 JavaScript 引擎当前栈内存中函数调用之间地嵌套关系。在超时处理程序执行时和拒绝期约时，我们看到的错误信息包含嵌套函数的标识符，那是被调用以创建最初期约实例的函数。可是，我们知道这些函数已经返回了，因此栈跟踪信息中不应该看到它们。
+
+答案很简单，这是因为 JavaScript 引擎会在创建期约时尽可能保留完整的调用栈。在抛出错误时，调用栈可以由运行时的错误处理逻辑获取，因而就会出现在栈跟踪信息中。当然，这意味着栈跟踪信息会占用内存，从而带来一些计算和存储成本。
+
+如果在前面的例子中使用的是异步函数，那又会怎样呢？比如：
+
+```javascript
+function fooPromiseExecutor(resolve, reject) {
+    setTimeout(reject, 1000, 'bar');
+}
+
+async function foo() {
+    await new Promise(fooPomiseExecutor);
+}
+foo();
+
+// Uncaught (in promise) bar
+// foo
+// async function (async)
+// foo
+```
+
+这样一改，栈跟踪信息就准确地反映了当前的调用栈。fooPromiseExecutor() 已经返回，所以它不在错误信息中。但 foo() 此时被挂起了，并没有退出。JavaScript 运行时可以简单地在嵌套函数中存储指向包含函数的指针，就跟对待同步函数调用栈一样。这个指针实际上存储在内存中，可用于在出错时生成栈跟踪信息。这样就不会像之前的例子那样带来额外的消耗，因此在重视性能的应用中是可以优先考虑的。
+
+### 5. 安全地处理拒绝及并行
+
+在处理不可靠的期约时，async/await 还是稍微有点儿严格。假设一个比较少见的情况，比如我们想派发一系列网络请求，从某个想象的 API 加载数据。假设想象中的每个页面都是一个任意数据的数组，而连续的页面应该按顺序拼装起来。
+
+以下代码是简单的实现：
+
+```javascript
+async function getApiPages(pageCount) {
+    const data = [];
+    const pageUrls = Array.from(Array[pageCount].keys()).map(i => `https://exaple.com/api?page=${i}`);
+    
+    for (const url of pageUrls) {
+        const response = await fetch(url);
+        const pageData = await response.json();
+        data.push(pageData);
+    }
+    return data.flat();
+}
+```
+
+这个实现按顺序返回页面，但有一些问题。
+
+* 网络请求是串行的，因此比较慢。
+* 任何被拒绝的 fetch() 都会抛出未处理的拒绝。
+
+要并行发送请求同时保持顺序，并处理任何拒绝，可以将代码重构为下面这样：
+
+```javascript
+async function getApiPages(pageCount) {
+    const data = [];
+    const pageUrls = Array.from(Array(pageCount).keys()).map(i => `https://example.com/api?page=${i}`);
+    
+    // 并行派发请求且将 fetch()
+    // 返回的期约放到一个数组中
+    const pagePromises = pageUrls.map(async (url) => {
+        const response = await fetch(url);
+        return response.json();
+    });
+    
+    // 为所有期约隐式添加拒绝处理程序
+    Promise.allSettled(pagePromises);
+    
+    // 记录数据及页面索引
+    for await (const [i, pageData] of pagePromises.entries()) {
+        data[i] = pageData;
+    }
+    return data.flat();
+}
+```
+
+当然，这个实现还不够完善，因为静默地忽略了某些页面无法加载的情况。如果想为这些期约添加拒绝处理逻辑，也可以补充添加而不影响整体行为。这里使用 Promise.allSettled() 简单地消除了未处理的拒绝，如果想处理加载失败的页面，只要额外添加 onRejected 处理程序即可。
+
+>注意
+>
+>这个例子受到了 Jake Archibald 博客中一篇精彩文章 "The gotcha of unhandled promise rejections" 的启发。
+
+
+
+
+
 
 
 
