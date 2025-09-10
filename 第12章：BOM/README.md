@@ -576,6 +576,64 @@ navigator 是由 Netscape Navigator 2 最早引入浏览器的，现在已经成
 
 下表列出了这些接口定义的属性和方法。
 
+| 属性/方法                     | 说明                                                         |
+| ----------------------------- | ------------------------------------------------------------ |
+| activeVrDisplays              | 返回数组，包含 ispresenting 属性为 true 的 VRDisplay 实例    |
+| appCodeName                   | 即使在非 Mozilla 浏览器中也会返回 "Mozilla"                  |
+| appName                       | 浏览器全名                                                   |
+| appVersion                    | 浏览器版本。通常与实际的浏览器版本不一致                     |
+| battery                       | 返回暴露 Battery Status API 的 BatteryManager 对象           |
+| buildId                       | 浏览器的构建编号                                             |
+| connection                    | 返回暴露 Network Information API 的 NetworkInformation 对象  |
+| cookieEnabled                 | 返回布尔值，表示是否启用了 cookie                            |
+| credentials                   | 返回暴露 Credentials Management API 的 CredentialsContainer 对象 |
+| deviceMemory                  | 返回单位为 GB 的设备内存容量                                 |
+| doNotTrack                    | 返回用户的不跟踪（do-not-track）设置                         |
+| geolocation                   | 返回暴露 Geolocation API 的 Geolocation 对象                 |
+| getVRDisplays()               | 返回数组，包含可用的每个 VRDisplay 实例                      |
+| getUserMedia()                | 返回与可用媒体设备硬件关联的流                               |
+| hardwareConcurrency           | 返回设备的处理器核心数量                                     |
+| javaEnabled                   | 返回布尔值，表示浏览器是否启用了 Java                        |
+| language                      | 返回浏览器的主语言                                           |
+| languages                     | 返回浏览器偏好的语言数组                                     |
+| locks                         | 返回暴露 Web Locks API 的 LockManager 对象                   |
+| mediaCapabilities             | 返回暴露 Media Capabilities API 的 MediaCapabilities 对象    |
+| mediaDevices                  | 返回可用的媒体设备                                           |
+| maxTouchPoints                | 返回设备触摸屏支持的最大触点数                               |
+| mimeTypes                     | 返回浏览器中注册的 MIME 类型数组                             |
+| onLine                        | 返回布尔值，表示浏览器是否联网                               |
+| oscpu                         | 返回浏览器运行设备的操作系统和（或）CPU                      |
+| permissions                   | 返回暴露 Permissions API 的 Permissions 对象                 |
+| platform                      | 返回浏览器运行的系统平台                                     |
+| plugins                       | 返回浏览器安装的插件数组                                     |
+| product                       | 返回产品名称（通常是 "Gecko"）                               |
+| productSub                    | 返回产品的额外信息（通常是 Gecko 的版本）                    |
+| registerProtocolHandler()     | 将一个网站注册为特定协议的处理程序                           |
+| requestMediaKeySystemAccess() | 返回一个期约，解析为 MediaKeySystemAccess 对象               |
+| sendBeacon()                  | 异步传输一些小数据                                           |
+| serviceWorker                 | 返回用来与 ServiceWorker 实例交互的 ServiceWorkerContainer   |
+| share()                       | 返回当前平台的原生共享机制                                   |
+| storage                       | 返回暴露 Storage API 的 StorageManager 对象                  |
+| userAgent                     | 返回浏览器的用户代理字符串                                   |
+| vendor                        | 返回浏览器的厂商名称                                         |
+| vendorSub                     | 返回浏览器厂商的更多信息                                     |
+| vibrate()                     | 触发设备振动                                                 |
+| webdriver                     | 返回浏览器当前是否被自动化程序控制                           |
+
+navigator 对象的属性通常用于确定浏览器的类型。
+
+## 注册处理程序
+
+navigator 上的 registerProtocolHandler() 方法可以把一个网站注册为处理某种特定类型信息。在线 RSS 阅读器和电子邮件客户端借助这个方法将 Web 应用程序注册为像桌面软件一样的默认应用程序。
+
+要使用 registerProtocolHandler() 方法，必须传入 3 个参数：要处理的协议（如 "mailto" 或 "ftp"）、处理该协议的 URL，以及应用名称。比如，要把一个 Web 应用程序注册为默认邮件客户端，可以这样做：
+
+```javascript
+navigator.registerProtocolHandler("mailto", "http://www.example.com?cmd=%s", "Some Mail Client");
+```
+
+这个例子为 "mailto" 协议注册了一个处理程序，这样邮件地址就可以通过指定的 Web 应用程序打开。注意，第二个参数是负责处理请求的 URL，%s 表示原始的请求。
+
 # 4. screen 对象
 
 window 的另一个属性 screen 对象是为数不多的几个在编程中很少用到的 JavaScript 对象之一。这个对象中保存的纯粹是客户端能力信息，也就是浏览器窗口外面的客户端显示器的信息，比如像素宽度和像素高度。每个浏览器都会在 screen 对象上暴露不同的属性。下表总结了这些属性。
@@ -595,6 +653,18 @@ window 的另一个属性 screen 对象是为数不多的几个在编程中很�
 | orientation | 返回 Screen Orientation API 中屏幕的朝向     |
 
 # 5. history 对象
+
+## history.go()
+
+## history.back()
+
+## history.forward()
+
+## history.pushState()
+
+## history.popState()0
+
+## history.replaceState()
 
 history 对象表示自当前窗口首次使用以来用户的导航历史记录。因为 history 是 window 的属性，所以每个 window 都有自己的 history 对象。出于安全考虑，这个对象不会暴露用户访问过的 URL，但可以通过它在不知道实际 URL 的情况下前进和后退。
 
@@ -659,9 +729,32 @@ let stateObject = { foo: "bar" };
 history.pushState(stateObject, "My title", "baz.html");
 ```
 
+pushState() 方法执行后，状态信息就会被推到历史记录中，浏览器地址栏也会改变以反映新的相对 URL。除了这些变化之外，即使 location.href 返回的是地址栏中的内容，浏览器也不会向服务器发送请求。第二个参数并未被当前发现所使用，因此既可以传入一个空字符串也可以传入一个短标题。第一个参数应该包含正确初始化页面状态所必需的信息。为防止滥用，这个状态的对象大小是有限制的，通常在 500 KB ~ 1MB。
 
+因为 pushState() 会创建新的历史记录，所以也会相应地启用后退按钮。此时单击后退按钮，就会触发 window 对象上的 popstate 事件。popstate 事件的事件对象有一个 state 属性，其中包含通过 pushState() 第一个参数传入的 state 对象：
 
+```javascript
+window.addEventListener("popstate", (event) => {
+    let state = event.state;
+    if (state) { // 第一个页面加载时状态是 null
+        processState(state);
+    }
+});
+```
 
+基于这个状态，应该把页面重置为状态对象所表示的状态（因为浏览器不会自动为你做这些）。记住，页面初次加载时没有状态。因此单击后退按钮直到返回最初页面时，event.state 会为 null。
+
+可以通过 history.state 获取当前的状态对象，也可以使用 replaceState() 并传入与 pushState() 同样的前两个参数来更新状态。更新状态不会创建新历史记录，只会覆盖当前状态：
+
+```javascript
+history.resplaceState({ newFoo: "newBar" }, "New title");
+```
+
+传给 pushState() 和 replaceState() 的 state 对象应该只包含可以被序列化的信息。因此，DOM 元素之类的对象并不适合放到状态对象里保存。
+
+>注意
+>
+>使用 HTML5 状态管理时，要确保通过 pushState() 创建的每个假 URL 背后都对应着服务器上一个真实的物理 URL。否则，单击刷新按钮会导致 404 错误。所有单页应用程序（SPA，Single Page Application）框架都必须通过服务器或客户端的某些配置解决这个问题。
 
 
 
