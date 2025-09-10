@@ -414,6 +414,16 @@ setTimeout(incrermentNumber, 500);
 
 ## 9. 系统对话框
 
+### alert()
+
+### confirm()
+
+### prompt()
+
+### window.print()
+
+### window.find()
+
 使用 alert()、confirm() 和 prompt() 方法，可以让浏览器调用系统对话框向用户显示消息。这些对话框与浏览器中显示的网页无关，而且也不包含 HTML。它们的外观由操作系统或者浏览器决定，无法使用 CSS 设置。此外，这些对话框都是同步的模态对话框，即在它们显示的时候，代码会停止执行，在它们消失以后，代码才会恢复执行。
 
 alert() 方法在本书示例中经常用到。它接收一个要显示给用户的字符串。与 console.log 可以接收任意数量的参数且能一次性打印这些参数不同，alert() 只接收一个参数。调用 alert() 时，传入的字符串会显示在一个系统对话框中。对话框只有一个 "OK"（确定）按钮。如果传给 alert() 的参数不是一个原始字符串，则会调用这个值的 toString() 方法将其转换为字符串。
@@ -423,7 +433,231 @@ alert() 方法在本书示例中经常用到。它接收一个要显示给用户
 第二种对话框叫确认框，通过调用 confirm() 来显示。确认框跟警告框类似，都会向用户显示消息。但不同之处在于，确认框有两个按钮："Cancel"（取消）和 "
 OK"（确定）。用户通过单击不同的按钮表明接下来执行什么操作。比如，confirm("Are you sure?") 会显示下图所示的确认框。
 
+要知道用户单击了 OK 按钮还是 Cancel 按钮，可以判断 confirm() 方法的返回值：true 表示单击了 OK 按钮，false 表示单击了 Cancel 按钮或者通过单击某个角上的 X 图标关闭了确认框。确认框的典型用法如下所示：
 
+```javascript
+if (confirm("Are you sure?")) {
+    alert("I'm so glad you're sure!");
+} else {
+    alert("I'm sorry to hear you're not sure.");
+}
+```
+
+在这个例子中，第一行代码向用户显示了确认框，也就是 if 语句的条件。如果用户单击了 OK 按钮，则会弹出警告框显示 "I'm so glad you're sure!"。如果单击了 Cancel 按钮，则会显示 "I'm sorry to hear you're not sure."。确认框通常用于让用户确认执行某个操作，比如删除邮件等。因为这种对话框会完全打断正在浏览器网页的用户，所以应该在必要时再使用。
+
+最后一种对话框是提示框，通过调用 prompt() 方法来显示。提示框的用途是提示用户输入消息。除了 OK 和 Cancel 按钮，提示框还会显示一个文本框，让用户输入内容。prompt() 方法接收两个参数：哟啊显示给用户的文本，以及文本框的默认值（可以是空字符串）。调用 prompt("What is your name?", "Jake") 会显示下图所示的提示框。
+
+如果用户单击了 OK 按钮，则 prompt() 会返回文本框中的值。如果用户单击了 Cancel 按钮，或者对话框被关闭，则 prompt() 会返回 null。下面是一个例子：
+
+```javascript
+let result = prompt("What is your name?", "");
+if (result !== null) {
+    alert("Welcome, " + result);
+}
+```
+
+这些对话框可以向用户显示消息、确认操作和获取输入。由于不需要 HTML 和 CSS，所以系统对话框是 Web 应用程序最简单快捷的沟通手段。
+
+很多浏览器针对这些系统对话框添加了特殊功能。如果网页中的脚本生成了两个或更多系统对话框，则除第一个之外所有后续的对话框上都会显示一个复选框，如果用户选中则会禁用后续的弹框，直到页面刷新。
+
+如果用户选中了复选框并关闭了对话框，在页面刷新之前，所有系统对话框（警告框、确认框、提示框）都会被屏蔽。开发者无法获悉这些对话框是否显示了。对话框计数器会在浏览器空闲时重置，因独立的用户操作连续产生了两个警告框，则第二个警告框会显示复选框。
+
+JavaScript 还可以显示另外两种对话框：find() 和 print()。这两种对话框都是异步显示的，即控制权会立即返回给脚本。用户在浏览器菜单上选择查找（find）和 打印（print）时显示的就是这两种对话框。通过在 window 对象上调用 find() 和 print() 可以显示它们，比如：
+
+```javascript
+// 显示打印对话框
+window.print();
+
+// 显示查找对话框
+window.find()
+```
+
+这两个方法不会返回任何有关用户在对话框中执行了什么操作的信息，因此很难加以利用。此外，因为这两种对话框是异步的，所以浏览器的对话框计数器不会涉及它们，而且用户选择禁用对话框对它们也没有影响。
+
+# 2. location 对象
+
+location 是最有用的 BOM 对象之一，提供了当前窗口中加载的文档的信息，以及通常的导航功能。这个对象独特的地方在于，它既是 window 的属性，也是 document 的属性。也就是说，window.location 和 document.location 指向同一个对象。location 对象不仅保存着当前加载文档的信息，也保存着把 URL 解析为离散片段后能够通过属性访问的信息。这些解析后的属性在下表中有详细说明（location 前缀是必需的）。
+
+假设浏览器当前加载的 URL 是 http://foouser:barpassword@www,wiley.con:80/WileyCDA/?q=javascript#contents，location 对象的内容如下表所示。
+
+| 属性              | 值                                                        | 说明                                                         |
+| ----------------- | --------------------------------------------------------- | ------------------------------------------------------------ |
+| location.hash     | "#contents"                                               | URL 散列值（井号后跟零个或多个字符），如果没有则为空字符串   |
+| location.host     | "www.wiley.com:80"                                        | 服务器名及端口号                                             |
+| location.hostname | "www.wiley.com"                                           | 服务器名                                                     |
+| location.href     | "http://www.wiley.com:80/WileyCDA/?q=javascript#contents" | 当前加载页面的完整 URL。location 的 toString() 方法返回这个值 |
+| location.pathname | "/WileyCDA"                                               | URL 中的路径和（或）文件名                                   |
+| location.port     | "80"                                                      | 请求的端口。如果 URL 中没有端口，则返回空字符串              |
+| location.protocol | "http:"                                                   | 页面使用的协议。通常是 "http:" 或 "https:"                   |
+| location.search   | "?q=javascript"                                           | URL 的查询字符串。这个字符串以问号开头                       |
+| location.username | "foouser"                                                 | 域名前指定的用户名                                           |
+| location.password | "barpassword"g                                            | 域名前指定的密码                                             |
+| location.origin   | "http://www.wiley.com"                                    | URL 的源地址。只读                                           |
+
+>注意
+>
+>在处理 location 对象时，URL API 和 URLSearchParams API 非常有用。详情请参阅第 18 章。
+
+## 操作地址
+
+可以通过修改 location 对象修改浏览器的地址。首先，最常见的是使用 assign() 方法并传入一个 URL，如下所示：
+
+```javascript
+location.assign("http://www.wiley.com");
+```
+
+这行代码会立即启动导航到新 URL 的操作，同时在浏览器历史记录中增加一条记录。如果给 location.href 或 window.location 设置一个 URL，也会以同一个 URL 值调用 assign() 方法。比如，下面两行代码都会执行与显式调用 assign() 一样的操作：
+
+```javascript
+window.location = "http://www.wiley.com";
+location.href = "http://www.wiley.com";
+```
+
+在这 3 种修改浏览器地址的方法中，设置 location.href 是最常见的。
+
+修改 location 对象的属性也会修改当前加载的页面。hash、search、hostname、pathname 和 port 属性被设置为新值之后都会修改当前 URL，如下面的例子所示：
+
+```javascript
+// 假设当前 URL 为 http://www.wiley.com/WiltyCDA/
+
+// 把 URL 修改为 http://www.wiley.com/WileyCDA/#section1
+location.hash = "#section1";
+
+// 把 URL 修改为 http://www.wiley.com/WileyCDA/?q=javascript
+location.search = "?q=javascript";
+
+// 把 URL 修改为 http://www.example.com/WileyCDA/
+location.hostname = "www.example.com";
+
+// 把 URL 修改为 http://www.example.com/mydir/
+location.pathname = "mydir";
+
+// 把 URL 修改为 http://www.example.com:8080/WileyCDA/
+location.port = 8080;
+```
+
+除了 hash 之外，只要修改 location 的一个属性，就会导致页面重新加载新 URL。
+
+>注意
+>
+>修改 hash 的值会在浏览器历史中增加一条新记录。
+
+在以前面提到的方式修改 URL 之后，浏览器历史记录中会增加相应的记录。当用户单击后退按钮时，会导航到前一个页面。如果不希望增加历史记录，可以使用 replace() 方法。这个方法接收一个 URL 参数，但重新加载后不会增加历史记录。调用 replace() 之后，用户不能回到前一页。比如下面的例子：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<title>You won't be able to get back here</title>
+</head>
+<body>
+	<p>Enjoy this page for a second, because you won't be coming back here.</p>
+    <script>
+        setTimeout(() => location.replace("http://www.wiley.com/"), 1000);
+    </script>
+</body>
+</html>
+```
+
+浏览器加载这个页面 1 秒之后会重定向到 www.wiley.com。此时，后退按钮是禁用状态，即不能返回这个示例页面，除非手动输入完整的 URL。
+
+最后一个修改地址的方法是 reload()，它能重新加载当前显示的页面。调用 reload() 而不传参数，页面会以最有效的方式重新加载。也就是说，如果页面自上次请求以来没有修改过，浏览器可能会从缓存中加载页面。如果想强制从服务器重新加载，可以像下面这样给 reload() 传个 true：
+
+```javascript
+location.reload(); // 重新加载，可能从缓存加载
+location.reload(true); // 重新加载，从服务器加载
+```
+
+脚本中位于 reload() 调用之后的代码可能执行也可能不执行，这取决于网络延迟和系统资源等因素。为此，最好把 reload() 作为最后一行代码。
+
+# 3. navigator 对象
+
+navigator 是由 Netscape Navigator 2 最早引入浏览器的，现在已经成为客户端标识浏览器的标准。只要浏览器启用 JavaScript，navigator 对象就一定存在。但是与其他 BOM 对象一样，每个浏览器都支持自己的一组属性。
+
+下表列出了这些接口定义的属性和方法。
+
+# 4. screen 对象
+
+window 的另一个属性 screen 对象是为数不多的几个在编程中很少用到的 JavaScript 对象之一。这个对象中保存的纯粹是客户端能力信息，也就是浏览器窗口外面的客户端显示器的信息，比如像素宽度和像素高度。每个浏览器都会在 screen 对象上暴露不同的属性。下表总结了这些属性。
+
+| 属性        | 说明                                         |
+| ----------- | -------------------------------------------- |
+| availHeight | 屏幕像素高度减去系统组件高度（只读）         |
+| availLeft   | 没有被系统组件占用的屏幕的最左侧像素（只读） |
+| availTop    | 没有被系统组件占用的屏幕的最顶端像素（只读） |
+| availWidth  | 屏幕像素宽度减去系统组件宽度（只读）         |
+| colorDepth  | 表示屏幕颜色的位数，多数系统是 32（只读）    |
+| height      | 屏幕像素高度                                 |
+| left        | 当前屏幕左边的像素距离                       |
+| pixelDepth  | 屏幕的位深（只读）                           |
+| top         | 当前屏幕顶端的像素距离                       |
+| width       | 屏幕像素宽度                                 |
+| orientation | 返回 Screen Orientation API 中屏幕的朝向     |
+
+# 5. history 对象
+
+history 对象表示自当前窗口首次使用以来用户的导航历史记录。因为 history 是 window 的属性，所以每个 window 都有自己的 history 对象。出于安全考虑，这个对象不会暴露用户访问过的 URL，但可以通过它在不知道实际 URL 的情况下前进和后退。
+
+## 1. 导航
+
+go() 方法可以在用户历史记录中沿任何方向导航，可以前进也可以后退。这个方法只接收一个参数，这个参数可以是一个整数，表示前进或后退多少步。负值表示在历史记录中后退（类似点击浏览器的后退按钮），而正值表示在历史记录中前进（类似点击浏览器的前进按钮）。下面来看几个例子：
+
+```javascript
+// 后退一页
+history.go(-1);
+
+// 前进一页
+history.go(1);
+
+// 前进两页
+history.go(2);
+```
+
+在旧版本的一些浏览器中，go() 方法的参数也可以是一个字符串，这种情况下浏览器会导航到历史记录中包含该字符串的第一个位置。最接近的位置可能涉及后退，也可能涉及前进。如果历史记录中没有匹配的项，则这个方法什么也不做，如下所示：
+
+```javascript
+// 导航到最近的 wiley.com 页面
+history.go("wiley.com");
+
+// 导航到最近的 w3.org 页面
+history.go("w3.org");
+```
+
+go() 有两个简写方法：back() 和 forward()。顾名思义，这两个方法模拟了浏览器的后退按钮和前进按钮：
+
+```javascript
+// 后退一页
+history.back();
+
+// 前进一页
+history.forward();
+```
+
+history 对象还有一个 length 属性，表示历史记录中有多少个条目。这个属性反映了历史记录的数量，包括可以前进和后退的页面。对于窗口或标签页中加载的第一个页面，history.length 等于 1。通过以下方法测试这个值可以确定用户浏览器的起点是不是你的页面：
+
+```javascript
+if (history.length == 1) {
+    // 这是用户窗口中的第一个页面
+}
+```
+
+history 对象通常被用于创建后退和前进按钮，以及确定页面是不是用户历史记录中的第一条记录。
+
+>注意
+>
+>如果页面 URL 发生变化，则会在历史记录中生成一个新条目。这包括改变 URL 的散列值（因此，把 location.hash 设置为一个新值会在这些浏览器的历史记录中增加一条记录）。这个行为常被单页应用程序框架用来模拟前进和后退，这样做不会因导航而触发页面刷新。
+
+## 2. 历史状态管理
+
+现代 Web 应用程序开发中最难的环节之一就是历史记录管理。用户每次点击都会触发页面刷新的时代早已过去，后退和前进按钮对用户来说就代表帮我切换一个状态的历史也随之结束。为解决这个问题，首先出现的是 hashchange 事件（第 15 章介绍事件时会讨论）。HTML5 也为 history 对象增加了方便的状态管理特性。
+
+hashchange 会在页面 URL 的散列变化时被触发，开发者可以在此时执行某些操作。而状态管理 API 则可以让开发者改变浏览器 URL 而不会加载新页面。为此，可以使用 history.pushState() 方法。这个方法接收 3 个参数：一个 state 对象、一个新状态的标题和一个（可选的）相对 URL。例如：
+
+```javascript
+let stateObject = { foo: "bar" };
+
+history.pushState(stateObject, "My title", "baz.html");
+```
 
 
 
