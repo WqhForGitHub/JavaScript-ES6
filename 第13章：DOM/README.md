@@ -141,6 +141,718 @@ if (someNode.nextSibling === null) {
 >
 >虽然所有节点类型都继承了 Node，但并非所有节点都有子节点。本章后面会讨论不同节点类型的差异。
 
+### 3. 操纵节点
+
+#### appendChild()
+
+#### replaceChild()
+
+#### removeChild()
+
+#### insertBefore()
+
+因为所有关系指针都是只读的，所以 DOM 又提供了一些操纵节点的方法。最常用的方法是 appendChild()，用于在 childModes 列表末尾添加节点。添加新节点会更新相关的关系指针，包括父节点和之前的最后一个子节点。appendChild() 方法返回新添加的节点，如下所示：
+
+```javascript
+let returnedNode = someNode.appendChild(newNode);
+alert(returnedNode == newNode); // true
+alert(someNode.lastChild == newNode); // true
+```
+
+如果把文档中已经存在的节点传给 appendChild()，则这个节点会从之前的位置被转移到新位置。即使 DOM 树通过各种关系指针维系，一个节点也不会在文档中同时出现在两个或更多个地方。因此，如果调用 appendChild() 传入父元素的第一个子节点，则这个节点会成为父元素的最后一个子节点，如下所示：
+
+```javascript
+// 假设 someNode 有多个子节点
+let returnedNode = someNode.appendChild(someNode.firstChild);
+alert(returnedNode == someNode.firstChild); // false
+alert(returnedNode == someNode.lastChild); // true
+```
+
+如果想把节点放到 childNodes 中的特定位置而不是末尾，则可以使用 insertBefore() 方法。这个方法接收两个参数：要插入的节点和参照节点。调用这个方法后，要插入的节点会变成参照节点的前一个同胞节点，并被返回。如果参照节点是 null，则 insertBefore() 与 appendChild() 效果相同，如下面的例子所示：
+
+```javascript
+// 作为最后一个子节点插入
+returnedNode = someNode.insertBefore(newNode, null);
+alert(newNode == someNode.lastChild); // true
+
+// 作为新的第一个子节点插入
+returnedNode = someNode.insertBefore(newNode, someNode.firstChild);
+alert(returnedNode == newNode); // true
+alert(newNode == someNode.firstChild); // true
+
+// 插入最后一个子节点前面
+returnedNode = someNode.insertBefore(newNode, someNode.lastChild);
+alert(newNode == someNode.childNodes[someNode.childNodes.length - 2]); // true
+```
+
+appendChild() 和 insertBefore() 在插入节点时不会删除任何已有节点。相对地，replaceChild() 方法接收两个参数：要插入的节点和要替换的节点。要替换的节点会被返回并从文档树中完全移除，要插入的节点会取而代之。下面看一个例子：
+
+```javascript
+// 替换第一个子节点
+let returnedNode = someNode.replaceChild(newNode, someNode.firstChild);
+
+// 替换最后一个子节点
+returnedNode = someNode.replaceChild(newNode, someNode.lastChild);
+```
+
+使用 replaceChild() 插入一个节点后，所有关系指针都会从被替换的节点复制过来。虽然被替换的节点从技术上说仍然被同一个文档所拥有，但文档中已经没有它的位置。
+
+要移除节点而不是替换节点，可以使用 removeChild() 方法。这个方法接收一个参数，即要移除的节点。被移除的节点会被返回，如下面的例子所示：
+
+```javascript
+// 删除第一个子节点
+let formerFirstChild = someNode.removeChild(someNode.firstChild);
+
+// 删除最后一个子节点
+let formerLastChild = someNode.removeChild(someNode.lastChild);
+```
+
+与 replaceChild() 方法一样，通过 removeChild() 被移除的节点从技术上说仍然被同一个文档所拥有，但文档中已经没有它的位置。
+
+上面介绍的 4 个方法都用于操作某个节点的子元素，也就是说使用它们之间必须先取得父节点（使用前面介绍的 parentNode 属性）。并非所有节点类型都有子节点，如果在不支持子节点的节点上调用这些方法，则会导致抛出错误。
+
+### 4. 其他方法
+
+#### cloneNode()
+
+#### normalize()
+
+所有节点类型还共享了两个方法。第一个是 cloneNode()，会返回与调用它的节点一模一样的节点。cloneNode() 方法接收一个布尔值参数，表示是否深复制。在传入 true 参数时，会进行深复制，即复制节点及其整个子 DOM 树。如果传入 false，则只会复制调用该方法的节点。复制返回的节点属于文档所有，但尚未指定父节点，所以可称为孤儿节点（orphan）。可以通过 appendChild()、insertBefore() 或 replaceChild() 方法把孤儿节点添加到文档中。以下面的 HTML 片段为例：
+
+```html
+<ul>
+    <li>item 1</li>
+    <li>item 2</li>
+    <li>item 3</li>
+</ul>
+```
+
+如果 myList 保存着对这个 `<ul>` 元素的引用，则下列代码展示了使用 cloneNode() 方法的两种方式：
+
+```javascript
+let deepList = myList.cloneNode(true);
+alert(deepList.childNodes.length); // 7
+
+let shallowList = myLuist.cloneNode(false);
+alert(shallowList.childNodes.length); // 0
+```
+
+在这个例子中，deepList 保存着 myList 的副本。这意味着 deepList 有 3 个列表项，每个列表项又各自包含文本。变量 shallowList 则保存着 myList 的浅副本，因此没有子节点。
+
+>注意
+>
+>cloneNode() 方法不会复制添加到 DOM 节点的 JavaScript 属性，比如事件处理程序。这个方法只复制 HTML 属性，以及可选地复制子节点。除此之外则一概不会复制。
+
+本节要介绍的最后一个方法是 normalize()。这个方法唯一的任务就是处理文档子树中的文本节点。由于解析器实现的差异或 DOM 操作等原因，可能会出现并不包含文本的文本节点，或者文本节点之间互为同胞关系。在节点上调用 normalize() 方法会检测这个节点的所有后代，从中搜索上述两种情形。如果发现空文本节点，则将其删除。如果两个同胞节点是相邻的，则将其合并为一个文本节点。这个方法将在本章后面进一步讨论。
+
+## 2. Document 类型
+
+### document.documentElement
+
+### document.body
+
+### document.doctype
+
+### document.title
+
+### document.URL
+
+### document.domain
+
+### document.referrer
+
+### document.anchors
+
+### document.applets
+
+### document.forms
+
+### document.images
+
+### document.links
+
+### document.write()
+
+### document.writeln()
+
+### document.open()
+
+### document.close()
+
+### document.getElementById()
+
+### document.getElementsByTagName()
+
+### document.getElementsByName()
+
+Document 类型是 JavaScript 中表示文档节点的类型。在浏览器中，文档对象 document 是 HTMLDocument 的实例（HTMLDocument 继承 Document），表示整个 HTML 页面。document 是 window 对象的属性，因此是一个全局对象。Document 类型的节点有以下特征：
+
+* nodeType 等于 9
+* nodeName 值为 "#document"
+* nodeValue 值为 null
+* parentNode 值为 null
+* ownerDocument 值为 null
+* 子节点可以是 DocumentType（最多一个）、Element（最多一个）、ProcessingInstruction 或 Comment 类型。
+
+Document 类型可以表示 HTML 页面或其他 XML 文档，但最常用的还是通过 HTMLDocument 的实例取得 document 对象。document 对象可用于获取关于页面的信息以及操纵其外观和底层结构。
+
+### 1. 文档子节点
+
+虽然 DOM 规范规定 Document 节点的子节点可以是 DocumentType、Element、ProcessingInstruction 或 Comment，但也提供了两个访问子节点的快捷方式。第一个是 documentElement 属性，始终指向 HTML 页面中的 `<html>` 元素。虽然 document.childNodes 中始终有 `<html>` 元素，但使用 documentElement 属性可以更快更直接地访问该元素。假如有以下简单的页面：
+
+```html
+<html>
+    <body>
+        
+    </body>
+</html>
+```
+
+浏览器解析完这个页面之后，文档只有一个子节点，即 `<html>` 元素。这个元素既可以通过 documentElement 属性获取，也可以通过 childNodes 列表访问，如下所示：
+
+```javascript
+let html = document.documentElement; // 取得对 <html> 的引用
+alert(html === document.childNodes[0]); // true
+alert(html === document.firstChild); // true
+```
+
+这个例子表明 documentElement、firstChild 和 childNodes[0] 都指向同一个值，即 `<html>` 元素。
+
+作为 HTMLDocument 的实例，document 对象还有一个 body 属性，直接指向 `<body>` 元素。因为这个元素是开发者使用最多的元素，所以 JavaScript 代码中经常可以看到 document.body，比如：
+
+```javascript
+let body = document.body; // 取得对 <body> 的引用
+```
+
+所有主流浏览器都支持 document.documentElement 和 document.body。
+
+Document 类型另一种可能的子节点是 DocumentType。`<!doctype>` 标签是文档中独立的部分，其信息可以通过 doctype 属性（在浏览器中是 document.doctype）来访问，比如：
+
+```javascript
+let doctype = document.doctype; // 取得对 <!doctype> 的引用
+```
+
+另外，严格来讲出现在 `<html>` 元素外面的注释也是文档的子节点，它们的类型是 Comment。不过，由于浏览器实现不同，这些注释不一定能被识别，或者表现可能不一致。比如以下 HTML 页面：
+
+```html
+<!-- 第一条注释 -->
+<html>
+    <body>
+        
+    </body>
+</html>
+<!-- 第二条注释 -->
+```
+
+这个页面看起来有 3 个子节点：注释、`<html>` 元素、注释。逻辑上讲，document.childNodes 应该包含 3 项，对应代码中的每个节点。但实际上，浏览器有可能不同方式对待 `<html>` 元素外部的注释，比如忽略一个或两个注释。
+
+一般来说，appendChild()、removeChild() 和 replaceChild() 方法不会用在 document 对象上。这是因为文档类型（如果存在）是只读的，而且只能有一个 Element 类型的子节点（即 `<html>`，已经存在了）。
+
+### 2. 文档信息
+
+document 作为 HTMLDocument 的实例，还有一些标准 Document 对象上所没有的属性。这些属性提供浏览器所加载网页的信息，其中第一个属性是 title，包含 `<title>` 元素中的文本，通常显示在浏览器窗口或标签页的标题栏。通过这个属性可以读写页面的标题，修改后的标题也会反映在浏览器标题栏上。不过，修改 title 属性并不会改变 `<title>` 元素。下面是一个例子：
+
+```javascript
+// 读取文档标题
+let originalTitle = document.title;
+
+// 修改文档标题
+document.title = "New page title";
+```
+
+接下来要介绍的 3 个属性是 URL、domain 和 referrer。URL 包含当前页面的完整 URL（地址栏中的 URL），domain 包含页面的域名，而 referrer 包含链接到当前页面的那个页面的 URL。如果当前页面没有来源，则 referrer 属性包含空字符串。所有这些信息都可以在请求的 HTTP 头部信息中获取，只是在 JavaScript 中通过这几个属性暴露出来而已，如下面的例子所示：
+
+```javascript
+// 取得完整的 URL
+let url = document.URL;
+
+// 取得域名
+let domain = document.domain;
+
+// 取得来源
+let referrer = document.referrer;
+```
+
+URL 跟域名是相关的。如果 document.URL 是 http://www.wiley.com/WileyCDA/，则 document.domian 就是 www.wiley.com。
+
+在这些属性中，只有 domain 属性是可以设置的。出于安全考虑，给 domain 属性设置的值是有限制的。如果 URL 包含子域名如 p2p.wiley.com，则可以将 domain 设置为 "wiley.com"（URL 包含 "www" 时也一样，比如 www.wiley.com）。不能给这个属性设置 URL 中不包含的值，比如：
+
+```javascript
+// 页面来自 p2p.wiley.com
+
+document.domain = "wiley.com"; // 成功
+
+document.domain = "w3.org"; // 出错！
+```
+
+当页面中包含来自某个不同子域的窗格（`<frame>`）或内嵌窗格（`<iframe>`）时，设置 document.domain 是有用的。因为跨源通信存在安全隐患，所以不同子域的页面间无法通过 JavaScript 通信。此时，在每个页面上把 document.domain 设置为相同的值，这些页面就可以访问对方的 JavaScript 对象了。比如，一个加载自 www.wiley.com 的页面中包含一个内嵌窗格，其中的页面加载自 p2p.wiley.com。这两个页面的 document.domain 包含不同的字符串，内部和外部页面相互之间不能访问对方的 JavaScript 对象。如果每个页面都把 document.domain 设置为 wiley.com，那这两个页面之间就可以通信了。
+
+浏览器对 domain 属性还有一个限制，即这个属性一旦放松就不能再收紧。比如，把 document.domain 设置为 "wiley.com" 之后，就不能再将其设置回 "p2p.wiley.com"，否则会导致错误，比如：
+
+```javascript
+// 页面来自 p2p.wiley.com
+
+document.domain = "wiley.com"; // 放松，成功
+
+document.domain = "p2p.wiley.com"; // 收紧，错误！
+```
+
+### 3. 定位元素
+
+使用 DOM 最常见的情形可能就是获取某个或某组元素的引用，然后对它们执行某些操作。document 对象上暴露了一些方法，可以实现这些操作。getElementById() 和 getElementsByTagName() 就是 Document 类型提供的两个方法。
+
+getElementById() 方法接收一个参数，即要获取元素的 ID，如果找到了则返回这个元素，如果没找到则返回 null。参数 ID 必须跟元素在页面中的 id 属性值完全匹配，包括大小写。比如页面中有以下元素：
+
+```html
+<div id="myDiv">Some text</div>
+```
+
+可以使用如下代码取得这个元素：
+
+```javascript
+let div = document.getElementById("mydiv"); // null
+```
+
+如果页面中存在多个具有相同 ID 的元素，则 getElementById() 返回在文档中出现的第一个元素。
+
+getElementByTagName() 是另一个常用来获取元素引用的方法。这个方法接收一个参数，即要获取元素的标签名，返回包含零个或多个元素的 NodeList。在 HTML 文档中，这个方法返回一个 HTMLCollection 对象。考虑到二者都是实时列表，HTMLCollection 与 NodeList 是很相似的。例如，下面的代码会取得页面中所有的 `<img>` 元素并返回包含它们的 HTMLCollection：
+
+```javascript
+let images = document.getElementsByTagName("img");
+```
+
+这里把返回的 HTMLCollection 对象保存在了变量 images 中。与 NodeList 对象一样，也可以使用中括号或 item() 方法从 HTMLCollection 取得特定的元素。而取得元素的数量同样可以通过 length 属性得知，如下所示：
+
+```javascript
+alert(images.length); // 图片数量
+alert(images[0].src); // 第一张图片的 src 属性
+alert(images.item(0).src); // 同上
+```
+
+HTMLCollection 对象还有一个额外的方法 namedItem()，可通过标签的 name 属性取得某一项的引用。假设页面中包含如下的 `<img>` 元素：
+
+```html
+<img src="myimage.gif" name="myImage">
+```
+
+那么也可以像这样从 images 中取得对这个 `<img>` 元素的引用：
+
+```javascript
+let myImage = images.namedItem("myImage");
+```
+
+这样，HTMLCollection 就提供了除索引之外的另一种获取列表项的方式，从而为取得元素提供了便利。对于有 name 属性的元素，还可以直接使用中括号来获取，如下面的例子所示：
+
+```javascript
+let myImage = images["myImage"];
+```
+
+对 HTMLCollection 对象而言，中括号既可以接收数值索引，也可以接收字符串索引。而在后台，数值索引会调用 item()，字符串索引会调用 namedItem()。
+
+要取得文档中的所有元素，可以给 getElementByTagName() 传入 *。在 JavaScript 和 CSS 中，`*` 一般被认为是批评配一切的字符。来看下面的例子：
+
+```javascript
+let allElements = document.getElementsByTagName("*");
+```
+
+这行代码可以返回包含页面中所有元素的 HTMLCollection 对象，顺序就是它们在页面中出现的顺序。因此第一项是 `<html>` 元素，第二项是 `<head>` 元素，以此类推。
+
+>注意
+>
+>对于 document.getElementsByTagName() 方法，虽然规范要求区分标签的大小写，但为了最大限度兼容原有 HTML 页面，实际上是不区分大小写的。如果是在 XML 页面（如 XHTML）中使用，那么 document.getElementByTagName() 就是区分大小写的。
+
+HTMLDocument 类型上定义的获取元素的第三个方法是 getElementsByName()。顾名思义，这个方法会返回具有给定 name 属性的所有元素。getElementsByName() 方法最常用于单选按钮，因为同一字段的单选按钮必须具有相同的 name 属性才能确保把正确的值发送给服务器，比如下面的例子：
+
+```html
+<fieldset>
+    <legend>Which color do you prefer?</legend>
+    <ul>
+        <li>
+        	<input type="radio" value="red" name="color" id="colorRed">
+            <label for="colorRed">Red</label>
+      	</li>
+        <li>
+            <input type="radio" value="green" name="color" id="colorGreen">
+            <label for="colorGreen">Green</label>
+        </li>
+        <li>
+            <input type="radio" value="blue" name="color" id="colorBlue">
+            <label for="colorBlue">Blue</label>
+        </li>
+    </ul>
+</fieldset>
+```
+
+这里所有的单选按钮都有名为 "color" 的 name 属性，但它们的 ID 都不一样。这是因为 ID 是为了匹配对应的 `<label>` 元素，而 name 相同是为了保证只将三个中的一个值发送给服务器。然后就可以像下面这样取得所有单选按钮：
+
+```javascript
+let radios = document.getElementsByName("color");
+```
+
+与 getElementsByTagName() 一样，getElementsByName() 方法也返回 HTMLCollection。不过在这种情况下，namedItem() 方法只会取得第一项（因为所有项的 name 属性都一样）。
+
+### 4. 特殊集合
+
+document 对象上还暴露了几个特殊集合，这些集合也都是 HTMLCollection 的实例。这些集合是访问文档中公共部分的快捷方式，列举如下。
+
+* document.anchors 包含文档中所有带 name 属性的 `<a>` 元素。
+* document.applets 包含文档中所有 `<applet>` 元素（因为 `<applet>` 元素已经不建议使用，所以这个集合已经废弃）。
+* document.forms 包含文档中所有 `<form>` 元素（与 document.getElementsByTagName("form") 返回的结果相同）。
+* document.images 返回文档中所有 `<img>` 元素（与 document.getElementsByTagName("img") 返回的结果相同）。
+* document.links 包含文档中所有带 href 属性的 `<a>` 元素。
+
+这些特殊集合始终存在于 HTMLDocument 对象上，而且与所有 HTMLCollection 对象一样，其内容也会实时更新以符合当前文档的内容。
+
+### 5. 文档写入
+
+document 对象有一个古老的能力，即向网页输出流中写入内容。这个能力对应 4 个方法：write()、writeln()、open() 和 close()。write() 和 writeln() 方法都接收一个字符串参数，可以将这个字符串写入网页中。write() 简单地写入文本，而 writeln() 还会再字符串末尾追加一个换行符（\n）。这两个方法可以用来再页面加载期间向页面中动态添加内容，如下所示：
+
+```html
+<html>
+<head>
+    <title>document.write() Example</title>
+</head>
+<body>
+    <p>The current data and time is:</p>
+    <script type="text/javascript">
+        document.write("<strong>" + (new Date()).toString() + "</strong>");
+    </script>
+</body>
+</html>
+```
+
+这个例子会在页面加载过程中输出当前日期和时间。日期放在了 `<strong>` 元素中，如同它们之前就包含在 HTML 页面中一样。这意味着会创建一个 DOM 元素，以后也可以访问。通过 write() 和 writeln() 输出的任何 HTML 都会以这种方式来处理。
+
+write() 和 writeln() 方法经常用于动态包含外部资源，如 JavaScript 文件。在包含 JavaScript 文件时，记住不能像下面的例子中这样直接包含字符串 `"</script>"`，因为这个字符串会被解释为脚本块的结尾，导致后面的代码不能执行：
+
+```html
+<html>
+<head>
+    <title>document.write() Example</title>
+</head>
+<body>
+    <script type="text/javascript">
+        document.write("<script> type=\"text/javascript\" src=\"file.js\">" + "</script>");
+    </script>
+</body>
+</html>
+```
+
+虽然这样写看起来没错，但输出之后的 `"</script>"` 会匹配最外层的 `<script>` 标签，导致页面中显示出 ")。为避免出现这个问题，需要对前面的例子稍加修改：
+
+```html
+<html>
+<head>
+    <title>document.write() Example</title>
+</head>
+<body>
+    <script type="text/javascript">
+        document.write("<script type=\"text/javascript\" src=\"file.js\">" + "<\/script>")
+    </script>
+</body>
+</html>
+```
+
+这里的字符串 "<\/script>" 不会再匹配最外层的 `<script>` 标签，因此不会在页面中输出额外内容。
+
+前面的例子展示了在页面渲染期间通过 document.write() 向文档中输出内容。如果是在页面加载完之后再调用 document.write()，则输出的内容会重写整个页面，如下面的例子所示：
+
+```html
+<html>
+<head>
+	<title>document.write() Example</title>
+</head>
+<body>
+    <p>This is some content that you won't get to see because it will be overwritten.</p>
+    <script type="text/javascript">
+        window.onload = function() {
+            document.write("Hello world!");
+        };
+    </script>
+</body>
+</html>
+```
+
+这个例子使用了 window.onload 事件处理程序，将调用 document.write() 的函数推迟到页面加载完毕后执行。执行之后，字符串 "Hello world!" 会重写整个页面内容。
+
+open() 和 close() 方法分别用于打开和关闭网页输出流。在调用 write() 和 writeln() 时，这两个方法都不是必需的。
+
+## 3. Element 类型
+
+除了 Document 类型，Element 类型就是 Web 开发中最常用的类型了。Element 表示 XML 或 HTML 元素，对外暴露出访问元素标签名、子节点和属性的能力。Element 类型的节点具有以下特征：
+
+* nodeType 等于 1
+* nodeName 值为元素的标签名
+* nodeValue 值为 null
+* parentNode 值为 Document 或 Element 对象
+* 子节点可以是 Element、Text、Comment、ProcessingInstruction、CDATASection、EntityReference 类型。
+
+可以通过 nodeName 或 tagName 属性来获取元素的标签名。这两个属性返回同样的值（添加后一个属性明显是为了不让人误会）。比如有下面的元素：
+
+```html
+<div id="myDiv"></div>
+```
+
+可以像这样取得这个元素的标签名：
+
+```javascript
+let div = document.getElementById("myDiv");
+alert(div.tagName); // "DIV"
+alert(div.tagName == div.nodeName); // true
+```
+
+例子中的元素标签名为 div，ID 为 "myDiv"。注意，div.tagName 实际上返回的是 "DIV" 而不是 "div"。在 HTML 中，元素标签名始终以全大写表示。在 XML（包括 XHTML）中，标签名始终与源代码中的大小写一致。如果不确定脚本是在 HTML 文档还是 XML 文档中运行，最好将标签名转换为小写形式。
+
+### 1. HTML 元素
+
+#### getAttribute()
+
+#### setAttribute()
+
+#### removeAttribute()
+
+所有 HTML 元素都通过 HTMLElement 类型表示，包括其直接实例和间接实例。另外，HTMLElement 直接继承 Element 并增加了一些属性。每个属性都对应下列属性之一，它们是所有 HTML 元素上都有的标准属性：
+
+* id，元素在文档中的唯一标识符
+* title，包含元素的额外信息，通常以提示条形式展示
+* lang，元素内容的语言代码（很少用）
+* dir，语言的书写方向（"ltr" 表示从左到右，"rtl" 表示从右到左，同样很少用）
+* className，相当于 class 属性，用于指定元素的 CSS 类（因为 class 是 ECMAScript 关键字，所以不能直接用这个名字）。
+
+所有这些都可以用来获取对应的属性值，也可以用来修改相应的值。比如有下面的 HTML 元素：
+
+```html
+<div id="myDiv" class="bd" title="Body text" lang="en" dir="ltr"></div>
+```
+
+这个元素中的所有属性都可以使用下列 JavaScript 代码读取：
+
+```javascript
+let div = document.getElementById("myDiv");
+alert(div.id); // "myDiv"
+alert(div.className); // "bd"
+alert(div.title); // "Body text"
+alert(div.lang); // "en"
+alert(div.dir); // "ltr"
+```
+
+而且，可以使用下列代码修改元素的属性：
+
+```javascript
+div.id = "someOtherId";
+div.className = "ft";
+div.title="Some other text";
+div.lang="fr";
+div.dir = "rtl";
+```
+
+并非所有这些属性的修改都会对页面产生影响。比如，把 id 或 lang 改成其他值对用户是不可见的（假设没有基于这两个属性应用 CSS 样式），而修改 title 属性只会在鼠标移动这个元素上时才会反映出来。修改 dir 会导致页面文本立即向左或向右对齐。修改 className 会立即反映应用到新类名的 CSS 样式（如果定义了不同的样式）。
+
+### 2. 取得属性
+
+每个元素都有零个或多个属性，通常用于为元素或其内容附加更多信息。与属性相关的 DOM 方法主要有 3 个：getAttribute()、setAttribute() 和 removeAttribute()。这些方法主要用于操纵属性，包括在 HTMLElement 类型上定义的属性。下面看一个例子：
+
+```javascript
+let div = document.getElementById("myDiv");
+alert(div.getAttribute("id")); // "myDiv"
+alert(div.getAttribute("class")); // "bd"
+alert(div.getAttribute("title")); // "Body text"
+alert(div.getAttribute("lang")); // "en"
+alert(div.getAttribute("dir")); // "ltr"
+```
+
+注意传给 getAttribute() 的属性名与它们实际的属性名是一样的，因此这里要传 "class" 而非 "className"（className 是作为对象属性时才那么拼写的）。如果给定的属性不存在，则 getAttribute() 返回 null。
+
+getAttribute() 方法也能取得不是 HTML 语言正式属性的自定义属性的值。比如下面的元素：
+
+```html
+<div id="myDiv" my_special_attribute="hello!"></div>
+```
+
+这个元素有一个自定义属性 my_special_attribute，值为 "hello!"。可以像其他属性一样使用 getAttribute() 取得这个属性的值：
+
+```javascript
+let value = div.getAttribute("my_special_attribute");
+```
+
+注意，属性名不区分大小写，因此 "ID" 和 "id" 被认为是同一个属性。另外，根据 HTML5 规范的要求，自定义属性名应该前缀 data- 以方便验证。
+
+元素的所有属性也可以通过相应 DOM 元素对象的属性来取得。当然，这包括 HTMLElement 上定义的直接映射对应属性的 5 个属性，还有公认（非自定义）的属性也会被添加为 DOM 对象的属性。比如下面的例子：
+
+```html
+<div id="myDiv" align="left" my_special_attribute="hello"></div>
+```
+
+因为 id 和 align 在 HTML 中是 `<div>` 元素公认的属性，所以 DOM 对象上也会有这两个属性。但 my_special_attribute 是自定义属性，因此不会成为 DOM 对象的属性。
+
+通过 DOM 对象访问的属性中有两个返回的值跟使用 getAttribute() 取得值不一样。首先是 style 属性，这个属性用于为元素设定 CSS 样式。在使用 getAttribute() 访问 style 属性时，返回的是 CSS 字符串。而在通过 DOM 对象的属性访问时，style 属性返回的是一个（CSSStyleDeclaration）对象。DOM 对象的 style 属性用于以编程方式读写元素样式，因此不会直接映射为元素中 style 属性的字符串值。
+
+第二个属性其实是一类，即事件处理程序（或者事件属性），比如 onclick。在元素上使用事件属性时（比如 onclick），属性的值是一段 JavaScript 代码。如果使用 getAttribute() 访问事件属性，则返回的是字符串形式的源代码。而通过 DOM 对象的属性访问事件属性时返回的则是一个 JavaScript 函数（未指定该属性则返回 null）。这是因为 onclick 及其他事件属性时返回的则是一个 JavaScript 函数（未指定该属性则返回 null）。这是因为 onclick 及其他时间属性是可以接收函数作为值的。
+
+考虑到以上差异，开发者在进行 DOM 编程时通常会放弃使用 getAttribute() 而只使用对象属性。getAttribute() 主要用于取得自定义属性的值。
+
+### 3. 设置属性
+
+与 getAttribute() 配套的方法是 setAttribute()，这个方法接收两个参数：要设置的属性名和属性的值。如果属性已经存在，则 setAttribute() 会以指定的值替换原来的值。如果属性已经存在，则 setAttribute() 会以指定的值替换原来的值。如果属性不存在，则 setAttribute() 会以指定的值创建该属性。下面看一个例子：
+
+```javascript
+div.setAttribute("id", "someOtherId");
+div.setAttribute("class", "ft");
+div.setAttribute("title", "Some other text");
+div.setAttribute("lang", "fr");
+div.setAttribute("dir", "rtl");
+```
+
+setAttrbiute() 适用于 HTML 属性，也适用于自定义属性。另外，使用 setAttribute() 方法设置的属性名会规范为小写形式，因此 "ID" 会变成 "id"。
+
+因为元素属性也是 DOM 对象属性，所以直接给 DOM 对象的属性赋值也可以设置元素属性的值，如下所示：
+
+```javascript
+div.id = "someOtherId";
+div.align = "left";
+```
+
+注意，在 DOM 对象上添加自定义属性，如下面的例子所示，不会自动让它变成元素的属性：
+
+```javascript
+div.mycolor = "red";
+alert(div.getAttribute("mycolor")); // null
+```
+
+这个例子添加了一个自定义属性 mycolor 并将其值设置为 "red"。在多数浏览器中，这个属性不会自动变成元素属性。因此调用 getAttribute() 取得 mycolor 的值会返回 null。
+
+最后一个方法 removeAttribute() 用于从元素中删除属性。这样不单单是清除属性的值，而是会把整个属性完全从元素中去掉，如下所示：
+
+```javascript
+div.removeAttribute("class");
+```
+
+这个方法用得并不多，但在序列化 DOM 元素时可以通过它控制要包含的属性。
+
+### 4. attributes 属性
+
+Element 类型是唯一使用 attributes 属性的 DOM 节点类型。attributes 属性包含一个 NamedNodeMap 实例，是一个类似 NodeList 的实时集合。元素的每个属性都表示为一个 Attr 节点，并保存在这个 NamedNodeMap 对象中。NamedNodeMap 对象包含下列方法：
+
+* getNamedItem(name)，返回 nodeName 属性等于 name 的节点
+* removeNamedItem(name)，删除 nodeName 属性等于 name 的节点
+* setNamedItem(node)，向列表中添加 node 节点，以其 nodeName 为索引
+* item(pos)，返回索引位置 pos 处的节点
+
+attributes 属性中的每个节点的 nodeName 是对应属性的名字，nodeValue 是属性的值。比如，要取得元素 id 属性的值，可以使用以下代码：
+
+```javascript
+let id = element.attributes.getNamedItem("id").nodeValue;
+```
+
+下面是使用中括号访问属性的简写形式：
+
+```javascript
+let id = element.attributes["id"].nodeValue;
+```
+
+同样，也可以用这种语法设置属性的值，即先取得属性节点，再将其 nodeValue 设置为新值，如下所示：
+
+```javascript
+element.attributes["id"].nodeValue = "someOtherId";
+```
+
+removeNamedItem() 方法与元素上的 removeAttribute() 方法类似，也是删除指定名字的属性。下面的例子展示了这两个方法唯一的不同之处，就是 removeNamedItem() 返回表示被删除属性的 Attr 节点：
+
+```javascript
+let oldAttr = element.attributes.removeNamedItem("id");
+```
+
+setNamedItem() 方法很少使用，它接收一个属性节点，然后给元素添加一个新属性，如下所示：
+
+```javascript
+element.attributes.setNamedItem(newAttr);
+```
+
+一般来说，因为使用起来更简便，通常开发者更喜欢使用 getAttribute()、removeAttribute() 和 setAttribute() 方法，而不是刚刚介绍的 NamedNodeMap 对象的方法。
+
+attributes 属性最有用的场景是需要迭代元素上所有属性的时候。这时候往往是把 DOM 结构序列化为 XML 或 HTML 字符串。比如，以下代码能够迭代一个元素上的所有属性并以 attribute1="value1" attributes2="value2" 的形式生成格式化字符串：
+
+```javascript
+function outputAttribute(element) {
+    let pairs = [];
+    
+    for (let i = 0, len = element.attributes.length; i < len; ++i) {
+        const attribute = element.attributes[i];
+        pairs.push(`${attribute.nodeName}="${attribute.nodeValue}"`);
+    }
+    
+    return pairs.join(" ");
+}
+```
+
+这个函数使用数组存储每个名/值对，迭代完所有属性后，再将这些名/值对用空格拼接在一起。（这个技术常用于序列化为长字符串。）这个函数中的 for 循环使用 attributes.length 属性迭代每个属性，将每个属性的名字和值输出为字符串。不同浏览器返回的 attributes 中的属性顺序也可能不一样。HTML 或 XML 代码中属性出现的顺序不一定与 attributes 中的顺序一致。
+
+### 5. 创建元素
+
+#### document.createElement()
+
+可以使用 document.createElement() 方法创建新元素。这个方法接收一个参数，即要创建元素的标签名。在 HTML 文档中，标签名是不区分大小写的，而 XML 文档（包括 XHTML）是区分大小写的。要创建 `<div>` 元素，可以使用下面的代码：
+
+```javascript
+let div = document.createElement("div");
+```
+
+使用 createElement() 方法创建新元素的同时也会将其 ownerDocument 属性设置为 document。此时，可以再为其添加属性、添加更多子元素。比如：
+
+```javascript
+div.id = "myNewDiv";
+div.className = "box";
+```
+
+在新元素上设置这些属性只会附加信息。因为这个元素还没有添加到文档树，所以不会影响浏览器显示。要把元素添加到文档树，可以使用 appendChild()、insertBefore() 或 replaceChild()。比如，以下代码会把刚才创建的元素添加到文档的 `<body>` 元素中：
+
+```javascript
+document.body.appendChild(div);
+```
+
+元素被添加到文档树之后，浏览器会立即将其渲染出来。之后再对这个元素所做的任何修改，都会立即在浏览器中反映出来。
+
+### 6. 元素后代
+
+元素可以拥有任意多个子元素和后代元素，因为元素本身也可以是其他元素的子元素。childNodes 属性包含元素所有的子节点，这些子节点可能是其他元素、文本节点、注释或处理指令。不同浏览器在设别这些节点时的表现有明显不同。比如下面的代码：
+
+```html
+<ul id="myList">
+    <li>Item 1</li>
+    <li>Item 2</li>
+    <li>Item 3</li>
+</ul>
+```
+
+在解析以上代码时，`<ul>` 元素会包含 7 个子元素，其中 3 个是 `<li>` 元素，还有 4 个 Text 节点（表示 `<li>` 元素周围的空格）。如果把元素之间的空格删掉，变成下面这样，则所有浏览器都会返回同样数量的子节点：
+
+```html
+<ul id="myList"><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>
+```
+
+所有浏览器解析上面的代码后，`<ul>` 元素都会包含 3  个子节点。考虑到这种情况，通常在执行某个操作之后需要先检测一下节点的 nodeType，如下所示：
+
+```javascript
+for (let i = 0, len = element.childNodes.length; i < len; ++i) {
+    if (element.childNodes[i].nodeType == 1) {
+        // 执行某个操作
+    }
+}
+```
+
+以上代码会遍历某个元素的子节点，并且只在 nodeType 等于 1（即 Element 节点）时执行某个操作。
+
+要取得某个元素的子节点和其他后代节点，可以使用元素的 getElementsByTagName() 方法。在元素上调用这个方法与在文档上调用是一样的，只不过搜索范围限制在当前元素之内，即只会返回当前元素的后代。对于本节前面 `<ul>` 的例子，可以像下面这样取得其所有的 `<li>` 元素：
+
+```javascript
+let ul = document.getElementById("myList");
+let items = ul.getElementsByTagName("li");
+```
+
+这里例子中的 `<ul>` 元素只有一级子节点，如果它包含更多层级，则所有层级中的 `<li>` 元素都会返回。
+
+
+
 
 
 
