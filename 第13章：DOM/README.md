@@ -1033,6 +1033,8 @@ let comment = document.createComment("A comment");
 
 ## 6. CDATASection 类型
 
+### document.createCDataSection()
+
 CDATASection 类型表示 XML 中特有的 CDATA 区块。CDATASection 类型继承 Text 类型，因此拥有包括 splitText() 在内的所有字符串操作方法。CDATASection 类型的节点具有以下特征：
 
 * nodeType 等于 4
@@ -1052,6 +1054,8 @@ CDATA 区块只在 XML 文档中有效，因此某些浏览器比较陈旧的版
 在真正的 XML 文档中，可以使用 document.createCDATASection() 并传入节点内容来创建 CDATA 区块。
 
 ## 7. DocumentType 类型
+
+### document.doctype
 
 DocumentType 类型的节点包含文档的文档类型（doctype）信息，具有以下特征：
 
@@ -1076,14 +1080,517 @@ alert(document.doctype.name); // "html"
 
 ## 8. DocumentFragment 类型
 
+### document.createDocumentFragment()
+
 在所有节点类型中，DocumentFragment 类型是唯一一个在标记中没有对应表示的类型。DOM 将这种文档片段定义为轻量级文档，它能够包含和操作节点，却没有完整文档那样额外的消耗。DocumentFragment 节点具有以下特征：
 
 * nodeType 等于 11
 * nodeName 值为 "#document-fragment"
 * nodeValue 值为 null
 * parentNode 值为 null
+* 子节点可以是 Element、ProcessingInstruction、Comment、Text、CDATASection 或 EntityReference
 
+不能直接把文档片段添加到文档。相反，文档片段的作用是充当其他要被添加到文档的节点的仓库。可以使用 document.createDocumentFragment() 方法像下面这样创建文档片段：
 
+```javascript
+let fragment = document.createDocumentFragment();
+```
+
+文档片段从 Node 类型继承了所有文档类型具备的可以执行 DOM 操作的方法。如果文档中的一个节点被添加到一个文档片段，则该节点会从文档树中移除，不会再被浏览器渲染。添加到文档片段的新节点同样不属于文档树，不会被浏览器渲染。可以通过 appendChild() 或 insertBefore() 方法将文档片段的内容添加到文档。在把文档片段作为参数传给这些方法时，这个文档片段的所有子节点会被添加到文档中相应的位置。文档片段本身永远不会被添加到文档树。以下面的 HTML 为例：
+
+```html
+<ul id="myList"></ul>
+```
+
+假设想给这个 `<ul>` 元素添加 3 个列表项。如果分 3 次给这个元素添加列表项，浏览器就要重新渲染 3 次页面，以反映新添加的内容。为避免多次渲染，下面的代码示例使用文档片段创建了所有列表项，然后一次性将它们添加到了 `<ul>` 元素：
+
+```javascript
+let fragment = document.createDocumentFragment();
+let ul = document.getElementById("myList");
+
+for (let i = 0; i < 3; ++i) {
+    let li = document.createElement("li");
+    li.appendChild(document.createTextNode(`Item ${i + 1}`));
+    fragment.appendChild(li);
+}
+
+ul.appendChild(fragment);
+```
+
+这个例子先创建一个文档片段，然后取得 `<ul>` 元素的引用。接着通过 for 循环创建了 3 个列表项，每一项都包含表明自己身份的文本。为此先创建 `<li>` 元素，再创建文本节点并添加到该元素。然后通过 appendChild() 把 `<li>` 元素添加到文档片段。循环结束后，通过把文档片段传给 appendChild() 将所有列表项添加到了 `<ul>` 元素。此时，文档片段的子节点全部被转移到了 `<ul>` 元素中。
+
+## 9. Attr 类型
+
+### document.createAttribute()
+
+### setAttributeNode()
+
+### getAttributeNode()
+
+元素数据在 DOM 中通过 Attr 类型表示。Attr 类型构造函数和原型在所有浏览器中都可以直接访问。技术上讲，属性是存在于元素 attributes 属性中的节点。Attr 节点具有以下特征：
+
+* nodeType 等于 2
+* nodeName 值为属性名
+* nodeValue 值为属性值
+* parentNode 值为 null
+* 在 HTML 中不支持子节点
+* 在 XML 中子节点可以是 Text 或 EntityReference
+
+属性节点尽管是节点，却不认为是 DOM 文档树的一部分。Attr 节点很少直接被引用，通常开发者更喜欢使用 getAttribute()、removeAttribute() 和 setAttrbiute() 方法操作属性。
+
+Attr 对象上有 3 个属性：name、value 和 specified。name 包含属性名（与 nodeName 一样），value 包含属性值（与 nodeValue 一样），而 specified 是一个布尔值，表示属性使用的是默认值还是被指定的值。
+
+可以使用 document.createAttribute() 方法创建新的 Attr 节点，参数为属性名。比如，要给元素添加 align 属性，可以使用下列代码：
+
+```javascript
+let attr = document.createAttribute("align");
+attr.value = "left";
+element.setAttributeNode(attr);
+
+alert(element.attributes["align"].value); // "left"
+alert(element.getAttributeNode("align").value); // "left"
+alert(element.getAttribute("align")); // "left"
+```
+
+这个例子首先创建了一个新属性。调用 createAttribute() 并传入 "align" 为新属性设置了 name 属性，因此就不用再设置了。随后，value 属性被赋值为 "left"。为把这个新属性添加到元素上，可以使用元素的 setAttributeNode() 方法。添加这个属性后，可以通过不同方式访问它，包括 attributes 属性、getAttributeNode() 和 getAttribute() 方法。attributes 属性和 getAttributeNode() 方法都返回属性对应的 Attr 节点，而 getAttribute() 方法只返回属性的值。
+
+>注意
+>
+>将属性作为节点来访问多数情况下并无必要。推荐使用 getAttribute()、removeAttribute() 和 setAttribute() 方法操作属性，而不是直接操作属性节点。
+
+# 2. DOM 编程
+
+很多时候，操作 DOM 是很直观的。通过 HTML 代码能实现的，也一样能通过 JavaScript 实现。但有时候，DOM 也没有看起来那么简单。浏览器能力的参差不齐和各种问题，也会导致 DOM 的某些方法会复杂一些。
+
+## 1. 动态脚本
+
+`<script>` 元素用于向网页中插入 JavaScript 代码，可以是 src 属性包含的外部文件，也可以是作为该元素内容的源代码。动态脚本就是在页面初始加载时不存在，之后又通过 DOM 包含脚本。与对应的 HTML 元素一样，有两种方式通过 `<script>` 动态为网页添加脚本：引入外部文件和直接插入源代码。
+
+动态加载外部文件很容易实现，比如下面的 `<script>` 元素：
+
+```html
+<script src="foo.js"></script>
+```
+
+可以像这样通过 DOM 编程创建这个节点：
+
+```javascript
+let script = document.createElement("script");
+script.src = "foo.js";
+document.body.appendChild(script);
+```
+
+这里的 DOM 代码实际上完全照搬了它要表示的 HTML 代码。注意，在上面最后一行把 `<script>` 元素添加到页面之前，是不会开始下载外部文件的。当然也可以把它添加到 `<head>` 元素，同样可以实现动态加载。这个过程可以抽象为一个函数，比如：
+
+```javascript
+function loadScript(url) {
+    let script = document.createElement("script");
+    script.src = url;
+    document.body.appendChild(script);
+}
+```
+
+然后，就可以像这样加载外部 JavaScript 文件了：
+
+```javascript
+loadScript("client.js");
+```
+
+加载之后，这个脚本就可以对页面执行操作了。这里有个问题：怎么知道脚本什么时候加载完呢？
+
+这个问题并没有标准答案。第 15 章会讨论一些与加载相关的事件，具体情况取决于使用的浏览器。
+
+另一种动态插入 JavaScript 的方式是嵌入源代码，如下面的例子所示：
+
+```html
+<script>
+    function sayHi() {
+        alert("hi");
+    }
+</script>
+```
+
+注意，通过 innerHTML 属性创建的 `<script>` 元素永远不会执行。浏览器会尽责地创建 `<script>` 元素，以及其中地脚本文本，但解析器会给这个 `<script>` 元素打上永不执行的标签。只要是使用 innerHTML 创建的 `<script>` 标签，以后也没有方法强制其执行。
+
+## 2. 动态样式
+
+CSS 样式在 HTML 页面中可以通过插入两个元素加载。`<link>` 元素用于包含 CSS 外部文件，而 `<style>` 元素用于添加嵌入样式。与动态脚本类似，动态样式也是页面初始加载时并不存在，而是在之后才添加到页面中的。
+
+来看下面很容易使用 DOM 编程来创建：
+
+```javascript
+let link = document.createElement("link");
+link.rel = "stylesheet";
+link.type = "text/css";
+link.href = "styles.css";
+let head = document.getElementsByTagName("head")[0];
+head.appendChild(link);
+```
+
+以上代码在所有主流浏览器中都能正常运行。注意应该把 `<link>` 元素添加到 `<head>` 元素而不是 `<body>` 元素，这样才能保证所有浏览器都能正常运行。这个过程可以抽象为以下通用函数：
+
+```javascript
+function loadStyles(url) {
+    let link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    link.href = url;
+    let head = document.getElementsByTagName("head")[0];
+    head.appendChild(link);
+}
+```
+
+然后就可以像这样调用这个 loadStyles() 函数了：
+
+```javascript
+loadStyles("styles.css");
+```
+
+通过外部文件加载样式是一个异步过程。因此，样式的加载和正执行的 JavaScript 代码并没有先后顺序。一般来说，也没有必要知道样式什么时候加载完成。
+
+另一种定义样式的方式是使用 `<script>` 元素包含嵌入的 CSS 规则，例如：
+
+```html
+<style type="text/css">
+body {
+    background-color: red;
+}
+</style>
+```
+
+## 3. 使用 NodeList
+
+理解 NodeList 对象和相关的 NamedNodeMap、HTMLCollection，是理解 DOM 编程的关键。这 3 个集合类型都是实时的，意味着文档结构的变化会实时地在它们身上反映出来，因此它们的值始终代表最新的状态。实际上，NodeList 就是基于 DOM 文档的实时查询。例如，下面的代码会导致无穷循环：
+
+```javascript
+let divs = document.getElementsByTagName("div");
+
+for (let i = 0; i < div.length; i++) {
+    let div = document.createElement("div");
+    document.body.appendChild(div);
+}
+```
+
+第一行取得了包含文档中所有 `<div>` 元素的 HTMLCollection。因为这个集合是实时的，所以任何时候只要向页面中添加一个新 `<div>` 元素，再查询这个集合就会多一项。因为浏览器不希望保存每次创建的集合，所以就会在每次访问更新集合。这样就会出现前面使用循环的例子中所演示的问题。每次循环开始，都会求值 i < divs.length。这意味着要执行获取所有 `<div>` 元素的查询。因为循环体中会创建并向文档添加一个新 `<div>` 元素，所以每次循环 divs.length 的值也会递增。因为两个值都会递增，所以 i 将永远不会等于 divs.length。
+
+使用迭代器并不会解决这个问题，因为迭代对应的是一个永远增长的实时集合。以下代码仍然会导致无穷循环：
+
+```javascript
+for (let div of document.getElementsByTagName("div")) {
+    let newDiv = document.createElement("div");
+    document.body.appendChild(newDiv);
+}
+```
+
+任何时候要迭代 NodeList，最好再初始化一个变量保存查询时的长度，然后用循环变量与这个变量进行比较，如下所示：
+
+```javascript
+let divs = document.getElementsByTagName("div");
+
+for (let i = 0, len = divs.length; i < len; ++i) {
+    let div = document.createElement("div");
+    document.body.appendChild(div);
+}
+```
+
+这个例子又初始化了一个保存集合长度的变量 len。因为 len 保存着循环开始时集合的长度，而这个值不会随集合增大动态增长，所以就可以避免前面例子中出现的无穷循环。本章还会使用这种技术来演示迭代 NodeList 对象的首选方式。
+
+另外，如果不想再初始化一个变量，也可以像下面这样反向迭代集合：
+
+```javascript
+let divs = document.getElementsByTagName("div");
+
+for (let i = divs.length - 1; i >= 0; --i) {
+    let div = document.createElement("div");
+    document.body.appendChild(div);
+}
+```
+
+一般来说，最好限制操作 NodeList 的次数。因为每次查询都会搜索整个文档，所以最好把查询到的 NodeList 缓存起来。
+
+# 3. Selectors API
+
+## document.querySelector()
+
+## document.querySelectorAll()
+
+## matches()
+
+JavaScript 库中最流行的一种能力就是根据 CSS 选择符的模式匹配 DOM 元素。比如，jQuery 就完全以 CSS 选择符查询 DOM 获取元素引用，而不是使用 getElementById() 和 getElementsByTagName()。
+
+Selectors API（参见 W3C 网站上的 Selectors API Level 1）是 W3C 推荐标准，规定了浏览器原生支持的 CSS 查询 API。支持这一特性的所有 JavaScript 库都会实现一个基本的 CSS 解析器，然后使用已有的 DOM 方法搜素文档并匹配目标节点。虽然库开发者在不断改进其性能，但 JavaScript 代码能做到的毕竟有限。通过浏览器原生支持这个 API，解析和遍历 DOM 树可以通过底层编译语言实现，性能也有了数量级的提升。
+
+Selectors API Level 1 的核心是两个方法：querySelector() 和 querySelectorAll()。在兼容浏览器中，Document 类型和 Element 类型的实例上都会暴露这两个方法。
+
+Selectors API Level 2 规范在 Element 类型上新增了更多方法，比如 matches()、find() 和 findAll()。不过，目前还没有浏览器实现或宣称实现 find() 和 findAll()。
+
+## 1. querySelector()
+
+querySelector() 方法接收 CSS 选择符参数，返回匹配该模式的第一个后代元素，如果没有匹配项则返回 null。下面是一些例子：
+
+```javascript
+// 取得 <body> 元素
+let body = document.querySelector("body");
+
+// 取得 ID 为 "myDiv" 的元素
+let myDiv = document.querySelector("#myDiv");
+
+// 取得类名为 "selected" 的第一个元素
+let selected = document.querySelector(".selected");
+
+// 取得类名为 "button" 的图片
+let img = document.body.querySelector("img.button");
+```
+
+在 Document 上使用 querySelector() 方法时，会从文档元素开始搜索。在 Element 上使用 querySelector() 方法时，则只会从当前元素的后代中查询。
+
+用于查询模式的 CSS 选择符可繁可简，依需求而定。如果选择符有语法错误或碰到不支持的选择符，则 querySelector() 方法会抛出错误。
+
+## 2. querySelectorAll()
+
+querySelectorAll() 方法跟 querySelector() 一样，也接收一个用于查询的参数，但它会返回所有匹配的节点，而不止一个。这个方法返回的是一个 NodeList 的静态实例。
+
+再强调一次，querySelectorAll() 返回的是 NodeList 实例一个属性和方法都不缺，但它是一个静态的快照，而非实时的查询。这样的底层实现避免了使用 NodeList 对象可能造成的性能问题。
+
+以有效 CSS 选择符调用 querySelectorAll() 都会返回 NodeList，无论匹配多少个元素都可以。如果没有匹配项，则返回空的 NodeList 实例。
+
+与 querySelector() 一样，querySelectorAll() 也可以在 Document、DocumentFragment 和 Element 类型上使用。下面是几个例子：
+
+```javascript
+// 取得 ID 为 "myDiv" 的 <div> 元素中的所有 <em> 元素
+let ems = document.getElementById("myDiv").querySelectorAll("em");
+
+// 取得所有类名中包含 "selected" 的元素
+let selecteds = document.querySelectorAll(".selected");
+
+// 取得所有是 <p> 元素子元素的 <strong> 元素
+let strongs = document.querySelectorAll("p strong");
+```
+
+返回的 NodeList 对象可以通过 for-of 循环、item() 方法或中括号语法取得个别元素。比如：
+
+```javascript
+let strongElements = document.querySelectorAll("p strong");
+
+// 以下 3 个循环的效果一样
+for (let strong of strongElements) {
+    strong.className = "important";
+}
+for (let i = 0; i < strongElements.length; ++i) {
+    strongElements.item(i).className = "important";
+}
+for (let i = 0; i < strongElements.length; ++i) {
+    strongElements[i].className = "important";
+}
+```
+
+与 querySelector() 方法一样，如果选择符有语法错误或碰到不支持的选择符，则 querySelectorAll() 方法会抛出错误。
+
+## 3. matches()
+
+matches() 方法（在规范草案中称为 matchesSelector()）接收一个 CSS 选择符参数，如果元素匹配则该选择符返回 true，否则返回 false。例如：
+
+```javascript
+if (document.body.matches("body.page1")) {
+    // true
+}
+```
+
+使用这个方法可以方便地检测某个元素会不会被 querySelector() 或 querySelectorAll() 方法返回。
+
+# 4. 元素遍历
+
+## childElementCount
+
+## firstElementChild
+
+## lastElementChild
+
+## previousElementSibling
+
+## nextElementSibling
+
+Element Traversal API 为 DOM 元素定义了 5 个属性：
+
+* childElementCount，返回子元素数量（不包含文本节点和注释）
+* firstElementChild，指向第一个 Element 类型的子元素（Element 版 firstChild）
+* lastElementChild，指向最后一个 Element 类型的子元素（Element 版 lastChild）
+* previousElementSibling，指向前一个 Element 类型的同胞元素（Element 版 previousSibling）
+* nextElementSibling，指向后一个 Element 类型的同胞元素（Element 版 nextSibling）
+
+在支持的浏览器中，所有 DOM 元素都会有这些属性，为遍历 DOM 元素提供便利。这样开发者就不用担心空白文本节点的问题了。
+
+举个例子，过去要以跨浏览器方式遍历特定元素的所有子元素，代码大致是这样写的：
+
+```javascript
+let parentElement = document.getElementById('parent');
+let currentChildNode = parentElement.firstChild;
+
+// 没有子元素，firstChild 返回 null，跳过循环
+while (currentChildNode) {
+    if (currentChildNode.nodeType === 1) {
+        // 如果有元素节点，则做相应处理
+        processChild(currentChildNode);
+    }
+    if (currentChildNode === parentElement.lastChild) {
+        break;
+    }
+    currentChildNode = currentChildNode.nextSibling;
+}
+```
+
+使用 Element Traversal 的属性之后，以上代码可以简化如下：
+
+```javascript
+let parentElement = document.getElementById('parent');
+let currentChildElement = parentElement.firstElementChild;
+
+// 没有子元素，firstElementChild 返回 null，跳过循环
+while (currentChildElement) {
+    // 这就是元素节点，做相应处理
+    processChild(currentChildElement);
+    if (currentChildElement === parentElement.lastElementChild) {
+        break;
+    }
+    currentChildElement = currentChildElement.nextElementSibling;
+}
+```
+
+# 5. HTML5
+
+## document.getElementsByClassName()
+
+## classList
+
+HTML5 代表着与以前的 HTML 截然不同的方向。在所有以前的 HTML 规范中，从未出现过描述 JavaScript 接口的情形，HTML 就是一个纯标记语言。JavaScript 绑定的事，一概交给 DOM 规范去定义。
+
+然而，HTML5 规范却包含了与标记相关的大量 JavaScript API 定义，其中有的 API 与 DOM 重合，定义了浏览器应该提供的 DOM 扩展。
+
+尽管所有浏览器厂商都理解遵循标准的重要性，但它们也都有为弥补功能缺失而为 DOM 添加专有扩展的历史。虽然这表面上看是一件坏事，但专门扩展也为开发者提供了很多重要功能，而这些功能后来则有可能被标准化，比如进入 HTML5。
+
+>注意
+>
+>因为 HTML5 覆盖的范围极其广泛，所有接下来几小节主要讨论其影响所有 DOM 节点的部分。HTML5 的其他部分将在本书后面的相关章节中再讨论。
+
+## 1. CSS 类扩展
+
+自 HTML4 被广泛采用起来，Web 开发中一个主要的变化是 class 属性用得越来越多，其用处是为元素添加样式以及语义信息。自然地，JavaScript 与 CSS 类的交互就增多了，包括动态修改类名，以及根据给定一个或一组类名查询元素，等等。为了适应开发者和他们对 class 属性的认可，HTML5 增加了一些特性以方便使用 CSS 类。
+
+### 1. getElementsByClassName() 方法
+
+getElementsByClassName() 是 HTML5 新增的最受欢迎的一个方法，暴露在 document 对象和所有 HTML 元素上。这个方法脱胎于基于原有 DOM 特性实现该功能的 JavaScript 库，提供了性能高好的原生实现。
+
+getElementsByClassName() 方法接收一个参数，即包含一个或多个类名的字符串，返回类名中包含相应类的元素的 NodeList。如果提供了多个类名，则顺序无关紧要。下面是几个示例：
+
+```javascript
+// 取得所有类名中包含 "username" 和 "current" 元素
+// 这两个类名的顺序无关紧要
+let allCurrentUsernames = document.getElementsByClassName("username current");
+
+// 取得 ID 为 "myDiv" 的元素子树中所有包含 "selected" 类的元素
+let selected = document.getElementById("myDiv").getElementsByClassName("selected");
+```
+
+这个方法只会返回以调用它的对象为根元素的子树中所有匹配的元素。在 document 上调用 getElementsByClassName() 返回文档中所有匹配的元素，而在特定元素上调用 getElementsByClassName() 则返回该元素后代中匹配的元素。
+
+如果要给包含特定类（而不是特定 ID 或标签）的元素添加事件处理程序，使用这个方法会很方便。不过要记住，因为返回值是 NodeList，所以使用这个方法会遇到跟使用 getElementsByTagName() 和其他返回 NodeList 对象的 DOM 方法同样的问题。
+
+### 2. classList 属性
+
+要操作类名，可以通过 className 属性实现添加、删除和替换。但 className 是一个字符串，所以每次操作之后都需要重新设置这个值才能生效，即使只改动了部分字符串一样。以下面的 HTML 代码为例：
+
+```html
+<div class="bd user disabled">...</div>
+```
+
+这个 `<div>` 元素有 3 个类名。要想删除其中一个，就得先把 className 拆开，删除不想要的那个，再把包含剩余类名的字符串设置回去。比如：
+
+```javascript
+// 要删除 "user" 类
+let targetClass = "user";
+
+// 把类名拆成数组
+let classNames = div.className.split(/\s+/);
+
+// 找到要删除类名的索引
+let idx = classNames.indexOf(targetClass);
+
+// 如果有删除
+if (idx > -1) {
+    classNames.splice(idx, 1);
+}
+
+// 重新设置类名
+div.className = className.join(" ");
+```
+
+这就是从 `<div>` 元素的类名中删除 "user" 的代码。替换类名和检测类名也要涉及同样的算法。添加类名只涉及字符串拼接，但必须先检查一下以确保不会重复添加相同的类名。很多 JavaScript 库为这些操作实现了便利方法。
+
+HTML5 通过给所有元素增加 classList 属性为这些操作提供了更简单也更安全的实现方式。classList 是一个新的集合类型 DOMTokenList 的实例。与其他 DOM 集合类型一样，DOMTokenList 也有 length 属性表示自己包含多少项，也可以通过 item() 或中括号取得个别的元素。此外，DOMTokenList 还增加了以下方法。
+
+* add(value)，向类名列表中添加指定的字符串值 value。如果这个值已经存在，则什么也不做。
+* contains(value)，返回布尔值，表示给定的 value 是否存在。
+* remove(value)，从类名列表中删除指定的字符串值 value。
+* toggle(value)，如果类名列表中已经存在指定的 value，则删除。如果不存在，则添加。
+
+这样一来，前面的例子中那么多行代码就可以简化成下面的一行：
+
+```javascript
+div.classList.remove("user");
+```
+
+这行代码可以在不影响其他类名的情况下完成删除。其他方法同样极大地简化了操作类名的复杂性，如下面的例子所示：
+
+```javascript
+// 删除 "disabled" 类
+div.classList.remove("disabled");
+
+// 添加 "current" 类
+div.classList.add("current");
+
+// 切换 "user" 类
+div.classList.toggle("user");
+
+// 检测类名
+if (div.classList.contains("bd") && !idv.classList.contains("disabled")) {
+    // 执行操作
+}
+
+// 迭代类名
+for (let class of div.classList) {
+    doStuff(class);
+}
+```
+
+添加了 classList 属性之后，除非是完全删除或完全重写元素的 class 属性，否则 className 属性就用不到了。
+
+## 2. 焦点管理
+
+### document.activeElement
+
+### document.hasFocus()
+
+HTML5 增加了辅助 DOM 焦点管理的功能。首先是 document.activeElement，这个属性始终包含当前拥有焦点的 DOM 元素。页面加载时，可以通过用户输入（按 Tab 键或在代码中使用 focus() 方法）让某个元素自动获得焦点。例如：
+
+```javascript
+let button = document.getElementById("myButton");
+button.focus();
+console.log(document.activeElement === button); // true
+```
+
+默认情况下，document.activeElement 在页面刚加载完之后会设置为 document.body。而在页面完全加载之前，document.activeElement 的值为 null。
+
+其次是 document.hasFocus() 方法，该方法返回布尔值，表示文档是否拥有焦点：
+
+```javascript
+let button = document.getElementById("myButton");
+button.focus();
+console.log(document.hasFocus()); // true
+```
+
+确定文档是否获得了焦点，就可以帮助确定用户是否在操作页面。
+
+第一个方法可以用来查询文档，确定哪个元素拥有焦点，第二个方法可以查询文档是否获得了焦点，而这对于保证 Web 应用程序的无障碍使用是非常重要的。无障碍 Web 应用程序的一个重要方面就是焦点管理，而能够确定哪个元素当前拥有焦点（相比于之前的猜测）是一个很大的进步。
 
 
 
