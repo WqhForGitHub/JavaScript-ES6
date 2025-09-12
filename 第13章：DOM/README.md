@@ -842,7 +842,7 @@ for (let i = 0, len = element.childNodes.length; i < len; ++i) {
 
 以上代码会遍历某个元素的子节点，并且只在 nodeType 等于 1（即 Element 节点）时执行某个操作。
 
-要取得某个元素的子节点和其他后代节点，可以使用元素的 getElementsByTagName() 方法。在元素上调用这个方法与在文档上调用是一样的，只不过搜索范围限制在当前元素之内，即只会返回当前元素的后代。对于本节前面 `<ul>` 的例子，可以像下面这样取得其所有的 `<li>` 元素：
+要取得某个元素的子节点和其他后代90-节点，可以使用元素的 getElementsByTagName() 方法。在元素上调用这个方法与在文档上调用是一样的，只不过搜索范围限制在当前元素之内，即只会返回当前元素的后代。对于本节前面 `<ul>` 的例子，可以像下面这样取得其所有的 `<li>` 元素：
 
 ```javascript
 let ul = document.getElementById("myList");
@@ -850,6 +850,240 @@ let items = ul.getElementsByTagName("li");
 ```
 
 这里例子中的 `<ul>` 元素只有一级子节点，如果它包含更多层级，则所有层级中的 `<li>` 元素都会返回。
+
+## 4. Text 类型
+
+Text 节点由 Text 类型表示，包含按字面解释的纯文本，也可能包含转义后的 HTML 字符，但不含 HTML 代码。Text 类型的节点具有以下特征：
+
+* nodeType 等于 3
+* nodeName 值为 "#text"
+* nodeValue 值为节点中包含的文本
+* parentNode 值为 Element 对象
+* 不支持子节点
+
+Text 节点中包含的文本可以通过 nodeValue 属性访问，也可以通过 data 属性访问 ，这两个属性包含相同的值。修改 nodeValue 或 data 的值，也会在另一个属性反映出来。文本节点暴露了以下操作文本的方法：
+
+* appendData(text)，向节点末尾添加文本 text
+* deleteData(offset, count)，从位置 offset 开始删除 count 个字符
+* insertData(offset, text)，在位置 offset 插入 text
+* replaceData(offset, count, text)，用 text 替换从位置 offset 到 offset + count 的文本
+* splitText(offset)，在位置 offset 将当前文本节点拆分为两个文本节点
+* substringData(offset, count)，提取从位置 offset 到 offset + count 的文本
+
+除了这些方法，还可以通过 length 属性获取文本节点中包含的字符数量。这个值等于 nodeValue.length 和 data.length。
+
+默认情况下，包含文本内容的每个元素最多只能有一个文本节点。例如：
+
+```html
+<!-- 没有内容，因此没有文本节点 -->
+<div></div>
+
+<!-- 有空格，因此有一个文本节点 -->
+<div> </div>
+
+<!-- 有内容，因此有一个文本节点 -->
+<div>Hello World!</div>
+```
+
+示例中的第一个 `<div>` 元素中不包含内容，因此不会产生文本节点。只要开始标签和结束标签之间有内容，就会创建一个文本节点，因此第二个 `<div>` 元素会有一个文本节点的子节点，虽然它只包含空格。这个文本节点的 nodeValue 就是一个空格。第三个 `<div>` 元素也有一个文本节点的子节点，其 nodeValue 的值为 "Hello World!"。下列代码可以用来访问这个文本节点：
+
+```javascript
+let textNode = div.firstChild; // 或 div.childNodes[0]
+```
+
+取得文本节点的引用后，可以像这样来修改它：
+
+```javascript
+div.firstChild.nodeValue = "Some other message";
+```
+
+只要节点在当前的文档树中，这样的修改就会马上反映出来。修改文本节点还有一点要注意，就是 HTML 或 XML 代码（取决于文档类型）会被转换成实体编码，即小于号、大于号或引号会被转义，如下所示：
+
+```javascript
+// 输出为 "Some <strong>other</strong> message"
+div.firstChild.nodeValue = "Some <strong>other</strong> message";
+```
+
+这实际上是在将 HTML 字符串插入 DOM 文档前进行编码的有效方式。
+
+### 1. 创建文本节点
+
+#### document.createTextNode()
+
+document.createTextNode() 可以用来创建新文本节点，它接收一个参数，即要插入节点的文本。跟设置已有文本的值一样，这些要插入的文本也会应用 HTML 或 XML 编码，如下面的例子所示：
+
+```javascript
+let textNode = document.createTextNode("<strong>Hello</strong> world!");
+```
+
+创建新文本节点后，其 ownerDocument 属性会被设置为 document。但在把这个节点添加到文档树之前，我们不会在浏览器中看到它。以下代码创建了一个 `<div>` 元素并给它添加了一段文本消息：
+
+```javascript
+let element = document.createElement("div");
+element.className = "message";
+
+let textNode = document.createTextNode("Hello world!");
+element.appendChild(textNode);
+
+document.body.appendChild(element);
+```
+
+这个例子首先创建了一个 `<div>` 元素并给它添加了值为 "message" 的 class 属性，然后又创建了一个文本节点并添加到该元素。最后一步是把这个元素添加到文档的主体上，这样元素及其包含的文本会出现在浏览器中。
+
+一般来说一个元素只包含一个文本子节点。不过，也可以让元素包含多个文本子节点，如下面的例子所示：
+
+```javascript
+let element = document.createElement("div");
+element.className = "message";
+
+let textNode = document.createTextNode("Hello world!");
+element.appendChild(textNode);
+
+let anotherTextNode = document.createTextNode("Yippee!");
+element.appendChild(anotherTextNode);
+
+document.body.appendChild(element);
+```
+
+在将一个文本节点作为另一个文本节点的同胞插入后，两个文本节点的文本之间不会包含空格。
+
+### 2. 规范化文本节点
+
+DOM 文档中的同胞文本节点可能导致困惑，因为一个文本节点足以表示以恶文本字符串。同样，DOM 文档中也经常会出现两个相邻文本节点。为此，有一个方法可以合并相邻的文本节点。这个方法叫 normalize()，是在 Node 类型中定义的（因此所有类型的节点上都有这个方法）。在包含两个或多个相邻文本节点的父节点上调用 normalize() 时，所有同胞文本节点会被合并为一个文本节点，这个文本节点的 nodeValue 就等于之前所有同胞节点 nodeValue 拼接在一起得到的字符串。来看下面的例子：
+
+```javascript
+let element = document.createElement("div");
+element.className = "message";
+
+let textNode = document.createTextNode("Hello world!");
+element.appendChild(textNode);
+
+let anotherTextNode = document.createTextNode("Yippee!");
+element.appendChild(anotherTextNode);
+
+document.body.appendChild(element);
+
+alert(element.childNodes.length); // 2
+
+element.normalize();
+alert(element.childNodes.length); // 1
+alert(element.firstChild.nodeValue); // "Hello world!Yippee!"
+```
+
+浏览器在解析文档时，永远不会创建同胞文本节点。同胞文本节点只会出现在 DOM 脚本生成的文档树中。
+
+### 3. 拆分文本节点
+
+Text 类型定义了一个与 normalize() 相反的方法：splitText()。这个方法可以在指定的偏移位置拆分 nodeValue，将一个文本节点拆分成两个文本节点。拆分之后，原来的文本节点包含开头到偏移位置前的文本，新文本节点包含剩下的文本。这个方法返回新的文本节点，具有与原来的文本节点相同的 parentNode。来看下面的例子：
+
+```javascript
+let element = document.createElement("div");
+element.className = "message";
+
+let textNode = document.createTextNode("Hello world!");
+element.appendChild(textNode);
+
+document.body.appendChild(element);
+
+let newNode = element.firstChild.splitText(5);
+alert(element.firstChild.nodeValue); // "Hello"
+alert(newNode.nodeValue); // " world!"
+alert(element.childNodes.length); // 2
+```
+
+在这个例子中，包含 "Hello world!" 的文本节点被从位置 5 拆分成两个文本节点。位置 5 对应 "Hello" 和 "world!" 之间的空格，因此原始文本节点包含字符串 "Hello"，而新文本节点包含文本 "world!"（包含空格）。
+
+拆分文本节点最常用于从文本节点中提取数据的 DOM 解析技术。
+
+## 5. Comment 类型
+
+### document.createComment()
+
+DOM 中的注释通过 Comment 类型表示。Comment 类型的节点具有以下特征：
+
+* nodeType 等于 8
+* nodeName 值为 "#comment"
+* nodeValue 值为注释的内容
+* parentNode 值为 Document 或 Element 对象
+* 不支持子节点
+
+Comment 类型与 Text 类型继承同一个基类（CharacterData），因此拥有除 splitText() 之外 Text 节点所有的字符串操作方法。与 Text 类型相似，注释的实际内容可以通过 nodeValue 或 data 属性获得。
+
+注释节点可以作为父节点的子节点来访问。比如下面的 HTML 代码：
+
+```html
+<div id="myDiv"><!-- A comment --></div>
+```
+
+这里的注释是 `<div>` 元素的子节点，这意味着可以像下面这样访问它：
+
+```javascript
+let div = document.getElementById("myDiv");
+let comment = div.firstChild;
+alert(comment.data); // "A comment"
+```
+
+可以使用 document.createComment() 方法创建注释节点，参数为注释文本，如下所示：
+
+```javascript
+let comment = document.createComment("A comment");
+```
+
+显然，注释节点很少通过 JavaScript 创建和访问，因为注释几乎不涉及算法逻辑。此外，浏览器不一定承认结束的 `</html>` 标签之后的注释。如果要访问注释节点，则必须确定它们的 `<html>` 元素的后代。
+
+## 6. CDATASection 类型
+
+CDATASection 类型表示 XML 中特有的 CDATA 区块。CDATASection 类型继承 Text 类型，因此拥有包括 splitText() 在内的所有字符串操作方法。CDATASection 类型的节点具有以下特征：
+
+* nodeType 等于 4
+* nodeName 值为 "#cdata-section"
+* nodeValue 值为 CDATA 区块的内容
+* parentNode 值为 Document 或 Element 对象
+* 不支持子节点
+
+CDATA 区块只在 XML 文档中有效，因此某些浏览器比较陈旧的版本会错误地将 CDATA 区块解析为 Comment 或 Element。比如下面这行代码：
+
+```html
+<div id="myDiv"><![CDATA[This is some content.]]></div>
+```
+
+这里 `<div>` 的第一个子节点应该是 CDATASection 节点。但主流的四大浏览器没有一个将其识别为 CDATASection。即使在有效的 XHTML 文档中，这些浏览器也不能恰当地支持嵌入地 CDATA 区块。
+
+在真正的 XML 文档中，可以使用 document.createCDATASection() 并传入节点内容来创建 CDATA 区块。
+
+## 7. DocumentType 类型
+
+DocumentType 类型的节点包含文档的文档类型（doctype）信息，具有以下特征：
+
+* nodeType 等于 10
+* nodeName 值为文档类型的名称
+* nodeValue 值为 null
+* parentNode 值为 Document 对象
+* 不支持子节点
+
+DocumentType 对象在 DOM Level 1 中不支持动态创建，只能在解析文档代码时创建。对于支持这个类型的浏览器，DocumentType 对象保存在 document.doctype 属性中。DOM Level 1 规定了 DocumentType 对象的 3 个属性：name、entities 和 notations。name 是文档类型的名称，entities 是这个文档类型描述的实体的 NamedNodeMap，而 notations 是这个文档类型描述的表示法的 NamedNodeMap。因为浏览器中的文档通常都是 HTML 或 XHTML 文档类型，所以 entities 和 notations 列表为空。（这个对象只包含行内声明的文档类型。）无论如何，只有 name 属性是有用的。这个属性包括文档类型的名称，即紧跟在 `<!DOCTYPE>` 后面的那串文本。比如下面的 HTML 4.01 严格文档类型：
+
+```html
+<!DOCTYPE HTML PUBLIC "-// W3C// DTTD HTML 4.01// EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+```
+
+对于这个文档类型，name 属性的值是 "html"：
+
+```javascript
+alert(document.doctype.name); // "html"
+```
+
+## 8. DocumentFragment 类型
+
+在所有节点类型中，DocumentFragment 类型是唯一一个在标记中没有对应表示的类型。DOM 将这种文档片段定义为轻量级文档，它能够包含和操作节点，却没有完整文档那样额外的消耗。DocumentFragment 节点具有以下特征：
+
+* nodeType 等于 11
+* nodeName 值为 "#document-fragment"
+* nodeValue 值为 null
+* parentNode 值为 null
+
+
 
 
 
