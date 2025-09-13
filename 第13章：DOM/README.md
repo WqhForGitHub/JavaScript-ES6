@@ -1592,6 +1592,412 @@ console.log(document.hasFocus()); // true
 
 第一个方法可以用来查询文档，确定哪个元素拥有焦点，第二个方法可以查询文档是否获得了焦点，而这对于保证 Web 应用程序的无障碍使用是非常重要的。无障碍 Web 应用程序的一个重要方面就是焦点管理，而能够确定哪个元素当前拥有焦点（相比于之前的猜测）是一个很大的进步。
 
+## 3. HTMLDocument 扩展
+
+### document.readyState
+
+### document.compatMode
+
+### document.head
+
+### document.characterSet
+
+HTML5 扩展了 HTMLDocument 类型，增加了更多功能。与其他 HTML5 定义的 DOM 扩展一样，这些变化同样基于所有浏览器事实上都已经支持的专有扩展。为此，即使这些扩展的标准化相对较晚，很多浏览器也早就实现了相应的功能。
+
+### 1. readyState 属性
+
+document.readyState 属性有两个可能的值：
+
+* loading，表示文档正在加载
+* complete，表示文档加载完成
+
+实际开发中，最好是把 document.readState 当成一个指示器，以判断文档是否加载完毕。在这个属性得到广泛支持以前，通常要依赖 onload 事件处理程序设置一个标记，表示文档加载完了。这个属性的基本用法如下：
+
+```javascript
+if (document.readyState == "complete") {
+    // 执行操作
+}
+```
+
+### 2. compatMode 属性
+
+自从 IE6 提供了以标准或混杂渲染页面的能力之后，检测页面渲染模式成为一个必要的需求。为了满足这一需求，IE 为 document 添加了 compatMode 属性，这个属性唯一的任务是指示浏览器当前处于什么渲染模式。如下面的例子所示，标准模式下 document.compatMode 的值是 "CSS1Compat"，而在混杂模式下，document.compatMode 的值是 "BackCompat"：
+
+```javascript
+if (document.compatMode == "CSS1Compat") {
+    console.log("Standards mode");
+} else {
+    console.log("Quirks mode");
+}
+```
+
+HTML5 最终也把 compatMode 属性的实现标准化了。除非需要考虑特别老的浏览器，否则不太可能需要此属性。
+
+### 3. head 属性
+
+作为对 document.body（指向文档的 `<body>` 元素）的补充，HTML5 增加了 document.head 属性，指向文档的 `<head>` 元素。可以像下面这样直接取得`<head>` 元素：
+
+```javascript
+let head = document.head;
+```
+
+### 4. 字符集属性
+
+HTML5 增加了几个与文档字符集有关的新属性，其中 characterSet 属性表示文档实际使用的字符集，也可以用来指定新字符集。这个属性的默认值是 "UTF-16"，但可以通过 `<meta>` 元素或响应头，以及新增的 characterSet 属性来修改。下面是一个例子：
+
+```javascript
+console.log(document.characterSet); // "UTF-16"
+document.characterSet = "UTF-8";
+```
+
+### 5. 自定义数据属性
+
+HTML5 允许给元素指定非标准的属性，但要使用前缀 data- 以便告诉浏览器，这些属性既不包含与渲染有关的信息，也不包含元素的语义信息。除了前缀，自定义属性对命名是没有限制的，data- 后缀跟什么都可以。下面是一个例子：
+
+```html
+<div id="myDiv" data-appId="12345" data-myname="Matt"></div>
+```
+
+定义了自定义数据属性后，可以通过元素的 dataset 属性来访问。dataset 属性是一个 DOMStringMap 的实例，包含一组键/值对映射。元素的每个 data-name 属性在 dataset 中都可以通过 data- 后面的字符串作为键来访问（例如，属性 data-myname、data-myName 可以通过 myname 访问，但要注意 data-my-name、data-My-Name 要通过 myName 来访问）。下面是一个使用自定义数据属性的例子：
+
+```javascript
+// 本例中使用的方法仅用于示范
+
+let div = document.getElementById("myDiv");
+
+// 取得自定义数据属性的值
+let appId = div.dataset.appId;
+let myName = div.dataset.myname;
+
+// 设置自定义数据属性的值
+div.dataset.appId = 23456;
+div.dataset.myname = "Michael";
+
+// 有 "myname" 吗？
+if (div.dataset.myname) {
+    console.log(`Hello, ${div.dataset.myname}`);
+}
+```
+
+自定义数据属性非常适合需要给元素附加某些数据的场景，比如链接追踪和在聚合应用程序中标识页面的不同部分。另外，单页应用程序框架也非常多地使用了自定义数据属性。
+
+### 6. 插入标记
+
+DOM 虽然已经为操纵节点提供了很多 API，但向文档中一次性插入大量 HTML 时还是比较麻烦。相比先创建一堆节点，再把它们以正确地顺序连接起来，直接插入一个 HTML 字符串要简单（快速）得多。HTML5 已经通过以下 DOM 扩展将这种能力标准化了。
+
+#### 1. innerHTML 属性
+
+在读取 innerHTML 属性时，会返回元素所有后代的 HTML 字符串，包括元素、注释和文本节点。而在写入 innerHTML 时，则会根据提供的字符串值以新的 DOM 子树替代元素中原来包含的所有节点。比如下面的 HTML 代码：
+
+```html
+<div id="content">
+    <p>This is a <strong>paragraph</strong> with a list following it.</p>
+    <ul>
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+    </ul>
+</div>
+```
+
+对于这里的 `<div>` 元素而言，其 innerHTML 属性会返回以下字符串：
+
+```html
+<p>This is a <strong>paragraph</strong> with a list following it.</p>
+<ul>
+    <li>Item 1</li>
+    <li>Item 2</li>
+    <li>Item 3</li>
+</ul>
+```
+
+实际返回的文本内容会因浏览器而不同。主要取决于 HTML 代码的书写方式，包含空格和缩进。因此不要指望不同浏览器的 innerHTML 会返回完全一样的值。
+
+在写入模式下，赋给 innerHTML 属性的值会被解析为 DOM 子树，并替代元素之前的所有节点。因为所赋的值默认为 HTML，所以其中的所有标签都会以浏览器处理 HTML 的方式转换为元素（同样，转换结果也会因浏览器不同而不同）。如果赋值中不包含任何 HTML 标签，则直接生成一个文本节点，如下所示：
+
+```javascript
+div.innerHTML = "Hello world!";
+```
+
+因为浏览器会解析设置的值，所以给 innerHTML 设置包含 HTML 的字符串时，结果会大不一样。来看下面的例子：
+
+```javascript
+div.innerHTML = "Hello & welcome, <b>\"reader\"!</b>"
+```
+
+这个操作的结果相当于：
+
+```html
+<div id="content">Hello & welcome, <b> "reader " !</b></div>
+```
+
+设置完 innerHTML，马上就可以像访问其他节点一样访问这些新节点。
+
+>注意
+>
+>设置 innerHTML 会导致浏览器将 HTML 字符串解析为相应的 DOM 树。这意味着设置 innerHTML 属性后马上再读出来会得到不同的字符串。这是因为返回的字符串是将原始字符串对应的 DOM 子树序列化之后的结果。
+
+#### 2. outerHTML 属性
+
+读取 outerHTML 属性时，会返回调用它的元素（及所有后代元素）的 HTML 字符串。在写入 outerHTML 属性时，调用它的元素会被传入的 HTML 字符串经解释之后生成的 DOM 子树取代。比如下面的 HTML 代码：
+
+```html
+<div id="content">
+    <p>This is a <strong>paragraph</strong> with a list following it.</p>
+    <ul>
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+    </ul>
+</div>
+```
+
+在这个 `<div>` 元素上调用 outerHTML 会返回相同的字符串，包括 `<div>` 本身。注意，浏览器因解析和解释 HTML 代码的机制不同，返回的字符串也可能不同。（跟 innerHTML 的情况是一样的。）
+
+使用 outerHTML 设置 HTML，比如：
+
+```javascript
+div.outerHTML = "<p>This is a paragraph.</p>"
+```
+
+与执行以下脚本的结果相同：
+
+```javascript
+let p = document.createElement("p");
+p.appendChild(document.createTextNode("This is a paragraph."));
+div.parentNode.replaceChild(p, div);
+```
+
+新的 `<p>` 元素会取代 DOM 树中原来的 `<div>` 元素。
+
+#### 3. insertAdjacentHTML() 与 insertAdjacentText()
+
+用于插入标签的最后两个新增方法是 insertAdjacentHTML() 和 insertAdjacentText()。这两个方法都接收两个参数：要插入标记的位置和要插入的 HTML 或文本。第一个参数必须是下列值中的一个：
+
+* "beforebegin"，插入当前元素前面，作为前一个同胞节点。
+* "afterbegin"：插入当前元素内部，作为新的子节点或放在第一个子节点前面
+* "beforeend"，插入当前元素内部，作为新的子节点或放在最后一个子节点后面
+* "afterend"， 插入当前元素后面，作为下一个同胞节点。
+
+注意这几个值是不区分大小写的。第二个参数会作为 HTML 字符串解析（与 innerHTML 和 outerHTML 相同）或者作为纯文本解析（与 innerText 和 outerText 相同）。如果是 HTML，则会在解析出错时抛出错误。下面展示了它们的基本用法：
+
+```javascript
+// 作为前一个同胞节点插入
+element.insertAdjacentHTML("beforebegin", "<p>Hello world!</p>");
+element.insertAdjacentText("beforebegin", "Hello world!");
+
+// 作为第一个子节点插入
+element.insertAdjacentHTML("afterbegin", "<p>Hello world!</p>");
+element.insertAdjacentText("afterbegin", "Hello world!");
+
+// 作为最后一个子节点插入
+element.insertAdjacentHTML("beforeend", "<p>Hello world!</p>");
+element.insertAdjacentText("beforeend", "Hello world!");
+
+// 作为下一个同胞节点插入
+element.insertAdjacentHTML("afterend", "<p>Hello world!</p>");
+element.insertAdjacentText("afterend", "Hello world!");
+```
+
+#### 4. 内存与性能问题
+
+使用本节介绍的方法替换子节点可能在浏览器中导致内存问题。比如被移除的子树元素中之前有关联的事件处理程序或其他 JavaScript 对象（作为元素的属性），那它们之间的绑定关系会滞留在内存中。如果这种替换操作频繁发生，页面的内存占用就会持续攀升。在使用 innerHTML、outerHTML 和 insertAdjacmentHTML() 之前，最好手动删除要被替换的元素上关联的事件处理程序和 JavaScript 对象。
+
+使用这些属性当然有其方便之处，特别是 innerHTML。一般来讲，插入大量的新 HTML 使用 innerHTML 比使用多次 DOM 操作创建节点再插入来的更便捷。这是因为 HTML 解析器会解析设置给 innerHTML（或 outerHTML）的值。解析器在浏览器中是底层代码（通常是 C++ 代码），比 JavaScript 快得多。不过，HTML 解析器的构建与解构也不是没有代价，因此最好限制使用 innerHTML 和 outerHTML 的次数。比如，下面的代码使用 innerHTML 创建了一些列表项：
+
+```javascript
+for (let value of values) {
+    ul.innerHTML += `<li>${value}</li>`; // 别这样做!
+}
+```
+
+这段代码效率低，因为每次迭代都要设置一次 innerHTML。不仅如此，每次循环还要先读取 innerHTML，也就是说循环一次要访问两次 innerHTML。为此，最好通过循环先构建一个独立的字符串，最后再一次把生成的字符串赋值给 innerHTML，比如：
+
+```javascript
+let itemsHtml= "";
+for (let value of values) {
+    itemsHtml += `<li>${value}</li>`;
+}
+ul.innerHTML = itemsHtml;
+```
+
+这样修改之后效率就高多了，因为只有对 innerHTML 的一次赋值。当然，像下面这样一行代码也可以实现：
+
+```javascript
+ul.innerHTML = values.map(value => `<li>${value}</li>`).join('');
+```
+
+#### 5. 跨站点脚本
+
+尽管 innerHTML 不会执行自己创建的 `<script>` 标签，但仍然向恶意用户暴露了很大的攻击面，因为通过它可以毫不费力地创建元素并执行 onclick 之类的属性。
+
+如果页面中要使用用户提供的信息，则不建议使用 innerHTML。与使用 innerHTML 获得的方便相比，防止 XSS 攻击更让人头疼。此时一定要隔离要插入的数据，在插入页面前必须毫不犹豫地使用相关的库对它们进行转义。
+
+## 7. scrollIntoView()
+
+DOM 规范中没有涉及如何滚动页面中的某个区域。为填补这方面的缺失，不同浏览器实现了不同的控制滚动的方式。在所有这些专有方法中，HTML5 选择了标准化 scrollIntoView() 方法。
+
+scrollIntoView() 方法存在于所有 HTML 元素上，可以滚动浏览器窗口或容器元素以便包含元素进入视口。这个方法的参数如下。
+
+* alignToTop 是一个布尔值。
+  * true：窗口滚动后元素的顶部与视口顶部对齐
+  * false：窗口滚动后元素的底部与视口底部对齐
+* scrollIntoViewOptions 是一个选项对象
+  * behavior：定义过渡动画，可取的值为 "smooth" 和 "auto"，默认为 "auto"。
+  * block：定义垂直方向的对齐，可取的值为 "start"、"center"、"end" 和 "nearest"，默认为 "start"。
+  * inline：定义水平方向上的对齐，可取的值为 "start"、"center"、"end" 和 "nearest"，默认为 "nearest"。
+* 不传参数等同于 alignToTop 为 true。
+
+来看几个例子：
+
+```javascript
+// 确保元素可见
+document.forms[0].scrollIntoView();
+
+// 同上
+document.forms[0].scrollIntoView(true);
+document.forms[0].scrollIntoView({ block: 'start' });
+
+// 尝试将元素平滑地滚入视口
+document.forms[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+```
+
+这个方法可以用来在页面上发生某个事件时吸引用户的注意力。此外，把焦点设置到一个元素上也会导致浏览器将元素滚动到可见位置。
+
+## 8. children 属性
+
+children 属性是一个 HTMLCollection，只包含元素的 Element 类型的子节点。如果元素的子节点类型全部是元素类型，那 children 和 childNodes 中包含的节点应该是一样的。可以像下面这样使用 children 属性：
+
+```javascript
+let childCount = element.children.length;
+let firstChild = element.children[0];
+```
+
+## 9. contains() 方法
+
+DOM 编程中经常需要确定一个元素是不是另一个元素的后代。contains() 方法应该在要搜索的祖先元素上调用，参数是目标节点。如果目标节点是被搜索节点的后代，contains() 返回 true，否则返回 false。下面看一个例子：
+
+```javascript
+console.log(document.documentElement.contains(document.body)); // true
+```
+
+这个例子测试 `<html>` 元素中是否包含 `<body>` 元素，在格式正确的 HTML 中会返回 true。
+
+另外，使用 DOM Level 3 的 compareDocumentPosition() 方法也可以确定节点间的关系。这个方法会返回表示两个节点关系的掩码。下表给出了这些位掩码的说明。
+
+| 掩码 | 节点关系                                      |
+| ---- | --------------------------------------------- |
+| 0x1  | 断开（传入的节点不在文档中）                  |
+| 0x2  | 领先（传入的节点在 DOM 树中位于参考节点之前） |
+| 0x4  | 随后（传入的节点在 DOM 树种位于参考节点之后） |
+| 0x8  | 包含（传入的节点是参考节点的祖先）            |
+| 0x10 | 被包含（传入的节点是参考节点的后代）          |
+
+要模仿 contains() 方法，就需要用到掩码 16（0x10)。compareDocumentPosition() 方法的结果可以通过按位与来确定参考节点是否包含传入的节点，比如：
+
+```javascript
+let result = document.documentElement.compareDocumentPosition(document.body);
+console.log(!!(result & 0x10));
+```
+
+以上代码执行后 result 的值为 20（或 0x14，其中 0x4 表示随后，加上 0x10 被包含）。对 result 和 0x10 应用按位与会返回非零值，而两个叹号会将这个值转换成对应的布尔值。
+
+## 10. 插入标记
+
+HTML5 虽然将 innerHTML 和 outerHTML 纳入了标准，但还有两个属性没有入选。这两个剩下的属性是 innerText 和 outerText。
+
+### 1. innerText 属性
+
+innerText 属性对应元素中包含的所有文本内容，无论文本在子树中哪个层级。在用于读取值时，innerText 会按照深度优先的顺序将子树中所哟文本节点的值拼接起来。在用于写入值时，innerText 会移除元素的所有后代并插入一个包含该值的文本节点。来看下面的 HTML 代码：
+
+```html
+<div id="content">
+    <p>This is a <strong>paragraph</strong>with a list following it.</p>
+    <ul>
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+    </ul>
+</div>
+```
+
+对这个例子中的 `<div>` 而言，innerText 属性会返回以下字符串：
+
+This is a paragraph with a list following it.
+
+Item 1
+
+Item 2
+
+Item 3
+
+注意不同浏览器对待空格的方式不同，因此格式化之后的字符串可能包含也可能不包含原始 HTML 代码中的缩进。
+
+下面再看一个使用 innerText 设置 `<div>` 元素内容的例子：
+
+```javascript
+div.innerText = "Hello world!";
+```
+
+执行这行代码后，HTML 页面中的这个 `<div>` 元素实际上会变成这个样子：
+
+```html
+<div id="content">Hello world!</div>
+```
+
+设置 innerText 会移除元素之前的所有后代节点，完全改变 DOM 子树。此外，设置 innerText 也会编码出现在字符串中的 HTML 语法字符（小于号、大于号、引号及和号）。下面是一个例子：
+
+```javascript
+div.innerText = "Hello & welcome, <b>\"reader\"!</b>";
+```
+
+执行以上代码的结果如下：
+
+```html
+<div id="content">Hello &welcome, </b>"reader "!</b></div>
+```
+
+因为设置 innerText 只能在容器元素中生成一个文本节点，所以为了保证一定是文本节点，就必须进行 HTML 编码。innerText 属性可以用于去除 HTML 标签。通过将 innerText 设置为等于 innerText，可以去除所有 HTML 标签而只剩下文本，如下所示：
+
+```javascript
+div.innerText = div.innerText;
+```
+
+执行以上代码后，容器元素的内容只会包含原先的文本内容。
+
+>注意
+>
+>与 innerText 会跳过行内样式和脚本块不同，textContent 返回的文本中会包含行内样式和脚本代码。innerText 目前已经得到所有浏览器支持，应该作为取得和设置文本内容的首选方法使用。
+
+### 2. outerText 属性
+
+outerText 与 innerText 是类似的，只不过作用范围包含调用它的节点。要读取文本值时，outerText 与 innerText 实际上会返回同样的内容。但在写入文本值时，outerText 不只会移除所有后代节点，而是会替换整个元素。比如：
+
+```javascript
+div.outerText = "Hello world!";
+```
+
+这行代码的执行效果就相当于执行以下两行代码：
+
+```javascript
+let text = document.createTextNode("Hello world!");
+div.parentNode.replaceChild(text, div);
+```
+
+本质上，这相当于用新的文本节点替代 outerText 所在的元素。此时，原来的元素会与文档脱离关系，因此就无法访问了。
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
