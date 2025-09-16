@@ -1,3 +1,13 @@
+尽管 DOM API 已经相当不错，但仍然不断有标准或专有的扩展出现，以支持更多功能。2008 年以前，大部分浏览器对 DOM 的扩展是专有的。此后，W3C 开始着手将这些已成为事实标准的专有扩展编制成正式规范。
+
+DOM1（DOM Level 1）主要定义了 HTML 文档的底层结构。DOM32（DOM Level 2）和 DOM3（DOM Level 3）在这些结构之上加入更多交互能力，提供了更高级的特性。
+
+还有三种 Observer API 支持为浏览器中发生的不同变化定义处理程序。这些 API 由不同规范定义，但有公共的接口。
+
+* Mutation Observer：检测对整个或部分 DOM 树的更改。
+* Intersetion Observer：检测元素是否重叠以及重叠多少。
+* Resize Observer：检测元素的尺寸是否发生变化。
+
 # 1. 样式
 
 HTML 中的样式有 3 种定义方式：外部样式表（通过 `<link>` 元素）、文档样式表（使用 `<style>` 元素）和元素特定样式（使用 style 属性）。DOM2 Style 为这 3 种应用样式的机制都提供了 API。
@@ -960,6 +970,12 @@ range = null; // 解除引用
 
 # 4. Observer API
 
+## observe()
+
+## unobserve()
+
+## disconnect()
+
 使用 Observer API 可以监听网页不同方面的变化，并针对这些变化执行相应的架设函数。现代浏览器支持的观察者（observer）API 主要有 Mutation Observer、Resize Observer 和 Intersection Observer。
 
 * Mutation Observer API 是 DOM 标准定义的
@@ -1166,6 +1182,699 @@ setTimeout(() => {
 注意，回调中的 console.log() 是后执行的，说明回调在 style.width 被赋予新值时不是同步执行的。
 
 现实当中，缩放事件通常不会只发生一次。比如，用户会持续拖动并缩放窗口、动画会不断修改元素大小，或者逐步地渲染内容，这些都会导致连续不断地触发缩放事件。回调函数需要考虑到这一点。
+
+### 3. ResizeObserverEntry
+
+每个回调都会接收两个参数：第一个是表示每个缩放事件的 ResizeObserverEntry 对象的数组，第二个是观察者实例。这样回调可以根据缩放尺寸来修改页面，也可以通过观察者引用来停止观察某个元素。
+
+ResizeObserverEntry 对象是一个包含以下只读属性的字典。
+
+* borderBoxSize：包含新边框盒子的尺寸
+* contentBoxSize：包含新内容盒子的尺寸
+* devicePixelContentBoxSize：包含以设备像素计的新内容盒子的尺寸
+* contentRect：DOMRect 对象，包含新元素尺寸，是之前 API 规范遗留下来的
+* target：对元素的引用
+
+上面这些 *-BoxSize 属性是包含两个属性的对象的数组，其中一个属性是 blockSize，即块维度元素盒子的长度，另一个属性是 inlineSize，即行内维度元素盒子的长度。之所以是数组，主要是因为在多栏布局中元素可能有多个片段，但一般来说数组长度都是 1。
+
+下面的例子展示了一个示例 ResizeObserverEEntry 对象的数组：
+
+```javascript
+let observer = new ResizeObserver((entries, observer) => {
+    console.log(entries);
+});
+observer.observe(document.body);
+
+// 观察到一次缩放后的输出：
+// [
+//	{
+//		borderBoxSize: [
+// 			{
+//				inlineSize: 323,
+//				blockSize: 51
+//			}
+//		],
+//		contentBoxSize: [
+//			{
+//				inlineSize: 323,
+//				blockSize: 51
+//			}
+// 		],
+//		devicePixelContentBoxSize: {
+//			{
+//				inlineSize: 323,
+//				blockSize: 51
+//			}
+//		],
+// 		contentRect: {
+//			top: 0,
+//			right: 323,
+//			bottom: 51,
+//			left: 0,
+//			height: 51,
+//			width: 323,
+//			x: 0,
+//			y: 0
+//		},
+//		target: body
+//	}
+// ]
+```
+
+Resize Observer API 没有使用记录队列，因为回调触发的间隔是严格定义的。如果浏览器检测到缩放在布局渲染之后发生，它会触发一次回调并传入一个捕获当前目标缩放后状态的 ResizeObserverEntry。下一次触发事件的时机在后续的布局阶段，于是就不会出现针对同一事件触发两次缩放事件的情况。因此不需要使用队列。
+
+## 3. Intersection Observer
+
+Intersection Observer API 可以监听 DOM 元素相对于指定视口或容器元素的可见性及位置。使用 IntersectionObserver，可以在被观察的元素与视口重叠或离开视口时异步执行回调函数。这个 API 特别适合用于实现基于滚动的动画，或者图片懒加载、无穷滚动等性能优化逻辑。IntersectionObserver 也提供了不同选项用于控制观察行为，比如控制触发重叠的阈值、同时观察多个元素，以及调整重叠区域的根元素。
+
+要创建 IntesectionObserver 的实例，需要在调用这个构造函数时传入一个回调函数和一个可选的 options 对象：
+
+```javascript
+let observer = new IntersectionObserver(() => console.log("Intersection!"));
+```
+
+在不提供 options 对象的情况下，观察者的默认行为如下。
+
+* 默认视口是文档的视口，也就是整个屏幕
+* 默认阈值是 0，即目标元素与视口有 1 个像素的重叠就会触发回调
+
+来看下面这个使用默认行为的例子：
+
+```javascript
+document.body.innerHTML = `
+	<div style="margin-top: 150vh; height: 100px;0"></div>
+`;
+
+let observer = new IntersectionObserver(entries => {
+    console.log("Intersection!");
+});
+
+observer.observe(document.querySelector("div"));
+```
+
+页面的初始状态是有一个 `<div>` 元素，完全位于视口之下。当在任何方向上达到阈值时，都会触发回调：从完全覆盖到部分可见，或从部分可见到完全覆盖。当用户向下滚动时，只要 `<div>` 的顶部与文档视口重叠，就会触发回调。如果继承向上滚动，`<div>` 又看不到了，还会再触发回调。
+
+### 1. 重叠配置
+
+options 对象用于配置观察者如何判断重叠事件发生，可以使用以下属性。
+
+* root：表示应该被作为视口的元素，默认是文档视口。一般不用修改这个值，因为元素进入设备视口是重叠观察者最常用的场景。
+* rootMargin：用于人工修改视口的边界盒子，可以扩展或收缩，以确定哪一部分属于视口范畴。这个属性应该与 CSS 的 margin 样式使用相同的值，默认为 0px 0px 0px 0px。
+* threshold：是一个浮点值或介于 0.0 到 1.0 之间的浮点值的数组。用于定义会触发重叠回调的百分比（或多个百分比）。
+* trackVisibility：是一个布尔值，表示观察者是否要跟踪目标元素可见性的变化。如果设置为 true，则必须设置 delay 属性。
+* delay：只有在 trackVisibility 为 true 时才需要，表示观察者针对给定目标元素发出通知的最小延迟时间，最小为 100 毫秒。
+
+下面的例子对之前的例子进行了修改，每当可见区域达到 0%、50% 和 100% 时触发回调：
+
+```javascript
+document.body.innerHTML = `
+	<div style="margin-top: 150vh; height: 100px;"></div>
+`;
+
+let observer = new IntersectionObserver(() => console.log("Intersection!"), {
+    threshold: [0, 0.5, 1]
+});
+
+observer.observe(document.querySelector("div"));
+```
+
+此时滚动页面，让 `<div>` 完全可见，再让其完全不可见将触发 6 次回调：分别对应完全进入视图时每次满足阈值和完全离开视图时每次满足阈值。
+
+trackVisibility 和 delay 是在 IntersectionObserver 第 2 版的规范中新增的，目前只有 Chromium 浏览器支持。在第 1 版中，重叠的坐标表示目标元素是否与视口重叠，但这并不代表用户能够看到元素。像 transform、filter、opacity、z-index 和 visibility 这样的 CSS 规则都可以让元素对用户不可见。第 2 版为解决这个问题允许开发者使用 isVisible 布尔值，这个值表示是否存在重叠且是否有像素实际渲染到屏幕上可以被用户看到。下面的例子创建了一个观察者，检查两个 `<div>` 元素的实际可见性：
+
+```javascript
+document.body.innerHTML = `
+	<div style="height: 100px; width: 100px;">Foo</div>
+	<div style="height: 100px; width: 100px; opacity: 0;">Bar</div>
+`;
+
+let obsever = new IntersectionObserver((entries) => console.log(`isVisible: ${entries.map((x) => x.isVisible)}`),
+	{
+    	trackVisibility: true,
+    	delay: 1000
+	}
+);
+
+[...document.querySelectorAll("div")].map((el) => observer.observe(el));
+
+// isVisible: [true, false]
+```
+
+相对于计算重叠，计算实际的可见性非常耗费资源。因此这里的 delay 值用于控制浏览器尽可能少地执行这种计算，应该给它设置一个你觉得能够容忍的最大值。
+
+>注意
+>
+>浏览器对可见性的计算比较容易误报。在目标元素实际可见时它有可能返回 isVisible: false，但是不会在目标元素不可见时返回 isVisible: true。
+
+### 2. 回调与 IntersectionObserverEntry
+
+回调在被触发时会接收到一个 IntersectionObserverEntry 对象的数组，其中每个对象对应一个被观察的元素，而这个条目本身代表该元素在满足阈值条件触发回调的重叠状态。它包含如下只读属性。
+
+* boundingClientRect：被观察元素的重叠区域与其整个区域的比例，介于 0 到 1 之间。重点在于这个值可能与触发回调的阈值不匹配。
+* intersectionRatio：被观察元素的重叠区域与其整个区域的比例，介于 0 到 1 之间。重点在于这个值可能与触发回调的阈值不匹配。
+* isIntersecting：布尔值，表示目标元素是否与视口有任何重叠。
+* rootBounds：根元素的 DOMRect 边界矩形。
+* target：对被观察元素的引用
+* isVisible：布尔值，表示元素是否被确定为可见。只在设置了 trackVisibility 和 delay 时使用。默认值为 false。
+* time：DOMHighResTimeStamp，表示记录重叠的时间。
+
+下面的例子输出了一个简单的 `<div>` 的条目：
+
+```javascript
+document.body.innerHTML = `
+	<div style="height: 100px; width: 100px; margin-top: -50px;"></div>
+`;
+
+let observer = new IntersectionObserver((entries) => 
+    console.log({ entries });
+);
+
+observer.observe(document.querySelector("div"));
+
+// {
+//   entries: [
+//     {
+//       boundingClientRect: {
+//         x: 8,
+//         y: -42,
+//         width: 100,
+//         height: 100,
+//         top: -42,
+//         right: 108,
+//         bottom: 58,
+//         left: 8,
+//       },
+//       intersectionRatio: 0.5799999833106995,
+//       intersectionRect: {
+//         x: 8,
+//         y: 0,
+//         width: 100,
+//         height: 58,
+//         top: 0,
+//         right: 108,
+//         bottom: 58,
+//         left: 8,
+//       },
+//       isIntersecting: true,
+//       isVisible: false,
+//       rootBounds: null,
+//       target: div,
+//       time: 1794.5,
+//     },
+//   ];
+// }
+```
+
+布尔值 isIntersecting 特别有用，因为可以在回调中利用它来根据最新状态有条件地应用逻辑。比如下面这个例子：
+
+```javascript
+// 生成 30 个 div 地垂直列
+document.body.innerHTML = `
+	<div style="height: 100px; width: 100px;"></div>
+`.repeat(30);
+
+let observer = new IntersectionObserver((entries) => {
+        entries.map((entry) => {
+            entry.target.style.backgroundColor = entry.isIntersecting ? "blue": "red";
+        });
+	},
+    // 只在 <div> 的可见性超过一半时触发回调
+    {
+        threshold: 0.5
+    }
+);
+
+[...document.querySelectorAll("div")].map((el) => observer.observe(el));
+```
+
+在这个例子中，我们用一个简单的观察者观察了一堆 `<div>` 元素，但只会讲可见元素设置为蓝色。每次回调被触发，我们并不知道会收到多少个 IntersecionObserverEntry 对象。可能是 1 个，也可能是全部 30 个，也可能是中间某个值。而且，其中某些条目可能会表明相应的目标元素变得可见了，而其他表明相应的元素变得不可见了。为此，前面的例子展示了一次性处理所有条目的常用模式：使用 isIntersecting 来分别处理条目。
+
+## 4. Mutation Observer
+
+Mutation Observer API 可以在 DOM 被修改时异步执行回调。使用 MutationObserver 可以观察整个文档、DOM 子树，或者一个元素。而且，还可以观察元素属性、子节点、文本，以及上述三者任意组合的变化。
+
+>注意
+>
+>Mutation Observer 用于取代废弃的 Mutation Events。
+
+MutationObserver 实例通过调用 MutationObserver 构造函数传入一个回调函数来创建：
+
+```javascript
+let oberver = new MutationObserver(() => console.log('DOM was mutated!'));
+```
+
+这个实例现在还没有跟任何 DOM 元素关联起来。要把这个观察者连接到 DOM，使用 observe() 方法。这个方法接收两个必传参数：要观察变化的目标 DOM 元素及 MutationObserverInit 对象。
+
+MutationObserverInit 对象用于控制观察者要观察什么变化，是键值形式的字典。比如，下面的代码创建了一个观察者，并配置它观察 `<body>` 元素的属性变化：
+
+```javascript
+let observer = new MutationObserver(() => console.log('<body> attributes changed'));
+
+observer.observe(document.body, { attributes: true })
+```
+
+此时，`<body>` 元素任何属性的变化都会被 MutationObserver 实例检测到，从而异步执行回调。对子元素的修改或其他非属性 DOM 元素的修改不会触发回调。这个行为可以通过如下代码来展示：
+
+```javascript
+let observer = new MutationObserver(() => console.log('<body> attributes changed'));
+
+observer.observe(document..body, { attributes: true });
+
+document.body.className = 'foo';
+console.log('Changed body class');
+
+// Changed body class
+// <body> attributes changed
+```
+
+注意，回调函数中的 console.log() 是后执行的，这表示回调并不是与实际的 DOM 修改同步执行的。
+
+### 1. 回调与 MutationRecord
+
+每次执行回调，回调都会收到一个 MutationRecord 实例的数组。每个实例包含发生了什么变化，以及 DOM 哪一部分的信息。因为在回调执行前可能发生多个修改，所以每次回调都会传入一个 MutationRecord 实例的数组。
+
+对应一个属性修改的 MutatonRecord 数组如下所示：
+
+```javascript
+let observer = new MutationObserver((mutationRecords) => console.log(mutationRecords));
+
+observer.observe(document.body, { attributes: true });
+
+document.body.setAttribute('foo', 'bar');
+
+// [
+//   {
+//       "addedNodes": NodeList [],
+//       "attributeName": "foo",
+//       "attributeNamespace": null,
+//       "nextSibling": null,
+//       "oldValue": null,
+//       "previousSibling": null,
+//       "removedNodes": NodeList [],
+//       "target": body,
+//       "type": "attributes"
+//   }
+// ]
+
+```
+
+下面是与命名空间相关的修改：
+
+```javascript
+let observer = new MutationObserver((mutationRecords) => console.log(mutatonRecords));
+
+observer.observe(document.body, { attributes: true });
+
+document.body.setttributeNS('baz', 'foo', 'bar');
+
+// [
+//   {
+//     "addedNodes": NodeList [],
+//     "attributeName": "foo",
+//     "attributeNamespace": "baz",
+//     "nextSibling": null,
+//     "oldValue": null,
+//     "previousSibling": null,
+//     "removedNodes": NodeList [],
+//     "target": body,
+//     "type": "attributes"
+//   }
+// ]
+```
+
+连续修改生成多个 MutationRecord 实例，随后执行回调讲按入队顺序接收到所有待处理的实例：
+
+```javascript
+let observer = new MutationObserver((mutationRecords) => console.log(mutationRecords));
+
+observer.observe(document.body, { attributes: true });
+
+document.body.className = 'foo';
+document.body.className = 'bar';
+document.body.className = 'baz';
+
+// [MutationRecord, MutationRecord, MutationRecord]
+```
+
+MutationRecord 实例有如下属性。
+
+* target：被修改影响的节点
+* type：字符串，表示修改的类型。取值为 "attributes"、"characterData" 或 "childList"
+* oldValue：在 MutationObserverInit 对象中启用后，属性或字符串数据修改讲把这个属性设置为被替换的值。这个值只有在 "attributeOldValue" 或 "characterDataOldValue" 为 true 的时候才有，其他时候为 null。
+
+对于 "childList" 类型的修改，这个属性始终是 null。
+
+* attrubuteName：对于 "attribute" 类型的修改，这个属性保存被修改属性的名称字符串
+* attributeNamespace：对使用了命名空间的 "attribute" 修改，这个属性保存被修改属性的命名空间字符串
+
+对于其他类型的修改，这个属性的值为 null。
+
+* addNodes：对于 "childList" 类型的修改，保存修改中添加的 NodeList。默认为空 NodeList
+* removedNodes：对于 "childList" 类型的修改，保存修改中删除的 NodeList。默认为空 NodeList
+* previousSibling：对于 "childList" 类型的修改，保存被修改节点的前一个相邻节点。默认为 null。
+* nextSibling：对于 "childList" 类型的修改，保存被修改节点的后一个相邻节点。默认为 null。
+
+回调函数的第二个参数是检测到修改的 MutationObserver 实例：
+
+```javascript
+let observer = new MutationObserver((mutationRecords, mutationObserver) => console.log(mutatonRecords, mutationObserver));
+
+observer.observe(document.body, { attributes: true });
+
+document.body.className = 'foo';
+
+// [MutationRecord, MutationObserver]
+```
+
+### 2. 通过 MutationObserverInit 控制观察范围
+
+MutationObserverInit 用于控制观察目标元素的哪些变化。宽泛地说，观察者可以观察属性变化、文本变化和子节点变化。
+
+MutationObserverInit 对象包含如下属性。
+
+* subtree：布尔值，表示除了目标元素，是否观察目标元素的节点子树。为 false 时，只会观察目标元素的相应变化。为 true 时，会观察目标元素及其整个节点子树的相应变化。
+* attributes: 布尔值，表示对节点属性的修改是否应该注册为变化。默认为 false。
+* attributeFilter：字符串值的数组，表示要观察哪些属性的变化。将这个值设置为数组，也会将属性的值转换为 true。默认为观察所有属性。
+* attributeOldValue： 布尔值，表示是否将变化前的属性值记录到 MutationRecord。将这个值设置为 true 也会将 characterData 的值转换为 true。默认为 false。
+* characterData：布尔值，表示是否将字符数据的修改注册为变化。默认为 false。
+* characterDataOldValue：布尔值，表示是否将变化的字符数据记录到 MutationRecord。将这个值设置为 true 也会将 characterData 的值转换为 true。默认为 false。
+* childList：布尔值，表示是否将对目标节点子节点的修改注册为变化。默认为 false。
+
+>注意
+>
+>在调用 observe() 时，MutationObserverInit 对象中必须至少 attributes、characterData 或 childList 中的一个要 true（可以直接设置，也可以通过设置关联属性如 attributeOldValue 间接设置）。否则会抛出错误，因为没有变化会触发回调。
+
+### 3. 观察属性变化
+
+MutationObserver 可以观察节点属性的新增、删除和修改。在 MutationObserverInit 对象中将 attributes 属性设置为 true 即可注册回调函数，如下所示：
+
+```javascript
+let observer = new MutationObserver((mutationRecords) => console.log(mutationRecords));
+
+observer.observe(document.body, { attributes: true });
+
+// 新增属性
+document.body.setAttribute('foo', 'bar');
+
+// 修改属性
+document.body.setAttribute('foo', 'baz');
+
+// 删除属性
+document.body.removeAttribute('foo');
+
+// 三个修改都被记录为变化
+// [MutationRecord, MutatonRecord, MutationRecord]
+```
+
+默认行为是观察所有属性变化，不在 MutationRecord 中记录旧属性值。如果想观察属性的子集，可以为 attributeFilter 属性执行白名单：
+
+```javascript
+let observer = new MutationObserver((mutationRecords) => console.log(mutationRecords));
+
+observer.observe(document.body, {
+    attributeFilter: ['foo']
+});
+
+// 添加白名单中的属性
+document.body.setAttribute('foo', 'baz');
+
+// 添加其他属性
+document.body.setAttribute('baz', 'qux');
+
+// 只有一个变化记录，对应 'foo' 属性
+// [MutationRecord]
+```
+
+如果想在变化记录中保存旧属性值，需要将 attributeOldValue 设置为 true：
+
+```javascript
+let observer = new MutationObserver((mutatonRecords) => console.log(mutatonRecords.map((x) => x.oldValue)));
+
+observer.observe(document.body, { attributeOldValue: true });
+
+document.body.setAttribute('foo', 'bar');
+document.body.setAttribute('foo', 'baz');
+document.body.setAttribute('foo', 'qux');
+
+// 每次变化都会记录之前的值
+// [null, 'bar', 'baz']
+```
+
+### 4. 观察字符数据变化
+
+MutationObserver 可以观察到文本节点（如 Text、Comment 或 ProcessingInstruction 节点）中的字符增加、删除和修改。这需要在 MutationObserverInit 中将 characterData 属性设置为 true，如下所示：
+
+```javascript
+let observer = new MutationObserver((mutationRecords) => console.log(mutationRecords));
+
+// 创建要观察的文本节点
+document.body.innerText = 'foo';
+
+observer.observe(document.body.firstChild, { characterData: true });
+
+// 相同的字符串赋值
+document.body.innerText = 'foo';
+
+// 新字符串赋值
+document.body.innerText = 'bar';
+
+// 节点设置函数赋值
+document.body.firstChild.textContent = 'baz';
+
+// 全部 3 次修改被记录为变化
+// [MutationRecord, MutationRecord, MutationRecord]
+```
+
+默认行为是不在 MutationRecord 中记录旧文本值。如果想在变化记录中保存旧文本值，可以将 attributeOldValue 设置为 true：
+
+```javascript
+let observer = new MutationObserver((mutationRecords) => console.log(mutationRecords.map((x) => x.oldValue)));
+
+document.body.innerText = 'foo';
+observer.observe(document.body.firstChild, { characterDataOldValue: true });
+
+document.body.innerText = 'foo';
+document.body.innerText = 'bar';
+document.body.firstChild.textContent = 'baz';
+
+// 每次变化都会记录之前的值
+// ["foo", "foo", "bar"]
+```
+
+### 5. 观察子列表变化
+
+MutationObserver 可以观察到目标元素添加或删除子节点。这需要在 MutationObserverInit 中将 childList 属性设置为 true。
+
+以下代码展示了添加节点：
+
+```javascript
+// 清除主体内容
+document.body.innerHTML = '';
+
+let observer - new MutatioObserver((mutationRecords) => console.log(mutationRecords));
+
+observer.observe(document.body, { childList: true });
+
+document.body.appendChild(document.createElement('div'));
+
+// [
+//   {
+//     addedNodes: NodeList [div],
+//     attributeName: null,
+//     attrubuteNamespace: null,
+//     oldValue: null,
+//     nextSibling: null,
+//     previousSibling: null,
+//     removedNodes: NodeList [],
+//     target: body,
+//     type: "childList"
+//   }
+// ]
+```
+
+以下代码展示了删除节点：
+
+```javascript
+// 在前面示例的基础上，删除刚刚添加的 div
+document.body.removeChild(div);
+
+// [
+//   {
+//     "addedNodes": NodeList [],
+//     "attributeName": null,
+//     "attributeNamespace": null,
+//     "oldValue": null,
+//     "nextSibling": null,
+//     "previousSibling": null,
+//     "removedNodes": NodeList [div],
+//     target: body,
+//     type: "childList"
+//   }
+// ]
+```
+
+子节点重新排序虽然可以通过一个方法完成，但也会注册两个独立的变化，因为严格来说这涉及一次节点删除和一次节点再添加：
+
+```javascript
+// 清除主体内容
+document.body.innerHTML = '';
+
+let observer = new MutationObserver((mutationRecords) => console.log(mutationRecords));
+
+// 先创建两个子节点
+document.body.appendChild(document.createElement('div'));
+document.body.appendChild(document.createElement('span'));
+
+observer.observe(document.body, { childList: true });
+
+// 交换子节点的位置
+document.body.insertBefore(document.body.lastChild, document.body.firstChild);
+
+// 记录了两次变化：
+// 索引 0 是删除，索引 1 是新增
+// [
+//   {
+//     "addedNodes": NodeList [],
+//     "attributeName": null,
+//     "attributeNamespace": null,
+//     "oldValue": null,
+//     "nextSibling": null,
+//     "previousSibling": div,
+//     "removedNodes": NodeList [span],
+//     target: body,
+//     type: "childList"
+//   },
+//   {
+//     "addedNodes": NodeList[span],
+//     "attributeName": null,
+//     "attributeNamespace": null,
+//     "oldValue": null,
+//     "nextSibling": div,
+//     previousSibling: null,
+//     removedNodes: NodeList[],
+//     target: body,
+//     type: "childList"
+//   }
+// ]
+```
+
+### 6. 观察子树变化
+
+默认情况下，MutationObserver 只限于观察目标元素及其子节点列表的修改。通过在 MutationObserverInit 中将 subtree 属性设置为 true，可以将观察范围扩展到 DOM 子树。
+
+以下代码展示了如何观察子树的属性变化：
+
+```javascript
+// 清除主体内容
+document.body.innerHTML = '';
+
+let observer = new MutatonObserver((mutationRecords) => console.log(mutationRecords));
+
+// 创建一个元素
+document.body.appendChild(document.createElement('div'));
+
+// 观察 <body> 子树
+observer.observe(document.body, { attributes: true, subtree: true });
+
+// 修改 <body> 子树
+document.body.firstChild.setAttribute('foo', 'bar');
+
+// 对子树的修改会注册为变化
+// [
+//   {
+//     "addedNodes": NodeList [],
+//     "attributeName": "foo",
+//     "attributeNamespace": null,
+//     "oldValue": null,
+//     "nextSibling": null,
+//     "previousSibling": null,
+//     "removedNodes": NodeList [],
+//     target: div,
+//     type: "attributes"
+//   }
+// ]
+```
+
+有意思的是，节点子树注册的回调即使在节点被移除被观察树的情况下仍然有效。这意味着在子树节点离开特定的子树后，严格来说发生在被观察子树外部的变化仍然会注册为有效的变化。
+
+以下代码展示了这一行为：
+
+```javascript
+// 清除主体内容
+document.body.innerHTML = '';
+
+let observer = new MutatonObserver((mutationRecords) => console.log(mutationRecords));
+
+let subtreeRoot = document.createElement('div'),
+    subtreeLeaf = document.createElement('span');
+
+// 创建高度为 2 的子树
+document.body.appendChild(subtreeRoot);
+subtreeRoot.appendChild(subtreeLeaf);
+
+// 观察子树
+observer.observe(subtreeRoot, { attributes: true, subtree: true });
+
+// 将子树中的节点转移到被观察的子树外部
+document.body.insertBefore(subtreeLeaf, subtreeRoot);
+
+subtreeLeaf.setAttribute('foo', 'bar');
+
+// 子树的修改仍然会注册为变化
+// [MutationRecord]
+```
+
+# 5. Observer 的性能
+
+在使用 Observer API 时，关键要处理好回调的性能。这些 API 有可能以惊人的频率执行回调，导致页面性能明显下降。比如，观察 `<body>` 元素的一个 ResizeObserver 在一次对窗口的拖动中就会触发数百次回调。此外，观察者的计算也始终是拖慢页面的一个因素。虽然耗时的点击处理程序会临时导致页面变慢，但低效的观察者却可能始终触发，因此产生让用户肉眼可见的性能劣化。
+
+要优化观察者的性能，一种方式在对回调函数进行防抖处理。防抖可以延迟回调函数执行，虽然在上一次事件触发指定的时间之后，但可以保证处理最后一次事件。在这观察者的场景中非常关键，因为了解元素最终的状态很重要。
+
+以下示例至少 1 秒执行一次回调：
+
+```javascript
+let timeoutId = null;
+let observer = new ResizeObserver(() => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => console.log("<body> size changed"), 1000);
+});
+
+observer.observe(document.body);
+```
+
+另一个简单但重要的优化策略是在不需要时删除观察者。换句话说，在不需要观察者时哟啊激进地调用 unobserve() 和 disconnect()。
+
+最后，尽可能使用异步回调。比如，因为 ResizeObserver 预期回调会导致进一步地布局变化，所以它会同步运行回调，并将渲染绘制操作延迟到回调完成后继续进行。如果不需要同步执行回调，可以将回调定义为异步函数，这样可以延迟执行回调，让绘制尽快开始。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
