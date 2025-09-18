@@ -1569,6 +1569,10 @@ list.addEventListener("click", () => {
 
 # 6. 模拟事件
 
+## document.createEvent()
+
+## dispatchEvent()
+
 事件就是为了表示网页中某个有意义的时刻。通常，事件都是由用户交互或浏览器功能触发。事实上，可能很少有人知道可以通过 JavaScript 在任何时候触发任意事件，而这些事件会被当成浏览器创建的事件。这意味着同样会有事件冒泡，因而也会触发相应的事件处理程序。这种能力在测试 Web 应用时特别有用。DOM3 规范指明了模拟特定类型事件的方式。
 
 ## DOM 事件模拟
@@ -1587,7 +1591,183 @@ list.addEventListener("click", () => {
 
 ### 1. 模拟鼠标事件
 
-模拟鼠标事件需要先创建一个新的鼠标 event 对象，然后再使用必要的信息对其进行初始化。要创建鼠标 event 对象，可以调用 createEvent() 方法从传入 "MouseEvents" 参数。这样就会返回一个 event 对象，这个对象有一个 initMouseEvent) 方法，用于为新对象指定鼠标的特定信息。
+模拟鼠标事件需要先创建一个新的鼠标 event 对象，然后再使用必要的信息对其进行初始化。要创建鼠标 event 对象，可以调用 createEvent() 方法从传入 "MouseEvents" 参数。这样就会返回一个 event 对象，这个对象有一个 initMouseEvent() 方法，用于为新对象指定鼠标的特定信息。initMouseEvent() 方法接收 15 个参数，分别对应鼠标事件会暴露的属性。这些参数列举如下。
+
+* type（字符串）：要触发的事件类型，如 "click"
+* bubbles（布尔值）：表示事件是否冒泡。为精确模拟鼠标事件，应该设置为 true
+* cancelable（布尔值）：表示事件是否可以被取消。为精确模拟鼠标事件，应该设置为 true
+* view（AbstractView）：与事件关联的视图。基本上始终是 document.defaultView
+* detail（整数）：关于事件的额外信息。只被事件处理程序使用，通常为 0
+* screenX（整数）：事件相对于屏幕的 x 坐标
+* screenY（整数）：事件相对于屏幕的 y 坐标
+* clientX（整数）：事件相对于视口的 x 坐标
+* clientY（整数）：事件相对于视口的 y 坐标
+* ctrlKey（布尔值）：表示是否按下了 Ctrl 键。默认为 false
+* altKey（布尔值）：表示是否按下了 Alt 键。默认为 false
+* shiftKey（布尔值）：表示是否按下了 Shift 键。默认为 false
+* metaKey（布尔值）：表示是否按下了 Meta 键。默认为 false
+* button（整数）：表示按下了哪个按钮。默认为 0
+* relatedTarget（对象）：与事件相关的对象。只在模拟 mouseover 和 mouseout 时使用
+
+显然，initMouseEvent() 方法的这些参数与鼠标事件的 event 对象属性是一一对应的。前 4 个参数是正确模拟事件最为重要的几个参数，这是因为它们是浏览器要用的，其他参数则是事件处理程序要用的。event 对象的 target 属性会自动设置为调用 dispatchEvent() 方法时传入的节点。下面来看一个使用默认值模拟单击事件的例子：
+
+```javascript
+let btn = document.getElementById("myBtn");
+
+// 创建 event 对象
+let event = document.createEvent("MouseEvents");
+
+// 初始化 event 对象
+event.initMouseEvent("click", true, true, document.defaultView, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+
+// 触发事件
+btn.dispatchEvent(event);
+```
+
+所有鼠标事件，包括 dblclick 都可以像这样在 DOM 合规的浏览器中模拟出来。
+
+### 2. 模拟键盘事件
+
+如前所述，DOM2 Events 中没有定义键盘事件，因此模拟键盘事件并不直观。键盘事件曾在 DOM2 Events 的草案中提到过，但最终成功推荐标准前又被删掉了。要注意的是，DOM3 Events 中定义的键盘事件与 DOM2 Events 草案最初定义的键盘事件差别很大。
+
+在 DOM3 中创建键盘事件的方式是给 createEvent() 方法传入参数 "KeyboardEvent"。这样会返回一个 event 对象，这个对象有一个 initKeyboardEvent() 方法。这个方法接收以下参数。
+
+* type（字符串）：要触发的事件类型，如 "keydown"
+* bubbles（布尔值）：表示事件是否冒泡。为精确模拟键盘事件，应该设置为 true
+* cancelable（布尔值）：表示事件是否可以取消。为精确模拟键盘事件，应该设置为 true
+* view（AbstractView）：与事件关联的视图。基本上始终是 document.defaultView
+* key（字符串）：按下键盘的字符串代码
+* location（整数）：按下按键的位置。0 表示默认键，1 表示左边，2 表示右边，3 表示数字键盘，4 表示移动设备（虚拟键盘），5 表示游戏手柄
+* modifiers（字符串）：空格分隔的修饰键列表，如 "Shift"
+* repeat（整数）：连续按了这个键多少次
+
+注意，DOM3 Events 废弃了 keypress 事件，因此只能通过上述方式模拟 keydown 和 keyup 事件：
+
+```javascript
+let textbox = document.getElementById("myTextbox"),
+    event;
+
+// 按照 DOM3 的方式创建 event 对象
+if (document.inplementation.hasFeature("KeyboardEvents", "3.0")) {
+    event = document.createEvent("KeyboardEvent");
+    
+    // 初始化 event 对象
+    event.initKeyboardEvent("keydown", true, true, document.defaultView, "a", 0, "Shift", 0);
+}
+// 触发事件
+textbox.dispatchEvent(event);
+```
+
+这个例子模拟了同时按住 Shift 键和键盘上 A 键的 keydown 事件。在使用 document.createEvent("KeyboardEvent") 之前，最好检测一下浏览器对 DOM3 键盘事件的支持情况，其他浏览器会返回非标准的 KeyboardEvent 对象。
+
+Firefox 允许给 createEvent() 传入 "KeyEvents" 来创建键盘事件。这时候返回的 event 对象包含的方法叫 initKeyEvent()，此方法接收以下 10 个参数。
+
+* type（字符串）：要触发的事件类型，如 "keydown"
+* bubbles（布尔值）：表示事件是否冒泡。为精确模拟键盘事件，应该设置为 true
+* cancelable（布尔值）：表示事件是否可以取消。为精确模拟键盘事件，应该设置为 true
+* view（AbstractView）：与事件关联的视图，基本上始终是 document.defaultView
+* ctrlKey（布尔值）：表示是否按下了 Ctrl 键。默认为 false
+* altKey（布尔值）：表示是否按下了 Alt 键。默认为 false
+* shiftKey（布尔值）：表示是否按下了 Shift 键。默认为 false
+* metaKey（布尔值）：表示是否按下了 Meta 键。默认为 false
+* keyCode（整数）：表示按下或释放键的键码。在 keydown 和 keyup 中使用。默认为 0
+* charCode（整数）：表示按下键对应字符的 ASCII 码。在 keypress 中使用。默认为 0
+
+键盘事件也可以通过调用 dispatchEvent() 并传入 event 对象来触发，比如：
+
+```javascript
+// 仅适用于 Firefox
+let textbox = document.getElementById("myTextbox");
+
+// 创建 event 对象
+let event = document.createEvent("KeyEvents");
+
+// 初始化 event 对象
+event.initKeyEvent("keydown", true, true, document.defaultView, false, false, true, false, 65, 65);
+
+// 触发事件
+textbox.dispatchEvent(event);
+```
+
+这个例子模拟了同时按住 Shift 键盘和键盘上 A 键的 keydown 事件。同样也可以像这样模拟 keyup 和 keypress 事件。
+
+对于其他浏览器，需要创建一个通用的事件，并为其指定特定于键盘的信息，如下面的例子所示：
+
+```javascript
+let textbox = document.getElementById("myTextbox");
+
+// 创建 event 对象
+let event = document.createEvent("Events");
+
+// 初始化 event 对象
+event.initEvent(type, bubbles, cancelable);
+event.view = document.defaultView;
+event.altKey = false;
+event.ctrlKey = false;
+event.siftKey = false;
+event.metaKey = false;
+event.keyCode = 65;
+event.charCode = 65;
+
+// 触发事件
+textbox.dispatchEvent(event);
+```
+
+以上代码创建了一个通用事件，然后使用 initEvent() 方法初始化，接着又为它指定了键盘事件信息。这里必须使用通用事件而不是用户界面事件，因为用户界面事件不允许直接给 event 对象添加属性。像这样模拟一个事件虽然会触发键盘事件，但文本框不hi输入任何文本，因为它并不能准确模拟键盘事件。
+
+### 3. 模拟其他事件
+
+鼠标事件和键盘事件是浏览器中最常见的模拟对象。不过，有时候可能也需要模拟 HTML 事件。模拟 HTML 事件要调用 createEvent() 方法并传入 "HTMLEvents"，然后再使用返回对象的 initEvent() 方法来初始化：
+
+```javascript
+let event = document.createEvent("HTMLEvents");
+event.initEvent("focus", true, false);
+target.dispatchEvent(event);
+```
+
+这个例子模拟了在给定目标上触发 focus 事件。其他 HTML 事件也可以像这样来模拟。
+
+>注意
+>
+>HTML 事件在浏览器中很少使用，因为它们用处有限。
+
+### 4. 自定义 DOM 事件
+
+DOM3 增加了自定义事件的类型。自定义事件不会触发原生 DOM 事件，但可以让开发者定义自己的事件。要创建自定义事件，需要调用 createEvent("CustomEvent")。返回的对象包含 initCustomEvent() 方法，该方法接收以下 4 个参数。
+
+* type（字符串）：要触发的事件类型，如 "myevent"
+* bubbles（布尔值）：表示事件是否冒泡
+* cancelabel（布尔值）：表示事件是否可以取消
+* detail（对象）：任意值。作为 event 对象的 detail 属性
+
+自定义事件可以像其他事件一样在 DOM 中派发，比如：
+
+```javascript
+let div = document.getElementById("myDiv"),
+    event;
+
+div.addEventListener("myevent", (event) => {
+    console.log("DIV: " + event.detail);
+});
+
+document.addEventListener("myevent", (event) => {
+    console.log("DOCUMENT: " + event.detail);
+});
+
+if (document.implementation.hasFeature("CustomEvents", "3.0")) {
+    event = document.createEvent("CustomEvent");
+    event.initCustomEvent("myevent", true, false, "Hello world!");
+    div.dispatchEvent(event);
+}
+```
+
+这个例子创建了一个名为 "myevent" 的冒泡事件。event 对象的 detail 属性就是一个简单的字符串，`<div>` 元素和 document 都为这个事件注册了事件处理程序。因为使用 initCustomEvent() 初始化时将事件指定为可以冒泡，所以浏览器会负责把事件冒泡到 document。
+
+
+
+
+
+
 
 
 
