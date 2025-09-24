@@ -1,4 +1,4 @@
-随着浏览器能力的增加，其复杂性也在迅速增加。从很多方面看，现代浏览器已经成为构建于诸多规范之上、集各种 API 于一身的瑞士军刀。浏览器规范的生态在某种程序上是混乱而无序的。一些 规范如 HTML5，定义了一批增强已有标准的 API 和浏览器特性。而另一些规范如 Web Cryptography API 和 Notifications API，只为一个特性定义了一个 API。不同浏览器实现这些新 API 的情况也不同，有的会实现其中一部分，有的则干脆尚未实现。
+t随着浏览器能力的增加，其复杂性也在迅速增加。从很多方面看，现代浏览器已经成为构建于诸多规范之上、集各种 API 于一身的瑞士军刀。浏览器规范的生态在某种程序上是混乱而无序的。一些 规范如 HTML5，定义了一批增强已有标准的 API 和浏览器特性。而另一些规范如 Web Cryptography API 和 Notifications API，只为一个特性定义了一个 API。不同浏览器实现这些新 API 的情况也不同，有的会实现其中一部分，有的则干脆尚未实现。
 
 >注意
 >
@@ -214,6 +214,53 @@ navigator.permissions.query({ name: "clipboard-read" }).then(result => {
     }
 })
 ```
+
+# 3. 跨上下文消息
+
+## postMessage()
+
+跨文档消息，有时候也简称为 XDM（cross-document messaging），是一种在不同执行上下文（如不同工作线程或不同源的页面）间传递信息的能力。例如，www.wiley.com 上的页面需要与包含在内嵌窗格中的 p2p.wiley.com 上面的页面通信。在 XDM 之前，要以安全方式实现这种通信需要很多工作。XDM 以安全易用的方式规范化了这个功能。
+
+>注意
+>
+>跨上下文消息用于窗口之间通信或工作线程之间通信。本节主要介绍使用 postMessage() 与其他窗口通信。关于工作线程之间通信、MessageChannel 和 BroadcastChannel，可以参考第 24 章。
+
+XDM 的核心是 postMessage() 方法。除了 XDM，这个方法名还在 HTML5 中很多地方用到过，但目的都一样，都是把数据传送到另一个位置。
+
+postMessage() 方法接收 3 个参数：消息、表示目标接收源的字符串和可选的可传输对象的数组（只与工作线程有关）。第二个参数对于安全非常重要，其可以限制浏览器交付数据的目标。下面来看一个例子：
+
+```javascript
+let iframeWindow = document.getElementById("myframe").contentWindow;
+iframeWindow.postMessage("A secret", "http://www.wiley.com");
+```
+
+最后一行代码尝试向内窗格中发送一条消息，而且指定了源必须是 "www.wiley.com"。如果源匹配，那么消息将会交付到内嵌窗格。否则，postMessage() 什么也不做。这个限制可以保护信息不会因地址改变而泄漏。如果不想限制接收目标，则可以给 postMessage() 的第二个参数传 "*"，但不推荐这么做。
+
+接收到 XDM 消息后，window 对象上会触发 message 事件。这个事件是异步触发的，因此从消息发出到接收到消息（接收窗口触发 message 事件）可能会有延迟。传给 onmessage 事件处理程序的 event 对象包含以下 3 方面重要信息。
+
+* data：作为第一个参数传递给 postMessage() 的字符串数据
+* origin：发送消息的文档源，例如 "www.wiley.com"
+* source：发送消息的文档中 window 对象的代理。这个代理对象主要用于在发送上一条消息的窗口中执行 postMessage() 方法。如果发送窗口有相同的源，那么这个对象应该就是 window 对象。
+
+接收消息之后验证发送窗口的源是非常重要的。与 postMessage() 的第二个参数可以保证数据不会意外传给未知页面一样，在 onmessage 事件处理程序中检查发送窗口的源可以保证数据来自正确的地方。基本的使用方式如下所示：
+
+```javascript
+window.addEventListener("message", (event) => {
+    // 确保来自预期发送者
+    if (event.origin === "http://www.wiley.com") {
+        // 对数据进行一些处理
+        processMessage(event.data);
+        // 可选：向来源窗口发送一条消息
+        event.source.postMessage("Recevied!", "http://p2p.wiley.com");
+    }
+});
+```
+
+大多数情况下，event.source 是某个 window 对象的代理，而非实际的 window 对象。因此不能通过它访问所有窗口下的消息。最好只使用 postMessage()，这个方法永远存在而且可以调用。
+
+XDM 有一些怪异之处。首先，postMessage() 的第一个参数的最初实现始终是一个字符串。后来，第一个参数改为允许任何结构的数据传入，不过并非所有浏览器都实现了这个改变。为此，最好就是只通过 postMessage() 发送字符串。如果需要传递结构化数据，那么最好先对该数据调用 JSON.stringify()，通过 postMessage() 传过去之后，再在 onmessage 事件处理程序中调用 JSON.parse()。
+
+在通过内嵌窗格加载不同域时，使用 XDM 是非常方便的。通过使用 XDM 与内嵌窗格中的网页通信，可以保证包含页面的安全。XDM 也可以用于同源页面之间通信。
 
 # 5. File API 与 Blob API
 
@@ -590,6 +637,240 @@ Geolocation API 位置请求可以使用 PositionOptions 对象来配置，作�
 * timeout：毫秒，表示在以 TIMEOUT 状态调用错误回调函数之前等待的最长时间。默认值是 0xFFFFFFFF（2^32 - 1）。表示完全跳过系统调用而立即以 TIMEOUT 调用错误回调函数。
 * maximumAge：毫秒，表示返回坐标的最长有效期，默认值为 0。因为查询设备位置会消耗资源，所以系统通常会缓存坐标并在下次返回缓存的值（遵从位置缓存失败策略）。系统会计算缓存期，如果 Geolocation API 请求的配置要求比缓存的结果更新，则系统会重新查询并返回值。0 表示强制系统忽略缓存的值，每次都重新查询。而 Infinity 会阻止系统重新查询，只会返回缓存的值。JavaScript 可以通过检查 Position 对象的 timestamp 属性值是否重复来判断返回的是不是缓存值。
 
+# 8. Device API
+
+## navigator.oscpu
+
+## navigator.vendor
+
+## navigator.platform
+
+## screen.colorDepth
+
+## screen.pixelDepth
+
+## screen.orientation
+
+## navigator.getBattery()
+
+## navigator.hardwareConcurrency
+
+## navigator.deviceMemory
+
+## navigator.maxTouchPoints
+
+现代浏览器提供了一组与页面执行环境相关的信息，包括浏览器、操作系统、硬件和周边设备信息。这些属性可以通过暴露在 window.,navigator 上的一组 API 获得。不过，这些 API 的跨浏览器支持还不够好，远未达到标准化的程序。
+
+>注意
+>
+>对这些 API 的支持可能因浏览器而异。
+
+## 1. 浏览器与操作系统信息
+
+navigator 和 screen 对象也提供了关于页面所在软件环境的信息。
+
+>注意
+>
+>以下几节列出的 navigator 的属性已经废弃，使用时请小心。
+
+### 1. navigator.oscpu
+
+navigator.oscpu 属性是一个字符串，通常对应用户代理字符串中操作系统/系统架构相关信息。根据 HTML 事实标准：
+
+oscpu 属性的获取方法必须返回空字符串或者表示浏览器所在平台的字符串，比如 "Windows NT 10.0; Win64; x64" 或 "Linux x86_64"。
+
+比如，Windows 10 上的 Firefox 的 oscpu 属性应该对应于以下加粗的部分：
+
+```javascript
+console.log(navigator.userAgent);
+"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
+console.log(navigator.oscpu);
+"Windows NT 10.0; Win64; x64"
+```
+
+### 2. navigator.vendor
+
+navigator.vendor 属性是一个字符串，通常包含浏览器开发商信息。返回这个字符串是浏览器 navigator 兼容模式的一个功能。根据 HTML 实时标准“
+
+navigator.vendor 返回一个空字符串，也可能返回字符串 "Apple Computer, Inc." 或字符串 "Google Inc."
+
+例如，Chrome 中的这个 navigator.vendor 属性返回下面的字符串：
+
+```javascript
+console.log(navigator.vendor); // "Google Inc."
+```
+
+### 3. navigator.platform
+
+navigator.platform 属性是一个字符串，通常表示浏览器所在的操作系统。根据 HTML 实时标准：
+
+navigator.platform 必须返回一个字符串或表示浏览器所在平台的字符串，例如 "MacIntel"、"Win32"、"FreeBSD i386" 或 "WebTV OS"
+
+例如，Windows 系统下 Chrome 中的这个 navigator.platform 属性返回下面的字符串：
+
+```javascript
+console.log(navigator.platform); // "Win32"
+```
+
+### 4. screen.colorDepth 和 screen.pixelDepth
+
+screen.colorDepth 和 screen.pixelDepth 返回一样的值，即显示器每像素颜色的位深。根据 CSS 对象模型（CSSON）规范：
+
+screen.colorDepth 和 screen.pixelDepth 属性应该返回输出设备中每像素用于显示颜色的位数，不包含 alpha 通道。
+
+Chrome 中这两个属性的值如下所示：
+
+```javascript
+console.log(screen.colorDepth); // 24
+console.log(screen.pixelDepth); // 24
+```
+
+### 5. screen.orientation
+
+screen.orientation 属性返回一个 ScreenOrientation 对象，其中包含 Screen Orientation API 定义的屏幕信息。这里面最有意思的属性是 angle 和 type，前者返回相对于默认状态下屏幕的角度，后者返回以下 4 种枚举值之一：
+
+* portrait-primary
+* portrait-secondary
+* landscape-primary
+* landscape-secondary
+
+例如，在 Chrome 移动版中，screen.orientation 返回的信息如下：
+
+```javascript
+// 垂直看
+console.log(screen.orientation.type); // portrait-primary
+console.log(screen.orientation.angle); // 0
+
+// 向左转
+console.log(screen.orientation.type); // landscape-primary
+console.log(screen.orientation.angle); // 90
+
+// 向右转
+console.log(screen.orientation.type); // landscape-secondary
+console.log(screen.orientation.angle); // 270
+```
+
+根据规范，这些值的初始化取决于浏览器和设备状态。因此，不能假设 portrait-primary 和 0 始终是初始值。这两个值主要用于确定设备旋转后浏览器的朝向变化。
+
+## 2. Connection State 和 NetworkInformation API
+
+浏览器会跟踪网络连接状态并以两种方式暴露这些信息：连接事件和 navigator.onLine 属性。在设备连接到网络时，浏览器会记录这个事实并在 window 对象商触发 online 事件。相应地，当设备断开网络连接后，浏览器会在 window 对象上触发 offline 事件。任何时候，都可以通过 navigator.onLine 属性来确定浏览器的联网状态。这个属性返回一个布尔值，表示浏览器是否联网。
+
+```javascript
+const connectionStateChange = () => console.log(navigator.onLine);
+
+window.addEventListener('online', connectionStateChange);
+window.addEventListener('offline', connectionStateChange);
+
+// 设备联网时：
+// true
+
+// 设备断网时：
+// false
+```
+
+当然，到底怎么才算联网取决于浏览器与系统实现。有些浏览器可能会认为只要连接到局域网就算在线，而不管是否真正接入了互联网。
+
+navigator 对象还暴露了 NetworkInformation API，可以通过 navigator.connection 属性使用。这个 API 提供了一些只读属性，并为连接属性变化事件处理程序定义了一个事件对象。
+
+以下是 Networkinformation API 暴露的属性。
+
+* downlink：整数，表示当前设备的带宽（以 Mbit/s 为单位），舍入到最接近的 25 kbit/s。这个值可能会根据历史网络吞吐量计算，也可能根据连接技术的能力来计算
+* downlinkMax：整数，表示当前设备最大的下行带宽（以 Mbit/s 为单位），根据网络的第一跳来确定。因为第一跳不一定反映到端的网络速度，所以这个值只能用作粗略的上限值
+* effectiveType：字符串枚举值，表示连接速度和质量。这些值对应不同的蜂窝数据网络连接技术，但也用于分类无线网络。这个值有以下 4 种可能。
+  * slow-2g
+    * 往返时间 > 2000ms
+    * 下行带宽 < 50kbit/s
+  * 2g
+    * 2000ms > 往返时间 >= 1400ms
+    * 70kbit/s > 下行带宽 >= 50kbit/s
+  * 3g
+    * 1400ms > 往返时间 >= 270ms
+    * 700kbit/s > 下行带宽 >= 70kbit/s
+  * 4g
+    * 270ms > 往返时间 >= 0ms
+    * 下行带宽 >= 700kbit/s
+* rtt：毫秒，表示当前网络实际的往返时间，舍入为最接近的 25 毫秒。这个值可能根据历史网络吞吐量计算，也可能根据连接技术的能力来计算。
+* type：字符串枚举值，表示网络连接技术。这个值可能为下列值之一。
+  * bluetooth：蓝牙
+  * cellular：蜂窝
+  * ethernet：以太网
+  * none：无网络连接。相当于 navigator.onLine === false
+  * mixed：多种网络混合
+  * other：其他
+  * unknown：不确定
+  * wifi：Wi-Fi
+  * wimax：WiMAX
+* saveData：布尔值，表示用户设备是否启用了节流模式
+* onchange：事件处理程序，会在任何连接状态变化时触发一个 change 事件。可以通过 navigator.connection.addEventListener('change', changeHandler) 或 navigator.connection.onchange = changeHandler 等方式使用。
+
+## 3. Battery Status API
+
+浏览器可以访问设备电池及充电状态的信息。navigator.getBattery() 方法会返回一个期约实例，解决为一个 BatteryManager 对象。
+
+```javascript
+navigator.getBattery().then((b) => console.log(b));
+// BatteryManager { ... }
+```
+
+BatteryManager 包含 4 个只读属性，提供了设备电池的相关信息。
+
+* charging：布尔值，表示设备当前是否正接入电源充电。如果设备没有电池，则返回 true
+* chargingTime：整数，表示预计离电池充满还有多少秒。如果电池已充满或设备没有电池，则返回 0
+* dischargingTime：整数，表示预计离电量耗尽还有多少秒。如果设备没有电池，则返回 Infinity
+* level：浮点数，表示电量百分比。电量完全耗尽 返回 0.0，电池充满返回 1.0。如果设备没有电池，则返回 1.0。
+
+这个 API 还提供了 4 个事件属性，可用于设置在相应的电池事件发生时调用的回调函数。可以通过给 BatteryManager 添加事件监听器，也可以通过给事件属性赋值来使用这些属性。
+
+* onchargingchange
+* onchargingtimechange
+* ondischargingtimechange
+* onlevelchange
+
+```javascript
+navigator.getBattery().then((battery) => {
+    // 添加充电状态变化时的处理程序
+    const chargingChangeHandler = () => console.log('chargingchange');
+    battery.onchargingchange = chargingChangeHandler;
+    // 或
+    battery.addEventListener('chargingchange', chargingChangeHandler);
+    
+    // 添加充电时间变化时的处理程序
+    const chargingTimeChangeHandler = () => console.log('chargingtimechange');
+    battery.onchargingtimechange = chargingTimeChangeHandler;
+    // 或
+    battery.addEventListener('chargingtimechange', chargingTimeChangeHandler);
+    
+    // 添加放电时间变化时的处理程序
+    const dischargingTimeChangeHandler = () => console.log('dischargingtimechange');
+    battery.ondischargingtimechange = dischargingTimeChangeHandler;
+    // 或
+    battery.addEventListener('dischargingtimechange', dischargingTimeChangeHandler);
+    
+    // 添加电量百分比变化时的处理程序
+    const levelChangeHandler = () => console.log('levelchange');
+    battery.onlevelchange = levelChangeHandler;
+    // 或
+    battery.addEventListener('levelchange', levelChangeHandler);k
+});
+```
+
+## 4. 硬件
+
+浏览器检测硬件的能力相当有限。不过，navigator 对象还是通过一些属性提供了基本信息。
+
+### 1. 处理器核心数
+
+navigator.hardwareConcurrency 属性返回浏览器支持的逻辑处理器核心数量，包含表示核心数的一个整数值（如果核心数无法确定，这个值就是 1）.关键在于，这个值表示浏览器可以并行执行的最大工作线程数量，不一定是实际的 CPU 核心数。
+
+### 2. 设备内存大小
+
+navigator.deviceMemory 属性返设备大小的系统内存大小，包含单位为 GB 的浮点数（舍入为最接近的 2 的幂：512 MB 返回 0.5，4GB 返回 4）。
+
+### 3. 最大触点数
+
+navigator.maxTouchPoints 属性返回触摸屏支持的最大关联触点数量，包含一个整数值。
+
 # 9. 媒体元素
 
 HTML5 新增了两个与媒体相关的元素，即 `<audio>` 和 `<video>`，从而为浏览器提供了嵌入音频和视频的统一解决方案。这两个元素既支持 Web 开发者在页面中嵌入媒体文件，也支持 JavaScript 实现对媒体的自定义控制。以下是它们的用法：
@@ -848,6 +1129,21 @@ n.onclose = () => console.log('Notification was closed!');
 n.onerror = () => console.log('Notification experienced an error!');
 ```
 
+# 11. Page Visibility API
+
+Web 开发中一个常见的问题是开发者不知道用户什么时候真正在使用页面。如果页面被最小化或隐藏在其他标签页的后面，那么轮询服务器或更新动画等功能可能就没必要了。Page Visibility API 旨在为开发者提供页面对用户是否可见的信息。
+
+这个 API 本身非常简单，由 3 部分构成。
+
+* document.visibilityState 字符串值，表示下面几种状态之一。
+  * visible：页面当前对用户可见
+  * hidden：页面当前不可见或最小化
+  * prerender：页面正在预渲染，尚未对用户可见
+* visibilitychange 事件，该事件会在文档从隐藏变可见（或反之）时触发
+* document.hidden 布尔值，表示页面是否隐藏。这可能意味着页面在后台标签页或浏览器中被最小化了。这个值是为了向后兼容才继续被浏览器支持的，应该优先使用 document.visibilityState 检测页面可见性。
+
+要想在页面从可见变为隐藏或从隐藏变为可见时得到通知，需要监听 visibilitychange 事件。
+
 # 13. URL API
 
 URL API 为 JavaScript 创建、解析和操作 URL 提供了便捷的手段。在这些 API 出现以前，开发者需要通过拼接组件（如协议、主机、路径）或者部分修改已有 URL 的方式来创建 URL。为此经常是正则表达式和字符串操作乱作一团。URL API 原生支持 URL 格式，通过相应的属性和方法让操作 URL 变得非常轻松。
@@ -959,6 +1255,12 @@ for (let param of searchParams) {
 
 # 14. 计时 API
 
+## performance.now()
+
+## performance.getEntries()
+
+## performance.getEntriesByType()
+
 页面性能始终是 Web 开发者关心的话题。Performance 接口通过 JavaScript API 暴露了浏览器内部的度量指标，允许开发者直接访问这些信息并基于这些信息实现自己想要的功能。这个接口暴露在 window.performance 对象上。所有与页面相关的指标，包括已经定义和将来会定义的，都会存在于这个对象上。
 
 Performance 接口由多个 API 构成，除了 Paint Timing API 都有两个级别：
@@ -998,7 +1300,7 @@ console.log(duration);
 为此，必须使用不同的计时 API 来精确且准确地度量时间的流逝。High Resolution Time API 定义了 window.performance.now()，这个方法返回一个微秒精度的浮点值。因此，使用这个方法先后捕获的时间戳更不可能出现相等的情况。而且这个方法可以保证时间戳单调增长。
 
 ```javascript
-tjjconst t0 = performance.now();
+const t0 = performance.now();
 const t1 = performance.now();
 
 console.log(t0); // 
@@ -1009,14 +1311,987 @@ const duration = t1 - t0;
 console.log(duration);
 ```
 
+performance.now() 计时器采用相对度量。这个计时器在执行上下文创建时从 0 开始计时。例如，打开页面或创建工作线程时，performance.now() 就会从 0 开始计时。由于这个计时器在不同上下文初始化时可能存在时间差，因此不同上下文之间如果没有共享参照点则不能直接比较 performance.now()。performance.timeOrigin 属性返回计时器初始化时全局系统时钟的值。
 
+```javascript
+const relativeTimestamp = performance.now();
 
+const absoluteTimestamp = performance.timeOrigin + relativeTimestamp;
 
+console.log(relativeTimestamp); // 244.43500000052154
+console.log(absoluteTimestamp); // 1567926208892.4001
+```
 
+>注意
+>
+>通过使用 performance.now() 测量 L1 缓存与主内存的延迟差，幽灵漏洞可以执行缓存推断攻击。为弥补这个安全漏洞，所有的主流浏览器有的选择降低 performance.now() 的精度，有的选择在时间戳里混入一些随机性。Webkit 博客上有一篇相关主题的不错的文章 "What Spectre and Meltdown Mean For Webkit", 作者是 Filip Pizlo。
 
+## 2. Performance Timeline API
 
+Performance Timeline API 使用一套用于度量客户端延迟的工具扩展了 Performance 接口。性能度量会采用计算结束与开始时间差的形式。这些开始和结束时间会被记录为 DOMHighResTimeStamp 值，而封装这个时间戳的对象是 PerformanceEntry 的实例。
 
+浏览器会自动记录各种 PerformanceEntry 对象，而使用 performance.mark() 也可以记录自定义的 PerformanceEntry 对象。在一个执行上下文种被记录的所有性能条目可以通过 performance.getEntries() 获取：
 
+```javascript
+console.log(performance.getEntries());
+
+// [PerformanceNavigationTiming, PerformanceResourceTiming, ...]
+```
+
+这个返回的集合代表浏览器的性能时间线（performance timeline）。每个 PerformanceEntry 对象都有 name、entryType、startTime 和 duration 属性：
+
+```javascript
+const entry = performance.getEntries()[0];
+
+console.log(entry.name); // "https://example.com"
+console.log(entry.entryType); // navigation
+console.log(entry.startTime); // 0
+console.log(entry.duration); // 182.36500001512468
+```
+
+不过，PerformanceEntry 实际上是一个抽象基类。所有记录条目虽然都继承 PerformanceEntry，但最终还是如下某个具体类的实例：
+
+* PerformanceMark
+* PerformanceMeasure
+* PerformanceFrameTiming
+* PerformanceNavigationTiming
+* PerformanceResourceTiming
+* PerformancePaintTiming
+
+上面每个类都会增加大量属性，用于描述与相应条目有关的元数据。每个实例的 name 和 entryType 属性会因为各自的类不同而不同。
+
+### 1. User Timing API
+
+User Timing API 用于记录和分析自定义性能条目。如前所述，记录自定义性能条目要使用 performance.mark() 方法：
+
+```javascript
+performance.mark('foo');
+
+console.log(performance.getEntriesByType('mark')[0]);
+// PerformanceMark {
+// 	name: "foo",
+//  entryType: "mark",
+// 	startTime: 269.8800000362098,
+// 	duration: 0
+// }
+```
+
+在计算开始前和结束后各创建一个自定义性能条目可以计算时间差。最新的标记（mark）会被推到 getEntriesByType() 返回数组的开始：
+
+```javascript
+performance.mark('foo');
+for (let i = 0; i < 1E6; ++i) {}
+performance.mark('bar');
+
+const [endMark, startMark] = performance.getEntriesType('mark');
+console.log(startMark.startTime - endMark.startTime); // 1.3299999991431832
+```
+
+除了自定义性能条目，还可以生成 PerformanceMeasure（性能度量）条目，对应由名字作为标识的两个标记之间的持续时间。PerformanceMeasure 的实例由 performance.measure() 方法生成：
+
+```javascript
+performance.mark('foo');
+for (let i = 0; i < 1E6; ++i) {}
+performance.mark('bar');
+
+performance.measure('baz', 'foo', 'bar');
+
+const [differenceMark] = performance.getEntriesByType('measure');
+
+console.log(differenceMark);
+// PerformanceMeasure {
+// 	name: "baz"
+// 	entryType: "measure"
+// 	startTime: 298.9800000214018,
+// 	duration: 1.349999976810068
+// }
+```
+
+### 2. Navigation Timing API
+
+Navigation Timing API 提供了高精度时间戳，用于度量当前页面加载速度。浏览器会在导航事件发生时自己记录 PerformanceNavigationTiming 条目。这个对象会捕获大量时间戳，用于描述页面是何时以及如何加载的。
+
+下面的例子计算了 loadEventStart 和 loadEventEnd 时间戳之间的差：
+
+```javascript
+const [performanceNavigationTimingEntry] = performance.getEntriesByType('navigation');
+
+console.log(performanceNavigationTimingEntry);
+// PerformanceNaivigationTiming {
+// 	connectEnd: 2.259999979287386
+// 	connectStart: 2.259999979287386
+// 	decodedBodySize: 122314
+// 	domComplete: 631.9899999652989
+// 	domContentLoadedEventEnd: 300.92499998863786
+// ...
+// }
+
+console.log(performanceNavigationTimingEntry.loadEventEnd - performanceNavigationTimingEntry.loadEventStart);
+// 0.805000017862767
+```
+
+### 3. Resource Timing API
+
+Resource Timing API 提供了高精度时间戳，用于度量当前页面加载时请求资源的速度。浏览器会在加载资源时自动记录 PeformanceResourceTiming。这个对象会捕获大量时间戳，用于描述资源加载的速度。
+
+下面的例子计算了加载一个特定资源所花的时间：
+
+```javascript
+const performanceResourceTimingEntry = performance.getEntriesType('resource')[0];
+
+console.log(performanceResourceTimingEntry);
+// PerformanceResourceTiming {
+// 	connectEnd: 138.11499997973442
+// 	connectStart: 138.11499997973442
+// 	decodedBodySize: 33808
+// 	domainLookupEnd: 138.11499997973442
+// 	domainLookupStart: 138.11499997973442
+// ...
+// 	workerStart: 0
+// }
+
+console.log(performanceResourceTimingEntry.responseEnd - performanceResourceTimingEntry.requestStart);
+// 493.9600000507198
+```
+
+通过计算并分析不同时间差，可以更全面地审视浏览器加载页面的过程，发现可能存在的性能瓶颈。
+
+# 15. Web 组件
+
+这里所说的 Web 组件指的是一套用于增强 DOM 行为的工具，包括影子 DOM、自定义元素和 HTML 模板。这一套浏览器 API 特别混乱。
+
+* 并没有统一的 Web Components 规范：每个 Web 组件都在一个不同的规范中定义
+* 有些 Web 组件如影子 DOM 和自定义元素，已经出现了向后不兼容的版本问题
+* 浏览器实现极其不一致
+
+由于存在这些问题，因此使用 Web 组件通常需要引入一个 Web 组件库，比如 Polymer。这种库可以作为腻子脚本，模拟浏览器中缺失的 Web 组件。
+
+>注意
+>
+>本章只介绍 Web 组件的最新版本。
+
+## 1. HTML 模板
+
+在 Web 组件之前，一直缺少基于 HTML 解析构建 DOM 子树，然后在需要时再把这个子树渲染出来的机制。一种间接方案是使用 innerHTML 把标记字符串转换为 DOM 元素，但这种方式存在严重的安全隐患。另一种间接方案是使用 document.createElement() 构建每个元素，然后逐个把它们添加到孤儿根节点（不是添加到 DOM），但这样做特别麻烦，完全与标记无关。
+
+相反，更好的方式是提前在页面中写出特殊标记，让浏览器自动将其解析为 DOM 子树，但跳过渲染。这正是 HTML 模板的核心思想，而 `<template>` 标签正是为这个目的而生的。下面是一个简单的 HTML 模板的例子：
+
+```html
+<template id="foo">
+    <p>I'm inside a template!</p>
+</template>
+```
+
+### 1. 使用 DocumentFragment
+
+在浏览器中渲染时，上面例子中的文本不会被渲染到页面上。因为 `<template>` 的内容不属于活动文档，所以 document.querySelector() 等 DOM 查询方法不会发现其中的 `<p>` 标签。这是因为 `<p>` 存在于一个包含在 HTML 模板中的 DocumentFragment 节点内。
+
+在浏览器中通过开发者工具检查网页内容时，可以看到 `<template>` 中的 DocumentFragment：
+
+```html
+<template id="foo">
+    #document-fragment
+    <p>I'm inside a template!</p>
+</template>
+```
+
+通过 `<template>` 元素的 content 属性可以获取这个 DocumentFragment 的引用：
+
+```javascript
+console.log(document.querySelector('#foo').content); // #document-fragment
+```
+
+此时的 DocumentFragment 就像一个对应子树的最小化 document 对象。换句话说，DocumentFragment 上的 DOM 匹配方法可以查询其子树中的节点：
+
+```javascript
+const fragment = document.querySelector('#foo').content;
+
+console.log(document.querySelector('p')); // null
+console.log(fragment.querySelector('p')); // <p>...</p>
+```
+
+DocumentFragment 也是批量向 HTML 中添加元素的高效工具。比如，我们想以最快的方式给某个 HTML 元素添加多个子元素。如果连续调用 document.appendChild()，则不仅费事，还会导致多次布局重排。而使用 DocumentFragment 可以一次性添加所有子节点，最多只会有一次布局重排：
+
+```javascript
+// 开始状态：
+// <div id="foo"></div>
+//
+// 期待的最终状态
+// <div id="foo">
+// 	<p></p>
+//	<p></p>
+// 	<p></p>
+// </div>
+// 也可以使用 document.createDocumentFragment()
+const fragment = new DocumentFragment();
+
+const foo = document.querySelector('#foo');
+
+// 为 DocumentFragment 添加子元素不会导致布局重排
+fragment.appendChild(document.createElement('p'));
+fragment.appendChild(document.createElement('p'));
+fragment.appendChild(document.createElement('p'));
+
+console.log(fragment.children.length); // 3
+
+foo.appendChild(fragment);
+
+console.log(fragment.children.length); // 0
+
+console.log(document.body.innerHTML);
+// <div id="foo">
+// 	<p></p>
+// 	<p></p>
+// 	<p></p>
+// </div>
+```
+
+### 2. 使用 `<template>` 标签
+
+注意，在前面的例子中，DocumentFragment 的所有子节点都高效地转移到了 foo 元素上，转移之后 DocumentFragment 变空了。同样地过程也可以使用 `<template>` 标签重现：
+
+```javascript
+const fooElement = document.querySelector('#foo');
+const barTemplate = document.queyrSelector('#bar');
+const barFragment = barTemplate.content;
+
+console.log(document.body.innerHTML);
+// <div id="foo">
+// </div>s
+// <template id="bar">
+// 	<p></p>
+// 	<p></p>
+// 	<p></p>
+// </template>
+
+fooElement.appendChild(barFragment);
+
+console.log(document.body.innerHTML);
+// <div id="foo">
+// 	<p></p>
+// 	<p></p>
+// 	<p></p>
+// </div>
+// <template id="bar"></template>j
+```
+
+如果想要复制模板，可以使用 importNode() 方法克隆 DocumentFragment：
+
+```javascript
+const fooElement = document.querySelector('#foo');
+const barTemplate = document.querySelector('#bar');
+const barFragment = barTemplate.content;
+
+console.log(document.body.innerHTML);
+// <div id="foo">
+// </div>
+// <template id="bar">
+// 	<p></p>
+// 	<p></p>
+// 	<p></p>
+// </template>
+
+fooElement.appendChild(document.importNode(barFragment, true));
+
+console.log(document.body.innerHTML);
+// <div id="foo">
+// 	<p></p>
+// 	<p><p>
+// 	<p></p>
+// </div>
+// <template id="bar">
+//	<p></p>
+// 	<p></p>
+// 	<p></p>
+// </template>
+```
+
+### 3. 模板脚本
+
+脚本指定可以推迟到将 DocumentFragment 的内容实际添加到 DOM 树。下面的例子演示了这个过程：
+
+```javascript
+// 页面 HTML
+//
+// <div id="foo"></div>
+// <template id="bar">
+//	<script>console.log('Template script executed');</script>
+// </template>
+
+const fooElement = document.querySelector('#foo');
+const barTemplate = document.querySelector('#bar');
+const barFragment = barTemplate.content;
+
+console.log('About to add template');
+fooElement.appendChild(barFragment);
+console.log('Added template');
+
+// About to add template
+// Template script executed
+// Added template
+```
+
+如果新添加的元素需要进行某些初始化，这种延迟执行是有用的。
+
+## 2. 影子 DOM
+
+### attachShadow()
+
+### shadowRoot
+
+概念上讲，影子 DOM（shadow DOM）Web 组件相当直观，通过它可以将一个完整的 DOM 树作为节点添加到父 DOM 树。这样可以实现 DOM 封装，意味着 CSS 样式和 CSS 选择符可以限制在影子 DOM 子树和不是整个顶级 DOM 树中。
+
+影子 DOM 与 HTML 模板很相似，因为它们都是类似 document 的结构，并允许与顶级 DOM 有一定程度的分离。不过，影子 DOM 与 HTML 模板还是有区别的，主要表现在在影子 DOM 的内容会实际渲染到页面上，而 HTML 模板的内容不会。
+
+### 1. 理解影子 DOM
+
+假设有以下 HTML 标记，其中包含多个类似的 DOM 子树：
+
+```html
+<div>
+    <p>Make me red!</p>
+</div>
+<div>
+    <p>Make me blue!</p>
+</div>
+<div>
+    <p>Make me green!</p>
+</div>
+```
+
+从其中的文本节点可以推断出，这 3 个 DOM 子树会分别渲染为不同的颜色。常规情况下，为了给每个子树应用唯一的样式，又不使用 style 属性，就需要给每个子树添加一个唯一的类名，然后通过相应的选择符为它们添加样式：
+
+```html
+<div class="red-text">
+    <p>Make me red!</p>
+</div>
+<div class="green-text">
+    <p>Make me green!</p>
+</div>
+<div>
+    <p>Make me blue!</p>
+</div>
+
+<style>
+    .red-text {
+        color: red;
+    }
+    .green-text {
+        color: green;
+    }
+    .blue-text {
+        color: blue;
+    }
+</style>
+```
+
+当然，这个方案也不是十分理想，因为这跟在全局命名空间中定义变量没有太大区别。尽管知道这些样式与其他地方无关，所有 CSS 样式还会应用到整个 DOM。为此，就要保持 CSS 选择符足够特别，以防这些样式渗透到其他地方。但这也是仅是一个折中的办法而已。理想情况下，应该能够把 CSS 限制在使用它们的 DOM 上：这正是影子 DOM 最初的使用场景。
+
+### 2. 创建影子 DOM
+
+考虑到安全及避免影子 DOM 冲突，并非所有元素都可以包含影子 DOM。尝试给无效元素或者已经有了影子 DOM 的元素添加影子 DOM 会导致抛出错误。
+
+以下是可以容纳影子 DOM 的元素。
+
+* 任何以有效名称创建的自定义元素（参见 HTML 规范中相关的定义）
+* `<article>`
+* `<aside>`
+* `<blockquote>`
+* `<body>`
+* `<div>`
+* `<footer>`
+* `<h1>`
+* `<h2>`
+* `<h3>`
+* `<h4>`
+* `<h5>`
+* `<h6>`
+* `<header>`
+* `<main>`
+* `<nav>`
+* `<p>`
+* `<section>`
+* `<span>`
+
+影子 DOM 是通过 attachShadow() 方法创建并添加给有效 HTML 元素的。容纳影子 DOM 的元素被称为影子宿主（shadow host）。影子 DOM 的根节点被称为影子根（shadow root）。
+
+attachShadow() 方法需要一个 shadowRootInit 对象，返回影子 DOM 的实例。shadowRootInit 对象必须包含一个 mode 属性，值为 "open" 或 "closed"。对 "open" 影子 DOM 的引用可以通过 shadowRoot 属性在 HTML 元素上获得，而对 "closed" 影子 DOM 的引用无法这样获取。
+
+下面的代码演示了不同 mode 的区别：
+
+```javascript
+document.body.innerHTML = `
+	<div id="foo"></div>
+	<div id="bar"></div>
+`;
+
+const foo = document.querySelector('#foo');
+const bar = document.querySelector('#bar');
+
+const openShadowDOM = foo.attachShadow({ mode: 'open' });
+const closedShadowDOM = bar.attachShadow({ mode: 'closed' });
+
+console.log(openShadowDOM); // #shadow-root（open）
+console.log(closedShadowDOM); // #shadow-root（closed）
+
+console.log(foo.shadowRoot); // #shadow-root（open）
+console.log(bar.shadowRoot); // null
+```
+
+一般来说，需要创建保密（closed）影子 DOM 的场景更少。虽然这可以限制通过影子宿主访问影子 DOM，但恶意代码有很多方法绕过这个限制，恢复对影子 DOM 的访问。简言之，不能为了安全而创建保密影子 DOM。
+
+>注意
+>
+>如果想保护独立的 DOM 树不受未信任代码影响，影子 DOM 并不适合这个需求，对 `<iframe>` 施加的跨源限制更可靠。
+
+### 3. 使用影子 DOM
+
+把影子 DOM 添加到元素之后，可以像使用常规 DOM 一样使用影子 DOM。来看下面的例子，这里重新创建了前面红/绿/蓝子树的示例：
+
+```javascript
+for (let color of ['red', 'green', 'blue']) {
+    const div = document.createElement('div');
+    const shadowDOM = div.atttachShadow({ mode: 'open' });
+    
+    document.body.appendChild(div);
+    shadowDOM.innerHTML = `
+    	<p>Make me ${color}</p>
+    	
+    	<style>
+        p {
+			color: ${color};
+        }
+        </style>
+    `;
+}
+```
+
+虽然这里使用相同的选择符应用了 3 种不同的颜色，但每个选择符只会把样式应用到它们所在的影子 DOM 上。为此，3 个 `<p>` 元素会出现 3 种不同的颜色。
+
+可以这样验证这些元素分别位于它们自己的影子 DOM 中：
+
+```javascript
+for (let color of ['red', 'green', 'blue']) {
+    const div = document.createElement('div');
+    const shadowDOM = div.attachShadow({ mode: 'open' });
+    
+    document.body.appendChild(div);
+    
+    shadowDOM.innerHTML = `
+    	<p>Make me ${color}</p>
+    	
+    	<style>
+    	p {
+    		color: ${color};
+    	}
+    	</style>
+    `;
+}
+
+function countP(node) {
+    console.log(node.querySelectorAll('p').length);
+}
+
+countP(document); // 0
+
+for (let element of document.querySelectorAll('div')) {
+    countP(element.shadowRoot);
+}
+
+// 1
+// 1
+// 1
+```
+
+在浏览器开发者工具中可以更清楚地看到影子 DOM。例如，前面的例子在浏览器检查窗口中会显示成这样：
+
+```html
+<body>
+<div>
+    #shadow-root（open）
+    <p>Make me red!</p>
+    <style>
+    p {
+        color: red;
+    }
+    </style>
+</div>
+<div>
+    #shadow-root（open）
+    <p>Make me green!</p>
+    <style>
+    p {
+        color: green;
+    }
+    </style>
+</div>
+<div>
+    #shadow-root（open）
+    <p>Make me blue!</p>
+    
+    <style>
+    p {
+        color: blue;
+    }
+    </style>
+</div>
+</body>
+```
+
+影子 DOM 并非铁板一块。HTML 元素可以在 DOM 树间无限制移动：
+
+```javascript
+document.body.innerHTML = `
+<div></div>
+<p id="foo">Move me</p>
+`;
+
+const divElement = document.querySelector('div');
+const pElement = document.querySelector('p');
+
+const shadowDOM = divElement.attachShadow({ mode: 'open' });
+
+// 从父 DOM 中移除元素
+divElement.parentElement.removeChild(pElement);
+
+// 把元素添加到影子 DOM
+shadowDOM.appendChild(pElement);
+
+// 检查元素是否移动到了影子 DOM
+console.log(shadowDOM.innerHTML); // <p id="foo">Move me</p>
+```
+
+### 4. 合成与影子 DOM 槽位
+
+影子 DOM 是为自定义 Web 组件设计的，为此需要支持嵌套 DOM 片段。从概念上讲，可以这么说：位于影子宿主中的 HTML 需要一种机制以渲染到影子 DOM 中去，但这些 HTML 又不必属于影子 DOM 树。
+
+默认情况下，嵌套内容会隐藏。来看下面的例子，其中的文本在 1000 毫秒后会被隐藏：
+
+```javascript
+document.body.innerHTML = `
+<div>
+	<p>Foo</p>
+</div>
+`;
+
+setTimeout(() => document.querySelector('div').attachShadow({ mode: 'open' }), 1000);
+```
+
+影子 DOM 一添加到元素中，浏览器就会赋予它最高优先级，优先渲染它的内容而不是原来的文本。在这个例子中，由于影子 DOM 是空的，因此 `<div>` 会在 1000 毫秒后变成空的。
+
+为了显示文本内容，需要使用 `<slot>` 标签指示浏览器在哪里放置原来的 HTML。下面的代码修改了前面的例子，让影子宿主中的文本出现在了影子 DOM 中：
+
+```javascript
+document.body.innerHTML = `
+<div id="foo">
+	<p>Foo</p>
+</div>
+`;
+
+document.querySelector('div')
+	.attachShadow({ mode: 'open' })
+	.innerHTML = `<div id="bar">
+					<slot></slot>
+				  </div>`;
+```
+
+现在，投射进去的内容就像自己存在于影子 DOM 中一样。检查页面会发现原来的内容实际上替代了 `<slot>`：
+
+```html
+<body>
+<div id="foo">
+    #shadow-root（open）
+    <div id="bar">
+        <p>Foo</p>
+    </div>
+</div>
+</body>
+```
+
+注意，虽然在页面检查窗口中看到内容在影子 DOM 中，但这实际上只是 DOM 内容的投射（projection）。实际的元素仍然处于外部 DOM 中：
+
+```javascript
+document.body.innerHTML = `
+<div id="foo">
+	<p>Foo</p>
+</div>
+`;
+
+document.querySelector('div')
+	.attachShadow({ mode: 'open' })
+	.innerHTML = `
+		<div id="bar">
+			<slot></slot>
+		</div>
+	`;
+
+console.log(document.querySelector('p').parentElement);
+// <div id="foo"></div>
+```
+
+下面是使用槽位（slot）改写的前面红/绿/蓝子树的例子：
+
+```javascript
+for (let color of ['red', 'green', 'blue']) {
+    const divElement = document.createElement('div');
+    divElement.innerText = `Make me ${color}`;
+    document.body.appendChild(divElement);
+    
+    divElement
+        .attachShadow({ mode: 'open' })
+    	.innerHTML = `
+        <p><slot></slot></p>
+        
+        <style>
+        p {
+        	coor: ${color};
+        }
+        </style>
+    	`;
+}
+```
+
+除了默认槽位，还可以使用命名槽位（named slot）实现多个投射。这是通过匹配的 slot/name 属性对实现的。带有 slot="foo" 属性的元素会被投射到带有 name="foo" 的 `<slot>` 上。下面的例子演示了如何改变影子宿主子元素的渲染顺序：
+
+```javascript
+document.body.innerHTML = `
+<div>
+	<p slot="foo">Foo</p>
+	<p slot="bar">Bar</p>
+</div>
+`;
+
+document.querySelector('div')
+	.attachShadow({ mode: 'open' })
+	.innerHTML = `
+	<slot name="bar"></slot>
+	<slot name="foo"></slot>
+	`;
+
+// Renders:
+// Bar
+// Fook
+```
+
+### 5. 事件重定向
+
+如果影子 DOM 中发生了浏览器事件（如 click），那么浏览器需要一种方式以父 DOM 处理事件。不过，实现也必须考虑影子 DOM 的边界。为此，事件会逃出影子 DOM 并经过事件重定向（event retarget）在外部被处理。逃出后，事件就好像是由影子宿主本身而非真正的包装元素触发的一样。下面的代码演示了这个过程：
+
+```javascript
+// 创建一个元素作为影子宿主
+document.body.innerHTML = `
+<div onclick="console.log('Handled outside:', event.target)"></div>
+`;
+
+// 添加影子 DOM 并向其中插入 HTML
+document.querySelector('div')
+	.attachShadow({ mode: 'open' })
+	.innerHTML = `
+	<button onclick="console.log('Handled inside:', event.target)">Foo</button>
+	`;
+
+// 点击按钮时：
+// Handled inside: <button onclick="..."></button>
+// Handled outside: <div onclick="..."></div>
+```
+
+注意，事件重定向只会发生在影子 DOM 中实际存在的元素上。使用 `<slot>` 标签从外部投射进来的元素不会发生事件重定向，因为从技术上讲，这些元素仍然存在于影子 DOM 外部。
+
+## 3. 自定义元素
+
+如果你使用 JavaScript 框架，那么很熟悉自定义元素的概念。这是因为所有主流框架都以某种形式提供了这个特性。自定义元素为 HTML 元素引入了面向对象编程的风格。基于这种风格，可以创建自定义、复杂的和可重用的元素，而且只要使用简单的 HTML 标签或属性就可以创建相应的的实例。
+
+### 1. 创建自定义元素
+
+浏览器会尝试讲无法识别的元素作为通用元素整合进 DOM。当然，这些元素默认也不会做任何通用 HTML 元素不能做的事。来看下面的例子，其中胡乱编的 HTML 标签会变成一个 HTMLElement 实例：
+
+```javascript
+document.body.innerHTML = `
+<x-foo >I'm inside a nonsense element.</x-foo >
+`;
+
+console.log(document.querySelector('x-foo') instanceof HTMLElement); // true
+```
+
+自定义元素在此基础上更进一步。利用自定义元素，可以在 `<x-foo>` 标签出现时为它定义复杂的行为，同样也可以在 DOM 中将其纳入元素生命周期管理。自定义元素要使用全局属性 customElements，这个属性会返回 CustomElementRegistry 对象。
+
+```javascript
+console.log(customElements); // CustomElementRegistry {}
+```
+
+调用 customElements.define() 方法可以创建自定义元素。下面的代码创建了一个简单的自定义元素，这个元素继承 HTMLElement：
+
+```javascript
+class FooElement extends HTMLElement {}
+customElements.define('x-foo', FooElement);
+
+document.body.innerHTML = `
+<x-foo>I'm inside a nonsense element.</x-foo>
+`;
+
+console.log(document.querySelector('x-foo') instanceof FooElement); // true
+```
+
+>注意
+>
+>自定义元素名必须至少包含一个不在名称开头和末尾的连字符，而且元素标签不能自关闭。
+
+自定义元素的威力源自类定义。例如，可以通过调用自定义元素的构造函数来控制这个类在 DOM 中每个实例的行为：
+
+```javascript
+class FooElement extends HTMLElement {
+    constructor() {
+        super();
+        console.log('x-foo');
+    }
+}
+customElements.define('x-foo', FooElement);
+
+document.body.innerHTML = `
+<x-foo></x-foo>
+<x-foo></x-foo>
+<x-foo></x-foo>
+`;
+
+// x-foo
+// x-foo
+// x-foo
+```
+
+>注意
+>
+>在自定义元素的构造函数中必须始终先调用 super()。如果元素继承了 HTMLElement 或相似类型而不会覆盖构造函数，则没有必要调用 super()，因为原型构造函数默认会做这件事。很少有创建自定义元素而不继承 HTMLElement 的情况。
+
+如果自定义元素继承了一个元素类，那么可以使用 is 属性和 extends 选项将标签指定为该自定义元素的实例：
+
+```javascript
+class FooElement extends HTMLDivElement {
+    constructor() {
+        super();
+        console.log('x-foo');
+    }
+}
+customElements.define('x-foo', FooElement, { extends: 'div' });
+
+document.body.innerHTML = `
+<div is="x-foo"></div>
+<div is="x-foo"></div>
+<div is="x-foo"></div>
+`;
+
+// x-foo
+// x-foo
+// x-foo
+```
+
+### 2. 添加 Web 组件内容
+
+因为每次将自定义元素添加到 DOM 中都会调用其类构造函数，所以很容易自动给自定义元素添加子 DOM 内容。虽然不能在构造函数中添加子 DOM（会抛出 DOMException），但可以为自定义元素添加影子 DOM 并将内容添加到这个影子 DOM 中：
+
+```javascript
+class FooElement extends HTMLElement {
+    constructor() {
+        super();
+        
+        // this 引用 Web 组件节点
+        this.attachShadow({ mode: 'open' });
+        
+        this.shadowRoot.innerHTML = `
+        	<p>I'm inside a custom element!</p>
+        `;
+    }
+}
+customElements.define('x-foo', FooElement);
+
+document.body.innerHTML += `<x-foo></x-foo>`;
+
+// 结果 DOM
+// <body>
+// <x-foo>
+// 	#shadow-root（open）
+// 	<p>I;m inside a custom element!</p>
+// <x-foo>
+// </body>
+```
+
+为避免字符串模板和 innerHTML 不干净，可以使用 HTML 模板和 document.createElement() 重构这个例子：
+
+```javascript
+//（初始的 HTML）
+// <template id="x-foo-tpl">
+// 	<p>I'm inside a custom element template!</p>
+// </template>
+
+const template = document.querySelector('#x-foo=tpl');
+
+class FooElement extends HTMLElement {
+    constructor() {
+        super();
+        
+        this.attachShadow({ mode: 'open' });
+        
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
+    }
+}
+customElements.define('x-foo', FooElement);
+
+document.body.innerHTML += `<x-foo></x-foo>`;
+
+// 结果 DOM：
+// <body>
+// <template id="x-foo-tpl">
+// 	<p>I'm inside a custom element template!</p>
+// </template>
+// <x-foo>
+//  #shadow-root（open）
+// 		<p>I'm inside a custom element template!</p>
+// <x-foo>
+// </body>
+```
+
+这样可以在自定义元素中实现高度的 HTML 的代码重用，以及 DOM 封装。使用这种模式能够自由创建可重用的组件而不必担心外部 CSS 污染组件的样式。
+
+### 3. 使用自定义元素生命周期方法
+
+可以在自定义元素的不同生命周期执行代码。带有相应名称的自定义元素类的实例方法会在不同生命周期阶段被调用。自定义元素有以下 5 个生命周期方法。
+
+* constructor()：在创建元素实例或将已有 DOM 元素升级为自定义元素时调用
+* connectedCallback()：在每次将这个自定义元素实例添加到 DOM 中时调用
+* disconnectedCallback()：在每次将这个自定义元素实例从 DOM 中移除时调用
+* attributeChangedCallback()：在每次可观测属性的值发生变化时调用。在元素实例初始化时，初始值的定义也算一次变化
+* adoptedCallback()：在通过 document.adoptNode() 将这个自定义元素实例移动到新文档对象时调用
+
+下面的例子演示了这些构建、连接和断开连接的回调：
+
+```javascript
+class FooElement extends HTMLElement {
+    constructor() {
+        super();
+        console.log('ctor');
+    }
+    
+    connectedCallback() {
+        console.log('connected');
+    }
+    
+    disconnectedCallback() {
+        console.log('disconnected');
+    }
+}
+customElements.define('x-foo', FooElement);
+
+const fooElement = document.createElement('x-foo');
+// ctor
+
+document.body.appendChild(fooElement);
+// connected
+
+document.body.removeChild(fooElement);
+// disconnnected
+```
+
+### 4. 反射自定义元素属性
+
+自定义元素既是 DOM 实体又是 JavaScript 对象，因此两者之间应该同步变化。换句话说，对 DOM 的修改应该反映到 JavaScript 对象，反之亦然。要从 JavaScript 对象反射到 DOM，常见的方式是使用获取函数和设置函数。下面的例子演示了在 JavaScript 对象和 DOM 之间反射 bar 属性的过程：
+
+```javascript
+document.body.innerHTML = `<x-foo></x-foo>`;
+
+class FooElement extends HTMLElement {
+    constructor() {
+        super();
+        
+        this.bar = true;
+    }
+    
+    get bar() {
+        return this.getAttribute('bar');
+    }
+    
+    set bar(value) {
+        this.setAttribute('bar', value);
+    }
+}
+customElements.define('x-foo', FooElements);
+
+console.log(document.body.innerHTML);
+// <x-foo bar="true"></x-foo>
+```
+
+另一方向的反射（从 DOM 到 JavaScript 对象）需要给相应的属性添加监听器。为此，可以使用 observedAttributes() 获取函数让自定义元素的属性值每次改变时都调用 attributeChangedCallback()：
+
+```javascript
+class FooElement extends HTMLElement {
+    static get observedAttributes() {
+        // 返回应该触发 attributeChangedCallback() 执行的属性
+        return ['bar'];
+    }
+    
+    get bar() {
+        return this.getAttribute('bar');
+    }
+    
+    set bar(value) {
+        this.setAttribute('bar', value);
+    }
+    
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            console.log(`${oldValue} -> ${newValue}`);
+            
+            this[name] = newValue;
+        }
+    }
+}
+customElements.define('x-foo', FooElement);
+
+document.body.innerHTML = `<x-foo bar="false"><x-foo>`;
+// null -> false
+
+document.querySelector('x-foo').setAttrbiute('bar', true);
+// false -> true
+```
+
+### 5. 升级自定义元素
+
+并非始终可以先自定义元素，然后再在 DOM 中使用相应的元素标签。为解决这个先后次序问题，Web 组件在 CustomElementRegistry 上额外暴露了一些方法。这些方法可以用来检测自定义元素是否定义完成，然后可以用它来升级已有元素。
+
+如果自定义元素已经有定义，那么 CustomElementRegistry.get() 方法会返回相应自定义元素的类。类似地，CustomElementRegistry.whenDefined() 方法会返回一个期约，当相应自定义元素有定义之后解决：
+
+```javascript
+customElements.whenDefined('x-foo').then(() => console.log('defined!'));
+
+console.log(customElements.get('x-foo'));
+// undefined
+
+customElements.define('x-foo', class {});
+// defined!
+
+console.log(customElements.get('x-foo'));
+// class FooElement {}
+```
+
+连接到 DOM 的元素在自定义元素有定义时会自动升级。如果想在元素连接到 DOM 之前强制升级，可以使用 CustomElementRegistry.upgrade() 方法：
+
+```javascript
+// 在自定义元素有定义之前会创建 HTMLUnknownElement 对象
+const fooElement = document.createElement('x-foo');
+
+// 创建自定义元素
+class FooElement extends HTMLElement {}
+customElements.define('x-foo', FooElement);
+
+console.log(fooElement instanceof FooElement); // false
+
+// 强制升级
+customElements.upgrade(fooElement);
+
+console.log(fooElement instanceof FooElement); // true
+```
+
+>注意
+>
+>还有一个 HTML Imports Web 组件，但这个规范目前还是草案，没有主要浏览器支持。浏览器最终是否会支持这个规范目前还是未知数。
 
 
 
