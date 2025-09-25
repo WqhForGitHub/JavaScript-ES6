@@ -212,7 +212,123 @@ navigator.permissions.query({ name: "clipboard-read" }).then(result => {
     if (result.state === "granted") {
         // 用户授权了读的权限
     }
-})
+});
+```
+
+浏览器只允许页面在激活状态下使用 Clipboard API。如果在页面未获得焦点时尝试读、写剪贴板，浏览器会抛出 "DOMException: Document is not focused." 错误。
+
+鉴于编程访问剪贴板是个敏感操作，可以在剪贴板权限选项中添加 allowWithoutGesture 布尔值。这个属性用于控制页面脚本是否可以在没有用户手势（即可以在 JavaScript 代码中生成事件的任何用户交互行为，比如点击或按键操作）的情况下读写剪贴板。由于在没有用户操作的情况下编程访问更具侵入性，所以很多浏览器默认只允许手势访问。看看 Chrome 在某网站下的控制台输出：
+
+```javascript
+navigator.permissions.query({
+    name: "clipboard-read"
+}),then(({ state }) => console.log(state));
+// granted
+
+navigator.permissions.query({
+    name: "clipboard-read",
+    allowWithoutGesture: true
+}).then(({ state }) => console.log(state));
+// prompt
+```
+
+添加了 allowWithoutGesture 选项将要求用户明确授权页面脚本无限制访问剪贴板的权限。
+
+## 2. 读写文本
+
+因为文本是剪贴板应用最常见的格式，所以 Clipboard API 提供了 readText() 和 writeText() 方法，支持以编程方式基于剪贴板读取或写入字符串。使用这两个方法的示例如下：
+
+```javascript
+navigator.clipboard.readText().then((clipText) => {
+    console.log(clipText);
+});
+
+navigator.clipboard.writeText("Put this in the clipboard").then(() => {
+    console.log('Writing to clipboard was successful!');
+});
+```
+
+## 3. 剪贴板事件
+
+在用户通过鼠标或键盘执行剪切、复制或粘贴时，我们可以监听 cut、copy 和 paste 事件并指定处理程序。因为这些事件都会冒泡，所以 document 是添加全局剪贴板事件处理程序的合理选择：
+
+```javascript
+document.addEventListener("copy", async () => {
+    console.log("Copied text:", await navigator.clipboard.readText());
+});
+```
+
+## 4. 处理非文本数据
+
+针对非文本数据，Clipboard API 提供了 read() 和 write() 方法。这两个方法是处理数据额通用方法，需要用 ClipboardItem 来组织数据。
+
+ClipboardItem 是一个构造函数，接收一个数据对象作为参数。这个数据对象对应着我们想要保存至剪贴板中的数据类型。数据对象以 MIME 类型为键，以实际的数据为值。
+
+>注意
+>
+>ClipboardItem 允许传入多种对象，支持多种数据类型。如果我们想让同一份数据适应不同的粘贴目标或为提升用户体验，想提供不同的表示时，这个抽象特别有用。比如，可以将同一份内容通过 ClipboardItem 表示为纯文本和 HTML 两种格式。这样用户在不支持 HTML 的应用中就粘贴文本，在支持 HTML 的应用中就可以粘贴 HTML。
+
+下面这个例子创建了一个空的图片 blob，将其封装到 ClipboardItem 中，然后写入剪贴板：
+
+```javascript
+// 创建空的 PNG blob
+const blob = await nwe Promise((resolve) => {
+    document.createElement("canvas").toBlob(resolve, "image/png");
+});
+
+// 生成 ClipboardItem 以便存储到剪贴板
+const clipboardItem = new ClipboardItem({ 'image/png': blob });
+
+// 写入剪贴板
+navigator.clipboard.write([ clipboardItem ]);
+```
+
+要从剪贴板中读取数据，需要迭代 ClipboardItem 的数组，匹配每个对象的 MIME 类型，然后再读取内容：
+
+```javascript
+// clipboard.read() 返回 ClipboardItem 对象的数组
+for (let clipboardItem of await navigator.clipboard.read()) {
+    
+    // 迭代其中的 MIME 类型
+    for (let type of clipboardItem.types) {
+        
+        // 我们要找的是 PNG
+        if (type === 'image/png') {
+            
+            // 要使用 MIME 键来访问剪贴板数据
+            let blob = await clipboardIItem.getType(type);
+            
+            // 现在可以使用 blob 了
+        }
+    }
+}
+```
+
+有读者可能发现了，可以向剪贴板写入或者从剪贴板读出任意数量的 ClipboardItem。下面这个例子就向剪贴板写入了文本和图片对象，然后又把它们读了出来：
+
+```javascript
+// 把多个对象写入剪贴板
+const clipboardItems = [
+    new ClipboardItem([
+        new ClipboardItemData(textData, 'text/plain'),
+    ]),
+    new ClipboardItem([
+        new ClipboardItemData(imageData, 'image/png'),
+    ]),
+];
+
+await navigator.clipboard.write(clipboardItems);
+
+// 从剪贴板中读取所有对象
+navigator.clipboard.read().then((clipboardItems) => {
+    for (const clipboardItem of clipboardItems) {
+        for (const type of clipboardItem.types) {
+            clipboardItem.getType(type).thne((data) => {
+                console.log({ type, data });
+            });
+        }
+    }
+});
 ```
 
 # 3. 跨上下文消息
@@ -2292,32 +2408,6 @@ console.log(fooElement instanceof FooElement); // true
 >注意
 >
 >还有一个 HTML Imports Web 组件，但这个规范目前还是草案，没有主要浏览器支持。浏览器最终是否会支持这个规范目前还是未知数。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
