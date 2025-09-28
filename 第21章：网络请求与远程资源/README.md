@@ -647,6 +647,768 @@ Response 构造函数接收一个可选的 body 参数，这个 body 可以是 n
 | status     | 表示 HTTP 响应状态码的整数<br>默认为 200                     |
 | statusText | 表示 HTTP 响应状态的字符串<br>默认为空字符串                 |
 
+可以像下面这样使用 body 和 init 来构建 Response 对象“
+
+```javascript
+let r = new Response('foobar', {
+    status: 418,
+    statusText: 'I\'m a teapot'
+});
+console.log(r);
+```
+
+大多数情况下，产生 Response 对象的主要方式是调用 fetch()，它返回一个最后会解决为 Response 对象的期约，这个 Response 对象代表实际的 HTTP 响应。下面的代码展示了这样得到的 Response 对象：
+
+```javascript
+fetch('https://example.com')
+	.then((response) => {
+    	console.log(response);
+	});
+```
+
+Response 类还有两个用于生成 Response 对象的静态方法：Response.redirect() 和 Response.error()。前者接收一个 URL 和一个重定向状态码（301、302、303、307 或 308），返回重定向的 Response 对象：
+
+```javascript
+console.log(Response.redirect('https://example.com', 301));
+```
+
+提供的状态码必须对应重定向，否则会抛出错误：
+
+```javascript
+Response.redirect('https://example.com', 200);
+// RangeError: Failed to execute 'redirect' on 'Response': Invalid status code
+```
+
+另一个静态方法 Response.error() 用于产生表示网络错误的 Response 对象（网络错误会导致 fetch() 期约被拒绝）。
+
+```javascript
+console.log(Response.error());
+```
+
+### 2. 读取响应状态信息
+
+Response 对象包含一组只读属性，描述了请求完成后的状态，如下表所示。
+
+| 属性       | 值                                                           |
+| ---------- | ------------------------------------------------------------ |
+| headers    | 响应包含的 Headers 对象                                      |
+| ok         | 布尔值，表示 HTTP 状态码的含义。200~299 的状态码返回 true，其他状态码返回 false |
+| redirected | 布尔值，表示响应是否至少经过一次重定向                       |
+| status     | 整数，表示响应的 HTTP 状态码                                 |
+| statusText | 字符串，包含对 HTTP 状态码的正式描述。这个值派生自可选的 HTTP Reason-Phrase 字段，因此如果服务器以 Reason-Phrase 为由拒绝响应，这个字段可能是空字符串 |
+| type       | 字符串，包含响应类型。可能是下列字符串之一<br>- basic：表示标准的同源响应<br>- cors：表示标准的跨源响应<br>- error：表示响应对象是通过 Response.error() 创建的<br>- opaque：表示 no-cors 的 fetch() 返回的跨源响应<br>- opaquereddirect：表示对 redirect 设置为 manual 的请求的响应 |
+| url        | 包含响应 URL 的字符串。对于重定向响应，这是最终的 URL，非重定向响应就是它产生的 |
+
+以下代码演示了返回 200、302、404 和 500 状态码的 URL 对应的响应：
+
+```javascript
+fetch('//example.com').then(console.log);
+
+fetch('//example.com/redirect-me').then(console.log);
+
+fetch('//example.com/does-not-exist').then(console.log);
+
+fetch('//example.com/throws-error').then(console.log);
+```
+
+### 3. 克隆 Response 对象
+
+克隆 Response 对象的主要方式是使用 clone() 方法，这个方法会创建一个一模一样的副本，不会覆盖任何值。这样不会将任何请求的请求体标记为已使用：
+
+```javascript
+let r1 = new Response('foobar');
+let r2 = r1.clone();
+
+console.log(r1.bodyUsed); // false
+console.log(r2.bodyUsed); // false
+```
+
+如果响应对象的 bodyUsed 属性为 true（即响应体已被读取），则不能再创建这个对象的副本。在响应体被读取之后再克隆会导致抛出 TypeError。
+
+```javascript
+let r = new Response('foobar');
+r.clone();
+// 没有错误
+
+r.text(); // 设置 bodyUsed 为 true
+
+r.clone();
+// TypeError: Failed to execute 'clone' on 'Response': Response body
+// is already used
+```
+
+有响应体的 Response 对象只能读取一次。（不包含响应体的 Response 对象不受此限制。）比如：
+
+```javascript
+let r = new Response('foobar');
+
+r.text().then(console.log); // foobar
+
+r.text().then(console.log);
+// TypeError: Failed to execute 'text' on 'Response': body stream is locked
+```
+
+更多次读取包含响应体的同一个 Response 对象，必须在第一次读取前调用 clone()：
+
+```javascript
+let r = new Response('foobar');
+
+r.clone().text().then(console.log); // foobar
+r.clone().text().then(console.log); // foobar
+r.text().then(console.log); // foobar
+```
+
+此外，通过创建带有原始响应体的 Response 实例，可以执行伪克隆操作。关键是怎样不会把第一个 Response 实例标记为已读，而是会在两个响应之间共享：
+
+```javascript
+let r1 = new Response('foobar');
+let r2 = new Responser(r1.body);
+
+console.log(r1.bodyUsed); // false
+console.log(r2bodyUsed); // false
+
+r2.text().then(console.log); // foobar
+r1.text().then(console.log);
+// TypeError: Failed to execute 'text' on 'Response': body stream is locked
+```
+
+## 6. Request、Response 及 Body 混入
+
+Request 和 Response 都使用了 Fetch API 的 Body 混入，以实现两者承担有效载荷的能力。这个混入为两个类型提供了只读的 body 属性（实现为 ReadableStream）、只读的 bodyUsed 布尔值（表示 body 流是否已读）和一组方法，用于从流中读取内容并将结果转换为某种 JavaScript 对象类型。
+
+通常，将 Request 和 Response 主体作为流来使用只要有两个原因。一个原因是有效载荷的大小可能会导致网络延迟，另一个原因是流 API 本身在处理有效载荷方面是有优势的。除此之外，最好是一次性获取资源主体。
+
+Body 混入提供了 5 个方法，用于将 ReadableStream 转存到缓冲区的内存里，将缓冲区转换为某种 JavaScript 对象类型，以及通过期约来产生结果。在解决之前，期约会等待主体流报告完成及缓冲被解析。这意味着客户端必须等待响应的资源完全加载才能访问其内容。
+
+### 1. Body.text()
+
+Body.text() 方法返回期约，解决为将缓冲区转存得到的 UTF-8 格式字符串。下面的代码展示了在 Response 对象上使用 Body.text()：
+
+```javascript
+fetch('https://example.com')
+	.then((response) => response.text());
+	.then(console.log);
+```
+
+以下代码展示了在 Request 对象上使用 Body.text()：
+
+```javascript
+let request = new Request('https://example.com', { method: 'POST', body: 'barbazqux' });
+
+request.text()
+	.then(console.log);
+
+// barbazqux
+```
+
+### 2. Body.json()
+
+Body.json() 方法返回期约，解决为将缓冲区转存得到的 JSON。下面的代码展示了在 Response 对象上使用 Body.json()：
+
+```javascript
+fetch('https://example.com')
+	.then((response) => response.json())
+	.then(console.log);
+
+// {"foo": "bar"}
+```
+
+以下代码展示了在 Request 对象上使用 Body.json()：
+
+```javascript
+let request = new Request('https://example.com', { method: 'POST', body: JSON.stringify({ bar: 'baz' }) });
+
+request.json()
+	.then(console.log);
+
+// { bar: 'baz' }
+```
+
+### 3. Body.formData()
+
+浏览器可以将 FormData 对象序列化/反序列化为主体。例如，下面这个 FormData 实例：
+
+```javascript
+let myFormData = new FormData();
+myFormData.append('foo', 'bar');
+```
+
+在通过 HTTP 传送时，Webkit 浏览器将其序列化为下列内容：
+
+------WebkitFormBoundarydR9Q2kOzE6nbN7eR
+
+Content-Disposition: form-data; name="foo"
+
+
+
+bar
+
+------WebkitFormBoundarydR9Q2kOzE6nbN7eR--
+
+Body.formData() 方法返回期约，解决为将缓冲区转存得到的 FormData 实例。下面的代码展示了在 Response 对象上使用 Body.formData()：
+
+```javascript
+fetch('https://example.com/form-data')
+	.then((response) => response.formData())
+	.then((formData) => console.log(formData.get('foo')));
+
+// bar
+```
+
+以下代码展示了在 Request 对象上使用 Body.formData()：
+
+```javascript
+let myFormData = new FormData();
+myFormData.append('foo', 'bar');
+
+let request = new Request('https://example.com', { method: 'POST', body: myFormData });
+
+request.,formData()
+	.then((formData) => console.log(formData.get('foo')));
+
+// bar
+```
+
+### 4. Body.arrayBuffer()
+
+有时候，可能需要以原始二进制格式查看和修改主体。为此，可以使用 Body.arrayBuffer() 将主体内容转换为 ArrayBuffer 实例。Body.arrayBuffer() 方法返回期约，解决为将缓冲区转存得到的 ArrayBuffer 实例。下面的代码展示了在 Response 对象上使用 Body.arrayBuffer()：
+
+```javascript
+fetch('https://example.com')
+	.then((response) => response.arrayBuffer())
+	.then(console.log);
+
+// ArrayBuffer(...) {}
+```
+
+以下代码展示了在 Request 对象上使用 Body.arrayBuffer()：
+
+```javascript
+let request = new Request('https://example.com', { method: 'POST', body: 'abcdefg' });
+
+// 以整数形式打印二进制编码的字符串
+request.arrayBuffer()
+	.then((buf) => console.log(new Int8Array(buf)));
+
+// Int8Array(7) [97, 98, 99, 100, 101, 102, 103]
+```
+
+### 5. Body.blob()
+
+有时候，可能需要以原始二进制格式使用主体，不用查看和修改。为此，可以使用 body.blob() 将主体内容转换为 Blob 实例。Body.blob() 方法返回期约，解决为将缓冲区转存得到的 Blob 实例。下面的代码展示了在 Response 对象上使用 Body.blob()：
+
+```javascript
+fetch('https://example.com')
+	.then((response) => response.blob())
+	.then(console.log);
+
+// Blob(...) { size: ..., type: "..." }
+```
+
+以下代码展示了在 Request 对象上使用 Body.blob()：
+
+```javascript
+let request = new Request('https://example.com', { method: 'POST', body: 'abcdefg' });
+
+request.blob()
+	.then(console.log);
+
+// Blob(7) { size: 7, type: "text/plain;charset=utf-8" }
+```
+
+### 6. 一次性流
+
+因为 Body 混入是构建在 ReadableStream 之上的，所以主体流只能使用一次。这意味着所有主体混入方法都只能调用一次，再次调用就会抛出错误。
+
+```javascript
+fetch('https://example.com')
+	.then((response) => response.blob().then(() => response.blob()));
+
+// TypeError: Failed to execute 'blob' on 'Response': body stream is locked
+let request = new Request('https://example.com', { method: 'POST', body: 'foobar' });
+
+request.blob().then(() => request.blob());
+// TypeError: Failed to execute 'blob' on 'Request': body stream is locked
+```
+
+即使是在读取流的过程中，所有这些方法也会在它们被调用时给 ReadableStream 加锁，以阻止其他读取器访问：
+
+```javascript
+fetch('https://example.com')
+	.then((response) => {
+    	response.blob(); // 第一次调用给流加锁
+    	response.blob(); // 第二次调用再次加锁会失败
+	});
+
+// TypeError: Failed to execute 'blob' on 'Response': body stream is locked
+let request = new Request('https://example.com', { method: 'POST', body: 'foobar' });
+
+request.blob(); // 第一次调用给流加锁
+request.blob(); // 第二次调用再次加锁会失败
+// TypeError: Failed to execute 'blob' on 'Request': body stream is locked
+```
+
+作为 Body 混入的一部分，bodyUsed 布尔值属性表示 ReadableStream，意思是读取器是否已经在流上加了锁。这不一定表示流已经被完全读取。下面的代码演示了这个属性：
+
+```javascript
+let request = new Request('https://example.com', { method: 'POST', body: 'foobar' });
+
+let response = new Response('foobar');
+
+console.log(request.bodyUsed); // false
+console.log(response.bodyUsed); // false
+
+request.text().then(console.log); // foobar
+response.text().then(console.log); // foobar
+
+console.log(request.bodyUsed); // true
+console.log(response.bodyUsed); // true
+```
+
+## 7. 使用 ReadableStream 主体
+
+JavaScript 编程逻辑很多时候会将访问网络作为原子操作，比如请求是同时创建和发送的，响应数据也是以统一的格式一次性暴露出来的。这种约定隐藏了底层的混乱，让涉及网络的代码变得很清晰。
+
+从 TCP/IP 角度来看，传输的数据是以分块形式抵达端点的，而且速度收到网速的限制。接收端点会为此分配内存，并将收到的块写入内存。Fetch API 通过 ReadableStream 支持在这些块到达时就实现读取和操作这些数据。
+
+>注意
+>
+>本节会以获取 Fetch API 规范的 HTML 为例。这个页面差不多有 1MB 大小，足以让示例中接收的数据分成多个块。
+
+正如 Stream API 所定义的，ReadableStream 暴露了 getReader() 方法，用于产生 ReadableStreamDefaultReader，这个读取器可以用于自爱数据到达时异步获取数据块。数据流的格式是 Uint8Array。下面的代码调用了读取器的 read() 方法，把最早可用的块打印了出来：
+
+```javascript
+fetch('https://www.w3.org/')
+	.then((response) => response.body)
+	.then((body) => {
+    	let reader = body.getReader();
+    
+    	console.log(reader); // ReadableStreamDefaultReader {}
+    
+    	reader.read()
+    		.then(console.log);
+	});
+
+// { value: Uint8Array{}, done: false }
+```
+
+要随着数据流的到来取得整个有效载荷，可以像下面这样递归调用 read() 方法：
+
+```javascript
+fetch('https://www.w3.org/')
+	.then((response) => response.body)
+	.then((body) => {
+    	let reader = body.getReader();
+    	
+    	function processNextChunk({value, done}) {
+            if (done) {
+                return;
+            }
+            
+            console.log({value, done});
+            
+            return reader.read()
+            	.then(processNextChunk);
+        }
+    
+    	return reader.read()
+    		.then(processNextChunk);
+	});
+
+// { value: Uint8Array, done: false }
+// { value: Uint8Array, done: false }
+// { value: Uint8Array, done: false }
+// ...
+```
+
+异步函数非常适合这样的 fetch() 操作。可以通过使用 async/await 将上面的递归调用大平：
+
+```javascript
+fetch('https://www.w3.org/')
+	.then((response) => response.body)
+	.then(async function(body) {
+    	let reader = body.getReader();
+    
+    	while (true) {
+            let { value, done } = await reader.read();
+            
+            if (done) {
+                break;
+            }
+            
+            console.log({value, done});
+        }
+	});
+
+// { value: Uint8Array(), done: false }
+// { value: Uint8Array(), done: false }
+// { value: Uint8Array(), done: false }
+// ...
+```
+
+另外，read() 方法也可以直接封装到 Iterable 接口中。因此就可以在 for-await-for 循环中方便地实现这种转换：
+
+```javascript
+fetch('https://www.w3.org/')
+	.then((response) => response.body)
+	.then(async function(body) {
+    	let reader = body.getReader();
+    
+    	let asyncIterable = {
+            [Symbol.asyncIterator]() {
+                return {
+                    next() {
+                        return reader.read();
+                    }
+                };
+            }
+        };
+    
+    	for await (chunk of asyncIterable) {
+            console.log(chunk);
+        }
+	});
+
+// { value: Uint8Array, done: false }
+// { value: Uint8Array, done: false }
+// { value: Uint8Array, done: false }
+// ...
+```
+
+通过将异步逻辑包装到一个生成器函数中，还可以进一步简化代码。而且，这个实现通过支持只读取部分流也变得更稳健。如果流因为耗尽或错误而终止，读取器会释放锁，以允许不同的流读取器继续操作：
+
+```javascript
+async function* streamGenerator(stream) {
+    const reader = stream.getReader();
+    
+    try {
+        while (true) {
+            const { value, done } = await reader.read();
+            
+            if (done) {
+                break;
+            }
+            
+            yield value;
+        }
+    } finally {
+        reader.releaseLock();
+    }
+}
+
+fetch('https://www.w3.org/')
+	.then((response) => response.body)
+	.then(async function(body) {
+    	for await (chunk of streamGenerator(body)) {
+            console.log(chunk);
+        }
+	});
+```
+
+在这些例子中，当读取完 Uint8Array 块之后，浏览器会将其标记为可以被垃圾回收。对于需要在不连续的内存中连续检查大量数据的情况，这样可以节省很多内存空间。
+
+缓冲区的大小，以及浏览器是否等待缓冲区被填充后才将其提到流中，要根据 JavaScript 运行时的实现。浏览器会控制等待分配的缓冲区被填满，同时会尽快将缓冲区数据（有时候可能未填充数据）发送到流。
+
+不同浏览器中分块大小可能不同，这取决于带宽和网络延迟。此外，浏览器如果决定不等待网络，也可以将部分填充的缓冲区发送到流。最终，我们的代码要准备好处理以下情况：
+
+* 不同大小的 Uint8Array 块
+* 部分填充的 Uint8Array 块
+* 块到达的时间间隔不确定
+
+默认情况下，块是以 Uint8Array 格式抵达的。因为块的分割不会考虑编码，所以会出现某些值作为多字节字符被分散到两个连续块中的情况。手动处理这些情况是很麻烦的，但很多时候可以使用 Encodeing API 的可插拔方案。
+
+要将 Uint8Array 转换为可读文本，可以将缓冲区传给 TextDecoder，返回转换后的值。通过设置 stream: true，可以将之前的缓冲区保留在内存，从而让跨越两个块的内容能够被正确编码：
+
+```javascript
+let decoder = new TextDecoder();
+
+async function* streamGenerator(stream) {
+    const reader = stream.getReader();
+    
+    try {
+        while (true) {
+            const { value, done } = await reader.read();
+            
+            if (done) {
+                break;
+            }
+            
+            yield value;
+        }
+    } finally {
+        reader.releaseLock();
+    }
+}
+
+fetch('http://www.w3.org/')
+	.then((response) => response.body)
+	.then(async function (body) {
+    	for await (chunk of streamGenerator(body)) {
+            console.log(decoder,decode(chunk, { stream: true }));
+        }
+	});
+
+// <!doctype html><html lang="en"> ...
+// whether a <a daa-link-type="dfn" href="#concept-header" ...
+// result to <var>rangeValue</var> ...
+// ...
+```
+
+因为可以使用 ReadableStream 创建 Response 对象，所以就可以在读取流之后，将其通过管道导入另一个流。然后在这个新流再使用 Body 的方法，如 text()。这样就可以随着流的到达实时检查和操作流的内容。下面的代码展示了这种双流技术：
+
+```javascript
+fetch('https://www.w3.org/')
+	.then((response) => response.body)
+	.then((body) => {
+    	const reader = body.getReader();
+    
+    	// 创建第二个流
+    	return new ReadableStream({
+            async start(controller) {
+                try {
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        
+                        if (done) {
+                            break;
+                        }
+                        
+                        // 将主体流的块推到第二个流
+                        controller.enqueue(value);
+                    }
+                } finally {
+                    controller.close();
+                    reader.releaseLock();
+                }
+            }
+        })
+	})
+	.then((secondaryStream) => new Response(secondaryStream))
+	.then(response => response.text())
+	.then(console.log);
+
+// <!doctype html><html lang="en"><head><meta charset="urf-8">...
+```
+
+# 2. 跨源资源共享
+
+浏览器联网的一个主要限制是跨源安全策略。默认情况下，脚本只能访问与发起请求的页面在同一个域内的资源。这个安全限制可以防止某些恶意行为。不过，浏览器也需要支持合法跨源访问的能力。
+
+跨源资源共享（CORS，Cross-origin Resource Sharing）定义了浏览器与服务器如何实现跨源通信。CORS 背后的基本思路就是使用自定义 HTTP 头部允许浏览器和服务器相互沟通，以确定请求或响应应该成功还是失败。
+
+对于简单的请求，比如 GET 或 POST 请求，没有自定义头部，而且请求体是 text/plain 类型，这样的请求在发送时会有一个额外的头部叫 Origin。Origin 头部包含发送请求的页面的源（协议、域名和端口），以便服务器确定是否为其提供响应。下面是 Origin 头部的一个示例：
+
+```javascript
+Origin: https://www.wiley.com
+```
+
+如果服务器决定响应请求，那么应该发送 Access-Control-Allow-Origin 头部，包含相同的源。或者如果资源是公开的，那么就包含 "*"。比如：
+
+```javascript
+Access-Control-Allow-Origin: https://www.wiley.com
+```
+
+如果没有这个头部，或者有但源不匹配，则表明不会响应浏览器请求。否则，服务器就会处理这个请求。注意，无论请求还是响应都不会包含 cookie 信息。
+
+现代浏览器原生支持 CORS。在浏览器尝试访问不同源的资源时，这个行为会被自动触发。要向不同域的源发送请求，可以使用 fetch() 方法并传入一个绝对 URL，比如：
+
+```javascript
+fetch("http://www.example.com/page/")
+	.then(response => {
+    	if (response.ok) {
+            return response.text();
+        } else {
+            throw new Error("Request was unsuccessful: " + response.status);
+        }
+	});
+```
+
+因为无论同域还是跨域请求都使用同一个接口，所以最好在访问本地资源时使用相对 URL，在访问远程资源时使用绝对 URL。这样可以更明确地区分使用场景，同时避免出现访问本地资源时出现头部或 cookie 信息访问受限的问题。
+
+## 1. 预检请求
+
+CORS 通过一种叫预检查请求的服务器验证机制，允许使用自定义头部、除 GET 和 POST 之外的方法，以及不同请求体内容类型。在要发送涉及上述某种高级选项的请求时，浏览器会先向服务器发送一个预检请求。这个请求使用 OPTIONS 方法发送并包含以下头部。
+
+* Origin：与简单请求相同
+* Access-Control-Request-Method：请求希望使用的方法
+* Access-Control-Request-Headers：（可选）要使用的逗号分隔的自定义头部列表
+
+下面是一个假设的 POST 请求，包含自定义的 FRIZ 头部：
+
+```javascript
+Origin: https://www.example.com
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: FRIZ
+```
+
+在这个请求发送后，服务器可以确定是否允许这种类型的请求。服务器会通过在响应中发送如下头部与浏览器沟通这些信息。
+
+* Access-Control-Allow-Origin：与简单请求相同
+* Access-Control-Allow-Methods：允许的方法（逗号分隔的列表）
+* Access-Control-Allow-Headers：服务器允许的头部（逗号分隔的列表）
+* Access-Control-Max-Age：缓存预检请求的秒数
+
+例如：
+
+```javascript
+Access-Control-Allow-Origin: https://www.example.com
+Access-Control-Allow-Methods: POST, GET
+Access-Control-Allow-Headers: FRIZ
+Access-Control-Allow-Max-Age: 1728000
+```
+
+预检请求返回后，结果会按响应指定的时间缓存一段时间。换句话说，只有第一次发送这种类型的请求时才会多发送一次额外的 HTTP 请求。
+
+## 2. 凭据请求
+
+默认情况下，跨源请求不提供凭据（cookie、HTTP 认证和客户端 SSL 证书）。可以通过将 withCredentials 属性设置为 true 来表明请求会发送凭据。如果服务器允许带凭证的请求，那么可以在响应中包含如下 HTTP 头部：
+
+```javascript
+Access-Control-Allow-Credentials: true
+```
+
+如果发送了凭据请求而服务器返回的响应中没有这个头部，则浏览器不会把响应交给 JavaScript（responseText 是空字符串，status 是 0，onerror() 被调用）。注意，服务器也可以在预检请求的响应中发送这个 HTTP 请求，以表明这个源允许发送凭据请求。
+
+# 3. Beacon API
+
+为了把尽量多的页面信息传到服务器，很多分析工具需要在页面生命周期中尽量晚的时候向服务器发送遥测或分析数据。因此，理想的情况下是通过浏览器的 unload 事件发送的网络请求。这个事件表示用户要离开当前页面，不会再生成别的有用信息了。
+
+在 unload 事件触发时，分析工具要停止收集信息并把收集到的数据发给服务器。这时候有一个问题，因为 unload 事件对浏览器意味着没有理由再发送任何结果未知的网络请求（因为页面都要被销毁了）。例如，在 unload 事件处理程序中创建的任何异步请求都会被浏览器取消。为此，fetch() 不适合这个任务。
+
+为解决这个问题，W3C 引入了补充性的 Beacon API。这个 API 给 navigator 对象增加了一个 sendBeacon() 方法。这个简单的方法接收一个 URL 和一个数据有效载荷参数，并会发送一个 POST 请求。可选的数据有效载荷参数有 ArrayBufferView、Blob、DOMString、FormData 实例。如果请求成功进入了最终要发送的任何队列，则这个方法返回 true，否则返回 false。
+
+可以像下面这样使用这个方法：
+
+```javascript
+// 发送 POST 请求
+// URL: 'https://example.com/analytics-reporting-url'
+// 请求负载：'{ foo: 'bar' }'
+
+navigator.sendBeacon('https://example.com/analytics-reporting-url', '{ foo: "bar" }');
+```
+
+这个方法虽然看起来只不过是 POST 请求的一个语法糖，但它有几个重要的特性。
+
+* sendBeacon() 并不是只能在页面生命周期末尾使用，而是任何时候都可以使用
+* 调用 sendBeacon() 后，浏览器会把请求添加到一个内部的请求队列。浏览器会主动地发送队列中的请求
+* 浏览器保证在原始页面已经关闭的情况下也会发送请求
+* 状态码、超时和其他网络原因造成的失败完全是不透明的，不能通过编程方式处理
+* 信标（beacon）请求会携带调用 sendBeacon() 时所有相关的 cookie
+
+# 4. Web Socket
+
+Web Socket（套接字）的目标是通过一个长时连接实现与服务器全双工、双向的通信。在 JavaScript 中创建 Web Socket 时，一个 HTTP 请求会发送到服务器以初始化连接。服务器响应后，连接使用 HTTP 的 Upgrade 头部从 HTTP 协议切换到 Web Socket 协议。这意味着 Web Socket 不能通过标准 HTTP 服务器实现，而必须使用支持该协议的专有服务器。
+
+因为 Web Socket 使用了自定义协议，所以 URL 方案（scheme）稍有变化：不能再使用 http:// 或 https://，而要使用 ws:// 和 wss://。前者是不安全的连接，后者是安全连接。在指定 Web Socket URL 时，必须包含 URL 方案，因为将来有可能再支持其他方案。
+
+使用自定义协议而非 HTTP 协议的好处是，客户端与服务器之间可以发送非常少的数据，不会对 HTTP 造成任何负担。使用更小的数据包让 Web Socket 非常适合带宽和延迟问题比较明显的移动应用。使用自定义协议的缺点是，定义协议的时间比定义 JavaScript API 要长。
+
+## 1. API
+
+要创建一个新的 Web Socket，就要实例化一个 WebSocket 对象并传入提供连接 URL：
+
+```javascript
+let socket = new WebSocket("ws://www.example.com/server.php");
+```
+
+注意，必须给 WebSocket 构造函数传入一个绝对 URL。同源策略不适用于 Web Socket，因此可以打开到任意站点的连接。至于是否与来自特定源的页面通信，则完全取决于服务器。（在握手阶段就可以确定请求来自哪里。）
+
+浏览器会在初始化 WebSocket 对象之后立即创建连接。WebSocket 也有一个 readyState 属性表示当前状态，取值如下。
+
+* WebSocket.OPENING（0）：连接正在建立
+* WebSocket.OPEN（1）：连接已经建立
+* WebSocket.CLOSING（2）：连接正在关闭
+* WebSocket.CLOSE（3）：连接已经关闭
+
+WebSocket 对象没有 readystatechange 事件，而是有与上述不同状态对应的其他事件。readyState 值从 0 开始。
+
+任何时候都可以调用 close() 方法关闭 Web Socket 连接：
+
+```javascript
+socket.close();
+```
+
+调用 close() 之后，readyState 立即变为 2（连接正在关闭），并会在关闭后变为 3（连接已经关闭）。
+
+## 2. 发送和接收数据
+
+打开 Web Socket 之后，可以通过连接发送和接收数据。要向服务器发送数据，使用 send() 方法并传入一个字符串、ArrayBuffer 或 Blob，如下所示：
+
+```javascript
+let socket = new WebSocket("ws://www.example.com/server.php");
+
+let stringData = "Hello world!";
+let arrayBufferData = Uint8Array.from(['f', 'o', 'o']);
+let blobData = new Blob(['f', 'o', 'o']);
+
+socket.send(stringData);
+socket.send(arrayBufferData.buffer);
+socket.send(blobData);
+```
+
+服务器向客户端发送消息时，WebSocket 对象上会触发 message 事件。这个 message 事件与其他消息协议，可以通过 event.data 属性访问到有效载荷：
+
+```javascript
+socket.onmessage = function(event) {
+    let data = event.data;
+    // 对数据执行某些操作
+};
+```
+
+与通过 send() 方法发送的数据类似，event.data 返回的数据也可能是 ArrayBuffer 或 Blob。这由 WebSocket 对象的 binaryType 属性决定，该属性的值可能是 "blob" 或 "arraybuffer"。
+
+## 3. 其他事件
+
+WebSocket 对象在连接生命周期中有可能触发 3 个其他事件。
+
+* open：在连接成功建立时触发
+* error：在发送错误时触发。连接无法存续
+* close：在连接关闭时触发
+
+WebSocket 对象不支持 DOM Level 2 事件监听器，因此需要使用 DOM Level 0 风格的事件处理程序来监听这些事件：
+
+```javascript
+let socket = new WebSocket("ws://www.example.com/server.php");
+socket.onpen = function() {
+    alert("Connection established.")
+};
+socket.onerror = function() {
+    alert("Connection error.");
+};
+socket.onclose = function() {
+    alert("Connection closed.");
+};
+```
+
+在这些事件中，只有 close 事件的 event 对象上有额外信息。这个对象上有 3 个额外属性：wasClean、code 和 reason，其中 wasClean 是一个布尔值，表示连接是否干净地关闭。code 是一个来自服务器地数值状态码。reason 是一个字符串，包含服务器发来的消息。可以将这些信息显示给用户或记录到日志：
+
+```javascript
+socket.onclose = function(event) {
+    console.log(`as clean? ${event.wasClean} Code=${event.code} Reason=${event.reason}`);
+};
+```
+
+# 5. EventSource API
+
+EventSource API 支持客户端通过一个 HTTP 连接接收服务器的实时更新。这个 API 已经得到多数现代浏览器的支持，可以与 SSE（Server-Sent Event， 服务器发送事件）配合在 Web 应用中实现实时更新。
+
+要使用 EventSource API，必须以 SSE 格式向客户端发送事件。SSE 是一种轻量协议，用于通过 HTTP 从服务器向客户端发送基于文件的事件。每个事件都包含一个字段名和值，又冒号分隔。多个事件使用两个换行符分隔。客户端可以使用 EventSource 对象监听事件，并处理连接和解析事件。
+
+下面是一个使用 EventSource API 的例子：
+
+```javascript
+const eventSource = new EventSource("https://api.example.com/events");
+eventSource.onmessage = event => {
+    console.log(event.data);
+};
+eventSource.onerror = error => {
+    console.log("Error:", error);
+};
+```
+
+在这个例子中，我们使用 URL "https://api.example.com/events" 创建了一个 EventSource 对象。事件处理程序 onmessage 负责把事件数据打印到控制台。而 onerror 事件处理程序则会打印连接期间发生的错误。
+
+在服务器端，可以使用 MIME 类型 Content-Type: text/event-stream 和 Cache-Control: no-cache header 来发送 SSE 事件，以确保浏览器始终请求最新的资源。
 
 
 
@@ -655,7 +1417,6 @@ Response 构造函数接收一个可选的 body 参数，这个 body 可以是 n
 
 
 
-​	   														
 
 
 
@@ -686,4 +1447,16 @@ Response 构造函数接收一个可选的 body 参数，这个 body 可以是 n
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+​	   													
 
