@@ -14,7 +14,7 @@ Singleton.prototype.getName = function() {
 
 Singleton.getInstance = function(name) {
     if (!this.instance) {
-        this.intance = new Singleton(name);
+        this.instance = new Singleton(name);
     }
     return this.instance;
 }
@@ -176,7 +176,7 @@ var namespace1 = {
     },
     b: function() {
         alert(2);
-    }
+    }dd
 };
 ```
 
@@ -187,7 +187,7 @@ var MyApp = {};
 
 MyApp.namespace = function(name) {
     var parts = name.split('.');
-    var current - MyApp;
+    var current = MyApp;
     for (var i in parts) {
         if (!current[parts[i]]) {
             current[parts[i]] = {};
@@ -232,7 +232,222 @@ var user = (function() {
 
 我们用下划线来约定私有变量 `__name` 和 `__age`，它们被封装在闭包产生的作用域中，外部是访问不到这两个变量的，这就避免了对全局的命令污染。
 
-<br>
+# 5. 惰性单例
+
+前面我们了解了单例模式的一些实现方法，本节我们来了解惰性单例。
+
+惰性单例指的是在需要的时候才创建对象实例，惰性单例是单例模式的重点，这种技术在实际开发中非常有用，有用的程序可能超出了我们的想象，实际上在本章开头就使用过这种技术，instance 实例对象总是在我们调用 Singleton.getInstace 的时候才被创建，而不是在页面加载好的时候就创建，代码如下：
+
+```javascript
+Singleton.getInstance = (function() {
+    var instance = null;
+    return function(name) {
+        if (!instance) {
+            instance = new Singleton(name);
+        }
+        
+        return instance;
+    }
+})();
+```
+
+不过这是基于类的单例模式，前面说过，基于类的单例模式在 JavaScript 中并不适用，下面我们将以 WebQQ 的登录浮窗为例，介绍与全局变量结合实现惰性的单例。
+
+假设我们是 WebQQ 的开发人员（网址是 web.qq.com），当点击左边导航里 QQ 头像时，会弹出一个登录浮窗，很明显这个浮窗在页面里总是唯一的，不可能出现同时存在两个登录窗口的情况。
+
+第一种解决方案是在页面加载完成的时候创建好这个 div 浮窗，这个浮窗一开始肯定是隐藏状态的，当用户点击登录按钮的时候，它才开始显示的：
+
+```html
+<html>
+    <body>
+        <button id="loginBtn">登录</button>
+    </body>
+</html>
+
+<script>
+    var loginLayer = (function() {
+        var div = document.createElement('div');
+        div.innerHTML = '我是登录浮窗';
+        div.style.display = 'none';
+        document.body.appendChild(div);
+        return div;
+    })();
+    
+    document.getElementById('loginBtn').onclick = function() {
+        loginLayer.style.display = 'block';
+    };
+</script>
+```
+
+这种方式有一个问题，也许我们进入 WebQQ 只是玩玩游戏或者看看天气，根本不需要进行登录操作，因为登录浮窗总是一开始就被创建好，那么很有可能将白白浪费一些 DOM 节点。
+
+现在改写一下代码，使用户点击登录按钮的时候才开始创建该浮窗：
+
+```html
+<html>
+    <body>
+        <button id="loginBtn">登录</button>
+    </body>
+</html>
+
+<script>
+    var createLoginLayer = function() {
+        var div = document.createElement('div');
+        div.innerHTML = '我是登录浮窗';
+        div.style.display = 'none';
+        document.body.appendChild(div);
+        return div;
+    };
+    
+    document.getElementById('loginBtn').onclick = function() {
+        var loginLayer = createLoginLayer();
+        loginLayer.style.display = 'block';
+    };
+</script>
+```
+
+虽然现在达到了惰性的目的，但失去了单例的效果。当我们每次点击登录按钮的时候，都会创建一个新的登录浮窗 div。虽然我们可以在点击浮窗上的关闭按钮时（此处未实现）把这个浮窗从页面中删除掉，但这样频繁地创建和删除节点明显是不合理的，也是不必要的。
+
+也许读者已经想到了，我么可以用一个变量来判断是否已经创建过登录浮窗，这也是本节第一段代码中的做法：
+
+```javascript
+var createLoginLayer = (function() {
+    var div;
+    return function() {
+        if (!div) {
+            div = document.createElement('div');
+            div.innerHTML = '我是登录浮窗';
+            div.style.display = 'none';
+            document.body.appendChild(div);
+        }
+        
+        return div;
+    }
+})();
+
+document.getElementById('loginBtn').onclick = function() {
+    var loginLayer = createLoginLayer();
+    loginLayer.style.display = 'block';
+}
+```
+
+# 6. 通用的惰性单例
+
+上一节我们完成了一个可用的惰性单例，但是我们发现它还有如下一些问题。
+
+* 这段代码仍然是违反单一职责原则的，创建对象和管理单例的逻辑都放在 createLoginLayer 对象内部
+* 如果我们下次需要创建页面中唯一的 iframe，或者 script 标签，用来跨域请求数据，就必须得如法炮制，把 createLoginLayer 函数几乎照抄一遍：
+
+```javascript
+var createIframe = (function() {
+    var iframe;
+    return function() {
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+        return iframe;
+    }
+})();
+```
+
+我们需要把不变的部分隔离出来，先不考虑创建一个 div 和创建一个 iframe 有多少差异，管理单例的逻辑其实是完全可以抽象出来的，这个逻辑始终是一样的：用一个变量来标志是否创建过对象，如果是，则在下次直接返回这个已经创建好的对象：
+
+```javascript
+var obj;
+if (!obj) {
+    obj = xxx;
+}
+```
+
+现在我们就把如何管理单例的逻辑从原来的代码中抽离出来，这些逻辑被封装在 getSingle 函数内部，创建对象的方法 fn 被当成参数动态传入 getSingle 函数：
+
+```javascript
+var getSingle = function(fn) {
+    var result;
+    return function() {
+        return result || (result = fn.apply(this, arguments));
+    }
+}
+```
+
+接下来将用于创建登录浮窗的方法用参数 fn 的形式传入 getSingle，我们不仅可以传入 createLoginLayer，还能传入 createScript、createIframe、createXhr 等。之后再让 getSingle 返回一个新的函数，并且用一个变量 result 来保存 fn 的计算结果。result 的变量因为身在闭包中，它永远不会被销毁。在将来的请求中，如果 result 已经被赋值，那么它将返回这个值。代码如下：
+
+```javascript
+var createLoginLayer = function() {
+    var div = document.createElement('div');
+    div.innerHTML = '我是登录浮窗';
+    div.style.display = 'none';
+    document.body.appendChild(div);
+    return div;
+};
+
+var createSingleLoginLayer = getSingle(createLoginLayer);
+
+document.getElementById('loginBtn').onclick = function() {
+    var loginLayer = createSingleLoginLayer();
+    loginLayer.style.display = 'block';
+}
+```
+
+下面我们再试试创建唯一的 iframe 用于动态加载第三方页面：
+
+```javascript
+var createSingleIframe = getSingle(function() {
+    var iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    return iframe;
+});
+
+document.getElementById('loginBtn').onclick = function() {
+    var loginLayer = createSingleIframe();
+    loginLayer.src = 'http://baidu.com';
+};
+```
+
+在这个例子中，我们把创建实例对象的职责和管理单例的职责分别放置在两个方法里，这两个方法可以独立变化而互不影响，当它们连接在一起的时候，就完成了创建唯一的实例对象的功能，看起来是一件挺奇妙的事情。
+
+这种单例模式的用途远不止创建对象，比如我们通常渲染完页面中的一个列表之后，接下来要给这个列表绑定 click 事件，如果是通过 ajax 动态往列表里追加数据，在使用事件代理的前提下，click 事件实际上只需要在第一次渲染列表的时候被绑定一次，但是我们不想去判断当前是否第一次渲染列表，如果借助于 jQuery，我们通常选择给节点绑定 one 事件：
+
+```javascript
+var bindEvent = function() {
+    $('div').one('click', function() {
+        alert('click');
+    });
+};
+
+var render = function() {
+    console.log('开始渲染列表');
+    bindEvent();
+};
+
+render();
+render();
+render();
+```
+
+如果利用 getSingle 函数，也能达到一样的效果。代码如下：
+
+```javascript
+var bindEvent = getSingle(function() {
+    document.getElementById('div1').addEventListener = function() {
+        alert('click');
+    }
+    return true;
+});
+
+var render = function() {
+    console.log('开始渲染列表');
+    bindEvent();
+};
+
+render();
+render();
+render();
+```
+
+可以看到，render 函数和 bindEvent 函数都分别执行了 3 次，但 div 实际上只被绑定了一个事件。
 
 # deepseek
 

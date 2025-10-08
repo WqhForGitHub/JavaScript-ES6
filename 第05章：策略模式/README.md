@@ -1,3 +1,11 @@
+
+
+# 1. 使用策略模式计算奖金
+
+
+
+
+
 # deepseek
 
 ## JavaScript 的策略模式（Strategy Pattern）
