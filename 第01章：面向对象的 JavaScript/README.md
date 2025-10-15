@@ -30,18 +30,6 @@ JavaScript 没有提供传统面向对象语言中的类式继承，而是通过
 
 下面我们用代码来模拟这个故事。
 
-javascript
-
-
-
-
-
-
-
-
-
-
-
 ```javascript
 var duck = {
   duckSinging: function(){
@@ -377,8 +365,6 @@ GoF 所著的《设计模式》一书的副书名是 “可复用面向对象软
 
 在策略模式<sup>③</sup>中，Context 并没有执行算法的能力，而是把这个职责委托给了某个策略对象。每个策略对象负责的算法已被各自封装在对象内部。当我们对这些策略对象发出 “计算” 的消息时，它们会返回各自不同的计算结果。
 
-### 12 第 1 章 面向对象的 JavaScript
-
 在 JavaScript 这种将函数作为一等对象的语言中，函数本身也是对象，函数用来封装行为并且能够被四处传递。当我们对一些函数发出 “调用” 的消息时，这些函数会返回不同的执行结果，这是 “多态性” 的一种体现，也是很多设计模式在 JavaScript 中可以用高阶函数来代替实现的原因。
 
 ## 1.3 封装
@@ -669,14 +655,10 @@ Person.prototype.getName = function(){
 
 var objectFactory = function(){
   var obj = new Object(),  // 从Object.prototype上克隆一个空的对象
-      Constructor = [].shift.call( arguments );  // 取得外部传入的构造器，此例是Person
-```
-
-<sup>①</sup>JavaScript 是通过克隆 Object.prototype 来得到新的对象，但实际上并不是每次都真正地克隆了一个新的对象。从内存方面的考虑出发，JavaScript 还做了一些额外的处理，具体细节可以参阅周爱民老师编著的《JavaScript 语言精髓与编程实践》。这里不做深入讨论，我们暂且把创建对象的过程看成完完全全的克隆。
-
-```javascript
-  obj.__proto__ = Constructor.prototype;  // 指向正确的原型
+      Constructor = [].shift.call( arguments ), // 取得外部传入的构造器，此例是Person
+     obj.__proto__ = Constructor.prototype;  // 指向正确的原型
   var ret = Constructor.apply( obj, arguments );  // 借用外部传入的构造器给obj设置属性
+
   return typeof ret === 'object' ? ret : obj;  // 确保构造器总是会返回一个对象
 };
 
