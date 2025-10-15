@@ -2,9 +2,32 @@
 
 # 1. 使用策略模式计算奖金
 
+策略模式有着广泛的应用。本节我们就以年终奖的计算为例进行介绍。
 
+很多公司的年终奖是根据员工的工资基数和年底绩效情况来发放的。例如，绩效为 S 的人年终奖有 4 倍工资，绩效为 A 的人年终奖有 3 倍工资，而绩效为 B 的人年终奖是 2 倍工资。假设财务部要求我们提供一段代码，来方便他们计算员工的年终奖。
 
+## 1. 最初的代码实现
 
+我们可以编写一个名为 calculateBonus 的函数来计算每个人的奖金数额。很显然，calculationBonus 函数要正确工作，就需要接收两个参数：员工的工资数额和他的绩效考核等级。代码如下：
+
+```javascript
+var calculateBonus = function(performanceLevel, salary) {
+    if (performanceLevel === '5') {
+        return salary * 4;
+    }
+    
+    if (performanceLevel === 'A') {
+        return salary * 3;
+    }
+    
+    if (performanceLevel === 'B') {
+        return salary * 2;
+    }
+};
+
+calculateBonus('B', 20000); // 输出: 40000
+calculateBonus('S', 6000); // 输出: 24000
+```
 
 # deepseek
 
