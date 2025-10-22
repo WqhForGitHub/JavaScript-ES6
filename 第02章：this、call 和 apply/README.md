@@ -1,12 +1,10 @@
-# 第 2 章 this、call 和 apply
-
 在 JavaScript 编程中，this 关键字总是让初学者感到迷惑，Function.prototype.call 和 Function.prototype.apply 这两个方法也有着广泛的运用。我们有必要在学习设计模式之前先理解这几个概念。
 
-## 2.1 this
+# 2.1 this
 
 跟别的语言大相径庭的是，JavaScript 的 this 总是指向一个对象，而具体指向哪个对象是在运行时基于函数的执行环境动态绑定的，而非函数被声明时的环境。
 
-### 2.1.1 this 的指向
+## 2.1.1 this 的指向
 
 除去不常用的 with 和 eval 的情况，具体到实际应用中，this 的指向大致可以分为以下 4 种：
 
@@ -15,7 +13,7 @@
 - 构造器调用。
 - Function.prototype.call 或 Function.prototype.apply 调用。
 
-#### **1. 作为对象的方法调用**
+### **1. 作为对象的方法调用**
 
 当函数作为对象的方法被调用时，this 指向该对象：
 
@@ -30,7 +28,7 @@ var obj = {
 obj.getA();
 ```
 
-#### **2. 作为普通函数调用**
+### **2. 作为普通函数调用**
 
 当函数不作为对象的属性被调用时，也就是我们常说的普通函数方式，此时的 this 总是指向全局对象。在浏览器的 JavaScript 里，这个全局对象是 window 对象。
 
@@ -98,7 +96,7 @@ function func(){
 func();
 ```
 
-#### **3. 构造器调用**
+### **3. 构造器调用**
 
 JavaScript 中没有类，但是可以从构造器中创建对象，同时也提供了 new 运算符，使得构造器看起来更像一个类。
 
@@ -136,7 +134,7 @@ var obj = new MyClass();
 alert( obj.name );  // 输出: sven
 ```
 
-#### **4. Function.prototype.call 或 Function.prototype.apply 调用**
+### **4. Function.prototype.call 或 Function.prototype.apply 调用**
 
 跟普通的函数调用相比，用 Function.prototype.call 或 Function.prototype.apply 可以动态地改变传入函数的 this：
 
@@ -156,7 +154,7 @@ console.log( obj1.getName.call( obj2 ) );// 输出: anne
 
 call 和 apply 方法能很好地体现 JavaScript 的函数式语言特性，在 JavaScript 中，几乎每一次编写函数式语言风格的代码，都离不开 call 和 apply。在 JavaScript 诸多版本的设计模式中，也用到了 call 和 apply。在下一节会详细介绍它们。
 
-### 2.1.2 丢失的 this
+## 2.1.2 丢失的 this
 
 这是一个经常遇到的问题，我们先看下面的代码：
 
@@ -225,11 +223,11 @@ var div = getId( 'div1' );
 alert (div.id);  // 输出: div1
 ```
 
-## 2.2 call 和 apply
+# 2.2 call 和 apply
 
 ECAMScript 3 给 Function 的原型定义了两个方法，它们是 Function.prototype.call 和 Function.prototype.apply。在实际开发中，特别是在一些函数式风格的代码编写中，call 和 apply 方法尤为有用。在 JavaScript 版本的设计模式中，这两个方法的应用也非常广泛，能熟练运用这两个方法，是我们真正成为一名 JavaScript 程序员的重要一步。
 
-### 2.2.1 call 和 apply 的区别
+## 2.2.1 call 和 apply 的区别
 
 Function.prototype.call 和 Function.prototype.apply 都是非常常用的方法。它们的作用一模一样，区别仅在于传入参数形式的不同。
 
@@ -282,11 +280,11 @@ func.apply( null, [ 1, 2, 3 ] );
 Math.max.apply( null, [ 1, 2, 5, 3, 4 ] )  // 输出: 5
 ```
 
-### 2.2.2 call 和 apply 的用途
+## 2.2.2 call 和 apply 的用途
 
 前面说过，能够熟练使用 call 和 apply，是我们真正成为一名 JavaScript 程序员的重要一步。本节我们将详细介绍 call 和 apply 在实际开发中的用途。
 
-#### **1. 改变 this 指向**
+### **1. 改变 this 指向**
 
 call 和 apply 最常见的用途是改变函数内部的 this 指向，我们来看个例子：
 
@@ -368,7 +366,7 @@ var div = getId( 'div1' );
 alert( div.id );  // 输出: div1
 ```
 
-#### **2. Function.prototype.bind**
+### **2. Function.prototype.bind**
 
 大部分高级浏览器都实现了内置的 Function.prototype.bind，用来指定函数内部的 this 指向，即使没有原生的 Function.prototype.bind 实现，我们来模拟一个也不是难事，代码如下：
 
@@ -418,7 +416,7 @@ var func = function( a, b, c, d ){
 func( 3, 4 );
 ```
 
-#### **3. 借用其他对象的方法** 
+### **3. 借用其他对象的方法** 
 
 我们知道，杜鹃既不会筑巢，也不会孵雏，而是把自己的蛋寄托给云雀等其他鸟类，让它们代为孵化和养育。同样，在 JavaScript 中也存在类似的借用现象。
 
