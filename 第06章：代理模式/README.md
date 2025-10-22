@@ -525,7 +525,7 @@ var plus = function(){
 };
 
 /****************** 创建缓存代理的工厂 ******************/
-var createProxyFactory = function( fn ){
+var createProxyFactory = function(  ){
   var cache = {};
   return function(){
     var args = Array.prototype.join.call( arguments, ',' );
