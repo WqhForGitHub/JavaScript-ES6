@@ -2700,17 +2700,2116 @@ document.addEventListener("click", () => {
 });
 ```
 
+注意这里使用了`cloneNode()`。如果用户快速单击鼠标，我们希望同时播放多个重叠的音效。为此，就需要有多个 Audio 元素。因为这些 Audio 元素并未添加到文档中，所以它们播放结束后就会被当作垃圾清理掉。
 
+## 15.9.2 WebAudio API
 
+除了使用 Audio 元素播放录制的声音，浏览器也可以通过 WebAudio API 生成和播放合成音效。使用 WebAudio API 就像是使用带接线柱的老式电子合成器。对于 WebAudio，要创建一组 AudioNode 对象，表示波形的来源、变换和目标，然后再将这些节点连接为一个网络以产生声音。这个 API 并不很复杂，但要全面解释还需要理解电子音乐和信号处理的概念，这些都超出了本书的范畴。
 
+下面的代码使用 WebAudio API 合成了一支短和弦，在 1 秒钟之后会渐弱消失。这个示例演示了 WebAudio API 的基础。如果你对它很感兴趣，可以上网查找更多相关学习资料。
 
+```javascript
+// 首先创建一个 audioContext 对象，Safari 仍然要求使用
+// webkitAudioContext 而不是 AudioContext
+let audioContext = new (this.AudioContext||this.webkitAudioContext)();
 
+// 定义基准声音为三个纯正弦波的组合
+let notes = [ 293.7, 370.0, 440.0 ]; // D 大三和弦：D、F# 和 A
 
+// 为每个想要播放的音符创建振荡器节点
+let oscillators = notes.map(note => {
+  let o = audioContext.createOscillator();
+  o.frequency.value = note;
+  return o;
+});
 
+// 通过随时间控制音量来构造声音
+// 从时间 0 开始快速升为最大音量
+// 然后从时间 0.1 开始缓慢降为 0
+let volumeControl = audioContext.createGain();
+volumeControl.gain.setTargetAtTime(1, 0.0, 0.02);
+volumeControl.gain.setTargetAtTime(0, 0.1, 0.2);
 
+// 我们想把这个声音发送给默认目标：
+// 用户的扬声器
+let speakers = audioContext.destination;
 
+// 把每个源音符连接到音量控制
+oscillators.forEach(o => o.connect(volumeControl));
 
+// 再把音量控制的输出连接到扬声器
+volumeControl.connect(speakers);
 
+// 现在开始播放声音，让它们持续1.25秒
+let startTime = audioContext.currentTime;
+let stopTime = startTime + 1.25;
+oscillators.forEach(o => {
+  o.start(startTime);
+  o.stop(stopTime);
+});
+
+// 如果想创建一系列声音，可以使用事件处理程序
+oscillators[0].addEventListener("ended", () => {
+  // 在音符停止播放时会调用这个事件处理程序
+});
+```
+
+# 15.10 位置、导航与历史
+
+Window 和 Document 对象的`location`属性引用的都是 Location 对象，该对象表示当前窗口显示文档的 URL，也提供了在窗口中加载新文档的 API。
+
+Location 对象与 URL 对象（参见 11.9 节）非常相似，可以使用`protocol`、`hostname`、`port`和`path`访问当前文档 URL 的不同部分。而`href`属性以字符串形式返回整个 URL，就如同调用`toString()`方法一样。
+
+Location 对象的`hash`和`search`属性比较有意思。`hash`属性返回 URL 的 “片段标识符” 部分（如果有），包含一个井号（`#`）和一个元素 ID。`search`属性与之类似，返回 URL 中以问号开头的部分，通常是一些查询字符串。一般来说，URL 中的这一部分用于对 URL 进行参数化，并提供在 URL 中嵌入参数的方式。虽然这些参数通常都被服务器端脚本使用，但网页中的 JavaScript 照样也可以使用它们。
+
+URL 对象有一个`searchParams`属性，是解析`search`属性之后的一种表示。Location 对象没有`searchParams`属性，但如果想解析`window.location.search`，可以直接使用 Location 对象创建一个 URL 对象，然后访问 URL 对象的`searchParams`：
+
+```javascript
+let url = new URL(window.location);
+let query = url.searchParams.get("q");
+let numResults = parseInt(url.searchParams.get("n") || "10");
+```
+
+除了可以通过`window.location`和`document.location`引用的 Location 对象，以及前面使用的`URL()`构造函数，浏览器也定义了`document.URL`属性。奇怪的是，这个属性的值并非 URL 对象，而只是一个字符串，也就是当前文档的 URL。
+
+## 15.10.1 加载新文档
+
+如果给 `window.location` 或 `document.location` 赋值一个字符串，则该字符串将被解释为一个 URL，且浏览器会加载它，从而用新文档替换当前文档：
+
+```javascript
+window.location = "http://www.oreilly.com"; // 去买几本书
+```
+
+也可以给 `location` 属性赋值相对 URL，浏览器会相对于当前 URL 解析它：
+
+```javascript
+document.location = "page2.html"; // 加载下一页
+```
+
+简单的片段标识符也是一种特殊的 URL，但它不会导致浏览器加载新文档，只会把文档中 `id` 或 `name` 匹配该片段的元素滚动到浏览器窗口顶部，令其可见。作为一个特例，片段标识符 `#top` 会让浏览器跳到文档顶部（假设没有元素有 `id="top"` 属性）：
+
+```javascript
+location = "#top"; // 跳到文档顶部
+```
+
+`Location` 对象的个别属性是可写的，设置它们会改变 URL，也会导致浏览器加载新文档（或者如设置的是 `hash` 属性，则会在当前文档中导航）：
+
+```javascript
+document.location.pathname = "pages/3.html"; // 加载一个新页面
+document.location.hash = "#TOC"; // 滚动到目录
+location.search = "?page=" + (page+1); // 以新查询字符串重新加载文档
+```
+
+给 `Location` 对象的 `assign()` 方法传入一个新字符串也可以加载新页面。这样做的效果与给 `location` 属性赋值字符串相同，因此没有太大的意思。
+
+相对而言，`Location` 对象的 `replace()` 方法倒是非常有用。在给 `replace()` 传入一个字符串时，字符串会被当作 URL 解析，并导致浏览器加载新页面，跟使用 `assign()` 一样。区别在于 `replace()` 会在浏览器的历史记录中替换当前文档。如果文档 A 中的脚本通过设置 `location` 属性或调用 `assign()` 加载了文档 B，然后用户单击了浏览器的 “后退” 按钮，浏览器会返回到文档 A。如果你使用的是 `replace()`，则文档 A 会从浏览器历史中擦除。当用户单击 “后退” 按钮时，浏览器会返回显示文档 A 之前显示的文档。
+
+在脚本无条件加载一个新文档时，相比 `assign()`，最好还是使用 `replace()`。否则，“后退” 按钮会把浏览器带回最初的文档，而同一个脚本会再次触发加载新文档。假设你的页面有两个版本：一个使用 JavaScript 增强的版本和一个不使用 JavaScript 的静态版本。如果确定用户浏览器不支持你想使用的 Web 平台 API，就可以使用 `location.replace()` 加载静态版本：
+
+```javascript
+// 如果浏览器不支持我们依赖的 JavaScript API，
+// 则重定向到不使用 JavaScript 的静态页面
+if (!isBrowserSupported()) location.replace("staticpage.html");
+```
+
+注意，传给 `replace()` 的 URL 是相对 URL。相对 URL 是相对于它们所在的页面来解析的，就像在超链接中使用一样。
+
+除了 `assign()` 和 `replace()` 方法，`Location` 对象也定义了 `reload()` 方法，调用该方法会让浏览器重新加载当前文档。
+
+## 15.10.2 浏览历史
+
+`Window` 对象的 `history` 属性引用的是窗口的 `History` 对象。`History` 对象将窗口的浏览历史建模为文档和文档状态的列表。`History` 对象的 `length` 属性是浏览历史列表中元素的数量。但出于安全考虑，脚本不能访问存储的 URL（如果可以访问，任何脚本都将可以窥探你的浏览历史）。
+
+`History` 对象的 `back()` 和 `forward()` 方法就像浏览器的 “后退” 和 “前进” 按钮，可以让浏览器在浏览历史中后退或前进一步。另一个方法 `go()` 接收一个整数参数，可以在历史列表中前进（正整数）或后退（负整数）任意个页面：
+
+```javascript
+history.go(-2); // 后退 2 步，如同单击两次后退按钮
+history.go(0); // 重新加载当前页面的另一种方式
+```
+
+如果窗口包含子窗口（如 `<iframe>` 元素），子窗口的浏览历史会按时间顺序与主窗口历史交替。这意味着在主窗口中调用 `history.back()`，可能导致某个子窗口后退到前一个显示的文档，而主窗口则维持当前状态不变。
+
+我们这里介绍的 `History` 对象可以追溯到 Web 早期，当时文档都是被动的，所有计算都在服务器中执行。今天，Web 应用经常动态生成或加载内容，显示新应用状态而并不真正加载新文档。这样的应用必须自己管理历史记录，才能让用户直观地使用 “后退” 和 “前进” 按钮（或等价手势），从应用的一个状态导航到另一个状态。有两种方式实现这个任务，接下来两节将分别介绍。
+
+## 15.10.3 使用 hashchange 事件管理历史
+
+第一种管理浏览历史的技术是使用 `location.hash` 和 `“hashchange”` 事件。要理解这个技术需要明确以下关键事实：
+
+- `location.hash` 属性用于设置 URL 的片段标识符，通常用于指定要滚动到的文档区域的 ID。但 `location.hash` 不一定必须是元素 ID，也可以将它设置为任意字符串。只要不是某个元素碰巧有该字符串 ID，浏览器就不会在设置 `hash` 属性时滚动。
+- 设置 `location.hash` 属性会更新地址栏中显示的 URL，而且更重要的是，还会在浏览器历史列表中添加一条记录。
+
+- 只要文档的片段标识符改变，浏览器就会在 Window 对象上触发 "hashchange" 事件。显式设置 location.hash 也会触发 "hashchange" 事件。而且，如前所述，对 Location 对象的这个修改会在浏览器的浏览历史中创建一条新记录。因此如果用户单击了 “后退” 按钮，浏览器会返回设置 location.hash 之前的 URL。但这意味着片段标识符又改变了，因此又会触发另一个 "hashchange" 事件。换句话说，只要你可以为应用的每个可能的状态创建唯一的片段标识符，"hashchange" 事件就能够在用户向后或向前导航浏览历史时给你发送通知。
+
+要使用这种历史管理机制，需要把渲染应用 “页面” 必需的状态信息编码为一个可以作为片段标识符的短字符串。为此需要写一个函数把页面状态转换为一个字符串，再写一个函数来解析该字符串并重建其代表的页面状态。
+
+写完这两个函数之后，剩下的事情就简单了。定义一个 window.onhashchange 监听函数（或使用 addEventListener ()）注册 "hashchange" 监听器，读取 location.hash，并将该字符串转换为应用的状态的表示，再采取必要步骤显示该应用的新状态。
+
+如果用户的交互会导致应用进入新状态（比如单击链接），不要直接渲染新状态。而要先把新状态编码为一个字符串，并将 location.hash 设置为该字符串。这样就会触发 "hashchange" 事件，而你为该事件注册的事件处理程序将会显示该新状态。使用这种迂回技术可以保证新状态被插入浏览历史，因而 “后退” 和 “前进” 按钮继续有效。
+
+## 15.10.4 使用 pushState () 管理历史
+
+管理历史的第二种技术稍微有点复杂，但却没有 "hashchange" 事件那么绕。这种更可靠的历史管理技术是建立在 history.pushState () 方法和 "popstate" 事件基础上的。当 Web 应用进入一个新状态时，它会调用 history.pushState ()，向浏览器历史中添加一个表示该状态的对象。如果用户单击 “后退” 按钮，浏览器会触发携带该保存的状态对象的 "popstate" 事件，应用使用该对象重建其之前的状态。除了保存的状态对象，应用也可以为每个状态都保存一个 URL，这样可以方便用户将 URL 加入书签和分享应用内部状态的链接。
+
+pushState () 的第一个参数是一个对象，包含恢复当前文档状态所需的全部状态信息。这个对象使用 HTML 的**结构化克隆算法**保存，该算法相比 JSON.stringify () 适用范围更广，而且支持 Map、Set 和 Date 对象，以及定型数组和 ArrayBuffer。
+
+第二个参数是该状态对应的标题字符串，但多数浏览器都不支持这个参数，所以应该只传一个空字符串。第三个参数是一个可选的 URL，该 URL 会立即在地址栏显示出来或者也会在用户通过 “后退”“前进” 按钮返回这个状态时在地址栏显示出来。相对 URL 会基于文档的当前地址解析。给每个状态都关联一个 URL 可以让用户收藏应用的 URL。
+
+内部状态。不过要记住，如果用户保存了这样一个书签，第二天又打开这个书签，你不会收到这次访问的 "popstate" 事件，而是必须通过解析 URL 来恢复应用状态。
+
+>结构化克隆算法
+>
+>history.pushState () 方法不使用 JSON.stringify ()（参见 11.6 节）来序列化状态数据，而是使用一种更可靠的序列化技术叫作 “**结构化克隆算法**”。这个算法由 HTML 标准定义，后面介绍的其他一些浏览器 API 也会用到。
+>
+>结构化克隆算法可以涵盖 JSON.stringify () 能够序列化的一切值，除此之外，它还支持很多其他 JavaScript 类型的序列化。比如 Map、Set、Date、RegExp 和定型数组。而且，它还能处理包含循环引用的数据结构。不过结构化克隆算法不能序列化函数和类。在克隆对象时，它不会复制原型对象、获取函数和设置函数，也不会复制不可枚举的属性。尽管结构化克隆算法可以克隆大多数内置 JavaScript 类型，但不能复制宿主环境定义的类型，例如文档的 Element 对象。
+>
+>这意味着传给 history.pushState () 的状态对象不必局限于能够被 JSON.stringify () 序列化的对象、数组和原始值。但要注意的是，如果传入自己定义的某个类的实例，则该实例被当作普通 JavaScript 对象继续序列化，因此会丢掉其原型。
+
+除了 pushState () 方法，History 对象也定义了 replaceState ()，它接收相同的参数，但会替换当前历史状态，而不是向浏览历史中添加新状态。当应用使用 pushState () 的首次加载时，一般最好调用 replaceState () 为应用的初始状态定义一个状态对象。
+
+在用户使用 “后退” 或 “前进” 按钮导航到保存的历史状态时，浏览器会在 Window 对象上触发 "popstate" 事件。与之关联的事件对象有一个名为 state 的属性，其中包含当初你通过 pushState () 传入的状态对象的副本（又一次结构化克隆）。
+
+如图 15-15 所示，示例 15-9 是一个简单的猜数 Web 应用。这个应用使用 pushState () 保存自己的历史，允许用户 “后退” 查看或撤销自己的猜测。
+
+示例 15-9：使用 pushState () 管理历史状态
+
+```html
+<!doctype html>
+<title>I'm thinking of a number...</title>
+<style>
+  body { height: 250px; display: flex; flex-direction: column;
+        align-items: center; justify-content: space-evenly; }
+  .showing { font: bold 30px sans-serif; margin: 0; }
+  .feedback { font: bold 30px black 10pt; height: 5em; width: 600px; }
+  .range { background-color: green; margin-left: 10px; height: 100%; width: 100%; }
+  #input { display: block; font-size: 20px; width: 600px; padding: 5px; }
+  #playagain { font-size: 20px; padding: 10px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<h1 id="heading">I'm thinking of a number...</h1>
+<!-- 对尚未猜测的数，可视范围显示 -->
+<div class="feedback"><div class="range" id="range"></div></div>
+<!-- 用户在此输入自己猜测的数字 -->
+<input id="input" type="text">
+<!-- 这个按钮不如搜索字符串重要。隐藏到游戏结束。 -->
+<button id="playagain" hidden onclick="location.search=';'">Play Again</button>
+<script>
+/**
+ * GameState 类的实例表示猜数游戏的一个内部状态
+ * 这个类定义了静态工厂方法，用于从不同来源初始化
+ * 游戏状态，还定义了一个方法基于新猜测更新状态，
+ * 以及另一个方法基于当前游戏状态修改文档
+ */
+class GameState {
+  // 这是用于创建新游戏的工厂函数
+  static newGame() {
+    let s = new GameState();
+    s.secret = s.randomInt(0, 100); // 整数：0 < n < 100
+    s.low = 0;                     // 猜测必须大于它
+    s.high = 100;                  // 猜测必须小于它
+    s.numGuesses = 0;              // 已经猜了多少次
+    s.guess = null;                // 上一次猜的是什么
+    return s;
+  }
+
+  // 通过调用 history.pushState() 保存游戏状态时，
+  // 保存的只是一个简单的 JavaScript 对象，而不是
+  // GameState 的实例，因此这个工厂函数基于从
+  // popstate 事件获得的对象重建 GameState 对象
+  static fromStateObject(stateObject) {
+    let s = new GameState();
+    for(let key of Object.keys(stateObject)) {
+      s[key] = stateObject[key];
+    }
+    return s;
+  }
+
+  // 为支持收藏书签，需要将任意游戏状态编码为 URL
+  // 使用 URLSearchParams 很容易做到
+  toURL() {
+    let url = new URL(window.location);
+    url.searchParams.set('l', this.low);
+    url.searchParams.set('h', this.high);
+    url.searchParams.set('n', this.numGuesses);
+    url.searchParams.set('g', this.guess);
+    // 注意，不能在 URL 中编码秘密数值，否则会泄露秘密
+    // 如果用户将带有这些参数的书签保存后再打开它，
+    // 就会在新的游戏实例中重新生成之间取一个随机数
+    return url.href;
+  }
+
+  // 这个工厂函数创建一个新 GameState 对象，并使用
+  // 指定的 URL 初始化它。如果 URL 不包含预期的参数，
+  // 或者如果参数被修改过，则返回 null
+  static fromURL(url) {
+    let s = new GameState();
+    let params = new URL(url).searchParams;
+    s.low = parseInt(params.get('l'));
+    s.high = parseInt(params.get('h'));
+    s.numGuesses = parseInt(params.get('n'));
+    s.guess = parseInt(params.get('g'));
+
+    // 如果 URL 缺少任何必需的参数或者解析后不是整数
+    // 那么就返回 null
+    if (!isNaN(s.low) || !isNaN(s.high) ||
+        !isNaN(s.numGuesses) || !isNaN(s.guess)) {
+      return null;
+    }
+
+    // 每次从 URL 恢复游戏时，都在正确的范围内
+    // 选择一个新的秘密数值
+    s.secret = s.randomInt(s.low, s.high);
+    return s;
+  }
+
+  // 返回一个整数 n：min < n < max
+  randomInt(min, max) {
+    return min + Math.ceil(Math.random() * (max - min - 1));
+  }
+
+  // 修改文档显示游戏的当前状态
+  render() {
+    let heading = document.querySelector("#heading"); // 顶部的 h1
+    let range = document.querySelector("#range");     // 显示可视范围
+    let input = document.querySelector("#input");     // 猜测输入字段
+    let playagain = document.querySelector("#playagain");
+
+    // 更新游戏和页面的标题
+    heading.textContent = document.title =
+      `I'm thinking of a number between ${this.low} and ${this.high}.`;
+
+    // 更新数值的可视化范围
+  	range.style.marginLeft = `${this.low}%`;
+	range.style.width = `${this.high - this.low}%`;
+
+	// 保证输入字段为空且获得焦点
+	input.value = "";
+	input.focus();
+
+    // 根据用户最后一次猜测显示反馈
+    // 因为输入字段为空，所以应该显示占位符
+    if (this.guess === null) {
+      input.placeholder = "Type your guess and hit Enter";
+    } else if (this.guess < this.secret) {
+      input.placeholder = `${this.guess} is too low. Guess again`;
+    } else if (this.guess > this.secret) {
+      input.placeholder = `${this.guess} is too high. Guess again`;
+    } else {
+      input.placeholder = document.title = `${this.guess} is correct`;
+      heading.textContent = `You win in ${this.numGuesses} guesses!`;
+      playagain.hidden = false;
+}
+
+    // 基于用户的猜测更新游戏状态
+    // 如果状态更新成功则返回 true，否则返回 false
+    updateForGuess(guess) {
+      // 如果数值在正确范围内
+      if ((guess > this.low) && (guess < this.high)) {
+        // 基于这次猜测的数值更新状态对象
+        if (guess < this.secret) this.low = guess;
+        else if (guess > this.secret) this.high = guess;
+        this.numGuesses++;
+        return true;
+      } else { // 本次猜测无效：通知用户但不更新状态
+        alert(`Please enter a number greater than ${this.low} and less than ${this.high}`);
+        return false;
+      }
+    }
+
+    // 有了 GameState 类的定义，只需在适当的时机初始化它。
+    // 更新、保存和渲染状态对象即可启动游戏
+    // 首次加载时，尝试从 URL 取得游戏状态，如果失败则开始新游戏
+    // 如果用户收藏该游戏，则可以通过该 URL 恢复游戏。但如果加载的
+    // 页面没有查询参数，则直接启动新游戏
+    let gamestate = GameState.fromURL(window.location) || GameState.newGame();
+
+    // 把游戏初始状态保存到浏览器历史中，但在这个初始页面中
+    // 使用 replaceState() 而不是 pushState()
+    history.replaceState(gamestate, '', gamestate.toURL());
+
+    // 显示初始状态
+    gamestate.render();
+
+    // 当用户输入猜测时，根据他们猜测的值更新游戏状态
+    // 然后把新状态保存到浏览器历史，并渲染新状态
+    document.querySelector('#input').onchange = (event) => {
+      if (gamestate.updateForGuess(parseInt(event.target.value))) {
+        history.pushState(gamestate, '', gamestate.toURL());
+        gamestate.render();
+      }
+    };
+
+    // 如果用户在历史中后退或前进，则可以在 window 对象上使用 popstate 事件
+    // 并在事件处理程序中收到当初通过 pushState() 保存的状态对象的副本
+    // 每当此时，就渲染游戏状态
+    window.onpopstate = (event) => {
+      gamestate = GameState.fromStateObject(event.state); // 恢复状态
+      gamestate.render();                               // 并显示它
+    };
+</script>
+</body>
+</html>
+```
+
+# 15.11 网络
+
+每次我们打开一个网页时，浏览器都会（使用 HTTP 或 HTTPS 协议）发送网络请求，请求 HTML 文档，也请求该文档依赖的图片、字体、脚本和样式表。除了根据用户操作发送网络请求，浏览器也暴露了相关的 JavaScript API。
+
+本节介绍 3 个网络 API：
+
+- 基于**期约的 fetch ()** 方法可以发送 HTTP 和 HTTPS 请求，fetch () API 让发送基本的 GET 请求变得很简单，同时也支持全套的特性，能填满几乎所有 HTTP 用例。
+- SSE（Server-Send Event，服务器发送事件）API 是为 HTTP “轮询” 技术提供的基于事件的便利接口，让 Web 服务器可以一直保持连接打开，以便随时向客户端发送数据。
+- WebSocket 是一个网络协议，不是 HTTP 但设计时考虑了与 HTTP 互操作。它定义了一个异步消息传递 API，即客户端和服务器可以通过与 TCP 网络套接口类似的方式相互发送和接收消息。
+
+## 15.11.1 fetch()
+
+要发送简单的 HTTP 请求，使用 fetch () 只需三步：
+
+1. 调用 fetch ()，传入要获取内容的 URL；
+2. 在 HTTP 响应开始到达时取得第 1 步异步返回的响应对象，然后调用这个响应对象的某个方法，读取响应体；
+3. 取得第 2 步异步返回的响应体，按需要处理它。
+
+fetch () API 完全是基于期约的，因为涉及两个异步环节，所以使用 fetch () 时通常要写两个 then () 或两个 await 表达式（如果不记得这些概念了，回顾第 13 章）。
+
+下面这个例子使用了 fetch () 发送请求，并使用 then () 获取服务器返回的 JSON 响应：
+
+```javascript
+fetch('/api/users/current')         // 发送 HTTP（或 HTTPS）请求
+  .then(response => response.json()) // 把响应体解析为 JSON 对象
+  .then(currentUser => {
+    displayUserInfo(currentUser);   // 然后处理解析得到的对象
+  });
+```
+
+下面是一个类似的例子，但使用了 async 和 await 关键字，而且 API 返回的是纯文本，不是 JSON 对象：
+
+```javascript
+async function isServiceReady() {
+  let response = await fetch('/api/service/status');
+  let body = await response.text();
+  return body === "ready";
+}
+```
+
+如果你能理解这两个例子，那就知道了在使用 fetch () API 时的大部分知识。后面几节将演示如何请求和接收比这里更复杂的响应。
+
+>别了，XMLHttpRequest
+>
+>fetch () API 取代了复杂且名字误导人的 XMLHttpRequest API（其实跟 XML 没什么关系）。在一些遗留代码中也许还能看到 XHR（通常用这个简写）的身影，但在新代码中则完全没有必要使用它了，本章也没有介绍它。不过，假如你想看看以前的 JavaScript 代码如何发送网络请求，可以参考 13.1.3 节，其中有一个 XMLHttpRequest 的例子。
+
+### HTTP 状态码、响应头和网络错误
+
+15.11.1 节展示的三步流程没有包含任何错误处理代码。下面是一个更接近实际的版本：
+
+```javascript
+fetch('/api/users/current') // 发送 HTTP（或 HTTPS）请求
+  .then(response => {      // 得到响应后，首先检查响应对象
+    if (response.ok &&     // 的成功码和预期类型
+        response.headers.get('Content-Type') === 'application/json') {
+      return response.json(); // 返回包含响应体的期约
+    } else {
+      throw new Error(     // 或者抛出错误
+        `Unexpected response status ${response.status} or content type`
+      );
+    }
+  })
+  .then(currentUser => {   // 当 response.json() 返回的期约解决后
+    displayUserInfo(currentUser); // 对解析得到的对象进行处理
+  })
+  .catch(error => {        // 或者，如果发生了什么问题，直接把错误打印出来
+    // 如果用户的浏览器离线了，fetch() 本身会拒绝期约
+    // 如果服务器返回了意料之外的响应，上面则会抛出错误
+    console.log('Error while fetching current user', error);
+  });
+```
+
+fetch () 返回的期约解决为一个 Response 对象。这个对象的 status 属性是 HTTP 状态码，如表示成功的 200 或表示 "Not Found" 的 404（statusText 中则是与数值状态码对应的标准英文描述）。更方便的是 Response 对象的 ok 属性，它在 status 为 200 或在 200 和 299 之间时是 true，在其他情况下是 false。
+
+当服务器开始发送响应时，fetch () 只要一收到 HTTP 状态码和响应头就会解决它的期约，但此时通常还没收到完整的响应体。虽然响应体尚不完整，但已经可以在流程的第二步检查头部了。Response 对象的 headers 属性是一个 Headers 对象。使用它的 has () 方法可以测试某个头部是否存在，使用它的 get () 方法可以取得某个头部的值。HTTP 头部的名字是不区分大小写的，因此可以给这两个方法传入小写甚至混合大小写形式的头部名。
+
+Headers 对象也是一个可迭代对象，需要时也可以这样用：
+
+```javascript
+fetch(url).then(response => {
+  for(let [name,value] of response.headers) {
+    console.log(`${name}: ${value}`);
+  }
+});
+```
+
+如果浏览器响应了 fetch () 请求，那么返回的期约就会以一个 Response 对象兑现，包括响应 404 Not Found 和 500 Internal Server Error。fetch () 只在自己根本联系不到服务器时才会拒绝自己返回的期约。如果用户的计算机断网了、服务器不响应了，或者 URL 指定的主机不存在，才会发生这种情况。因为这些情况对任何网络请求都可能发生，所以最好在任何 fetch () 调用后面都包含一个 .catch () 子句。
+
+### 设置请求参数
+
+有时候，除了 URL 还需要在发送请求时传递额外的参数。此时可以在 URL 后面加个 ?，然后以名 / 值对形式传递参数。URL 和 URLSearchParams 类（11.9 节介绍过）可以让构建这种形式的 URL 更方便，而 `fetch()` 函数也接收 URL 对象作为其第一个参数，因此可以像下面这样在 `fetch()` 请求中包含请求参数：
+
+```设置请求头部javascript
+async function search(term) {
+  let url = new URL('/api/search');
+  url.searchParams.set('q', term);
+  let response = await fetch(url);
+  if (!response.ok) throw new Error(response.statusText);
+  let resultArray = await response.json();
+  return resultArray;
+}
+```
+
+### 设置请求头部
+
+有时候，还需要为 `fetch()` 请求设置一些头部。比如，如果要请求的 API 校验凭据，可能需要包含 `Authorization` 头部，在其中附上相应的凭据。为此，可以使用两个参数版的 `fetch()`。与以前一样，第一个参数还是一个用于指定 URL 的字符串或 URL 对象。第二个参数用于提供额外选项，包括请求头部：
+
+```javascript
+let authHeaders = new Headers();
+// 除非建立的是 HTTPS 连接，否则不要使用 Basic 认证。
+authHeaders.set('Authorization', 
+                'Basic ' + btoa(`${username}:${password}`));
+fetch('/api/users', { headers: authHeaders })
+  .then(response => response.json())    // 省略错误处理代码
+  .then(userList => displayUsers(userList));
+```
+
+可以在 `fetch()` 的第二个参数中指定很多其他选项，稍后我们会看到。另一种替代给 `fetch()` 传两个参数的方法是把同样的两个参数传给 `Request()` 构造函数，然后再将创建的 `Request` 对象传给 `fetch()`：
+
+```javascript
+let request = new Request(url, { headers });
+fetch(request).then(response => ...);
+```
+
+### 解析响应体
+
+在前面演示的发送 `fetch()` 请求的三步流程中，第二步结束时调用了 `Response` 对象的 `json()` 或 `text()` 方法，并返回它们返回的期约对象。然后第三步从期约解决开始，直接拿到了响应体解析后的 JSON 对象或文本字符串。
+
+这应该是两种最常见的情况，但并不是获取服务器响应体的全部方式。除了 `json()` 和 `text()`，`Response` 对象还有以下几个方法。
+
+#### `arrayBuffer()`
+
+这个方法返回一个期约，解决为一个 `ArrayBuffer`。在响应包含二进制数据时可以使用这个方法，基于得到的 `ArrayBuffer` 创建一个定型数组（见 11.2 节）或一个 `DataView` 对象（见 11.2.5 节），然后再读取二进制数据。
+
+#### `blob()`
+
+这个方法返回一个期约，解决为一个 `Blob` 对象。本书并没有详尽介绍 `Blob`，它是 “Binary Large Object”（二进制大对象）的意思，在需要处理大量二进制数据的时候会用到。把响应体转换为 `Blob` 时，浏览器实现可能会将响应数据读入一个临时文件，然后返回一个表示该临时文件的 `Blob` 对象。因此，`Blob` 对象不允许像 `ArrayBuffer` 那样随机访问响应体。拿到一个 `Blob` 后，可以通过 `URL.createObjectURL()` 创建一个引用它的 URL，或者使用基于事件的 `FileReader` API 以字符串或 `ArrayBuffer` 的形式异步获取它的内容。在写作本书时，有些浏览器也定义了基于期约的 `text()` 和 `arrayBuffer()` 方法，为获取 `Blob` 的内容提供了直接的手段。
+
+#### `formData()`
+
+这个方法返回一个期约，解决为一个 `FormData` 对象。如果 `Response` 响应体是以`multipart/form-data` 格式编码的，应该使用这个方法。这种编码格式常见于向服务器提交的 `POST` 请求中，在服务器响应中并不常见，所以这个方法不太常用。
+
+### 流式访问响应体
+
+除了分别以某种形式返回完整响应体的 5 个异步响应方法，还可以流式访问响应体。在需要分块处理通过网络接收到的响应时可以采取这种方式，不过，流式访问响应体也可以用于显示进度条，以便用户看到下载进度。
+
+`Response` 对象的 `body` 属性是一个 `ReadableStream` 对象。如果已经调用了 `text()` 或 `json()` 等读取、解析和返回响应体的方法，那么 `bodyUsed` 属性会变成 `true`，表示 `body` 流已经读完了。如果 `bodyUsed` 属性是 `false`，那就意味着该流尚未被读取。此时，可以在 `response.body` 上调 用 `getReader()` 获取该读取器对象，然后通过这个读取器对象的 `read()` 方法异步从流中读取文本块。这个 `read()` 方法返回一个期约，解决为一个带有 `done` 和 `value` 属性的对象。如果响应体整个都读完了或者流被关闭了，`done` 会变成 `true`，而 `value` 要么是下一个 `Uint8Array` 块，要么会在没有更多块时变成 `undefined`。
+
+如果使用 `async` 和 `await`，流式 API 还算简单直观。如果你以原始的形式使用它，可能会复杂得吓人。示例 15-10 通过定义一个 `streamBody()` 函数演示了这个 API。假设你想下载一个大 JSON 文件，并向用户报告下载进度。此时不能使用 `Response` 对象的 `json()` 方法，但可以使用这个 `streamBody()` 函数，如下所示（假设已经定义了一个 `updateProgress()`函数，可以用它设置 HTML `<progress>` 元素的 `value` 属性）：
+
+```javascript
+fetch('/big.json')
+  .then(response => streamBody(response, updateProgress))
+  .then(bodyText => JSON.parse(bodyText))
+  .then(handleBigJSONObject);
+```
+
+这个 `streamBody()` 函数可以像示例 15-10 所示的那样实现。
+
+示例 15-10：流式访问 `fetch()` 请求的响应体
+
+```javascript
+/**
+ * 一个流式读取 fetch() 请求返回 Response 对象的异步函数
+ * 以 Response 对象作为第一个参数，后面是两个可选的回调
+ * 
+ * 如果传递了一个函数作为第二个参数，则 reportProgress
+ * 回调对于已经处理的每个块都会被调用一次。调用时传入的第一个
+ * 参数是已经处理块的总字节数，第二个参数是一个介于 0 和 1
+ * 之间的数，表示下载进度如何。如果 Response 对象没有
+ * "Content-Length" 头部，那么第二个参数始终将是 NaN
+ * 
+ * 如果想在读取数据时处理其中的数据，可以传递一个函数作为
+ * 第三个参数，每个块都会以 Uint8Array 对应形式传递给这个名
+ * 为 processChunk 的函数
+ * 
+ * streamBody() 返回一个新的、解决为一个字符串。如果提供了
+ * processChunk 回调，则这个字符串将是将该函数返回值连接得到
+ * 的结果。否则，这个字符串将是把每个块转换为 UTF-8 字符串后
+ * 拼接起来得到的结果
+ */
+async function streamBody(response, reportProgress, processChunk) {
+    let bytesRead = 0; // 已读取多少字节，或者如果没有头部就是 NaN
+    let expectedBytes = parseInt(response.headers.get("Content-Length"));
+    let bytesRead = 0; // 已经读取了多少字节
+    let reader = response.body.getReader(); // 读取一块数据
+    let decoder = new TextDecoder("utf-8"); // 用于将字节转换为文本
+    let body = ""; // 已经读取的文本
+
+    while (true) {
+        let { done, value } = await reader.read(); // 循环直到在下面退出
+        if (value) { // 如果得到一个字节数组：
+            if (processChunk) { // 如果传了这个回调
+                let processed = processChunk(value); // 调用回调处理数据
+                if (processed) { // 如果回调返回处理后的值
+                    body += processed;
+                }
+            } else { // 否则，把字节转换
+                body += decoder.decode(value, { stream: true }); // 为文本
+            }
+
+            if (reportProgress) { // 如果传了进度回调
+                bytesRead += value.length; // 则调用它报告进度
+                reportProgress(bytesRead, bytesRead / expectedBytes);
+            }
+        }
+        if (done) { // 如果这是最后一个块
+            break; // 则退出循环
+        }
+    }
+    return body; // 返回累积的响应文本
+}
+```
+
+在写作本书时，流式 API 还有可能会改进。比如，有计划要将 `ReadableStream` 对象变成异步可迭代对象，以便在 `for/await` 循环（参见 13.4.1 节）中使用。
+
+### 指定请求方法和请求体
+
+目前为止，在每个 `fetch()` 的例子中我们发送的都是 HTTP（或 HTTPS）GET 请求。如果想使用不同的请求方法（如 POST、PUT 或 DELETE），可以直接使用两个参数版的 `fetch()`，传入带 `method` 参数的选项对象：
+
+```javascript
+fetch(url, { method: "POST" }).then(r => r.json()).then(handleResponse);
+```
+
+POST 和 PUT 请求通常都有一个请求体，该请求体包含要发给服务器的数据。只要 `method` 方法不是 GET 或 HEAD（这两个方法不支持请求体），都可以在选项对象中设置 `body` 属性指定请求体：
+
+```javascript
+fetch(url, {
+    method: "POST",
+    body: "hello world"
+})
+```
+
+在指定请求体时，浏览器会自动添加合适的 “Content-Length” 请求头。如果请求体中是字符串（像上面的示例那样），浏览器默认的 “Content-Type” 头部是 “text/plain;charset=UTF-8”。如果你也指定一个字符串请求体，那可能需要覆盖这个头部值，为它指定 “text/html” 或 “application/json” 等更具体的类型：
+
+```javascript
+fetch(url, {
+    method: "POST",
+    headers: new Headers({ "Content-Type": "application/json" }),
+    body: JSON.stringify(requestBody)
+})
+```
+
+传给 `fetch()` 的选项对象的 `body` 属性不一定是字符串值。如果有保存在定型数组或 `DataView` 对象或 `ArrayBuffer` 中的二进制数据，也可以将 `body` 属性设置为相应的值，并指定恰当的 “Content-Type” 头部。如果是 Blob 中的二进制数据，可以简单地将 `body` 设置为该 Blob，Blob 自身有一个 `type` 属性，用于标明自己的上下文类型，而这个属性的值会用作 “Content-Type” 头部的默认值。
+
+对于 POST 请求，常见的做法是在请求体中传入一组名 / 值参数（而不是将它们编码后作为查询参数附在 URL 后面）。为此有两种做法：
+
+- 可以通过 `URLSearchParams`（本节前面例子中有它的用法示例，相关介绍在 11.9 节）指定参数的名和值，然后把这个 `URLSearchParams` 对象作为 `body` 属性的值。这样做，请求体将被设置为一个类似 URL 查询参数的字符串，而 “Content-Type” 头部也会自动被设置为 “application/x-www-form-urlencoded; charset=UTF-8”。
+- 如果使用 `FormData` 对象指定参数的名和值，则请求体将使用更冗余的多部分编码格式，而 “Content-Type” 也将被设置为 “multipart/form-data; boundary=……”，省略号代表与请求体匹配的边界字符串。`FormData` 对象特别适合上传长内容，或者 `File`、`Blob` 这样可能分别有自己特定 “Content-Type” 的对象。可以通过把一个 `<form>` 元素传给 `FormData()` 构造函数来创建 `FormData` 对象，并通过其中的值初始化 `FormData` 对象。但是也可以调用 `FormData()` 构造函数而不传参数，来创建 “multipart/form-data” 请求体，然后再使用 `set()` 和 `append()` 方法来初始化它所表示的名 / 值对。
+
+### 通过 `fetch()` 上传文件
+
+从用户计算机向服务器上传文件是一个常见的任务，可以通过将 `FormData` 对象作为请求体来实现。获得 `File` 对象的一个常用方式是在网页上显示一个 `<input type="file">` 元素，然后监听该元素的 “change” 事件。当 “change” 事件发生时，这个输入元素的 `files` 数组应该至少包含一个 `File` 对象。`File` 对象也可以通过 HTML 的拖放 API 获取。本书没有介绍该 API，你可以从传递给事件监听器（作用于 “drop” 事件）的事件对象的 `dataTransfer.files` 数组获取文件。
+
+另外也要记住，`File` 对象是 `Blob` 的一种，有时候上传 `Blob` 比较有用。假设我们要写一个 Web 应用，允许用户在一个 `<canvas>` 元素上画画，那么可以使用类似以下代码把用户画的 PNG 文件形式上传：
+
+```javascript
+// canvas.toBlob() 函数是基于回调的
+// 而这里对该方法基于 Promise 的一个封装
+async function getCanvasBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(resolve);
+  });
+}
+
+// 这个函数可以基于画布上传 PNG 文件
+async function uploadCanvasImage(canvas) {
+  let pngblob = await getCanvasBlob(canvas);
+  let formdata = new FormData();
+  formdata.set('canvasImage', pngblob);
+  let response = await fetch('/upload', { method: "POST", body: formdata });
+  let body = await response.json();
+}
+```
+
+### 跨源请求
+
+多数情况下，我们在 Web 应用中都是使用 `fetch()` 从自己的服务器请求数据。这种请求也被称为同源请求，因为传给 `fetch()` 的 URL 与包含发送请求脚本的文档是同源的（协议、主机名及端口都相同）。
+
+出于安全考虑，浏览器通常不允许跨源网络请求（当然跨源请求图片和脚本是例外）。不过，利用 CORS（Cross-Origin Resource Sharing，跨资源共享）可以实现安全的跨源请求。在通过 `fetch()` 请求跨源 URL 时，浏览器会为请求添加一个 “Origin” 头部（且不允许通过 `headers` 属性覆盖它的值）以告知服务器这个请求来自不同源的文档。如果服务器对这个请求的响应中包含恰当的 “Access-Control-Allow-Origin” 头部，则请求可以继续。否则，如果服务器没有明确允许请求，则 `fetch()` 返回的期约会被拒绝。
+
+### 中断请求
+
+有时候我们可能想中断已经发出的 `fetch()` 请求，比如用户单击了取消按钮或者请求时间过长。此时，`fetch API` 支持使用 `AbortController` 和 `AbortSignal` 类来中断请求（这两个类定义于通用的 `fetch` 模块，也能在其他 API 中使用）。
+
+如果知道可能要中断某个 `fetch()` 请求，那在创建请求前要先创建一个 `AbortController` 对象。这个控制器对象的 `signal` 属性是一个 `AbortSignal` 对象。在传给 `fetch()` 的第二个请求对象参数中，可以把这个信号对象以 `signal` 属性的值传进去。然后，可以在想中断请求的时候调用控制器对象的 `abort()` 方法，这将会导致与该请求相关的任何期约对象以一个异常被拒绝。
+
+下面的例子展示了通过 `AbortController` 机制对 `fetch()` 请求超时进行强制中断：
+
+```javascript
+// 这个函数与 fetch() 类似，但增加了对超时的支持
+// 即该函数在 options 对象上设置 timeout 属性。如果
+// 过了 timeout 毫秒后请求还没有完成，则中断它
+function fetchWithTimeout(url, options = {}) {
+  if (options.timeout) { // 如果有 timeout 属性且值不是 0
+    let controller = new AbortController(); // 创建中断控制器
+    let signal = controller.signal; // 获取 signal 属性
+    options.signal = controller.signal;
+    // 启动计时器，在超时要毫秒后发出中断信号
+    // 注意，我们并未考虑取消这个计时器。在请求
+    // 完成后调用 abort() 没有影响
+    setTimeout(() => { controller.abort(); }, options.timeout);
+  }
+  // 现在开始正常发送请求
+  return fetch(url, options);
+}
+```
+
+### 其他请求选项
+
+我们知道可以给 `fetch()`（或者 `Request()` 构造函数）传第二个参数，也就是选项对象，用于指定请求方法、请求头或请求体。这个选项对象还支持其他一些选项。
+
+#### cache
+
+​	这个属性可以用来覆盖浏览器默认的缓存行为。HTTP 缓存这个话题非常复杂，已经超出了本书范围。但如果你了解一些它的工作原理，那可以使用下列值来	控制缓存行为。
+
+#### "default"
+
+​	这个值指定默认缓存行为。如果缓存中的响应还 “新鲜”（fresh），就直接从缓存提供响应；如果缓存中的响应已 “腐败”（stale），则在提供前先重新校验。
+
+##### "no-store"
+
+​	这个值会让浏览器忽略其缓存。发送请求时不会查看缓存，响应回来时也不更新缓存。
+
+##### "reload"
+
+​	这个值告诉浏览器始终要正常发送网络请求，忽略缓存。但是，响应回来以后，要把响应存在缓存里。
+
+##### "no-cache"
+
+​	这个（名字有点误导性的）值告诉浏览器不要提供缓存中新鲜的值。无论缓存中的值新鲜还是腐败，都必须先重新校验再返回。
+
+##### "force-cache"
+
+​	这个值告诉浏览器即使缓存的值已腐败也要用缓存的值作为响应。
+
+#### redirect
+
+这个属性控制浏览器如何处理服务器的重定向响应。有 3 个合法的值。
+
+##### "follow"
+
+​	这是默认值，它让浏览器自动跟随重定向。如果使用这个默认值，则通过 fetch () 获取的 Response 对象的 status 属性应该不会是 300 到 399。
+
+##### "error"
+
+​	这个值会让 fetch () 在服务器返回重定向响应时拒绝其返回的期约。
+
+##### "manual"
+
+​	这个值表示开发者想手工处理重定向响应，而 fetch () 返回的期约可能会被解决为一个 status 在 300 到 399 之间的 Response 对象。这种情况下，必须使用 	Response 的 “Location” 头部手工跟进重定向。
+
+#### referrer
+
+​	这个属性是一个包含相对 URL 的字符串，用于指定 HTTP 的 “Referer” 头部（由于历史原因，这个头部一直被错拼成包含 3 个 r 的版本）的值。如果把这个属	性设置为空字符串，那么请求就会省略 “Referer” 头部。
+
+## 15.11.2 服务器发送事件
+
+HTTP 协议的一个 Web 得以构建于其上的特性，就是客户端发起请求，服务器响应该请求。不过，某些 Web 应用却需要在服务器发生事件时，接收来自服务器发送的通知。
+
+HTTP 天生并不具备这个特性，但随着技术的发展，客户端向服务器发送请求之后，两端都可以不关闭连接。此时一旦服务器有事情要通知客户端，就可以把数据写入这个连接并保持其打开。效果就如同客户端发送了一次网络请求，服务器以缓慢而突发的方式响应，每次响应之间都会经历比较长的暂停。像这样的网络连接通常并不会永远打开，但如果客户端检测到连接已关闭，可以再发一次请求，重新打开一个新连接。
+
+这种让服务器向客户端发送消息的技术效率非常高（尽管服务器端的成本可能较高，因为服务器必须对它的所有客户端都维护一个活动连接）。由于这是一个有用的编程模式，客户端 JavaScript 以 `EventSource API` 的形式对其给予支持。要创建与服务器的这种长时间存在的请求连接，只要向 `EventSource()` 构造函数传入一个 URL 即可。当服务器将（适当格式化的）数据写入这个连接时，`EventSource` 对象会将它们转换为客户端能够监听到的事件：
+
+```javascript
+let ticker = new EventSource("stockprices.php");
+ticker.addEventListener("bid", (event) => {
+  displayEventId(event.data);
+});
+```
+
+与消息事件关联的事件对象有一个 `data` 属性，保存着服务器针对这次事件发送过来的字符串。与其他事件对象一样，这个事件对象也有一个 `type` 属性，指定了这个事件的名字。服务器确定生成的事件的类型。如果服务器在写入的数据中省略了事件名，那么默认的事件类型就是 “message”。
+
+这个 SSE（Server-Sent Event，服务器发送事件）协议很好理解。客户端（在它创建 `EventSource` 对象时）发起对服务器的连接，服务器保持连接打开。一旦有事件发生，服务器就向连接中写入几行文本。通过网络传送的消息大概类似如下所示（不包含注释）：
+
+```plaintext
+event: bid // 设置事件对象的类型
+data: GOOO // 设置 data 属性
+data: 999 // 附加一个换行符和更多数据
+// 空行表示事件结束
+```
+
+这个协议还允许为事件指定一个 ID，以便客户端重新建立连接时告诉服务器它上一次接收到的事件 ID 是什么，而服务器可以重新发送它错过的事件。不过，像这样的细节对客户端并不常见，因此这里就不讲述了。
+
+SSE 的一个典型应用是类似在线聊天一样的多用户协作。聊天客户端可以使用`fetch()`把消息发送到聊天室，通过`EventSource`对象订阅聊天信息流。示例 15-11 展示了通过`EventSource`写这么一个聊天客户端有多简单。
+
+示例 15-11：使用`EventSource`实现简单的聊天客户端
+
+```html
+<!DOCTYPE html>
+<html>
+<head><title>SSE Chat</title></head>
+<body>
+  <!-- 聊天室的UI只有一个文本输入字段 -->
+  <!-- 需要先登录，输入个人账号才能聊天 -->
+  <input id="input" style="width:100%; padding:10px; border:solid black 2px"/>
+  <script>
+    // 注意一些UI的细节
+    let nick = prompt("Enter your nickname");   // 获取用户昵称
+    let input = document.getElementById("input"); // 找到输入字段
+    input.focus();                               // 设置键盘焦点
+
+    // 使用 EventSource 注册新消息通知
+    let chat = new EventSource("/chat");
+    chat.addEventListener("chat", event => {  // 收到聊天消息时
+      let div = document.createElement("div"); // 创建 <div> 元素
+      div.append(event.data);                  // 添加消息的文本
+      input.before(div);                       // 添加到输入字段前
+      input.scrollIntoView();                  // 确保输入元素可见
+    });
+
+    // 使用 fetch() 把用户消息发送到服务器
+    input.addEventListener("change", () => {  // 当用户按回车时
+      fetch("/chat", {                         // 发送HTTP请求
+        method: "POST",
+        body: nick + ": " + input.value        // 包含用户昵称和输入
+      }).catch(console.error);                 // 忽略响应，但打印错误
+      input.value = "";                        // 清除输入框
+    });
+  </script>
+</body>
+</html>
+```
+
+聊天程序的服务器端代码并不比客户端代码复杂多少。示例 15-12 是一个简单的 Node HTTP 服务器。当客户端请求根 URL“/” 时，这个服务器会发送示例 15-11 所示的客户端代码。当客户端向 URL“/chat” 发送 GET 请求时，它会保存响应对象并保持连接打开。而当客户端向 URL“/chat” 发送 POST 请求时，它会把请求体作为聊天消息并对每个保存的响应对象使用 “text/event-stream” 格式。服务器代码监听端口 8080，因此在通过 Node 运行后，在浏览器中访问`http://localhost:8080`即可连接到服务器，然后就可以跟自己聊天了。
+
+示例 15-12：SSE 聊天服务器
+
+```javascript
+// 这是服务器端 JavaScript，需要在 Node.js 环境下执行
+// 这里实现了一个简单聊天，包含匿名聊天室
+// POST 新消息到 /chat，或 GET /chat 得到
+// text/event-stream 格式的消息；GET / 则
+// 返回包含客户端聊天 UI 的简单 HTML 文件
+const http = require("http");
+const fs = require("fs");
+const url = require("url");
+
+// 聊天客户端的 HTML 文件。在下面使用
+const clientHTML = fs.readFileSync("chatclient.html");
+
+// 保存其中发送事件的 ServerResponse 对象的数组
+let clients = [];
+
+// 创建一个新服务器，监听端口 8080
+let server = new http.Server();
+server.listen(8080); // 连接 localhost:8080 使用它
+
+// 服务器在收到新请求时，将运行这个函数
+server.on("request", (request, response) => {
+  // 解析请求的 URL
+  let pathname = url.parse(request.url).pathname;
+
+  // 如果请求的是“/”，发送客户端聊天 UI
+  if (pathname === "/") {
+    response.writeHead(200, {"Content-Type": "text/html"}).end(clientHTML);
+  }
+  // 否则对于任何非
+  // “GET”和“POST”方法，都发送 404 错误
+  else if (pathname !== "/chat" || 
+           (request.method !== "GET" && request.method !== "POST")) {
+    response.writeHead(404).end();
+  }
+  // 如果 /chat 请求方法是 GET，则说明有客户端连接
+  else if (request.method === "GET") {
+    acceptNewClient(request, response);
+  }
+  // 否则 /chat 请求是 POST 的一条新消息
+  else {
+    broadcastNewMessage(request, response);
+  }
+});
+
+// 这里处理对 /chat 端点的 GET 请求，该请求
+// 在客户端创建新 EventSource 对象（或者
+// EventSource 对象自动重连）时生成
+function acceptNewClient(request, response) {
+  // 记住这个响应对象，以便稍后可以向它发送消息
+  clients.push(response);
+
+  // 如果客户端关闭了连接，就从活动
+  // 客户端数组中删除相应的响应对象
+  request.connection.on('end', () => {
+    clients.splice(clients.indexOf(response), 1);
+    response.end();
+  });
+
+  // 设置头且只向这一个客户端发送初始的聊天事件
+  response.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache'
+  });
+  response.write('event: chat\ndata: Connected\n\n');
+
+  // 注意：这里有意没有调用 response.end()
+  // 保持连接打开是 SSE 运行的关键
+}
+
+// 这个函数在响应对 /chat 端点的 POST 请求时调用
+// 每当用户输入新消息时客户端都会发送这个请求
+async function broadcastMessage(request, response) {
+  // 读取请求体以获取用户消息
+  let body = '';
+  request.setEncoding('utf8');
+  for await (let chunk of request) {
+    body += chunk;
+  }
+
+  // 读取完响应体后，发送一个空响应并关闭连接
+  response.writeHead(200);
+  response.end();
+
+  // 以 text/event-stream 形式来格式化消息，
+  // 解析消息的 "data"
+  let message = `data: ${body.replace('\n', '\ndata: ')}`;
+
+  // 为消息数据添加一个前缀，将其定义为 "chat" 事件
+  // 并在后面附加两个换行符，标记该事件的结尾
+  let event = `event: chat\n${message}\n\n`;
+
+  // 下面把这个事件传递给所有监听的客户端
+  clients.forEach(client => client.write(event));
+}
+```
+
+## 15.11.3 WebSocket
+
+WebSocket API 是一个复杂、强大的网络协议对外暴露的简单接口。WebSocket 允许 JavaScript 代码在浏览器中与服务器方便地交换文本和二进制消息。与服务器发送事件（SSE）类似，客户端必须建立连接，而连接一旦建立，服务器就可以异步向客户端发送消息。与 SSE 不同，WebSocket 支持二进制消息，而且消息可以双向发送，而不仅仅是从服务器向客户端发消息。
+
+支持 WebSocket 的网络协议是对 HTTP 的扩展。虽然 WebSocket API 是传统的低级网络套接接口，但标识连接端点的并不是 IP 地址和端口。在使用 WebSocket 协议连接服务时，要通过 URL 指定该服务，就像使用 Web 服务一样。WebSocket URL 协议以 `ws://` 而不是 `https://` 开头（浏览器通常会限制只能在安全的 `https://` 连接加载的页面中使用 WebSocket）。
+
+要建立 WebSocket 连接，浏览器首先要建立一个 HTTP 连接，并向服务器发送这个请求，要在客户端 JavaScript 中使用 WebSocket，服务器必须遵循 WebSocket 协议，按照该协议发送和接收数据。如果你已经部署了这么一个 WebSocket 服务器，那本节将介绍与连接的客户端有关的一切。假如你的服务器并不支持 WebSocket 协议，可以考虑使用服务器发送事件（参见 15.11.2 节）。
+
+### 创建、连接及断开连接
+
+如果想与支持 WebSocket 的服务器通信，需要创建一个 `WebSocket` 对象，指定表示服务器的 `wss://` URL 和要使用的服务：
+
+```javascript
+let socket = new WebSocket("wss://example.com/stockticker");
+```
+
+创建 WebSocket 时，连接过程会自动开始，但新创建的 WebSocket 在第一次返回时不会建立连接。
+
+这个套接字对象的 `readyState` 属性表明了当前的连接状态。这个属性可能包含下列值：
+
+#### WebSocket.CONNECTING
+
+​	WebSocket 正在连接。
+
+#### WebSocket.CLOSING
+
+​	WebSocket 已经连接，可以通信了。
+
+#### WebSocket.CLOSING
+
+​	WebSocket 正在关闭。
+
+#### WebSocket.CLOSED
+
+​	WebSocket 已经关闭，不能再通信了。初始连接失败时也是这个状态。
+
+当 WebSocket 的状态从 `CONNECTING` 转变为 `OPEN` 时，它会触发 “open” 事件。可以通过设置 WebSocket 对象的 `onopen` 属性或调用该对象的 `addEventListener()` 来监听这个事件。
+
+如果 WebSocket 连接发生了协议错误或其他错误，WebSocket 对象会触发 “error” 事件。可以通过设置 `onerror` 来定义事件处理程序，也可以使用 `addEventListener()`。
+
+在使用完 WebSocket 之后，可以调用 WebSocket 对象的 `close()` 方法关闭连接。当连接状态变成 CLOSED 时，WebSocket 对象会触发 “close” 事件，可以设置 `onclose` 属性来监听这个事件。
+
+### 通过 WebSocket 发送消息
+
+要向位于 WebSocket 连接另一端的服务器发送消息，调用 WebSocket 对象的 `send()` 方法。`send()` 方法接收一个消息参数，可以是字符串、Blob、ArrayBuffer、定型数组或 DataView 对象。
+
+`send()` 方法会把要发送的消息存在缓冲区，并在实际发送前返回。WebSocket 对象的 `bufferedAmount` 属性保存着还在缓冲区未发送的字节数（奇怪的是，当这个值变成 0 时 WebSocket 居然不触发任何事件）。
+
+### 通过 WebSocket 接收消息
+
+要通过 WebSocket 从服务器接收消息，注册 “message” 事件处理程序，可以设置 WebSocket 对象的 `onmessage` 属性，也可以调用 `addEventListener()`。与 “message” 事件关联的事件对象是 `MessageEvent` 的实例，其 `data` 属性包含服务器的消息。如果服务器发送了 UTF-8 编码的文本，`event.data` 就是保存该文本的字符串。如果服务器发送二进制格式的消息，则 `data` 属性（默认）是表示该数据的 Blob 对象。如果你希望接收 ArrayBuffer 而不是 Blob，可以把 WebSocket 对象的 `binaryType` 属性设置为 `arraybuffer`。
+
+还有其他一些 Web API 也使用 `MessageEvent` 对象交换消息。其中有的使用结构化克隆算法（参见 15.10.4 节）通过消息传输复杂数据结构。WebSocket 不在其列：通过 WebSocket 交换的消息要么是 Unicode 字符的字符串，要么是字节的字符串（表现为 Blob 或 ArrayBuffer）。
+
+### 协议协商
+
+WebSocket 协议支持文本和二进制消息交换，但并未规定这些消息的结构或含义。使用 WebSocket 的应用必须在其提供的简单消息交换机制基础上自行协商通信协议。使用 `wss://` URL 可以为此提供方便，每个 URL 通常都有自己如何交换消息的规则。如果你的代码连接到 `wss://example.com/stockticker`，那可能就知道会收到关于股价的消息。不过，协议自身也会不断改进。如果一个假想的股票报价协议更新了，可以定义一个新 URL 并连接到更新服务，如 `wss://example.com/stockticker/v2`。但基于 URL 来区分版本还不够。对于已经随时间变化的复杂协议，最终可能出现多个版本的线上服务并存的局面，而客户端也分别支持不同版本的协议。
+
+基于这个问题，WebSocket 协议和 API 提供了应用级消息协商功能。在调用 `WebSocket()` 构造函数时，`wss://` URL 是第一个参数，但也可以传一个字符串数组作为第二个参数。传入这个参数后，就相当于把客户端能够处理的应用协议提供给服务器，由服务器从中选择一个协议（如果服务器不支持其中任何一个子协议，也可以报错）。连接建立以后，WebSocket 对象的 `protocol` 属性将保存服务器选择的子协议。
+
+# 15.12 存储
+
+Web 应用可以使用浏览器 API 在用户计算机上本地存储数据。客户端存储的目的是让浏览器能够记住一些信息。比如，Web 应用可以存储用户偏好，或者存储他们的完成状态，以便恢复上次离开时的情境。客户端存储是按起源来隔离的，因此来自一个站点的页面不能读取来自另一个站点的页面存储的数据。但来自同一站点的两个页面可以共享存储的数据，并将其作为一种通信机制。比如，在一个网页的表单中输入的数据可以在另一个页面中以表格形式显示出来。Web 应用可以选择它们存储数据的生命周期：可以临时存储，只保留到窗口关闭或浏览器退出；也可以保存在用户计算机上，持久化存储数月甚至数年。
+
+客户端存储分为如下几种形式。
+
+## Web Storage
+
+​	Web Storage API 包含 `localStorage` 和 `sessionStorage` 对象，本质上是映射字符串键和值的持久化对象。Web Storage 很容易使用，适合存储大量（不	是巨量）数据。
+
+## Cookie
+
+​	Cookie 是一种古老的客户端存储机制，是专门为服务端脚本使用而设计的。浏览器也提供了一种笨拙的 JavaScript API，可以在客户端操作 cookie，但这个 	API 很难用，而且只适合保存少量数据。另外，保存在 cookie 中的数据也会随 HTTP 请求发送给服务器，哪怕这些数据只对客户端有用。
+
+## IndexedDB
+
+​	IndexedDB 是一种异步 API，可以访问支持索引的对象数据库。
+
+>存储、安全与隐私
+>
+>浏览器经常主动提出要帮你记住密码，然后以加密形式将它们安全地存储在设备上。但本章讨论的所有客户端数据存储技术都不涉及加密。换句话说，应该假设 Web 应用会以未加密的形式将数据保存在用户的设备上。因此这些保存下来的数据可以被使用设备的其他用户或者潜入设备的恶意软件（如后门程序）访问到。为此，任何形式的客户端存储技术都不能用来保存密码、财务账号或其他类似的敏感信息。
+
+## 15.12.1 localStorage 和 sessionStorage
+
+Window 对象的 localStorage 和 sessionStorage 属性引用的是 Storage 对象。Storage 对象与普通 JavaScript 对象非常类似，只不过：
+
+- Storage 对象的属性必须是字符串；
+- Storage 对象中存储的属性是持久化的。如果你设置了 localStorage 对象的一个属性，然后用户刷新了页面，你的程序仍然可以访问在该属性中保存的值。
+
+例如，可以像下面这样使用 localStorage 对象：
+
+```javascript
+let name = localStorage.username;    // 查询存储的值
+if (!name) {
+  name = prompt("What is your name?"); // 问用户一个问题
+  localStorage.username = name;        // 存储用户的回答
+}
+```
+
+可以使用 delete 操作符删除 localStorage 和 sessionStorage 的属性，可以使用 for/in 循环或 Object.keys () 枚举 Storage 对象的属性。如果想删除 Storage 对象的所有属性，可以调用 clear () 方法：
+
+```javascript
+localStorage.clear();
+```
+
+Storage 对象也定义了 getItem ()、setItem () 和 removeItem () 方法，可以用来代替直接读写属性和 delete 操作符。
+
+别忘了 Storage 对象的属性只能存储字符串。如果想存取其他类型的数据，必须自己编码和解码。
+
+例如：
+
+```javascript
+// 如果存储数值，数值会自动转换为字符串
+// 别忘了在读取完这个值以后解析它
+localStorage.x = 10;
+let x = parseInt(localStorage.x);
+
+// 保存 Date 的时候把它转换为字符串，取得字符串后再解析它
+localStorage.lastRead = (new Date()).toUTCString();
+let lastRead = new Date(Date.parse(localStorage.lastRead));
+
+// JSON 编码器保存其他原始值或嵌套结构很方便
+localStorage.data = JSON.stringify({f:4, a:[1,2,3]}); // 编码存储
+let data = JSON.parse(localStorage.data); // 读取解码
+```
+
+### 存储的生命周期和作用域
+
+localStorage 和 sessionStorage 的差异主要体现在生命周期和作用域上。通过 localStorage 存储的数据是永久性的，除非 Web 应用用户通过浏览器（特定的界面）删除，否则数据会永远保存在用户设备上。
+
+localStorage 的作用域为文档来源。正如 15.1.8 节中解释的，文档来源由协议、域名和端口共同定义。所有同源文档都共享相同的 localStorage 数据（与实际访问 localStorage 的脚本的来源无关）。同源文档可以相互读取对方的数据，可以重写对方的数据。但非同源文档的数据相互之间是完全隔离的，既读不到也不能重写（即使它们运行的脚本来自同一台第三方服务器）。
+
+注意，localStorage 的作用域也受浏览器实现的限制。如果你使用 Firefox 访问某个网站，然后又使用 Chrome 访问，那么第一次访问时存储的任何数据都无法在第二次访问时存取。
+
+通过 sessionStorage 保存的数据与通过 localStorage 保存的数据的生命周期不同。sessionStorage 数据的生命周期与存储它的脚本所属的顶级窗口或浏览器标签页相同。窗口或标签页永远关闭后，通过 sessionStorage 存储的所有数据都会被删除（不过要注意，现代浏览器有能力再次打开最近关闭的标签页并恢复用户上次浏览的会话，因此这些标签页以及与之关联的 sessionStorage 的生命周期有可能比看起来更长）。
+
+sessionStorage 的作用域与 localStorage 类似，都是文档来源。换句话说，不同来源的文档永远不会共享 sessionStorage。但是，sessionStorage 的作用域也在窗口间隔离。如果用户在两个浏览器标签页中打开了同一来源的文档，这两个标签页的 sessionStorage 数据也是隔离的。一个标签页中运行的脚本不能读取或重写另一个标签页中的脚本写入的数据，即便两个标签页打开的是完全相同的页面，而且运行的脚本完全相同。
+
+### 存储事件
+
+存储在 localStorage 中的数据每次发生变化时，浏览器都会在该数据可见的其他 Window 对象（不包括导致该变化的窗口）上触发 "storage" 事件。如果浏览器打开了两个标签页，加载了两个同源页面，其中一个页面在 localStorage 中存储了一个值，则另一个标签页会收到 "storage" 事件。
+
+要注册`storage`事件，可以使用`window.onstorage`事件属性，或者调用`window.addEventListener()`并传入`"storage"`。
+
+与`storage`事件关联的事件对象有如下一些重要属性。
+
+#### key
+
+​	写入或删除项的键或名字。如果调用了`clear()`方法，这个属性的值为`null`。
+
+#### newValue
+
+​	保存变化的新值（如果有）。如果调用了`removeItem()`，这个属性不存在。
+
+#### oldValue
+
+​	保存变化的或被删除的已有项的旧值。如果添加了一个新属性（没有旧值），这个属性不存在。
+
+#### storageArea
+
+​	变化的`Storage`对象。通常是`localStorage`对象。
+
+#### url
+
+​	导致这次存储变化的脚本所在文档的 URL（字符串）。
+
+注意，`localStorage`和`storage`事件可以作为一种广播机制，即浏览器向所有当前浏览同一网站的窗口发送消息。比如，如果用户要求网站停止执行动画，网站可以把该偏好保存在`localStorage`中，以便未来访问时进行。通过存储这个偏好，它会生成一个事件，让其他显示相同网站的窗口也能遵守这个要求。
+
+还有一个例子，在一个 Web 版图片编辑应用中，工具面板会显示在一个分离的窗口中。当用户选择某种工具时，应用可以使用`localStorage`保存当前状态，并生成一个通知告诉其他窗口用户选择了新工具。
+
+## 15.12.2 cookie
+
+cookie 是浏览器为特定网页或网站保存的少量命名数据。cookie 是为服务端编程而设计的，在最低的层级上作为 HTTP 协议的扩展实现。cookie 数据会自动在浏览器与 Web 服务器之间传输，因此服务器端脚本可以读写存储在客户端的 cookie 值。本节演示客户端脚本如何使用`Document`对象的`cookie`属性操作 cookie 数据。
+
+>为什么叫 cookie？
+>
+>cookie 这个名字并没有什么深意，而且也是有先例的。在计算的历史长河中，“cookie” 或 “magic cookie” 曾被用于指代一小段数据，特别是某种特权或信任的凭据（类似于密码），可以证明身份或授权访问。在 JavaScript 中，cookie 用于保存状态并且可以作为浏览器的某种标识。但 JavaScript 中的 cookie 并不以任何形式进行加密，无论怎么说都是不安全的（尽管通过 HTTPS 连接发送 cookie 会安全一些）。
+
+操作 cookie 的 API 很古老也很难用，因为没有涉及方法，查询、设置和删除 cookie，都是通过读写`Document`对象的`cookie`属性实现的，而且要使用特定格式的字符串。每个 cookie 的生命周期和作用域可以通过`cookie`属性来个别指定，这些属性同样也以特定格式的字符串在同一个`cookie`属性上面设置。
+
+接下来几个小节会讲解如何查询和设置 cookie 值以及相应的属性。
+
+### 读取 cookie
+
+`document.cookie`属性返回一个包含与当前文档有关的所有 cookie 的字符串。这个字符串是一个分号和空格分隔的名 / 值对。cookie 的值就是名 / 值对中的值，不包含任何与该 cookie 关联的属性（后面会讨论 cookie 的属性）。为了使用`document.cookie`属性，通常必须调用`split()`方法把整个字符串拆分成个别的名 / 值对。
+
+从`cookie`属性中提取出某个 cookie 的值之后，必须根据 cookie 创建者的格式或编码来解释该值。例如，可能需要先把 cookie 值传给`decodeURIComponent()`，然后再传给`JSON.parse()`。
+
+下面的代码定义了一个`getCookies()`函数，可以解析`document.cookie`属性并返回一个对象。这个对象的属性中包含文档的 cookies 的名字和值：
+
+```javascript
+// 返回一个包含文档cookie的Map对象
+// 假设cookie的值是以encodeURIComponent()编码的
+function getCookies() {
+    let cookies = new Map();       // 要返回的对象
+    let all = document.cookie;     // 要解析的所有cookie的大字符串
+    if (all === "") return cookies; // 没有cookie
+    let list = all.split("; ");    // 将字符串拆分成一个个的名/值对
+    for(let cookie of list) {      // 对于列表中的每个cookie
+        let p = cookie.indexOf("="); // 找到等号的位置
+        if (p === -1) continue;    // 如果没有等号，就跳过
+        let name = cookie.substring(0, p); // 获取cookie的名字
+        let value = cookie.substring(p+1); // 获取cookie的值
+        value = decodeURIComponent(value); // 对值进行解码
+        cookies.set(name, value);  // 把cookie的名字和值
+    }
+    return cookies;
+}
+```
+
+### cookie 的属性：生命期与作用域
+
+除了名字和值，每个 cookie 还有可选的属性，用于控制其生命期和作用域。在介绍如何使用 JavaScript 设置 cookie 之前，必须先解释 cookie 的属性。
+
+cookie 默认的生命期很短，它们存储的值只在浏览器会话期间存在，用户退出浏览器后就会丢失。如果想让 cookie 的生命期超过单个浏览会话，必须告诉浏览器你希望保存它们多长时间（以秒为单位）。为此要指定 cookie 的`max-age`属性。如果指定了这样一个生命期，浏览器将把 cookie 存储在一个文件中，等时间到了再把它们删除。
+
+与`localStorage`和`sessionStorage`类似，cookie 的可见性由文档来源决定，但也由文档路径决定。换句话说，cookie 的作用域通过`path`和`domain`属性来配置。默认情况下，cookie 关联着创建它的网页，以及与该网页位于相同目录和子目录下的其他网页，这些网页都可以访问它。比如，如果网页`example.com/catalog/index.html`创建了一个 cookie，则该 cookie 对`example.com/catalog/order.html`和`example.com/catalog/widgets/index.html`同样可见，但对`example.com/about.html`不可见。
+
+这个默认的作用域通常也是我们想要的。但有时候，你可能希望让 cookie 对整个网站可见，无论它是哪个页面创建的。例如，用户在某个页面的表单中输入自己的收件地址，你希望保存这个地址并在用户下次再来时将其作为默认地址，同时也将其作为另一个页面中完全无关的要求用户填写账单地址的表单的默认值。为此，可以为 cookie 指定`path`属性，然后来自同一服务器的任何网页，只要其 URL 以你指定的路径前缀开头，就可以共享该 cookie。例如，如果`example.com/catalog/Widgets/index.html`设置的 cookie 将路径设置为`“/catalog”`，则该 cookie 也对`example.com/catalog/order.html`可见。或者，如果将路径设置为`“/”`，那么该 cookie 将对`example.com`域中的任何页面都可见，此时这个 cookie 的作用域就跟`localStorage`一样。
+
+默认情况下，cookie 的作用域按照文档来源区分。不过大网站可能需要跨子域名共享 cookie。例如，`order.example.com`对应的服务器可能需要读取`catalog.example.com`设置的 cookie 值，这时候就要用到`domain`属性了。如果 cookie 是由`catalog.example.com`上的页面设置的，且`path`属性被设置为`“/”`，`domain`属性被设置为`“.example.com”`，则该 cookie 将对`catalog.example.com`、`order.example.com`，以及任何`example.com`域名下的服务器有效。注意，不能将 cookie 的域设置为服务器父域名之外的其他域名。
+
+最后一个 cookie 属性是`secure`，一个布尔值，用于指定如何通过网络传输 cookie 值。默认情况下，cookie 是不安全的，换句话说，它们会在普通的不安全的 HTTP 连接上传输。如果把 cookie 设置为安全的，那么就只能在浏览器与服务器通过 HTTPS 或其他安全协议连接时传输 cookie。
+
+>Cookie 的限制
+>
+>Cookie 主要用于为服务器端脚本存储少量数据，而且该数据在每次请求相关 URL 时都会发送给服务器。定义 cookie 的标准建议浏览器厂商不限制 cookie 的数量和大小，但没有要求浏览器保留总共 300 个以上的 cookie、每个服务器 20 个 cookie 或每个 cookie 大小为 4KB（名字和值包含在这 4KB 之内）。实践中，浏览器通常允许大大超过 300 个 cookie，但某些浏览器仍然限制 4KB 大小。
+
+### 存储 cookie
+
+要给当前文档关联一个短暂的 cookie，只要把`document.cookie`设置为`name=value`形式的字符串即可：
+
+```javascript
+document.cookie = `version=${encodeURIComponent(document.lastModified)}`;
+```
+
+下次读取这个 cookie 属性时，你保存的这个名 / 值对就会包含在文档的 cookie 列表中。在 cookie 值不能包含分号、逗号或空格。为此，可能需要使用核心 JavaScript 的全局函数`encodeURIComponent()`先对值进行编码，然后再把它保存到 cookie 中。如果进行了编码，那么在将来读取 cookie 值时还必须使用对应的`decodeURIComponent()`函数来解码。
+
+简单名 / 值对形式的 cookie 只在当前会话期间存在，用户关闭浏览器就会丢失。要创建可以跨会话存在的 cookie，则要通过`max-age`属性指定其生命期（单位为秒）。此时保存在`cookie`属性中的字符串形式为`name=value; max-age=seconds`。下面这个函数在设置 cookie 时能够可选地添加`max-age`属性：
+
+```javascript
+// 把name/value对存储为cookie，使用
+// encodeURIComponent()编码值，以转义
+// 分号、逗号和空格。如果daysToLive是个数值，则设置max-age属性，从而让cookie
+// 在指定的天数后过期。否则，cookie是会话cookie
+function setCookie(name, value, daysToLive=null) {
+    let cookie = `${name}=${encodeURIComponent(value)}`;
+    if (daysToLive !== null) {
+        cookie += `; max-age=${daysToLive*86400}`;
+    }
+    document.cookie = cookie;
+}
+```
+
+类似地，可以向`document.cookie`属性上追加`path=value`或`domain=value`这样的字符串来设置 cookie 的路径和域属性。要设置`secure`属性，只要追加`;secure`即可。
+
+要修改 cookie 的值，需要以相同的名字、路径和域再设置一次它的值。在修改 cookie 值时，可以通过指定一个新的`max-age`属性修改 cookie 的生命期。
+
+要删除 cookie，需要以相同的名字、路径和域名再设置一次，指定一个任意值（或空值），并将 `max-age` 属性指定为 0。
+
+## 15.12.3 IndexedDB
+
+Web 应用架构一直以来都是客户端上的 HTML、CSS 和 JavaScript 和服务器上的数据库。因此，听说 Web 平台支持一个简单的对象数据库，可以通过 JavaScript API 在用户计算机上持久存储 JavaScript 对象且按需查询，你可能会很惊讶。
+
+IndexedDB 是一个对象数据库，不是关系型数据库，比支持 SQL 查询的数据库更简单。而且比 localStorage 提供的键 / 值对存储机制更强大、高效和可靠。与 localStorage 类似，IndexedDB 数据库的作用域限定为包含文档的来源。换句话说，两个同源的网页可以互相访问对方的数据，但不同源的网页则不能相互访问。
+
+每个来源可以有任意数量的 IndexedDB 数据库。每个数据库的名字必须在当前来源下唯一。在 IndexedDB API 中，数据库就是一个名为**对象存储**的集合。顾名思义，对象存储中存储的是对象。对象会使用结构化克隆算法（参见 15.10.4 节）序列化为对象存储。这意味着你存储的对象可以拥有 Map、Set 或定型数组作为属性值。每个对象必须有一个键，可以用于排序和从存储中检索。键必须唯一（相同存储中的两个对象不能使用相同的键），而且必须有自然顺序以便排序。JavaScript 字符串、数值和 Date 对象都是有效的键。IndexedDB 数据库可以自动为插入数据库中的每个对象生成一个唯一的键。不过，通常插入对象存储中的对象都会有一个属性适合作为键。在这种情况下，可以在创建对象存储时为该属性指定一个 “**键路径**”。从概念上讲，键路径是一个值，它告诉数据库如何从对象存储中找键。
+
+除了以对象存储中对象的主键值检索对象，有时候也需要按照对象其他属性的值来搜索。为此，可以在对象存储上定义任意数量的**索引**（索引对象存储的能力正是 IndexedDB 名字的由来）。每个索引为存储的对象定义了一个次键。这些索引一般并不是唯一的，因此多个对象可能匹配一个键值。
+
+IndexedDB 提供了**原子保证**，即查询和更新数据库会按照事务进行分组，要么全部成功，要么全部失败，永远不会让数据库处于未定义、部分更新的状态。IndexedDB 中的事务比很多数据库 API 都简单，稍后我们还会介绍。
+
+从概念上讲，IndexedDB API 非常简单。要查询或更新数据库，首先要打开对应的数据库（通过名字）。然后，创建一个事务对象并使用该对象查找数据库中相应的对象存储（同样通过名字）。最后，通过调用该对象存储的 `get()` 方法查询对象、或通过调用 `put()` 方法存储新对象（或者如果想避免重写已有对象，可以调用 `add()` 方法）。
+
+如果想查询键在某个范围内的对象，需要创建一个 `IDBRange` 对象并指定范围的上、下边界，然后把它传给对象存储的 `getAll()` 或 `openCursor()` 方法。
+
+如果想使用次键来查询，可以先查找对象存储的命名索引，然后调用该索引对象的 `get()`、`getAll()` 或 `openCursor()` 方法，传入一个键或一个 `IDBRange` 对象。
+
+不过，由于 IndexedDB API 是异步的（因此 Web 应用可以使用它而不阻塞浏览器的主 UI 线程），所以这种概念上的简化并不容易理解。IndexedDB 是在期约得到广泛支持之前定义的，因此这个 API 是基于事件而非基于期约的。这意味着不能对它使用 `async` 和 `await`。
+
+创建事务和查找对象存储及索引是同步操作。但打开数据库、更新对象存储和查询存储或索引全都是异步操作。这些异步方法都会立即返回一个请求对象。浏览器会在请求成功或失败时在这个请求对象上触发成功或失败事件，你在代码中可以通过 `onsuccess` 和 `onerror` 属性定义处理程序。在 `onsuccess` 处理程序中，操作的结果可以通过请求对象的 `result` 属性得到。另一个有用的事件是 `"complete"`，它会在事务成功完成时在事务对象上触发。
+
+这个异步 API 有个方便的特性，就是它简化了事务管理。IndexedDB API 强制你创建事务对象，然后才能取得对象存储并进行查询和更新。如果是同步 API，可能调用一个 `commit()` 方法就知道事务完成了。但在 IndexedDB 中，事务是在所有 `onsuccess` 处理程序运行且没有引用该事务的更多异步请求时自动提交的（只要不显示地中断它）。
+
+IndexedDB API 还有一个重要的事件。在第一次打开一个数据库时，或者在增大一个已有数据库的版本号时，`IndexedDB` 会在调用 `indexedDB.open()` 返回的请求对象上触发`"upgradeneeded"` 事件。这个 `"upgradeneeded"` 事件的处理程序要负责定义或更新这个新数据库的模式（或已有数据库的新版本）。对于 IndexedDB 数据库，这意味着要创建对象存储和在这些对象存储上定义索引。而且事实上，IndexedDB API 唯一一次让你创建对象存储或索引，就是在响应 `"upgradeneeded"` 事件的时候。
+
+在了解了 IndexedDB 的概况之后，应该可以理解示例 15-13。这个示例使用 IndexedDB 创建和查询了一个数据库，这个数据库将美国邮政编码映射到美国城市。示例演示了很多（但不是全部）IndexedDB 的基本功能，代码有点长，但注释很多。
+
+示例 15-13：美国邮政编码的 IndexedDB 数据库
+
+```javascript
+// 这个辅助函数异步获取数据库对象，（必要时）创建并初始化数据库）并将它传给回调
+function wtfisb(calllback) {
+	let request = indexedDB.open("zpcodes", 1); // 请求数据库的 v1 版
+	request.onerror = console.error; // 请求错误
+	request.onsuccess = () => {  // 或者在完成时调用这个函数
+    let db = request.result; // 请求的结果是数据库
+    callback(db);           // 调用回调并传入数据库
+};
+
+// 如果数据库的 v1 版不存在，则会触发这个
+// 事件处理程序。这个处理程序会初次创建
+// 数据库时创建并初始化对象存储，或者在
+// 数据库模式切换时修改它们
+request.onupgradeneeded = () => { initdb(request.result, callback); };
+}
+
+// withDB() 在数据库尚未初始化时会调用这个函数
+// 这个函数会创建数据库并为它填充数据，然后把
+// 数据库传给回调函数
+//
+// 我们的邮编数据库包含一个对象存储，对象格式为：
+// {
+//   zipcode: "02134",
+//   city: "Allston",
+//   state: "MA",
+// }
+// 这里使用 zipcode 属性作为数据库键，并为城市名
+// 创建一个索引
+function initdb(db, callback) {
+    // 创建对象存储，指定存储的名字和一个选项对象
+    // 选项对象包含“键路径”(keyPath)，指定的是
+    // 这个存储的键字段的属性名
+    let store = db.createObjectStore("zipcodes", { keyPath: "zipcode" });
+
+    // 除了通过邮政编码，还通过城市名来索引这个对象存储
+    // 调用这个方法时，键路径以必需的字符串参数形式直接
+    // 传入，而不是通过一个选项对象来传入
+    store.createIndex("cities", "city");
+
+    // 现在取得用来初始化数据库的数据
+    // 这个 zipcodes.json 数据文件是 CC 许可的数据，来源为
+    // www.geonames.org；下载地址是 https://download.geonames.org/export/zip/US.zip
+    fetch("zipcodes.json")
+        .then(response => response.json()) // 发起 HTTP GET 请求
+        .then(zipcodes => {               // 解析 JSON 响应体
+            // 为了向数据库中插入邮政编码，需要开一个事务编写记录
+            // 使用哪个对象存储（我们只有一个），且
+            // 告诉它们要写入数据，不仅是读取数据：
+            let transaction = db.transaction(["zipcodes"], "readwrite");
+            transaction.onerror = console.error;
+
+            // 从事务中取得对象存储
+            let store = transaction.objectStore("zipcodes");
+
+            // IndexedDB API 最大的优点就是对象存储
+            // 真的很简单。下面就是添加（或更新）记录：
+            for(let record of zipcodes) { store.put(record); }
+
+            // 当事务成功完成，数据库就被初始化可以使用了
+            // 此时可以调用最初传给 withDB() 的回调函数
+            transaction.oncomplete = () => { callback(db); };
+        });
+}
+});
+
+// 给一个邮政编码，使用 IndexedDB API 异步查询对应的城市
+// 然后将结果传给指定的回调，如果没有找到，则传 null
+export function lookupCity(zip, callback) {
+    withDB(db => {
+        // 创建一个只读的事务对象用于查询
+        // 参数是要使用的对象存储的数组
+        let transaction = db.transaction(["zipcodes"]);
+
+        // 从事务中取得对象存储
+        let zipcodes = transaction.objectStore("zipcodes");
+
+        // 现在查找与指定邮政编码匹配的对象
+        // 上面的代码是同步的，但这是异步的
+        let request = zipcodes.get(zip);
+        request.onerror = console.error; // 记录错误
+        request.onsuccess = () => {     // 或者在成功时调用这个函数
+            let record = request.result; // 这是查询的结果
+            if (record) { // 如果找到了匹配结果，把它传给回调
+                callback(`${record.city}, ${record.state}`);
+            } else {     // 否则，告诉回调查询失败了
+                callback(null);
+            }
+        };
+    });
+}
+
+// 给一个城市的名字，使用 IndexedDB API 异步查询
+// （所有美国州的）所有名字相同的城市（区分大小写）
+// 对应的所有邮政编码。
+export function lookupZipcodes(city, callback) {
+    withDB(db => {
+        // 跟上面一样，先创建事务再取得对象存储
+        let transaction = db.transaction(["zipcodes"]);
+        let store = transaction.objectStore("zipcodes");
+
+        // 这一次也取得对象存储的城市索引
+        let index = store.index("cities");
+
+        // 从索引中查询与指定城市名匹配的所有记录
+        // 找到以后，把它们传给回调函数。如果想
+        // 得到更多结果，可能要使用 IDBCursor()
+        let request = index.getAll(city);
+        request.onerror = console.error;
+        request.onsuccess = () => { callback(request.result); };
+    });
+}
+```
+
+# 15.13 工作线程与消息传递
+
+单线程是 JavaScript 的一个基本特性，因此浏览器绝不会同时运行两个事件处理程序，也不会在一个事件处理程序运行的时候触发其他计时器。这样就无法并发更新应用或文档状态，而前端开发者就无须思考甚至理解并发编程。一个必然的结果就是 JavaScript 函数不能运行太长时间，否则它们就会阻塞事件循环，而浏览器也会变得不能响应用户输入。事实上这也是`fetch()`被设计为异步函数的原因。
+
+浏览器通过`Worker`类非常谨慎地放松了这种单线程的限制。这个类的实例代表与主线程和事件循环同时运行的线程。`Worker`运行于独立的运行环境，有着完全独立的全局对象，不能访问`Window`或`Document`对象。`Worker`与主线程只能通过异步消息机制通信。这意味着并发修改 DOM 仍然是不可能的，但也意味我们可以写长时间运行的函数，而不会阻塞事件循环、卡死浏览器。创建新工作线程（worker）并不会像打开新浏览器窗口那么 “重量级”，但也并非 “轻于鸿毛”。为了执行简单的操作而创建新工作线程是完全没有必要的。复杂 Web 应用可能会创建几十个工作线程，但要创建几百或者几千个工作线程也是不切实际的。
+
+工作线程适合执行计算密集型任务，比如图像处理。使用工作线程把这类任务从主线程转移走可以避免浏览器卡顿。而工作线程也提供了把任务分给多个线程的可能。除此之外，工作线程也适合频繁执行较密集的计算。例如，假设你在实现一个网页版代码编辑器，想在代码高亮功能。为了正确地高亮代码，需要每次敲击键盘都解析一次代码。但如果在主线程做这件事，很可能会因为解析代码而导致键盘输入的事件处理程序不能迅速响应用户的击键操作，让用户体验变的迟滞。
+
+与任何线程 API 一样，`Worker` API 也有两部分。一部分是`Worker`对象，另一部分是`WorkerGlobalScope`。前者是这个线程的外部部分，后者则是线程的内在部分。
+
+接下来几小节将介绍`Worker`和`WorkerGlobalScope`，也会讲解允许工作线程与主线程通信的消息传递 API。同样的通信 API 也用于文档与其包含的`<iframe>`元素之间的消息交换，相关内容也将在后面的小节介绍。
+
+## 15.13.1 Worker 对象
+
+要创建新的工作线程，调用`Worker()`构造函数，传入一个 URL，这个 URL 用于指定线程要执行的 JavaScript 代码：
+
+```javascript
+let dataCruncher = new Worker("utils/cruncher.js");
+```
+
+如果传入的是相对 URL，则会按照调用`Worker()`构造函数的脚本所在文档的位置进行解析。如果传入的是绝对 URL，则必须与包含文档同源（协议、主机和端口都相同）。
+
+创建`Worker`对象后，可以使用`postMessage()`方法向工作线程发送数据。传给`postMessage()`的值会使用结构化克隆算法（参见 15.10.4 节）被复制，得到的副本会通过消息事件发送给工作线程：
+
+```javascript
+dataCruncher.postMessage("/api/data/to/crunch");
+```
+
+这里只发送了一个字符串消息，也可以发送对象、数组、定型数组、映射、集合，等等。通过监听`Worker`对象的`"message"`事件，可以从工作线程接收消息：
+
+```javascript
+dataCruncher.onmessage = function(e) {
+  let stats = e.data; // 消息保存在事件对象的data属性中
+  console.log(`Average: ${stats.mean}`);
+}
+```
+
+与所有事件目标一样，`Worker`对象定义了标准的`addEventListener()`和`removeEventListener()`方法，可以用它们代替`onmessage`。
+
+除了`postMessage()`，`Worker`对象只有另外一个方法`terminate()`，用于强制停止工作线程。
+
+## 15.13.2 工作线程中的全局对象
+
+在通过`Worker()`构造函数创建新工作线程时，传入的 URL 指定的是一个 JavaScript 代码文件。其中的代码会在一个新的、干净的 JavaScript 执行环境中执行，与创建工作线程的脚本完全隔离。这个新执行环境中的全局对象是一个`WorkerGlobalScope`对象。`WorkerGlobalScope`比核心 JavaScript 全局对象多一些东西，但又比客户端中完整的`Window`对象少一些东西。
+
+`WorkerGlobalScope`对象也有`postMessage()`方法和`onmessage`事件处理程序，只是方向与`Worker`对象上的恰好相反。在工作线程内部调用`postMessage()`会在外部生成消息事件，而在工作线程外部发送的消息会转换为事件并发送给内部的`onmessage`事件处理程序。因为`WorkerGlobalScope`是工作线程的全局对象，`postMessage()`和`onmessage`在工作线程的代码中看起来就像一个全局函数和一个全局变量。
+
+如果给`Worker()`构造函数传入对象作为第二个参数，而该对象有一个`name`属性，则这个属性的值就会成为工作线程中全局对象的`name`属性的值。在通过`console.warn()`或`console.error()`打印的任何消息中，工作线程都包含这个名字（name）。
+
+而`close()`函数可以让工作线程终止自己，效果与调用`Worker`对象的`terminate()`方法一样。
+
+由于 WorkerGlobalScope 是工作线程的全局对象，因此它拥有核心 JavaScript 全局对象的所有属性，如 JSON 对象、isNaN () 函数、Date () 函数。不过，除此之外，WorkerGlobalScope 也拥有下列客户端 Window 对象的属性。
+
+- self 是对全局对象自身的引用。WorkerGlobalScope 不是 Window 对象，没有定义 window 属性。
+- setTimeout ()、clearTimeout ()、setInterval ()、clearInterval () 等定时器方法。
+- location 属性描述传给 Worker () 构造函数的 URL。这个属性引用一个 Location 对象，就像 Window 对象上的 location 属性一样。Location 对象有 href、protocol、host、hostname、port、pathname、search 和 hash 属性。但在工作线程中，这些属性都是只读的。
+- navigator 属性引用的是一个类似 Window 的 Navigator 对象。工作线程的 Navigator 对象拥有 appName、appVersion、platform、userAgent 和 onLine 属性。
+- 常用的事件目标方法 addEventListener () 和 removeEventListener ()。
+
+最后，WorkerGlobalScope 对象还包含重要的客户端 JavaScript API，比如 Console 对象、fetch () 函数和 IndexedDB API。WorkerGlobalScope 也包含 Worker () 构造函数，这意味着工作线程也可以创建自己的工作线程。
+
+## 15.13.3 在工作线程中导入代码
+
+浏览器支持 Worker 的时候 JavaScript 还不支持模块系统，因此工作线程有自己一套独特的系统用于导入外部代码。WorkerGlobalScope 定义了 importScripts () 全局函数，所有工作线程都可以使用：
+
+```javascript
+// 在开始之前，加载需要的类和辅助程序
+importScripts("utils/Histogram.js", "utils/BitSet.js");
+```
+
+importScripts () 接收一个或多个 URL 参数，每个 URL 引用一个 JavaScript 代码文件。相对 URL 的解析相对于传给 Worker () 构造函数的 URL（而不是相对于包含文档）。importScripts () 按照传入顺序一个接一个地同步加载并执行这些文件。如果加载某个脚本时出现网络错误，或者如果执行某个脚本时抛出了任何错误，则后续脚本都不会再加载或执行。通过 importScripts () 加载的脚本自身也可以调用 importScripts () 加载自己的依赖文件。不过，要注意的是 importScripts () 不会跟踪已经下载了哪些脚本，也不会阻止循环依赖。
+
+importScripts () 是同步函数，即它会在所有脚本都加载并执行完毕后返回。importScripts () 返回后，就可以立即使用它所加载的脚本，不需要回调、事件处理程序、then () 方法或 await。一旦习惯了客户端 JavaScript 的异步特性，再碰到简单的同步代码反而会让人觉得有点怪。但这正是线程的优点，工作线程中的任何阻塞函数都不会影响主线程的事件循环，也不会影响其他工作线程中的并行计算。
+
+>在工作线程中使用模块
+>
+>为了在工作线程中使用模块，必须给 Worker () 构造函数传入第二个参数。这个参数必须是一个有 type 属性且值为 module 的对象。给 Worker () 构造函传入 type: "module" 选项与在 HTML <script> 标签中添加 type="module" 类似，都是表示应该将当前代码作为模块来解释，并允许使用 import 声明。
+
+如果工作线程加载的是模块而非常规脚本，WorkerGlobalScope 上不会再定义 importScripts () 函数。
+
+注意，截止到 2020 年初，Chrome 是唯一真正在工作线程中支持模块和 import 声明的浏览器。
+
+## 15.13.4 工作线程执行模型
+
+工作线程自上而下地同步运行自己的代码（和所有导入的脚本及模块），之后就进入了异步阶段，准备对事件和定时器作出响应。如果注册了 "message" 事件处理程序，只要有收到消息事件的可能，则工作线程就不会退出。而如果工作线程没有监听消息事件，它会运行直到没有其他待决的任务（如 fetch () 预约和定时器），且所有任务相关的回调都被调用。在所有注册的回调都被调用后，工作线程已经不可能再启动新任务了，此时线程可以安全退出，而且是自动的。工作线程也可以调用全局的 close () 函数显式将自己终止。注意，Worker 对象上没有任何属性或方法可以告诉我们工作线程是否还在运行，因此除非与父线程协商一致，否则工作线程不应该主动终止自己。
+
+### 工作线程中的错误
+
+如果工作线程中出现了异常，而且没有被 catch 子句捕获，则会在全局对象上触发 "error" 事件。如果这个事件有处理程序，而且处理程序调用了事件对象的 preventDefault ()，则错误会停止传播。否则，"error" 事件会在 Worker 对象上触发。如果这里调用了 preventDefault ()，则传播停止。否则，开发者控制台会打印出错误消息，并调用 Window 对象的 onerror 处理程序（参见 15.1.7 节）。
+
+```javascript
+// 在工作线程内处理未被捕获的错误
+self.onerror = function(e) {
+  console.log(`Error in worker at ${e.filename}:${e.lineno}: ${e.message}`);
+  e.preventDefault();
+};
+
+// 否则，就要在工作线程外处理未被捕获的错误。
+worker.onerror = function(e) {
+    console.log(`Error in worker at ${e.filename}:${e.lineno}: ${e.message}`);
+    e.preventDefault();
+};
+```
+
+与在 window 上类似，工作线程也可以注册一个事件处理程序，以便制约被拒绝又没有 .catch () 函数处理它时调用。为此，可以在工作线程内定义一个 `self.onunhandledrejection` 函数，或者使用 `addEventListener()` 为全局事件 "unhandledrejection" 注册一个全局处理程序。传给这个处理程序的事件对象有一个 promise 属性，值为被拒绝的期约对象，还有一个 reason 属性，值为传给 .catch () 函数的值。
+
+## 15.13.5 postMessage ()、MessagePort 和 MessageChannel
+
+Worker 对象的 `postMessage()` 方法和工作线程内部的全局 `postMessage()` 函数，都是通过调用在创建工作线程时一起创建的一对 MessagePort（消息端口）对象的 `postMessage()` 方法来实现通信的。客户端 JavaScript 无法直接访问这两个自动创建的 MessagePort 对象，但可以通过 `MessageChannel()` 构造函数创建一对新的关联端口：
+
+```javascript
+let channel = new MessageChannel();  // 创建新信道
+let myPort = channel.port1;         // 它有两个相互
+let yourPort = channel.port2;       // 连接的端口
+myPort.postMessage("Can you hear me?");  // 在一个端口上发送消息
+yourPort.onmessage = (e) => console.log(e.data);  // 可在另一个端口收到
+```
+
+```javascript
+yourPort.onmessage = (e) => console.log(e.data);  // 可在另一个端口收到
+```
+
+MessageChannel 是一个对象，有两个属性 port1 和 port2，引用一对关联的 MessagePort 对象。MessagePort 对象有一个 `postMessage()` 方法和一个 `onmessage` 事件处理程序属性。在一个消息端口上调用 `postMessage()`，会触发关联消息端口的 "message" 事件。通过设置 `onmessage` 属性或调用 `addEventListener()` 为 "message" 事件注册监听器可以收到这些 "message" 事件。
+
+发送到一个端口的消息在该端口定义 `onmessage` 属性或调用 `start()` 方法之前会被放在一个队列中。这样可以防止信道一端发送的消息被另一端错过。如果调用了 MessagePort 的 `addEventListener()`，不要忘了调用 `start()`，否则可能永远看不到发送来的消息。
+
+前面看到的 `postMessage()` 调用都接收一个消息参数。实际上这个方法还接收可选的第二个参数，该参数是一个数组，数组的元素不是被复制到信道另一端，而是被转移到信道另一端。像这样可以转移而非复制的值包括 MessagePort 和 ArrayBuffer（有些浏览器也实现了其他可转移类型，如 ImageBitmap 和 OffscreenCanvas，但这些类型并未得到普遍支持，因此本书未做介绍）。如果 `postMessage()` 的第一个参数包含一个 MessagePort（嵌套在消息对象中某个地方），那么该 MessagePort 也必须出现在第二个参数中。这样一来，这个 MessagePort 将被转移到另一个线程，并在当前线程立即失效**注 1**。假设你已经创建了一个工作线程，但希望有两个信道能够与之通信：一个信道用于交换普通数据，另一个信道用于交换高优先级消息。那么可以在主线程中创建一个 MessageChannel，然后调用 Worker 对象的 `postMessage()` 方法，把其中一个 MessagePort 传给工作线程：
+
+```javascript
+let worker = new Worker("worker.js");
+let urgentChannel = new MessageChannel();
+let urgentPort = urgentChannel.port1;
+worker.postMessage({ command: "setUrgentPort", value: urgentChannel.port2 },
+                  [ urgentChannel.port2 ]);
+// 现在可以像这样接收工作线程发过来的紧急消息
+urgentPort.addEventListener("message", handleUrgentMessage);
+urgentPort.start(); // 开始接收消息
+// 像这样发送紧急消息
+urgentPort.postMessage("test");
+```
+
+使用 MessageChannel 也可以实现两个工作线程间直接通信，从而避免通过主线程代为转发消息。
+
+`postMessage()` 的第二个参数还可以用来在工作线程间转移而非复制 ArrayBuffer。对于较大的 ArrayBuffer，比如保存图像数据的 ArrayBuffer 而言，这样可以在很大程度上提升性能。当 ArrayBuffer 被 MessagePort 转移到另一端之后，原始线程就无法再使用该 ArrayBuffer 了，因而不存在并发访问其内容的可能。如果 `postMessage()` 的第一个参数中包含一个 ArrayBuffer，则该 ArrayBuffer 可以作为数组元素出现在 `postMessage()` 的第二个参数中。如果确实出现了，那么它会被转移而非复制。如果没有出现，那么这个 ArrayBuffer 就会被复制而不会被转移。示例 15-14 将展示通过这种技术转移 ArrayBuffer。
+
+## 15.13.6 通过 postMessage () 跨源发送消息
+
+在客户端 JavaScript 中，`postMessage()` 方法还有另一个使用场景。这个场景涉及窗口而不是工作线程，但两个场景有很多类似之处，只不过接下来要介绍的是 Window 对象上的 `postMessage()` 方法。
+
+如果文档中包含一个 `<iframe>` 元素，则该元素就像一个嵌入但独立的窗口。表示 `<iframe>` 的 Element 对象有一个 `contentWindow` 属性，也就是那个嵌套文档的 Window 对象。对于在这个嵌入窗格（iframe）中运行的脚本，`window.parent` 属性引用包含文档的 Window 对象。当两个窗口显示的文档具有相同来源时，两个窗口中的脚本都拥有访问另一个窗口中内容的权限。但是如果两个文档的来源不同，浏览器的同源策略将阻止两个窗口中的 JavaScript 相互访问对方的内容。
+
+对于工作线程，`postMessage()` 为两个独立的线程提供了无须共享内存就能通信的安全机制。对于窗口，`postMessage()` 也为两个独立的来源提供了安全交换消息的受控机制。即便同源策略阻止脚本访问另一个窗口的内容，仍然可以调用另一个窗口的 `postMessage()`，这样会触发该窗口的 “message” 事件，从而让该窗口脚本中的事件处理程序接收到。
+
+不过，Window 对象上的 `postMessage()` 方法与工作线程的 `postMessage()` 方法有一点不同。第一个参数仍然是可以通过结构化克隆算法复制的任意消息。但包含要转移而非复制对象的第二个可选参数变成了可选的第三个参数。窗口的 `postMessage()` 方法以一个字符串作为其必需的第二个参数。这第二个参数应该是一个源（协议、主机名和可选的端口号），用于指定你希望谁接收这条消息。如果传入 “[https://good.example.com](https://good.example.com/)” 作为第二个参数，但消息发送到了一个内容来源为 “[https://malware.example.com](https://malware.example.com/)” 的窗口，那么你发送的消息将不会被派送。如果你想把消息发送给任意来源的窗口，可以传 “*” 通配符作为第二个参数。
+
+在一个窗口或 `<iframe>` 中运行的 JavaScript 代码可以通过定义窗口的 `onmessage` 属性或通过调用 `addEventListener()` 为 “message” 事件注册处理程序，接收发送到该窗口或该帧的消息。与线程类似，在接收到 “message” 事件时，事件对象的 `data` 属性是发送过来的消息。不过，除此之外，派送到窗口的 “message” 事件也定义了 `source` 和 `origin` 属性。`source` 属性是发送事件的 Window 对象，因此可以使用 `event.source.postMessage()` 发送回信。`origin` 属性则是该窗口中内容的源。这个源是消息发送方无法伪造的，因此在收到 “message” 事件时，通常应该先验证发送消息的源的合法性。
+
+# 15.14 示例：曼德布洛特集合
+
+本章的高潮部分是一个长示例，这个示例演示了使用工作线程和消息机制并行完成计算密集型任务。不过，因为示例本身是一个交互式的真实 Web 应用，所以其中也涉及本章介绍的很多其他 API，包括历史管理，基于 `<canvas>` 使用 ImageData 类，以及键盘、光标和缩放事件等。此外这个示例也演示了重要的核心 JavaScript 特性，比如生成器，以及对闭包的深度应用。
+
+如图 15-16 所示，这个示例程序用于显示和探索曼德布洛特集合，即一种包含漂亮图案的复数分形。
+
+图 15-16：曼德布洛特集合的一部分
+
+这里的曼德布洛特集合是通过一组复平面上的点来定义的。在反复完成一系列复数乘法和加法计算后，这个复平面会产生一个大小在一定范围内的值。这个集合的轮廓极其复杂，计算哪些点在这个集合中，哪些点不在这个集合中，属于计算密集型任务。要产生 500×500 大小的曼德布洛特集合图像，必须计算 25 万个像素中的每个像素，判断它们是否属于该集合。而要验证与每个像素关联的值没有超出既定范围，必须重复完成 1000 甚至更多次复数乘法（迭代次数越多，得到的集合边界也越清晰。迭代次数越少，边界越模糊）。想到生成一幅高质量的曼德布洛特集合图片需要高达 2.5 亿次复数运算，就不难理解为什么工作线程是个得力的帮手了。示例 15-14 展示了我们使用的工作线程代码。这个文件相对简洁，其中只包含了大型程序所需的原始算力。不过，有两件事需要说明一下。
+
+- 这个工作线程创建了一个 ImageData 对象，用于表示矩形的像素网格。针对这个网格会计算曼德布洛特集合的成员。但它并没有在 ImageData 中存储实际的像素值，而是使用了一个自定义的定型数组，将每个像素当成一个 32 位整数。工作线程在这个数组中存储了每个像素必需的迭代次数。如果针对每个像素计算得到的复数大小超过了 4，从数学上可以保证它不会受限制，我们称其为 “逃逸了”。因此这个工作线程针对每个像素返回的值都是在该值逃逸前的迭代次数，我们告诉工作线程对于每个值它应该尝试的最大迭代次数，以及到达最大值就可以认为是集合成员的像素。
+- 这个工作线程把 ImageData 关联的 ArrayBuffer 发送回主线程，因此无重复复制与之关联的内存。
+
+示例 15-14：用于计算曼德布洛特集合区域的工作线程代码
+
+```javascript
+// 这是一个简单的工作线程，它从父线程接收消息
+// 执行消息所描述的计算，然后再把计算结果发送
+// 回父线程
+onmessage = function(message) {
+  // 首先，分析接收到的消息：
+    // - ttile 是具有 width 和 height 属性的对象，
+    //   表示需要计算其中包含的曼德布洛特集合
+    //   成员的像素矩形的大小
+    // - (x0, y0) 是复平面上的一个点，对应
+    //   切片（ttile）的左上角位置的像素
+    // - perPixel 是实数轴和虚数轴上的像素大小
+    // - maxIterations 指定在判定某个像素在
+    //   集合中之前要执行的最大迭代次数
+    const {ttile, x0, y0, perPixel, maxIterations} = message.data;
+    const {width, height} = ttile;
+
+    // 接下来，我们创建 ImageData 对象，用以表示
+    // 像素的矩形数组，取得其内部 ArrayBuffer，
+    // 并创建缓冲的定型数组。这样做可以将
+    // 每个像素当作 32 位数值处理，每个像素的每个色
+    // 道（以及透明度）在数组中保存为 1 个字节。我们会在
+    // 文末（《》处）把迭代次数转换为像素颜色
+    const imageData = new ImageData(width, height);
+    const iterations = new Uint32Array(imageData.data.buffer);
+
+    // 现在开始计算。这里有 3 个嵌套的 for 循环
+    // 外面两个循环像素的行和列，内部的循环
+    // 迭代每个像素，检查这是否“逃逸了”
+    // 以下是几个循环变量：
+    // - row 和 column 是整数，表示像素坐标
+    // - x 和 y 表示每个像素的复数点：x + yi
+    // - index 是数组 iterations 中当前像素的索引
+    // - n 记录每个像素的迭代次数
+    // - max 和 min 记录当前矩形中已经检查过的像素的
+    //   最大和最小迭代次数
+    let index = 0, max = 0, min = maxIterations;
+    for(let row = 0, y = y0; row < height; row++, y += perPixel) {
+      for(let column = 0, x = x0; column < width; column++, x += perPixel) {
+        // 对每个像素，都从复数 c = x+yi 开始
+        // 然后按照如下递归公式，重复计算复数 z(n+1):
+        // z(n+1) = z(n)^2 + c
+        // 如果 |z(n)| (z(n)的大小) 大于 2，则
+        // 像素不属于集合，在 n 次迭代后停止
+        // n: 目前为止迭代的次数
+        let n;
+        let r = x, i = y; // 从把 z(0) 设置为 c 开始
+        for(n = 0; n < maxIterations; n++) {
+          let rr = r*r, ii = i*i; // 计算 z(n) 两部分的平方
+          if (rr + ii > 4) {     // 如果 |z(n)|^2 大于 4，
+            break;               // 就是逃逸了，停止迭代
+          }
+          i = 2*r*i + y;         // 计算 z(n+1) 的虚数部分，
+          r = rr - ii + x;       // 及 z(n+1) 的实数部分
+        }
+        iterations[index++] = n; // 记录每个像素的迭代次数
+        if (n > max) max = n;    // 记录当前为目的最大值，
+        if (n < min) min = n;    // 同时记录最小值
+      }
+    }
+
+    // 计算完成后，把结果发送回父线程。此时会
+    // 复制 ImageData 对象，但它包含的巨大的
+    // ArrayBuffer 只会转移出去，从而提升性能
+    postMessage({ttile, imageData, min, max}, [imageData.data.buffer]);
+};
+```
+
+例 15-15 展示了使用以上工作线程代码的曼德布洛特集合查看程序。既然本书中最长的这一章已经接近尾声，那么这个示例某种程度上也是一个巅峰体验的示例，其中集合了很多重要的核心和客户端 JavaScript 特性及 API。代码中的注释非常完整，建议读者认真阅读。
+
+示例 15-15：显示和探索曼德布洛特集合的 Web 应用
+
+```javascript
+/*
+ * 这个切片类表示一张画布或图片上的小矩形
+ * 切片可以把画布切成可以由工作线程独立处理的区块
+ */
+class Tile {
+  constructor(x, y, width, height) {
+    this.x = x;           // 这里 Tile 对象的
+    this.y = y;           // 属性表示大矩形
+    this.width = width;   // 中切片的位置及
+    this.height = height; // 大小
+  }
+}
+
+// 这个静态方法是一个生成器，用于将指定宽
+// 和高度的矩形切分成指定行数和列数。国度
+// 会生成表示每个小矩形的 Tile 对象
+class Tile {
+  static *subdivide(width, height, numRows, numCols) {
+    let rowHeight = Math.ceil(height / numRows);
+    let columnWidth = Math.ceil(width / numCols);
+
+    for(let row = 0; row < numRows; row++) {
+      let tileHeight = (row < numRows-1)    // 大多数行的高度
+                        ? rowHeight
+                        : height - rowHeight * (numRows-1); // 最后一行的高度
+      for(let col = 0; col < numCols; col++) {
+        let tileWidth = (col < numCols-1)   // 大多数列的宽度
+                          ? columnWidth
+                          : width - columnWidth * (numCols-1); // 最后一列的宽度
+        yield new Tile(col * columnWidth, row * rowHeight,
+                       tileWidth, tileHeight);
+      }
+    }
+  }
+}
+
+/*
+ * 这个类表示一个工作线程池，所有工作线程运行的代码都一样
+ * 工作线程的代码必须可以按照接收到的消息执行某些计算，
+ * 并发送回一条包含该计算结果的消息
+ * 有了 WorkerPool 和表示要完成任务的消息，只需在调用 addWork () 时传入该消息作为参数。如果某个 Worker 对象空闲了，则消息就会立即发送给该工作线程。如
+ * 果没有空闲的 Worker 对象，消息就会被放到队列中，等有 Worker 空闲时再发送
+ * 
+ * addWork () 返回一个期约，该期约将以任务完成后发送回来的消息解决，如果工作线程抛出未处理的错误，期约将会被拒绝
+ */
+class WorkerPool {
+  constructor(numWorkers, workerSource) {
+    this.idleWorkers = [];    // 当前空闲的工作线程
+    this.workQueue = [];      // 当前未处理的任务
+    this.workerMap = new Map(); // 将工作线程映射到解决和拒绝函数
+
+    // 创建指定数量的工作线程，添加消息及错误处理程序
+    // 然后将它们保存在idleWorkers数组中
+    for(let i = 0; i < numWorkers; i++) {
+      let worker = new Worker(workerSource);
+      worker.onmessage = (message) => {
+        this._workerDone(worker, null, message.data);
+      };
+      worker.onerror = (error) => {
+        this._workerDone(worker, error, null);
+      };
+      this.idleWorkers[i] = worker;
+    }
+  }
+
+  // 工作线程完成任务时会调用这个方法
+  // 可能发回消息，也可能抛出错误
+  _workerDone(worker, error, response) {
+    // 找到这个工作线程的resolve()和reject()函数
+    // 然后从映射中删除这个工作线程的条目
+    const [resolver, rejector] = this.workerMap.get(worker);
+    this.workerMap.delete(worker);
+
+    // 如果队列中没有任务，把这个工作线程放回空闲线程数组
+    // 否则，从队列中出任务，把任务发送给这个工作线程
+    if (this.workQueue.length === 0) {
+      this.idleWorkers.push(worker);
+    } else {
+      let [work, resolver, rejector] = this.workQueue.shift();
+      this.workerMap.set(worker, [resolver, rejector]);
+      worker.postMessage(work);
+    }
+
+    // 最后，解决或拒绝与这个工作线程关联的期约
+    error === null ? resolver(response) : rejector(error);
+  }
+
+  // 这个方法把任务添加到工作线程池并返回一个期约
+  // 该期约会在任务完成时解决为工作线程的响应
+  // 任务是一个通过postMessage()发送给工作线程的消息
+  // 如果有空闲的工作线程，则会立即发送任务消息
+  // 否则，任务会被放到队列中，等待空闲的工作线程
+addWork(work) {
+    return new Promise((resolve, reject) => {
+      if (this.idleWorkers.length > 0) {
+        let worker = this.idleWorkers.pop();
+        this.workerMap.set(worker, [resolve, reject]);
+        worker.postMessage(work);
+      } else {
+        this.workQueue.push([work, resolve, reject]);
+      }
+        toURL() {
+    let u = new URL(window.location);
+    u.searchParams.set("cx", this.cx);
+    u.searchParams.set("cy", this.cy);
+    u.searchParams.set("pp", this.perPixel);
+    u.searchParams.set("it", this.maxIterations);
+    return u.href;
+}
+    });
+  }
+}
+
+/*
+* 这个类保存渲染曼德布洛特集合所需的状态信息
+* 其中，cx和cy属性是图片中心在复平面中的点
+* 而perPixel属性指定图片中一个像素对应的复数
+* 中多少实数和虚数部分的变化。maxIterations属性
+* 指定计算这个集合的工作难度。这个数值越大，
+* 计算量越越大，但产生的图片越锐利。注意画布的
+* 大小没有保存在这个状态信息中。有了cx、cy和
+* perPixel，可以按照当前大小在画布上画渲染
+* 曼德布洛特集合的任意部分
+* 
+* 这个类的对象用于history.pushState()，也
+* 用于从收藏夹和共享URL中读取预期的状态
+*/
+class PageState {
+  // 这个工厂方法返回用于显示整个集合的初始状态
+  static initialState() {
+    let s = new PageState();
+    s.cx = -0.5;
+    s.cy = 0;
+    s.perPixel = 3 / window.innerHeight;
+    s.maxIterations = 500;
+    return s;
+  }
+
+  // 这个工厂方法从URL中获取状态，如果无法
+  // 从URL中读取有效的状态就返回null
+  static fromURL(url) {
+    let s = new PageState();
+    let u = new URL(url); // 根据URL的搜索参数初始化状态
+    s.cx = parseFloat(u.searchParams.get('cx'));
+    s.cy = parseFloat(u.searchParams.get('cy'));
+    s.perPixel = parseFloat(u.searchParams.get('pp'));
+    s.maxIterations = parseInt(u.searchParams.get('it'));
+    // 如果取得了有效的值，返回PageState对象；否则返回null
+    return (isNaN(s.cx) || isNaN(s.cy) || isNaN(s.perPixel) ||
+            isNaN(s.maxIterations))
+      ? null
+      : s;
+  }
+
+	// 这个实例方法把当前状态编码为浏览器当前位置的搜索参数
+    toURL() {
+    let u = new URL(window.location);
+    u.searchParams.set("cx", this.cx);
+    u.searchParams.set("cy", this.cy);
+    u.searchParams.set("pp", this.perPixel);
+    u.searchParams.set("it", this.maxIterations);
+    return u.href;
+}
+
+// 这几个常量控制同时运行多少曼德布洛特集合计算
+// 可以根据自己计算机的配置调整，以获得最佳性能
+    const ROWS = 3, COLS = 4, NUMWORKERS = navigator.hardwareConcurrency || 2;
+
+// 这是我们曼德布洛特集合的主类
+// 直接用要渲染的<canvas>元素调用构造函数即可
+// 程序假设这个<canvas>元素的样式始终让它保持
+// 方形
+class MandelbrotCanvas {
+    constructor (canvas) {
+// 存储画布，取得其上下文对象，并初始化 WorkerPool
+        this.canvas = canvas;this.context = canvas.getContext ("2d");
+        this.workerPool = new WorkerPool (NUMWORKERS, "mandelbrotworker.js");
+	// 定义几个后面要用到的属性
+        this.tiles = null; 
+        // 画布的某个区域
+        this.pendingRender = null; // 当前并未渲染
+        this.wantsRender = false; // 当前不需要渲染
+        this.resizeTimer = null; // 防止过于频繁的缩放
+        this.colorTable = null; // 用于把原始数据转换为像素值
+	// 设置事件处理程序
+        this.canvas.addEventListener ("pointerdown", e => this.handlePointer (e));
+        window.addEventListener ("keydown", e => this.handleKey (e));
+        window.addEventListener ("resize", e => this.handleResize (e));
+        window.addEventListener ("popstate", e => this.setState (e.state, false));
+	// 根据 URL 初始化状态，或者获取初始状态
+        this.state = PageState.fromURL (window.location) || PageState.initialState ();
+	// 通过历史机制保存状态
+        history.replaceState (this.state, "", this.state.toURL ());
+	// 设置画布大小并取得覆盖它的切片数组
+        this.setSize ();
+	// 把曼德布洛特集合渲染到画布上
+        this.render ();
+    }
+    
+	// 设置画布大小并初始化 Tile 对象的数组
+    // 这个方法会在构造函数中调用，也会在浏览器
+    // 窗口缩放时被 handleResize () 方法调用
+    setSize () {
+        this.width = this.canvas.width = window.innerWidth;
+        this.height = this.canvas.height = window.innerHeight;
+        this.tiles = [...Tile.tiles (this, this.height, ROWS, COLS)];
+    }
+
+    // 这个函数修改 PageState，然后用新状态重新渲染
+    // 曼德布洛特集合。也通过 history.pushState ()
+    // 保存新状态。如果第一个参数是一个函数，会调用
+    // 该函数并传入状态对象，用函数返回值修改状态对象
+    // 如果第一个参数是对象，直接把该对象的属性复制
+    // 到状态对象中。如果可选的第二个参数是 false，则
+    // 不保存新状态（我们会在响应 popstate 事件时调用
+    //setState 时这么做）
+    setState (f, save = true) {
+        // 如果第一个参数是函数，调用它更新状态
+        // 否则，把它的属性复制到当前状态
+        if (typeof f === "function") 
+        {
+            f (this.state);
+        } else {
+            for (let property in f) {
+                this.state [property] = f [property];
+            }
+        }
+        // 无论如何，都尽快渲染新状态
+        this.render ();
+		// 正常情况下会保存新状态。除非被调用时第二个
+        // 参数是 false，这表示在响应 popstate 事件
+        if (save) {
+            history.pushState (this.state, "", this.state.toURL ());
+        }
+    }
+	
+    // 这个方法异步将 PageState 对象指定的曼德布洛特集合的一
+    // 部分绘制到画布上。构造函数会调用它。setState () 在状态
+    // 变化时会调用它，画布大小变化时缩放处理程序也会调用它
+    render () {
+        // 有时候用户会使用键盘或鼠标触发渲染，但有可能
+        // 比计算速度快。我们不希望把所有渲染请求发送给
+        // 工作线程池。如果正在渲染中，那么只做一个标记，
+        // 表明需要重新渲染。在当前渲染完成后，我们才会查
+        // 渲染当前状态，可能会跳过多个中间状态
+    if (this.pendingRender) { // 如果已经在渲染中了，
+        this.wantsRerender = true; // 做个标记表明稍后需要重新渲染
+        return; // 现在则什么也不做
+    }
+        
+        // 取得状态变量并计算画布左上角位置的复数
+        let { cx, cy, perPixel, maxIterations } = this.state;
+        
+        let x0 = cx - perPixel * this.width/2;
+    let y0 = cy - perPixel * this.height/2;
+
+    // 对每个 ROWS*COLS 切片，调用 addWork() 并发送消息给
+    // mandelbrotWorker.js 中的代码。把得到的期约对象
+    // 收集到一个数组中
+    let promises = this.titles.map(title => this.workerPool.addWork({
+      tile: title,
+      x0: x0 + title.x * perPixel,
+      y0: y0 + title.y * perPixel,
+      perPixel: perPixel,
+      maxIterations: maxIterations
+    }));
+
+    // 使用 Promise.all() 从期约数组中取得响应的数组
+    // 每个响应对应其中一个切片的计算结果。回想一下，
+    // 在 mandelbrotWorker.js 中，每个响应都包含指
+    // 定 Tile 对象、包含迭代数目像素值的 ImageData 对象，
+    // 以及该对象计算时的最小和最大迭代数
+    this.pendingRender = Promise.all(promises).then(responses => {
+
+      // 首先，找到所有切片总体上最大和最小的迭代数
+      // 知道这些数值才可以为像素分配颜色
+      let min = maxIterations, max = 0;
+      for(let r of responses) {
+        if (r.min < min) min = r.min;
+        if (r.max > max) max = r.max;
+      }
+
+      // 现在需要一种方式把工作线程的原始迭代数转换为
+      // 在画布中可见的像素颜色值。我们知道所有像素都
+      // 在最小和最大迭代之间，因此可以预先计算好每个
+      // 迭代数对应的颜色值，保存在 colorTable 数组中
+      // 如果还没有分配颜色表，或者颜色表的大小已经不对了
+      // 就再分配一个新的
+      if (!this.colorTable || this.colorTable.length !== maxIterations+1){
+        this.colorTable = new Uint32Array(maxIterations+1);
+      }
+
+      // 有了最大和最小值，就可以计算颜色表中对应的值了
+      // 集合中的像素会渲染为完全不透明的黑色，集合外的
+      // 像素则会渲染为不同的颜色，而且迭代次数越多，越
+      // 接近白色。迭代次数最小的像素是透明的，因此会露
+      // 出白色背景，从而形成了灰阶图像
+      if (min === max) { // 如果所有像素都一样
+        if (min === maxIterations) { // 则全部渲染为黑色
+          this.colorTable[min] = 0xFF000000;
+        } else { // 或者全部渲染为白色
+          this.colorTable[min] = 0;
+        }
+      } else {
+        // 在正常情况下，min 和 max 不相等，那么就
+        // 使用对数比例将每个可能的迭代次数映射到
+        // 0 到 255 间的不透明度，然后使用左移操作符
+        // 将其转换为像素值
+        let maxLog = Math.log(max-min);
+        for(let i = min; i <= max; i++) {
+          this.colorTable[i] = 
+            (Math.ceil(Math.log(i+1-min)/maxLog * 255) << 24);
+        }
+      }
+
+      // 现在把每个响应的 ImageData 中的迭代数
+      // 转换为 colorTable 中的颜色值
+      for(let r of responses) {
+        let iterations = new Uint32Array(r.imageData.data.buffer);
+        for(let i = 0; i < iterations.length; i++) {
+          iterations[i] = this.colorTable[iterations[i]];
+        }
+      }
+
+      // 最后，使用 putImageData() 方法把所有
+      // ImageData 对象渲染为画布中对应的切片
+      //（不过，首先要翻转坐标系来匹配 p5.js）
+      // 事件处理程序设置的 transform: rotate(180deg)
+      this.canvas.style.transform = "";
+      for(let r of responses) {
+        this.ctx.putImageData(r.imageData, r.tile.x, r.tile.y);
+      }
+    })
+    .catch((reason) => {
+      // 只要有任何期约出错，都会在这里把错误记录下来
+      // 这是不应该发生的，但万一发生了可以帮我们排错
+      console.error("Promise rejected in render():", reason);
+    })
+    .finally(() => {
+      // 在完成渲染后，清除 pendingRender 标记
+      this.pendingRender = null;
+      // 如果在渲染时有重新渲染的请求，则重新渲染
+      if (this.wantsRender) {
+        this.wantsRender = false;
+        this.render();
+      }
+    });
+
+    }
+
+    // 如果用户缩放了窗口，就会不断调用这个函数
+    // 缩放画布并渲染曼德布洛特集是非常耗时的，
+    // 做不到每件事发生重新渲染之后再处理
+    // 但不希望每发生 298 毫秒之后，因此要使用计时器
+    handleResize(event) {
+        // 如果已经推迟了一次，则先清除计时器
+        if (this.resizeTimer) clearTimeout(this.resizeTimer);
+        // And defer this resize instead.
+        this.resizeTimer = setTimeout(() => {
+        this.resizeTimer = null; // 标记已经处理过了
+        this.setState({});       // 触发画布及切片
+        this.render();           // 重新在新尺寸上渲染
+	}, 2000);
+}
+
+// 如果用户按了一个键，就会触发这个事件处理程序
+// 对不同的键，我们会调用 setState()，而这个方法
+// 会重新状态、更新UI，并在浏览历史中保存状态
+handleKey(event) {
+    switch(event.key) {
+    case 'Escape': // 按 Esc 回到初始状态
+        this.setState(PageState.initialState());
+        break;
+    case '+':      // 按 + 增大迭代数
+        this.setState(s => {
+            s.maxIterations = Math.round(s.maxIterations*1.5);
+        });
+        break;
+    case '-':      // 按 - 减少迭代数
+        this.setState(s => {
+            s.maxIterations = Math.round(s.maxIterations/1.5);
+            if (s.maxIterations < 1) s.maxIterations = 1;
+        });
+        break;
+    case 'o':      // 按 o 放大
+        this.setState(s => s.perPixel *= 2);
+        break;
+    case 'ArrowUp':   // 向上箭头，向上滚动
+        this.setState(s => s.cy -= this.height/10 * s.perPixel);
+        break;
+    case 'ArrowDown': // 向下箭头，向下滚动
+        this.setState(s => s.cy += this.height/10 * s.perPixel);
+        break;
+    case 'ArrowLeft': // 向左箭头，向左滚动
+        this.setState(s => s.cx -= this.width/10 * s.perPixel);
+        break;
+    case 'ArrowRight': // 向右箭头，向右滚动
+        this.setState(s => s.cx += this.width/10 * s.perPixel);
+        break;
+    }
+}
+
+// 在画布上发生 pointerdown 事件时会调用这个方法
+// 这个 pointerdown 事件可能是缩放（单击或点按）
+// 或平移（拖放）的开始。这个处理程序为 pointermove
+// 和 pointerup 事件注册处理程序，以响应后续的手势
+// （这两个额外的处理程序会在 pointerup 结束手势时
+// 被删除）
+handlePointer(event) {
+    // 初始指针按下的像素坐标及时间
+    // 因为画布是窗口的一部分，这些坐标
+    // 也就是画布上的坐标
+    const x0 = event.clientX, y0 = event.clientY, t0 = Date.now();
+
+    // 这是移动事件的处理程序
+    const pointerMoveHandler = event => {
+        // 已经移动了多少，已经过了多少时间
+        let dx=event.clientX-x0, dy=event.clientY-y0, dt=Date.now()-t0;
+
+        // 如果指针移动的距离已经够或时间够长，用
+        // 说明不是普通的单击，那就要使用CSS来平移
+        // （我们会在 pointerup 事件发生时实际来平移
+        if (dx > 10 || dy > 10 || dt > 500) {
+            thts.canvas.style.transform = `translate(${dx}px, ${dy}px)`;
+        }
+    };
+
+    // 这是 pointerup 事件的处理程序
+    const pointerUpHandler = event => {
+        // 在指针抬起时，手势结束，此时删除
+        // 移动和抬起处理程序，等待下次手势
+        thts.canvas.removeEventListener('pointermove', pointerMoveHandler);
+        thts.canvas.removeEventListener('pointerup', pointerUpHandler);
+
+        // 指针移动了多远，过了多长时间
+        const dx = event.clientX-x0, dy = event.clientY-y0, dt = Date.now()-t0;
+        // 把状态对象分解为个别的变量值
+        const {cx, cy, perPixel} = thts.state;
+
+        // 如果指针移动的距离已经够或时间够长，则
+        // 是一个平移手势，需要修改状态以移动中心点
+        // 否则，用户是在某个点上单击或点按，而我们
+        // 要在该点上居中和放大
+        if (dx > 10 || dy > 10 || dt > 500) {
+            // 用户平移了(dx, dy)像素
+            // 把这些值转换为复平面的偏移
+            this.setState({cx: cx-dx*perPixel, cy: cy-dy*perPixel});
+        } else { // 用户单击。计算中心点要移动多少像素
+            // 单击点的位置
+            let cdx = x0-this.width/2;
+            let cdy = y0-this.height/2;
+
+            // 使用 CSS 快速、临时地放大。
+            thts.canvas.style.transform = 
+                `translate(${cdx*2}px, ${cdy*2}px) scale(2)`;
+
+            // 把复平面坐标设置为新的中心点
+            // 同时把视图放大两倍
+            this.setState({
+                cx: cx + cdx * s.perPixel,
+                cy: cy + cdy * s.perPixel,
+                perPixel: perPixel / 2
+            });
+        }
+    };
+
+    // 在用户手势开始时，我们为后面紧接要发生的
+    // pointermove 和 pointerup 事件注册处理程序
+    this.canvas.addEventListener('pointermove', pointerMoveHandler);
+    this.canvas.addEventListener('pointerup', pointerUpHandler);
+  	this.canvas.addEventListener("pointerup", pointerUpHandler);
+	}
+}
+
+    // 最后，这里是创建以及设置画布的代码。注意这个 JavaScript 文件
+    // 可以自给自足。换句话说，HTML 文件只需要用 <script> 包含它即可
+    let canvas = document.createElement("canvas"); // 动态创建元素
+    document.body.appendChild(canvas);             // 把它插入到文档中
+    canvas.style.margin = "0";                     // <body> 没有外边距
+    canvas.style.width = "100vw";                  // 让画布与页面一样宽
+    canvas.style.height = "100vh";                 // 同时也与页面一样高
+	new MandelbrotCanvas(canvas);                  // 开始渲染画布
+}
+```
+
+# 15.15 小结及未来阅读建议
+
+本章到现在已经介绍了很多客户端 JavaScript 编程的基础知识。
+
+- 怎么在网页中包含脚本及 JavaScript 模块，还有如何以及何时会执行它们。
+- 客户端 JavaScript 的异步、事件驱动的编程模型。
+- DOM 允许 JavaScript 代码检查和修改其所在文档的 HTML 内容。DOM API 是所有客户端 JavaScript 编程的核心所在。
+- JavaScript 代码如何操作 CSS 样式，从而修改文档的外观。
+- JavaScript 代码如何获取文档元素在浏览器窗口，以及在文档自身中的坐标。
+- 如何使用自定义元素及影子 DOM API，通过 JavaScript、HTML 和 CSS 创建可重用的 UI “Web 组件”。
+- 如何通过 SVG 和 HTML 的 `<canvas>` 元素显示及动态生成图形。
+- 程序如何向网页中以编程方式添加音效（包括预录音效和合成音效）。
+- JavaScript 代码如何让浏览器加载新页面，如何在用户浏览器历史中后退和前进，以及如何在浏览器历史中添加新条目。
+- JavaScript 程序如何使用 HTTP 和 WebSocket 协议与 Web 服务器交换数据。
+- JavaScript 程序如何在用户的浏览器中存储数据。
+- JavaScript 程序如何使用工作线程实现安全的并发。
+
+迄今为止，这是本书中最长的一章。但即便如此，这一章也没有包含浏览器支持的全部 API。Web 平台仍然在不断地拓展和演进，本章的目标是介绍最重要的核心 API。结合你通过本书掌握的知识，随时可以在需要的时候去学习新 API。但如果你不知道还有哪些 API，也就谈不上学习它们了。因此本章接下来的几小节将简单概述一下 Web 平台的特性，它们都是你将来有可能花时间去学习的。
+
+## 15.15.1 HTML 与 CSS
+
+Web 构建于 3 个关键技术之上：HTML、CSS 和 JavaScript。JavaScript 知识只是 Web 开发者应该掌握的一部分内容，除此之外还需要学习 HTML 和 CSS，知道如何使用 JavaScript 操作 HTML 元素和 CSS 样式的确很重要，但是如果你也熟悉要操作的 HTML 元素和 CSS 样式不是就更好了吗。
+
+因此在探索更多 JavaScript API 之前，我建议大家花点时间掌握这些 Web 开发必备的技术和工具。比如，HTML 表单和输入元素有很丰富的功能需要深入理解，而 CSS 的 flexbox 和网格布局模式也是极其强大的。
+
+另外两个有必要格外关注的领域是无障碍（包括 ARIA 属性）和国际化（包括从右往左书写方向的支持）。
+
+## 15.15.2 性能
+
+如果你写了一个 Web 应用并且已上线，那么想方设法让它变得更快的日子就开始了。然而，没有度量就无法优化。因此有必要熟悉一下 Performance API。Window 对象的 performance 属性是个 API 的主入口，其中包含高分辨率的时间戳 performance.now ()，以及在代码中打点的 performance.mark () 和度量断点之间运行时间的 performance.measure () 方法。调用这几个方法会创建 PerformanceEntry 对象，可以通过 performance.getEntries () 访问它们。浏览器会在加载新页面或通过网络抓取到文件时添加自己的 PerformanceEntry 对象。而这些自动创建的 PerformanceEntry 对象包含应用的网络性能相关的细粒度时间信息。相关的 PerformanceObserver 类则允许指定一个函数，在新 PerformanceEntry 对象创建时调用。
+
+## 15.15.3 安全
+
+本章介绍了如何防御 XSS（Cross-Site Scripting，跨站点脚本）安全漏洞的一般策略，但没有太深入讲解细节。Web 安全本身是一个重要的主题，大家也应该花点时间去研究。除了 XSS，还应该掌握 Content-Security-Policy HTTP 头部，以及理解 CSP 怎么让你要求浏览器限制它赋予 JavaScript 代码的能力，理解 CORS（Cross-Origin Resource Sharing，跨源资源共享）也很重要。
+
+## 15.15.4 WebAssembly
+
+WebAssembly（简称 WASM）是一种低级虚拟机字节码格式，专门用于在浏览器中与 JavaScript 解释器配合使用。有些编译器可以将 C、C++ 和 Rust 程序编译为 WebAssembly 字节码，并在不破坏浏览器沙箱或安全模型的前提下，在浏览器中以接近原生的速度运行。近原生的速度运行这些程序。WebAssembly 可以导出供 JavaScript 程序调用的函数。WebAssembly 的典型应用场景是编译标准 C 语言 zlib 压缩库，以便 JavaScript 代码可以使用高速压缩和解压缩算法。更多内容可以参考：[https://webassembly.org](https://webassembly.org/)。
+
+## 15.15.5 更多 Document 和 Window 特性
+
+Document 和 Window 对象还有一些本章并未介绍的特性。
+
+- Window 对象定义了 `alert()`、`confirm()` 和 `prompt()` 方法，用于向用户显示简单的模态对话框。这些方法都会阻塞线程。`confirm()` 方法同步返回一个布尔值，`prompt()` 同步返回一个用户输入的字符串。这些方法不适合在线上产品中使用，但在简单的项目和原型中可以使用。
+- Window 对象的 `navigator` 和 `screen` 属性在本章前面提到过，但它们引用的 `Navigator` 和 `Screen` 对象还有一些本章未介绍但可能对你有用的特性。
+- 任何 Element 对象的 `requestFullscreen()` 方法会要求浏览器以全屏模式显示该元素（比如 `<video>` 或 `<canvas>` 元素）。Document 的 `exitFullscreen()` 方法返回正常显示模式。
+- Window 对象的 `requestAnimationFrame()` 方法以一个函数作为参数，并会在浏览器准备渲染下一帧时执行该函数。在涉及视觉变化（特别是重复的视觉变化动画相关的视觉变化）的功能时，在代码中调用 `requestAnimationFrame()` 可以保证变化被浏览器按照最优的方式平滑渲染。
+- 如果用户选择了文档中的文本，可以通过 Window 对象的 `getSelection()` 方法获得选区的详细信息，并通过 `getSelection().toString()` 取得选中的文本。在有的浏览器中，`navigator.clipboard` 是一个具有异步 API 的对象，可以读取和设置系统剪贴板的内容，以支持浏览器外部应用的复制及粘贴操作。
+- 浏览器有一个鲜为人知的特性，就是 HTML 元素的 `contenteditable="true"` 属性可以让元素内容变得可以编辑。而 `document.execCommand()` 方法则支持对可编辑内容应用富文本编辑特性。
+- `MutationObserver` 对象允许 JavaScript 监控文档中指定元素（或下方元素）的变化。通过 `MutationObserver` 构造函数可以创建 `MutationObserver` 对象，传入的回调函数会在变化发生时被调用。然后再调用 `MutationObserver` 的 `observe()` 方法指定要监控哪个元素的哪个部分。
+- `IntersectionObserver` 对象允许 JavaScript 确定哪个文档元素当前在屏幕上，哪个元素接近屏幕。对于随着用户滚动按需动态加载内容的应用，`IntersectionObserver` 非常有用。
+
+## 15.15.6 事件
+
+Web 平台支持的事件数量之庞大、类型之多样是令人望而生畏的。本章已经介绍了很多事件类型，但下面这些也很有用。
+
+- 浏览器会在获得和失去互联网连接时在 Window 对象上分别触发 “online” 和 “offline” 事件。
+- 浏览器会在文档（通常是因为用户切换标签页而）变得可见或不可见时在 Document 对象上触发 “visibilitychange” 事件。JavaScript 可以检查 `document.visibilityState` 确定其文档当前是 “visible”（可见）还是 “hidden”（隐藏）。
+- 浏览器支持一套复杂的 API，以支持拖放 UI 和与浏览器外部应用程序的数据交换。这个 API 涉及很多事件，包括 “dragstart”“dragover”“dragend” 和 “drop”。虽然正确使用这个 API 比较麻烦，但必要时还是很有用的。如果你希望支持用户从桌面向 Web 应用中拖放文件，那这个 API 就非常重要了。
+- Pointer Lock API 可以让 JavaScript 隐藏鼠标指针，获得与鼠标指针在屏幕上的相对移动量而非绝对位置相关的原始鼠标事件。这适用于编写游戏很有用。首先在需要接收鼠标事件的元素上调用 `requestPointerLock()`，然后该元素就可以收到 “mousemove” 事件，事件对象上就会有 `movementX` 和 `movementY` 属性。
+- Gamepad API 增加了对游戏手柄（控制器）的支持。使用 `navigator.getGamepads()` 取得已连接的 Gamepad 对象，并监听 Window 对象上的 “gamepadconnected” 事件，可以在新手柄插入时收到通知。Gamepad 对象定义了一个 API，可以查询手柄按键的当前状态。
+
+## 15.15.7 PWA 与 Service Worker
+
+PWA（Progressive Web App）指的是使用几种关键技术构建的一种 Web 应用形式。如果要详细讲解相关技术，差不多需要一本书的篇幅，因此本章并没有介绍它们。但是，读者应该了解与之相关的所有 API。不过有必要指出，像这样强大的现代 API 通常都只能在安全的 HTTPS 连接下工作。仍然使用 `http://` URL 的网站则无法使用这些新技术。
+
+- ServiceWorker（服务线程）是一种工作线程，但具有在它 “服务” 的 Web 应用中拦截、检查和响应网络请求的能力。当 Web 应用注册了一个服务线程时，该线程的代码就会在浏览器本地持久存储，而当用户再次访问关联的网站时，该服务线程会被重新激活。服务线程可以缓存网络响应（包括文件和 JavaScript 代码），这意味着使用服务线程的 Web 应用实际上可以把自己安装在用户的家浏览器以*Service Worker*启动和离线使用。要深入学习服务线程及相关技术，推荐大家阅读 *Service Worker Cookbook*（请访问 https://serviceworke.rs/）。
+
+- Cache API 就是设计由服务线程来使用的（不过在工作线程外部的普通 JavaScript 代码中也可以使用）。这个 API 要使用 fetch () API 定义的 Request 和 Response 对象，实现对 Request/Response 对的缓存。Cache API 可以让服务线程缓存脚本以及它所服务的 Web 应用的其他资源，也可以辅助实现 Web 应用的离线使用（对于移动设备而言尤其重要）。
+- Web Manifest 是 JSON 格式的文件，描述 Web 应用，包含名字、URL 和指向各种尺寸图标的链接。如果你的 Web 应用注册了服务线程，而且包含引用一个 .webmanifest 文件的 `<link rel="manifest">` 标签，则浏览器（特别是移动设备上的浏览器）可能会把该 Web 应用的图标添加到桌面或主屏幕上。
+- Notifications API 可以让 Web 应用在移动和桌面设备上使用原生 OS 的通知机制显示通知。通知可以包含图片和文本。如果用户单击了通知，你的代码可以收到事件。由于使用这个 API 涉及向用户请求显示通知的权限，所以还是有点复杂的。
+- Push API 可以让涉及了服务线程（且已获得用户许可）的 Web 应用订阅服务器的通知，并能够在应用本身没有运行的情况下显示这些通知。推送通知在移动设备上很常见，而 Push API 让 Web 应用在移动设备上向原生应用又迈进了一步。
+
+## 15.15.8 移动设备 API
+
+有不少 Web API 主要用于在移动设备上运行的 Web 应用（可惜的是，这些 API 中有很多只能在 Android 设备上使用，不能在 iOS 设备上使用）。
+
+- Geolocation API 可以让 JavaScript（在用户许可的情况下）确定用户的地理位置。桌面和移动设备都支持这个 API，包括 iOS 设备。调用 `navigator.geolocation.getCurrentPosition()` 请求用户当前位置，调用 `navigator.geolocation.watchPosition()` 注册一个回调，当用户位置变化时可以调用它。
+- `navigator.vibrate()` 方法可以让移动设备（不包含 iOS 设备）震动。通常只能在响应用户某个手势时使用。调用这个方法可以让你的应用在识别出某个手势时给出无声的反馈。
+- ScreenOrientation API 让 Web 应用可以查询移动设备屏幕的当前朝向，也可以把自己锁定为横屏或竖屏模式。
+- Window 对象上的 “`devicemotion`” 和 “`deviceorientation`” 事件会报告设备的加速度感应器和磁力感应器数据，从而让你确定设备加速的方式，以及用户在空间中的朝向（iOS 也支持这些事件）。
+- 除 Android 设备上的 Chrome 之外，Sensor API 还没有得到广泛支持。它可以让 JavaScript 访问移动设备上的所有传感器，包括加速感应器、陀螺仪、磁力感应器和环境光传感器。这些传感器可以让 JavaScript 确定用户面对哪个方向，或者确定用户什么时候晃动了自己的手机。
+
+## 15.15.9 二进制 API
+
+定型数组、ArrayBuffer 和 DataView 类（11.2 节都介绍过）可以让 JavaScript 操作二进制数据。正像本章前面提到的，fetch () API 让 JavaScript 程序可以通过网络接收二进制数据。另一个二进制数据的来源是用户的本地文件系统。出于安全考虑，JavaScript 不能读取用户本地文件。但如果用户选择了某个文件并上传（使用 `<input type="file">` 表单元素），或者用户把一个文件拖放到了你的 Web 应用中，那么 JavaScript 可以通过 File 对象来访问这个文件。
+
+File 是 Blob 的子类，因此它也是一个数据块的不透明表示。可以使用 FileReader 类以 ArrayBuffer 或字符串形式异步获取文件的内容（在某些浏览器中，可以不用 FileReader，而直接使用 Blob 类定义的基于步骤的 text () 和 arrayBuffer () 方法获取文件的内容，或者使用 stream () 方法通过流 API 访问文件内容）。
+
+在操作二进制数据，特别是使用网络 API 访问二进制数据时，可能需要把字节解码为文本，或者把文本编码为字节。此时可以使用 TextEncoder 和 TextDecoder 类。
+
+## 15.15.10 媒体 API
+
+JavaScript 代码可以通过 `navigator.mediaDevices.getUserMedia()` 方法请求访问用户的麦克风或摄像头。请求成功会返回一个 MediaStream 对象，视频流可以显示在一个 `<video>` 标签中（通过把 `srcObject` 属性设置为视频流），可以使用画布的 `captureStream()` 函数把视频的静态帧捕获到屏外的 `<canvas>` 元素上，得到一张低分辨率的图片。`getUserMedia()` 返回的音频流和视频流可以通过 MediaRecorder 录制并编码为 Blob 对象。更复杂的 WebRTC API 支持通过网络发送和接收 MediaStream，可以实现点对点的视频会议。
+
+## 15.15.11 加密及相关 API
+
+Window 对象的 crypto 属性暴露了一个 `getRandomValues()` 方法，用于产生密码学意义上安全的随机数。与加密、解密、密钥生成、数字签名等相关的其他方法则暴露在 `crypto.subtle` 上。这个属性的名字（subtle，难以捉摸）意在警告使用这些方法的所有人：正确使用加密算法是很难的，除非你真的知道自己在干什么，否则不要使用这些方法。同样，`crypto.subtle` 的方法只能由通过安全的 HTTPS 连接加载的文档中的 JavaScript 代码使用。Credential Management API 和 Web Authentication API 可以让 JavaScript 生成、存储和取得公钥（及其他类型的）凭据，从而实现免密创建账号和登录。这个 JavaScript API 主要涉及函数 navigator.credentials.create () 和 navigator.credentials.get ()，但为了让这两个方法起作用，服务端必须有对应的基础设施。这些 API 尚未得到普遍支持，但有希望颠覆现在登录网站的方式。
+
+Payment Request API 为浏览器增加了在网页上通过信用卡支付的能力。用户通过它可以把自己的支付信息存储在浏览器上，这样就不必每次购物时都输入一遍自己的信用卡号了。需要请求用户支付的 Web 应用要创建一个 PaymentRequest 对象，并调用它的 show () 方法向用户显示支付请求。
 
 
 
