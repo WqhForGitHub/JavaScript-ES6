@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>富文本编辑器 - Mini Notion</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f7f7f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 16px;
+    }
+    h1 { color: #333; margin-bottom: 4px; }
+    .subtitle { color: #999; font-size: 14px; margin-bottom: 20px; }
+
+    .editor-wrap {
+      width: 100%;
+      max-width: 720px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      padding: 10px 14px;
+      background: #fafafa;
+      border-bottom: 1px solid #eee;
+      align-items: center;
+    }
+    .toolbar button {
+      width: 36px; height: 36px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .toolbar button:hover { background: #e8e8e8; }
+    .toolbar button.active { background: #4a90d9; color: #fff; }
+    .toolbar .divider {
+      width: 1px; height: 24px;
+      background: #ddd;
+      margin: 0 4px;
+    }
+    .toolbar .save-status {
+      margin-left: auto;
+      font-size: 12px;
+      color: #999;
+    }
+    .toolbar .save-status.saved { color: #27ae60; }
+    .toolbar .save-status.saving { color: #f39c12; }
+
+    .editor {
+      min-height: 400px;
+      padding: 24px 32px;
+      outline: none;
+      font-size: 16px;
+      line-height: 1.8;
+      color: #333;
+    }
+    .editor:empty::before {
+      content: attr(data-placeholder);
+      color: #ccc;
+      pointer-events: none;
+    }
+    .editor h1 { font-size: 28px; margin: 16px 0 8px; }
+    .editor h2 { font-size: 22px; margin: 14px 0 6px; }
+    .editor h3 { font-size: 18px; margin: 12px 0 4px; }
+    .editor ul, .editor ol { padding-left: 28px; margin: 8px 0; }
+    .editor li { margin: 4px 0; }
+    .editor blockquote {
+      border-left: 3px solid #4a90d9;
+      padding-left: 16px;
+      margin: 12px 0;
+      color: #666;
+      background: #f9f9f9;
+      padding: 8px 16px;
+      border-radius: 0 6px 6px 0;
+    }
+    .editor code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Consolas', monospace;
+      font-size: 14px;
+      color: #e74c3c;
+    }
+    .editor a { color: #4a90d9; text-decoration: underline; }
+
+    .shortcut-hint {
+      width: 100%;
+      max-width: 720px;
+      margin-top: 16px;
+      font-size: 12px;
+      color: #aaa;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .shortcut-hint kbd {
+      background: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mini Notion 富文本编辑器</h1>
+  <p class="subtitle">contenteditable · execCommand · 快捷键 · 自动保存</p>
+
+  <div class="editor-wrap">
+    <div class="toolbar" id="toolbar">
+      <button data-cmd="bold" title="加粗 (Ctrl+B)"><b>B</b></button>
+      <button data-cmd="italic" title="斜体 (Ctrl+I)"><i>I</i></button>
+      <button data-cmd="underline" title="下划线 (Ctrl+U)"><u>U</u></button>
+      <button data-cmd="strikeThrough" title="删除线"><s>S</s></button>
+      <div class="divider"></div>
+      <button data-cmd="formatBlock" data-value="h1" title="标题1">H1</button>
+      <button data-cmd="formatBlock" data-value="h2" title="标题2">H2</button>
+      <button data-cmd="formatBlock" data-value="h3" title="标题3">H3</button>
+      <button data-cmd="formatBlock" data-value="p" title="正文">P</button>
+      <div class="divider"></div>
+      <button data-cmd="insertUnorderedList" title="无序列表">• 列表</button>
+      <button data-cmd="insertOrderedList" title="有序列表">1. 列表</button>
+      <button data-cmd="formatBlock" data-value="blockquote" title="引用">❝</button>
+      <div class="divider"></div>
+      <button data-cmd="createLink" title="插入链接">🔗</button>
+      <button data-cmd="insertCode" title="行内代码">&lt;/&gt;</button>
+      <button data-cmd="removeFormat" title="清除格式">⌫</button>
+      <span class="save-status" id="saveStatus">未保存</span>
+    </div>
+    <div
+      class="editor"
+      id="editor"
+      contenteditable="true"
+      data-placeholder="开始输入... 选中文字使用工具栏或快捷键格式化"
+    ></div>
+  </div>
+
+  <div class="shortcut-hint">
+    <span><kbd>Ctrl+B</kbd> 加粗</span>
+    <span><kbd>Ctrl+I</kbd> 斜体</span>
+    <span><kbd>Ctrl+U</kbd> 下划线</span>
+    <span><kbd>Ctrl+S</kbd> 保存</span>
+    <span><kbd>Ctrl+Shift+1</kbd> H1</span>
+    <span><kbd>Ctrl+Shift+2</kbd> H2</span>
+    <span><kbd>Ctrl+Shift+.</kbd> 引用</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

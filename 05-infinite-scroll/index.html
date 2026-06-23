@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>无限滚动 + 虚拟列表</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+    h1 { color: #333; margin-bottom: 4px; }
+    .subtitle { color: #999; font-size: 14px; margin-bottom: 20px; }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .controls label { font-size: 14px; color: #666; }
+    .controls select, .controls button {
+      padding: 8px 14px; border: 1px solid #ddd; border-radius: 6px;
+      background: #fff; cursor: pointer; font-size: 14px;
+    }
+    .controls button.active { background: #4a90d9; color: #fff; border-color: #4a90d9; }
+
+    .stats {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 16px;
+    }
+    .stats b { color: #4a90d9; }
+
+    /* 滚动容器 */
+    .scroll-container {
+      width: 100%;
+      max-width: 520px;
+      height: 500px;
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      position: relative;
+    }
+
+    /* 普通模式列表 */
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.15s;
+    }
+    .list-item:hover { background: #fafafa; }
+    .item-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: bold;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .item-content { flex: 1; }
+    .item-title { font-size: 15px; font-weight: 500; color: #333; }
+    .item-desc { font-size: 13px; color: #999; margin-top: 2px; }
+
+    /* 虚拟列表模式 */
+    .virtual-viewport {
+      position: relative;
+      width: 100%;
+    }
+    .virtual-spacer-top, .virtual-spacer-bottom {
+      width: 100%;
+    }
+
+    .loading-indicator {
+      text-align: center;
+      padding: 20px;
+      color: #999;
+      font-size: 14px;
+    }
+    .loading-indicator .dots::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+    @keyframes dots {
+      0% { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
+    }
+
+    .sentinel { height: 1px; }
+
+    .end-tip {
+      text-align: center;
+      padding: 24px;
+      color: #ccc;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>无限滚动 + 虚拟列表</h1>
+  <p class="subtitle">IntersectionObserver 滚动加载 · 虚拟列表性能优化</p>
+
+  <div class="controls">
+    <label>模式：</label>
+    <button id="modeNormal" class="active">普通渲染</button>
+    <button id="modeVirtual">虚拟列表</button>
+  </div>
+
+  <div class="stats">
+    <span>总数据量: <b id="totalCount">0</b></span>
+    <span>已渲染 DOM: <b id="renderCount">0</b></span>
+    <span>滚动位置: <b id="scrollPos">0</b>px</span>
+  </div>
+
+  <div class="scroll-container" id="scrollContainer">
+    <div id="content"></div>
+    <div class="sentinel" id="sentinel"></div>
+  </div>
+
+  <script src="virtual-list.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+#app {
+  width: 100%;
+  max-width: 640px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.header {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 24px;
+}
+
+.toolbar button {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: background 0.2s;
+}
+
+.toolbar button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.toolbar button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.input-section {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  flex-wrap: wrap;
+}
+
+.input-section input[type="text"] {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-section input:focus {
+  border-color: #667eea;
+}
+
+.input-section select,
+.input-section button {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #fff;
+}
+
+#addBtn {
+  background: #667eea;
+  color: #fff;
+  border: none;
+  font-weight: 600;
+}
+
+#addBtn:hover {
+  background: #5568d3;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 6px 16px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.filter-btn.active {
+  background: #667eea;
+  color: #fff;
+  border-color: #667eea;
+}
+
+.category-filter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #666;
+}
+
+.category-filter select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.counter {
+  margin-left: auto;
+  font-size: 13px;
+  color: #999;
+}
+
+.todo-list {
+  list-style: none;
+  padding: 0 16px 16px;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s;
+}
+
+.todo-item:hover {
+  background: #fafafa;
+}
+
+.todo-item.completed .todo-text {
+  text-decoration: line-through;
+  color: #ccc;
+}
+
+.todo-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.todo-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.todo-text {
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.todo-text.editing {
+  outline: 2px solid #667eea;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.todo-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #e8ecff;
+  color: #667eea;
+}
+
+.category-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.category-badge.default { background: #f0f0f0; color: #666; }
+.category-badge.work { background: #ffe8e8; color: #e74c3c; }
+.category-badge.life { background: #e8fff0; color: #27ae60; }
+.category-badge.study { background: #fff8e8; color: #f39c12; }
+
+.todo-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.todo-actions button {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: opacity 0.2s;
+}
+
+.btn-edit { background: #fff3cd; color: #856404; }
+.btn-delete { background: #f8d7da; color: #721c24; }
+.btn-edit:hover { opacity: 0.8; }
+.btn-delete:hover { opacity: 0.8; }
+
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #ccc;
+  font-size: 14px;
+}
