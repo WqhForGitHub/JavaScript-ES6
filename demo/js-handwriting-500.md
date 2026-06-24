@@ -582,7 +582,7 @@
 494. 手写简易版 React-Redux（connect + Provider）
 495. 手写简易版 Vue Router（hash 模式）
 496. 手写简易版 Vuex
-497. 手写简易版 KoA（中间件机制）
+497. 手写简易版 Koa（中间件机制）
 498. 手写简易版 Express（路由 + 中间件）
 499. 手写简易版 Webpack（模块打包）
 500. 手写简易版 Babel（AST 转换）
