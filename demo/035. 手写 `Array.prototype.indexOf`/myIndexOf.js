@@ -41,10 +41,10 @@ console.log([1, 2, 3, 2, 1].myIndexOf(2)); // 1
 console.log([1, 2, 3].myIndexOf(4)); // -1
 
 // --- 查找字符串 ---
-console.log(['a', 'b', 'c'].myIndexOf('b')); // 1
+console.log(["a", "b", "c"].myIndexOf("b")); // 1
 
 // --- 严格相等：1 与 '1' 不相等 ---
-console.log([1, 2, 3].myIndexOf('1')); // -1
+console.log([1, 2, 3].myIndexOf("1")); // -1
 
 // --- 找不到 NaN（与 includes 的区别）---
 console.log([1, NaN, 3].myIndexOf(NaN)); // -1

@@ -115,7 +115,7 @@ class FilteredIterator {
 
 // ---------------- Test cases ----------------
 // 1. Custom collection works with for...of
-const col = new Collection('a', 'b', 'c');
+const col = new Collection("a", "b", "c");
 console.log([...col]);
 // Expected: [ 'a', 'b', 'c' ]
 
@@ -129,7 +129,7 @@ console.log([...col.reverseIterator()]);
 // 2. Lazy infinite + take via filter/map composition
 const evens = new FilteredIterator(
   new MappedIterator(naturals(), (n) => n * 2),
-  (n) => n % 4 === 0
+  (n) => n % 4 === 0,
 );
 const first3 = [];
 for (const v of evens) {

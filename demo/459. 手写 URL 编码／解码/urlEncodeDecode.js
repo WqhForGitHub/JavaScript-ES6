@@ -99,7 +99,9 @@ function bytesToUtf8String(bytes) {
       i += 2;
     } else if (b < 0xf0) {
       result += String.fromCharCode(
-        ((b & 0x0f) << 12) | ((bytes[i + 1] & 0x3f) << 6) | (bytes[i + 2] & 0x3f)
+        ((b & 0x0f) << 12) |
+          ((bytes[i + 1] & 0x3f) << 6) |
+          (bytes[i + 2] & 0x3f),
       );
       i += 3;
     } else {
@@ -109,7 +111,10 @@ function bytesToUtf8String(bytes) {
         ((bytes[i + 2] & 0x3f) << 6) |
         (bytes[i + 3] & 0x3f);
       const adj = cp - 0x10000;
-      result += String.fromCharCode(0xd800 + (adj >> 10), 0xdc00 + (adj & 0x3ff));
+      result += String.fromCharCode(
+        0xd800 + (adj >> 10),
+        0xdc00 + (adj & 0x3ff),
+      );
       i += 4;
     }
   }
@@ -158,7 +163,9 @@ console.log("自实现:", urlEncode("a b&c")); // a%20b%26c
 // query 互转
 console.log(encodeParams({ name: "张三", age: 20, city: "北京" }));
 // name=%E5%BC%A0%E4%B8%89&age=20&city=%E5%8C%97%E4%BA%AC
-console.log(decodeParams("name=%E5%BC%A0%E4%B8%89&age=20&city=%E5%8C%97%E4%BA%AC"));
+console.log(
+  decodeParams("name=%E5%BC%A0%E4%B8%89&age=20&city=%E5%8C%97%E4%BA%AC"),
+);
 // { name: '张三', age: '20', city: '北京' }
 
 console.log(decodeParams("?a=1&b=2")); // { a: '1', b: '2' }

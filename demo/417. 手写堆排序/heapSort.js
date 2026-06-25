@@ -55,7 +55,9 @@ console.log(heapSort([1])); // [1]
 console.log(heapSort([3, 1, 2])); // [1, 2, 3]
 
 // 验证：随机大数组排序正确
-const big = Array.from({ length: 1000 }, () => Math.floor(Math.random() * 10000));
+const big = Array.from({ length: 1000 }, () =>
+  Math.floor(Math.random() * 10000),
+);
 const sorted = heapSort(big);
 const isSorted = sorted.every((v, i) => i === 0 || sorted[i - 1] <= v);
 console.log(isSorted); // true

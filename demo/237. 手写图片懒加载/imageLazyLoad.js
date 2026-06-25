@@ -22,14 +22,14 @@
  */
 function lazyLoadByObserver(selector, options) {
   options = options || {};
-  var srcAttr = options.srcAttr || 'data-src';
-  var loading = options.loading || '';
-  var rootMargin = options.rootMargin || '0px';
+  var srcAttr = options.srcAttr || "data-src";
+  var loading = options.loading || "";
+  var rootMargin = options.rootMargin || "0px";
 
   var images = document.querySelectorAll(selector);
 
   // 如果浏览器不支持 IntersectionObserver，降级
-  if (!('IntersectionObserver' in window)) {
+  if (!("IntersectionObserver" in window)) {
     return lazyLoadByScroll(selector, options);
   }
 
@@ -47,7 +47,7 @@ function lazyLoadByObserver(selector, options) {
         }
       });
     },
-    { rootMargin: rootMargin, threshold: 0.01 }
+    { rootMargin: rootMargin, threshold: 0.01 },
   );
 
   images.forEach(function (img) {
@@ -66,21 +66,25 @@ function lazyLoadByObserver(selector, options) {
  */
 function lazyLoadByScroll(selector, options) {
   options = options || {};
-  var srcAttr = options.srcAttr || 'data-src';
-  var loading = options.loading || '';
+  var srcAttr = options.srcAttr || "data-src";
+  var loading = options.loading || "";
   var throttleTime = options.throttle || 200;
 
   var images = Array.prototype.slice.call(document.querySelectorAll(selector));
   if (loading) {
-    images.forEach(function (img) { img.src = loading; });
+    images.forEach(function (img) {
+      img.src = loading;
+    });
   }
 
   var ticking = false;
 
   function isVisible(img) {
     var rect = img.getBoundingClientRect();
-    var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-    var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+    var viewportHeight =
+      window.innerHeight || document.documentElement.clientHeight;
+    var viewportWidth =
+      window.innerWidth || document.documentElement.clientWidth;
     // 元素顶部在视口底部以上，且元素底部在视口顶部以下
     return (
       rect.top < viewportHeight &&
@@ -119,12 +123,12 @@ function lazyLoadByScroll(selector, options) {
   }
 
   function destroy() {
-    window.removeEventListener('scroll', onScroll);
-    window.removeEventListener('resize', onScroll);
+    window.removeEventListener("scroll", onScroll);
+    window.removeEventListener("resize", onScroll);
   }
 
-  window.addEventListener('scroll', onScroll);
-  window.addEventListener('resize', onScroll);
+  window.addEventListener("scroll", onScroll);
+  window.addEventListener("resize", onScroll);
   // 初始检查一次
   check();
 
@@ -152,5 +156,15 @@ function mockIsVisible(rect, viewport) {
     rect.right > 0
   );
 }
-console.log(mockIsVisible({ top: 50, bottom: 200, left: 0, right: 100 }, { width: 800, height: 600 })); // => true
-console.log(mockIsVisible({ top: 700, bottom: 800, left: 0, right: 100 }, { width: 800, height: 600 })); // => false
+console.log(
+  mockIsVisible(
+    { top: 50, bottom: 200, left: 0, right: 100 },
+    { width: 800, height: 600 },
+  ),
+); // => true
+console.log(
+  mockIsVisible(
+    { top: 700, bottom: 800, left: 0, right: 100 },
+    { width: 800, height: 600 },
+  ),
+); // => false

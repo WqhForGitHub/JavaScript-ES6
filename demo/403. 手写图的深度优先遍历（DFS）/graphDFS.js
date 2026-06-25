@@ -119,26 +119,26 @@ const g = new GraphDFS();
 // B   C
 // |   |
 // D---E
-g.addEdge('A', 'B');
-g.addEdge('A', 'C');
-g.addEdge('B', 'D');
-g.addEdge('C', 'E');
-g.addEdge('D', 'E');
+g.addEdge("A", "B");
+g.addEdge("A", "C");
+g.addEdge("B", "D");
+g.addEdge("C", "E");
+g.addEdge("D", "E");
 
-console.log(g.dfsRecursive('A')); // ['A', 'B', 'D', 'E', 'C']
-console.log(g.dfsIterative('A')); // ['A', 'B', 'D', 'E', 'C']
+console.log(g.dfsRecursive("A")); // ['A', 'B', 'D', 'E', 'C']
+console.log(g.dfsIterative("A")); // ['A', 'B', 'D', 'E', 'C']
 
-console.log(g.findAllPaths('A', 'E')); // [['A','B','D','E'], ['A','C','E']]
+console.log(g.findAllPaths("A", "E")); // [['A','B','D','E'], ['A','C','E']]
 
 // 有向图环检测
 const dg = new GraphDFS(true);
-dg.addEdge('A', 'B');
-dg.addEdge('B', 'C');
-dg.addEdge('C', 'A');
+dg.addEdge("A", "B");
+dg.addEdge("B", "C");
+dg.addEdge("C", "A");
 console.log(dg.hasCycle()); // true
 
 const dag = new GraphDFS(true);
-dag.addEdge('A', 'B');
-dag.addEdge('B', 'C');
-dag.addEdge('A', 'C');
+dag.addEdge("A", "B");
+dag.addEdge("B", "C");
+dag.addEdge("A", "C");
 console.log(dag.hasCycle()); // false

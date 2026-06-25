@@ -58,6 +58,11 @@ console.log(bubbleSortOptimized([64, 34, 25, 12, 22, 11, 90]));
 // [11, 12, 22, 25, 34, 64, 90]
 
 // 稳定性验证
-const stableTest = [{ v: 3, id: 1 }, { v: 1, id: 2 }, { v: 3, id: 3 }, { v: 2, id: 4 }];
+const stableTest = [
+  { v: 3, id: 1 },
+  { v: 1, id: 2 },
+  { v: 3, id: 3 },
+  { v: 2, id: 4 },
+];
 const stableResult = bubbleSort(stableTest.map((x) => x.v));
 console.log(stableResult); // [1, 2, 3, 3]

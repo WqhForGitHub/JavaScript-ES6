@@ -27,7 +27,7 @@ String.prototype.myReplaceAll = function (pattern, replacement) {
     // 正则必须带 g 标志，否则报错
     if (!pattern.global) {
       throw new TypeError(
-        "String.prototype.replaceAll called with a non-global RegExp argument"
+        "String.prototype.replaceAll called with a non-global RegExp argument",
       );
     }
     rx = pattern;
@@ -111,9 +111,7 @@ try {
 console.log("John Smith".myReplaceAll(/(\w+) (\w+)/g, "$2, $1")); // "Smith, John"
 
 // --- 使用函数 ---
-console.log(
-  "hello world".myReplaceAll(/\w+/g, (w) => w.toUpperCase())
-); // "HELLO WORLD"
+console.log("hello world".myReplaceAll(/\w+/g, (w) => w.toUpperCase())); // "HELLO WORLD"
 console.log("a1b2c3".myReplaceAll(/\d/g, (d) => `[${d}]`)); // "a[1]b[2]c[3]"
 
 // --- 原字符串不被修改 ---
@@ -123,5 +121,9 @@ console.log(original); // "aaa"
 
 // --- 与原生对比 ---
 console.log("\n--- 与原生对比 ---");
-console.log("hello world".replaceAll("o", "0") === "hello world".myReplaceAll("o", "0")); // true
-console.log("2024-01-15".replaceAll(/-/g, "/") === "2024-01-15".myReplaceAll(/-/g, "/")); // true
+console.log(
+  "hello world".replaceAll("o", "0") === "hello world".myReplaceAll("o", "0"),
+); // true
+console.log(
+  "2024-01-15".replaceAll(/-/g, "/") === "2024-01-15".myReplaceAll(/-/g, "/"),
+); // true

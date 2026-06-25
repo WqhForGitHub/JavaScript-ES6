@@ -32,15 +32,24 @@ function infiniteScrollByScroll(options) {
   function getScrollInfo() {
     var scrollTop, scrollHeight, clientHeight;
     if (container === window) {
-      scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-      scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-      clientHeight = window.innerHeight || document.documentElement.clientHeight;
+      scrollTop =
+        window.pageYOffset ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+      scrollHeight =
+        document.documentElement.scrollHeight || document.body.scrollHeight;
+      clientHeight =
+        window.innerHeight || document.documentElement.clientHeight;
     } else {
       scrollTop = container.scrollTop;
       scrollHeight = container.scrollHeight;
       clientHeight = container.clientHeight;
     }
-    return { scrollTop: scrollTop, scrollHeight: scrollHeight, clientHeight: clientHeight };
+    return {
+      scrollTop: scrollTop,
+      scrollHeight: scrollHeight,
+      clientHeight: clientHeight,
+    };
   }
 
   async function onScroll() {
@@ -60,18 +69,18 @@ function infiniteScrollByScroll(options) {
           hasMore = false;
         }
       } catch (e) {
-        console.error('加载失败', e);
+        console.error("加载失败", e);
       } finally {
         loading = false;
       }
     }
   }
 
-  container.addEventListener('scroll', onScroll);
+  container.addEventListener("scroll", onScroll);
 
   return {
     destroy: function () {
-      container.removeEventListener('scroll', onScroll);
+      container.removeEventListener("scroll", onScroll);
     },
     reset: function () {
       hasMore = true;
@@ -92,12 +101,12 @@ function infiniteScrollByObserver(options) {
   options = options || {};
   var loadMore = options.loadMore;
   var sentinel = options.sentinel;
-  var rootMargin = options.rootMargin || '100px';
+  var rootMargin = options.rootMargin || "100px";
 
   var loading = false;
   var hasMore = true;
 
-  if (!('IntersectionObserver' in window)) {
+  if (!("IntersectionObserver" in window)) {
     return infiniteScrollByScroll(options);
   }
 
@@ -112,13 +121,13 @@ function infiniteScrollByObserver(options) {
             observer.disconnect();
           }
         } catch (e) {
-          console.error('加载失败', e);
+          console.error("加载失败", e);
         } finally {
           loading = false;
         }
       }
     },
-    { rootMargin: rootMargin }
+    { rootMargin: rootMargin },
   );
 
   observer.observe(sentinel);

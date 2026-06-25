@@ -15,11 +15,15 @@
  */
 
 function isObjectLike(value) {
-  return typeof value === 'object' && value !== null;
+  return typeof value === "object" && value !== null;
 }
 
 function isNumber(value) {
-  return typeof value === 'number' || (isObjectLike(value) && Object.prototype.toString.call(value) === '[object Number]');
+  return (
+    typeof value === "number" ||
+    (isObjectLike(value) &&
+      Object.prototype.toString.call(value) === "[object Number]")
+  );
 }
 
 function isNaN(value) {
@@ -29,14 +33,14 @@ function isNaN(value) {
 
 // --- Tests ---
 
-console.log('isNaN NaN:', isNaN(NaN)); // true
-console.log('isNaN Number(NaN):', isNaN(new Number(NaN))); // true
-console.log('isNaN undefined:', isNaN(undefined)); // false
-console.log('isNaN null:', isNaN(null)); // false
-console.log('isNaN string "NaN":', isNaN('NaN')); // false
-console.log('isNaN empty string:', isNaN('')); // false
-console.log('isNaN object:', isNaN({})); // false
-console.log('isNaN array:', isNaN([1])); // false
-console.log('isNaN number 5:', isNaN(5)); // false
-console.log('isNaN Infinity:', isNaN(Infinity)); // false
-console.log('isNaN true:', isNaN(true)); // false
+console.log("isNaN NaN:", isNaN(NaN)); // true
+console.log("isNaN Number(NaN):", isNaN(new Number(NaN))); // true
+console.log("isNaN undefined:", isNaN(undefined)); // false
+console.log("isNaN null:", isNaN(null)); // false
+console.log('isNaN string "NaN":', isNaN("NaN")); // false
+console.log("isNaN empty string:", isNaN("")); // false
+console.log("isNaN object:", isNaN({})); // false
+console.log("isNaN array:", isNaN([1])); // false
+console.log("isNaN number 5:", isNaN(5)); // false
+console.log("isNaN Infinity:", isNaN(Infinity)); // false
+console.log("isNaN true:", isNaN(true)); // false

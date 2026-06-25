@@ -48,10 +48,10 @@ console.log([1, 2, 3, 2, 1].myLastIndexOf(2)); // 3
 console.log([1, 2, 3].myLastIndexOf(4)); // -1
 
 // --- 查找字符串 ---
-console.log(['a', 'b', 'a', 'c'].myLastIndexOf('a')); // 2
+console.log(["a", "b", "a", "c"].myLastIndexOf("a")); // 2
 
 // --- 严格相等 ---
-console.log([1, 2, 3].myLastIndexOf('1')); // -1
+console.log([1, 2, 3].myLastIndexOf("1")); // -1
 
 // --- fromIndex 正数：从该位置向前找 ---
 console.log([1, 2, 3, 2, 1].myLastIndexOf(2, 2)); // 1（只在下标 2 及之前找）

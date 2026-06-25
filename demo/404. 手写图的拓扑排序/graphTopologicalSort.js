@@ -85,11 +85,11 @@ class TopologicalSort {
 // 测试：课程依赖关系
 // 0 -> 1, 0 -> 2, 1 -> 3, 2 -> 3, 3 -> 4
 const ts = new TopologicalSort();
-ts.addEdge('课程0', '课程1');
-ts.addEdge('课程0', '课程2');
-ts.addEdge('课程1', '课程3');
-ts.addEdge('课程2', '课程3');
-ts.addEdge('课程3', '课程4');
+ts.addEdge("课程0", "课程1");
+ts.addEdge("课程0", "课程2");
+ts.addEdge("课程1", "课程3");
+ts.addEdge("课程2", "课程3");
+ts.addEdge("课程3", "课程4");
 
 console.log(ts.kahnSort());
 // { order: ['课程0', '课程1', '课程2', '课程3', '课程4'], hasCycle: false }
@@ -99,8 +99,8 @@ console.log(ts.dfsSort());
 
 // 含环的图
 const cyclic = new TopologicalSort();
-cyclic.addEdge('A', 'B');
-cyclic.addEdge('B', 'C');
-cyclic.addEdge('C', 'A');
+cyclic.addEdge("A", "B");
+cyclic.addEdge("B", "C");
+cyclic.addEdge("C", "A");
 console.log(cyclic.kahnSort()); // { order: null, hasCycle: true }
-console.log(cyclic.dfsSort());  // { order: null, hasCycle: true }
+console.log(cyclic.dfsSort()); // { order: null, hasCycle: true }

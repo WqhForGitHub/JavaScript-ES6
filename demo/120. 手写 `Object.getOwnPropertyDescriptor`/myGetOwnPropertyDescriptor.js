@@ -73,13 +73,17 @@ function myGetOwnPropertyDescriptor(obj, prop) {
   let isAccessor = false;
   let getter;
   try {
-    getter = Object.prototype.__lookupGetter__ ? obj.__lookupGetter__(prop) : undefined;
+    getter = Object.prototype.__lookupGetter__
+      ? obj.__lookupGetter__(prop)
+      : undefined;
     if (typeof getter === "function") isAccessor = true;
   } catch (e) {}
 
   let setter;
   try {
-    setter = Object.prototype.__lookupSetter__ ? obj.__lookupSetter__(prop) : undefined;
+    setter = Object.prototype.__lookupSetter__
+      ? obj.__lookupSetter__(prop)
+      : undefined;
   } catch (e) {}
 
   if (isAccessor || typeof setter === "function") {
@@ -112,7 +116,12 @@ console.log(myGetOwnPropertyDescriptor(obj, "nope")); // undefined（非自身�
 
 // 不可枚举属性
 const obj2 = {};
-Object.defineProperty(obj2, "hidden", { value: 42, enumerable: false, configurable: false, writable: false });
+Object.defineProperty(obj2, "hidden", {
+  value: 42,
+  enumerable: false,
+  configurable: false,
+  writable: false,
+});
 console.log(myGetOwnPropertyDescriptor(obj2, "hidden"));
 // { enumerable: false, configurable: false, value: 42, writable: false }
 
@@ -120,8 +129,12 @@ console.log(myGetOwnPropertyDescriptor(obj2, "hidden"));
 const obj3 = {};
 let store = 0;
 Object.defineProperty(obj3, "acc", {
-  get() { return store; },
-  set(v) { store = v; },
+  get() {
+    return store;
+  },
+  set(v) {
+    store = v;
+  },
   enumerable: true,
   configurable: true,
 });

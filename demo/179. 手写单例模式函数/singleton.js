@@ -88,30 +88,34 @@ console.log("工厂单例:", c1 === c2); // true
 console.log(c2.env); // 'prod'
 
 // 方式4：Proxy 单例
-const SingleStore = singletonProxy(class {
-  constructor(state = {}) {
-    this.state = state;
-  }
-});
+const SingleStore = singletonProxy(
+  class {
+    constructor(state = {}) {
+      this.state = state;
+    }
+  },
+);
 const s1 = new SingleStore({ count: 0 });
 const s2 = new SingleStore({ count: 999 });
 console.log("Proxy 单例:", s1 === s2); // true
 console.log(s2.state.count); // 0
 
 // 应用：全局状态管理
-const createStore = getSingle(class {
-  constructor() {
-    this.state = {};
-    this.listeners = [];
-  }
-  set(key, value) {
-    this.state[key] = value;
-    this.listeners.forEach((fn) => fn(this.state));
-  }
-  subscribe(fn) {
-    this.listeners.push(fn);
-  }
-});
+const createStore = getSingle(
+  class {
+    constructor() {
+      this.state = {};
+      this.listeners = [];
+    }
+    set(key, value) {
+      this.state[key] = value;
+      this.listeners.forEach((fn) => fn(this.state));
+    }
+    subscribe(fn) {
+      this.listeners.push(fn);
+    }
+  },
+);
 const storeA = createStore();
 const storeB = createStore();
 storeA.set("user", "Tom");

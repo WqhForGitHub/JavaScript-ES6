@@ -21,8 +21,7 @@ function trace(label) {
 // 带格式化器的 trace
 function traceFmt(label, formatter) {
   return function (value) {
-    const display =
-      typeof formatter === "function" ? formatter(value) : value;
+    const display = typeof formatter === "function" ? formatter(value) : value;
     console.log(`  [trace] ${label}:`, display);
     return value;
   };
@@ -50,7 +49,7 @@ const calc = pipe(
   (x) => x * 2,
   trace("after *2"),
   (x) => x - 3,
-  trace("after -3")
+  trace("after -3"),
 );
 console.log("result:", calc(5));
 // 打印：
@@ -66,7 +65,7 @@ const process = pipe(
   traceFmt("names", (arr) => arr.length), // 只打印长度 3
   (names) => names.filter((n) => n.length > 3),
   traceFmt("filtered", (arr) => arr.join("|")),
-  (names) => names.join(", ")
+  (names) => names.join(", "),
 );
 console.log(process(data)); // 'Jerry, Spike'
 
@@ -78,7 +77,7 @@ const leveled = pipe(
     if (x > 100) console.warn("  big value!");
     return x;
   },
-  traceLevel("final", "info")
+  traceLevel("final", "info"),
 );
 leveled(20); // 200
 
@@ -101,7 +100,7 @@ const delay = (ms, v) => new Promise((res) => setTimeout(() => res(v), ms));
     (x) => delay(10, x + 1),
     asyncTrace("step1"),
     (x) => delay(10, x * 2),
-    asyncTrace("step2")
+    asyncTrace("step2"),
   );
   console.log(await p(10)); // 打印 step1:11, step2:22, 返回 22
 })();
@@ -115,6 +114,6 @@ const debugTrace = (label) => (value) => {
 const fastPipe = pipe(
   (x) => x + 1,
   debugTrace("v"),
-  (x) => x * 2
+  (x) => x * 2,
 );
 console.log(fastPipe(3)); // 打印 [debug] v: 4，返回 8

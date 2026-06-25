@@ -18,12 +18,13 @@ function createStringIterator(str) {
       }
       var charCode = str.charCodeAt(index);
       // 判断是否为高代理项（0xD800 - 0xDBFF）
-      if (charCode >= 0xD800 && charCode <= 0xDBFF && index + 1 < length) {
+      if (charCode >= 0xd800 && charCode <= 0xdbff && index + 1 < length) {
         var nextCode = str.charCodeAt(index + 1);
         // 判断下一个是否为低代理项（0xDC00 - 0xDFFF）
-        if (nextCode >= 0xDC00 && nextCode <= 0xDFFF) {
+        if (nextCode >= 0xdc00 && nextCode <= 0xdfff) {
           // 组合成完整的码位
-          var codePoint = 0x10000 + ((charCode - 0xD800) << 10) + (nextCode - 0xDC00);
+          var codePoint =
+            0x10000 + ((charCode - 0xd800) << 10) + (nextCode - 0xdc00);
           var char = String.fromCodePoint(codePoint);
           index += 2;
           return { value: char, done: false };
@@ -33,7 +34,7 @@ function createStringIterator(str) {
       var ch = str.charAt(index);
       index += 1;
       return { value: ch, done: false };
-    }
+    },
   };
 }
 
@@ -43,56 +44,58 @@ function myStringIterator() {
 }
 
 // 测试 1：基本字符串
-console.log('--- Basic string ---');
-var it = createStringIterator('abc');
+console.log("--- Basic string ---");
+var it = createStringIterator("abc");
 console.log(it.next().value); // a
 console.log(it.next().value); // b
 console.log(it.next().value); // c
-console.log(it.next().done);  // true
+console.log(it.next().done); // true
 
 // 测试 2：for...of 使用自定义迭代器
-console.log('--- for...of ---');
+console.log("--- for...of ---");
 function makeIterable(str) {
   return {
-    [Symbol.iterator]: function () { return createStringIterator(str); }
+    [Symbol.iterator]: function () {
+      return createStringIterator(str);
+    },
   };
 }
 var chars = [];
-for (var c of makeIterable('hello')) chars.push(c);
+for (var c of makeIterable("hello")) chars.push(c);
 console.log(chars); // ['h', 'e', 'l', 'l', 'o']
 
 // 测试 3：展开和解构
-console.log('--- Spread & Destructure ---');
-console.log([...makeIterable('XYZ')]); // ['X', 'Y', 'Z']
-var [first, second] = makeIterable('AB');
+console.log("--- Spread & Destructure ---");
+console.log([...makeIterable("XYZ")]); // ['X', 'Y', 'Z']
+var [first, second] = makeIterable("AB");
 console.log(first, second); // A B
 
 // 测试 4：处理 emoji（代理对）
-console.log('--- Emoji (surrogate pairs) ---');
-var emojiStr = 'a\uD83D\uDE00b'; // a😀b
+console.log("--- Emoji (surrogate pairs) ---");
+var emojiStr = "a\uD83D\uDE00b"; // a😀b
 var emojiIt = createStringIterator(emojiStr);
 console.log(emojiIt.next().value); // a
 console.log(emojiIt.next().value); // 😀（完整 emoji，而非拆开的代理对）
 console.log(emojiIt.next().value); // b
-console.log(emojiIt.next().done);  // true
+console.log(emojiIt.next().done); // true
 
 // 对比：使用 charAt 会拆开代理对
-console.log('--- charAt vs iterator ---');
+console.log("--- charAt vs iterator ---");
 console.log(emojiStr.charAt(1)); // \uD83D（高代理项的一半）
 var emojiChars = [...makeIterable(emojiStr)];
 console.log(emojiChars.length); // 3（a, 😀, b）
 console.log(emojiChars); // ['a', '😀', 'b']
 
 // 测试 5：空字符串
-console.log('--- Empty string ---');
-var emptyIt = createStringIterator('');
+console.log("--- Empty string ---");
+var emptyIt = createStringIterator("");
 console.log(emptyIt.next().done); // true
 
 // 测试 6：与原生对比
-console.log('--- Compare with native ---');
+console.log("--- Compare with native ---");
 var nativeChars = [];
-for (var c of 'hello') nativeChars.push(c);
-var myChars = [...makeIterable('hello')];
+for (var c of "hello") nativeChars.push(c);
+var myChars = [...makeIterable("hello")];
 console.log(JSON.stringify(nativeChars) === JSON.stringify(myChars)); // true
 
 var nativeEmoji = [];

@@ -21,7 +21,11 @@ function mySetPrototypeOf(obj, proto) {
   }
 
   // proto 必须是对象或 null
-  if (proto !== null && (typeof proto !== "object" && typeof proto !== "function")) {
+  if (
+    proto !== null &&
+    typeof proto !== "object" &&
+    typeof proto !== "function"
+  ) {
     throw new TypeError("Object prototype may only be an Object or null");
   }
 
@@ -51,7 +55,11 @@ function mySetPrototypeOf(obj, proto) {
 // ===== 测试 =====
 
 const obj = { a: 1 };
-const proto = { greet() { return "hi"; } };
+const proto = {
+  greet() {
+    return "hi";
+  },
+};
 
 mySetPrototypeOf(obj, proto);
 console.log(obj.greet()); // 'hi'

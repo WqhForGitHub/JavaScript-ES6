@@ -13,8 +13,8 @@
  */
 
 Array.prototype.myFlatMap = function (callback, thisArg) {
-  if (typeof callback !== 'function') {
-    throw new TypeError(callback + ' is not a function');
+  if (typeof callback !== "function") {
+    throw new TypeError(callback + " is not a function");
   }
 
   const result = [];
@@ -42,29 +42,32 @@ Array.prototype.myFlatMap = function (callback, thisArg) {
 // ===== 测试 =====
 
 // --- 把每个元素拆成重复数组并展平 ---
-console.log([1, 2, 3].myFlatMap(x => [x, x])); // [1, 1, 2, 2, 3, 3]
+console.log([1, 2, 3].myFlatMap((x) => [x, x])); // [1, 1, 2, 2, 3, 3]
 
 // --- 把句子拆成单词 ---
-console.log(['hello world', 'foo bar'].myFlatMap(s => s.split(' '))); // ['hello', 'world', 'foo', 'bar']
+console.log(["hello world", "foo bar"].myFlatMap((s) => s.split(" "))); // ['hello', 'world', 'foo', 'bar']
 
 // --- 回调返回非数组时，行为与 map 相同 ---
-console.log([1, 2, 3].myFlatMap(x => x * 2)); // [2, 4, 6]
+console.log([1, 2, 3].myFlatMap((x) => x * 2)); // [2, 4, 6]
 
 // --- 只展平一层（不会深度展平）---
-console.log([1, 2].myFlatMap(x => [[x, x]])); // [[1, 1], [2, 2]]
+console.log([1, 2].myFlatMap((x) => [[x, x]])); // [[1, 1], [2, 2]]
 
 // --- 使用索引 ---
 console.log([10, 20, 30].myFlatMap((x, i) => [i, x])); // [0, 10, 1, 20, 2, 30]
 
 // --- 使用 thisArg ---
 console.log(
-  [1, 2, 3].myFlatMap(function (x) {
-    return [x, this.suffix];
-  }, { suffix: 0 })
+  [1, 2, 3].myFlatMap(
+    function (x) {
+      return [x, this.suffix];
+    },
+    { suffix: 0 },
+  ),
 ); // [1, 0, 2, 0, 3, 0]
 
 // --- 与原生 flatMap 结果对比 ---
 console.log(
-  JSON.stringify([1, 2, 3].myFlatMap(x => [x, x * 2])) ===
-    JSON.stringify([1, 2, 3].flatMap(x => [x, x * 2]))
+  JSON.stringify([1, 2, 3].myFlatMap((x) => [x, x * 2])) ===
+    JSON.stringify([1, 2, 3].flatMap((x) => [x, x * 2])),
 ); // true

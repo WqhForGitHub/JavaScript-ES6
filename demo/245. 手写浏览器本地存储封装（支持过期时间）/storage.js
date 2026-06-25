@@ -20,8 +20,10 @@
  */
 function StorageWrapper(options) {
   options = options || {};
-  this.prefix = options.prefix || '';
-  this.storage = options.storage || (typeof localStorage !== 'undefined' ? localStorage : null);
+  this.prefix = options.prefix || "";
+  this.storage =
+    options.storage ||
+    (typeof localStorage !== "undefined" ? localStorage : null);
 }
 
 /**
@@ -47,7 +49,7 @@ StorageWrapper.prototype.set = function (key, value, expire) {
     this.storage.setItem(this._getKey(key), JSON.stringify(data));
     return true;
   } catch (e) {
-    console.error('存储失败：', e);
+    console.error("存储失败：", e);
     return false;
   }
 };
@@ -102,7 +104,11 @@ StorageWrapper.prototype.clear = function () {
       keysToRemove.push(k);
     }
   }
-  keysToRemove.forEach(function (k) { this.storage.removeItem(k); }.bind(this));
+  keysToRemove.forEach(
+    function (k) {
+      this.storage.removeItem(k);
+    }.bind(this),
+  );
 };
 
 /**
@@ -152,28 +158,40 @@ StorageWrapper.prototype.keys = function () {
 // 模拟测试：用内存对象模拟 localStorage
 var mockStorage = {
   _data: {},
-  getItem: function (k) { return this._data[k] || null; },
-  setItem: function (k, v) { this._data[k] = String(v); },
-  removeItem: function (k) { delete this._data[k]; },
-  key: function (i) { return Object.keys(this._data)[i]; },
-  get length() { return Object.keys(this._data).length; },
-  clear: function () { this._data = {}; },
+  getItem: function (k) {
+    return this._data[k] || null;
+  },
+  setItem: function (k, v) {
+    this._data[k] = String(v);
+  },
+  removeItem: function (k) {
+    delete this._data[k];
+  },
+  key: function (i) {
+    return Object.keys(this._data)[i];
+  },
+  get length() {
+    return Object.keys(this._data).length;
+  },
+  clear: function () {
+    this._data = {};
+  },
 };
 
-var store = new StorageWrapper({ prefix: 'test_', storage: mockStorage });
-store.set('name', 'hello');
-console.log(store.get('name')); // => 'hello'
+var store = new StorageWrapper({ prefix: "test_", storage: mockStorage });
+store.set("name", "hello");
+console.log(store.get("name")); // => 'hello'
 
-store.set('temp', 'value', 50);
-console.log(store.get('temp')); // => 'value'
+store.set("temp", "value", 50);
+console.log(store.get("temp")); // => 'value'
 // 模拟过期
-var data = JSON.parse(mockStorage._data['test_temp']);
+var data = JSON.parse(mockStorage._data["test_temp"]);
 data.expire = Date.now() - 1;
-mockStorage._data['test_temp'] = JSON.stringify(data);
-console.log(store.get('temp', 'default')); // => 'default'（已过期）
+mockStorage._data["test_temp"] = JSON.stringify(data);
+console.log(store.get("temp", "default")); // => 'default'（已过期）
 
-store.set('a', 1);
-store.set('b', 2);
+store.set("a", 1);
+store.set("b", 2);
 console.log(store.keys()); // => ['name', 'a', 'b']
 store.clear();
 console.log(store.keys()); // => []

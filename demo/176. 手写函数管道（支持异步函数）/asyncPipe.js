@@ -29,10 +29,7 @@ function asyncPipe(...fns) {
 // reduce 版
 function asyncPipeReduce(...fns) {
   return (input) =>
-    fns.reduce(
-      (chain, fn) => chain.then(fn),
-      Promise.resolve(input)
-    );
+    fns.reduce((chain, fn) => chain.then(fn), Promise.resolve(input));
 }
 
 // 支持初始多参数：第一个函数接收全部参数
@@ -59,7 +56,7 @@ const pipeline = asyncPipe(
     return x * 2;
   }, // 异步
   (x) => x + 3, // 同步
-  (x) => `result:${x}` // 同步
+  (x) => `result:${x}`, // 同步
 );
 
 (async () => {
@@ -70,7 +67,7 @@ const pipeline = asyncPipe(
 const allAsync = asyncPipe(
   () => delay(10, "a"),
   (s) => delay(10, s + "b"),
-  (s) => delay(10, s + "c")
+  (s) => delay(10, s + "c"),
 );
 (async () => {
   console.log(await allAsync()); // 'abc'
@@ -80,7 +77,7 @@ const allAsync = asyncPipe(
 const pipe2 = asyncPipeReduce(
   (x) => x + 1,
   (x) => Promise.resolve(x * 10),
-  (x) => x - 5
+  (x) => x - 5,
 );
 (async () => {
   console.log(await pipe2(2)); // 25 = (2+1)*10-5
@@ -90,7 +87,7 @@ const pipe2 = asyncPipeReduce(
 const multiPipe = asyncPipeMulti(
   (a, b) => delay(10, a + b),
   (x) => delay(10, x * 2),
-  (x) => `final:${x}`
+  (x) => `final:${x}`,
 );
 (async () => {
   console.log(await multiPipe(3, 4)); // 'final:14'
@@ -103,7 +100,7 @@ async function fetchUser(id) {
 const getUserLabel = asyncPipe(
   fetchUser, // 获取用户
   (user) => delay(10, { ...user, label: user.name.toUpperCase() }), // 加标签
-  (user) => `${user.label}(${user.age})` // 格式化
+  (user) => `${user.label}(${user.age})`, // 格式化
 );
 (async () => {
   console.log(await getUserLabel(1)); // 'TOM(20)'
@@ -114,7 +111,7 @@ const errorPipe = asyncPipe(
   () => Promise.resolve("ok"),
   () => {
     throw new Error("step2 fail");
-  }
+  },
 );
 (async () => {
   try {

@@ -27,7 +27,7 @@ function myIsExtensible(obj) {
 
   try {
     // 在严格模式下尝试添加属性
-    "use strict";
+    ("use strict");
     obj[testKey] = 1;
     // 成功说明可扩展，删除测试属性并返回 true
     delete obj[testKey];

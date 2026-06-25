@@ -20,7 +20,7 @@ function pipe(...fns) {
   return fns.reduce(
     (f, g) =>
       (...args) =>
-        g(f(...args))
+        g(f(...args)),
   );
 }
 
@@ -53,13 +53,20 @@ console.log(pipe(inc)(5)); // 6
 
 // pipe 与 compose 方向相反
 const compose = (...fns) =>
-  fns.reduce((f, g) => (...args) => f(g(...args)));
+  fns.reduce(
+    (f, g) =>
+      (...args) =>
+        f(g(...args)),
+  );
 const leftToRight = pipe(inc, double, square)(2); // 36
 const rightToLeft = compose(inc, double, square)(2); // 9
 console.log(leftToRight, rightToLeft); // 36 9
 
 // 实际应用：数据转换管道（可读性好）
-const users = [{ name: "tom", age: 20 }, { name: "jerry", age: 30 }];
+const users = [
+  { name: "tom", age: 20 },
+  { name: "jerry", age: 30 },
+];
 const getNames = (list) => list.map((u) => u.name);
 const toUpper = (list) => list.map((s) => s.toUpperCase());
 const joinByComma = (list) => list.join(", ");
@@ -70,6 +77,6 @@ console.log(displayNames(users)); // 'TOM, JERRY'
 const calculate = pipe(
   (x) => x + 10,
   (x) => x * 2,
-  (x) => x - 5
+  (x) => x - 5,
 );
 console.log(calculate(5)); // ((5+10)*2)-5 = 25

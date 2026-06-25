@@ -9,21 +9,21 @@
 
 function parseSelector(selector) {
   selector = selector.trim();
-  if (selector === '*') {
+  if (selector === "*") {
     return function (node) {
       return true;
     };
   }
-  if (selector[0] === '#') {
+  if (selector[0] === "#") {
     var id = selector.slice(1);
     return function (node) {
-      return node.getAttribute && node.getAttribute('id') === id;
+      return node.getAttribute && node.getAttribute("id") === id;
     };
   }
-  if (selector[0] === '.') {
+  if (selector[0] === ".") {
     var cls = selector.slice(1);
     return function (node) {
-      var nodeClass = node.getAttribute ? node.getAttribute('class') : null;
+      var nodeClass = node.getAttribute ? node.getAttribute("class") : null;
       if (!nodeClass) return false;
       return nodeClass.split(/\s+/).indexOf(cls) !== -1;
     };
@@ -41,7 +41,7 @@ function parseSelector(selector) {
  * @returns {Element[]}
  */
 function myQuerySelectorAll(selector, root) {
-  root = root || (typeof document !== 'undefined' ? document : null);
+  root = root || (typeof document !== "undefined" ? document : null);
   if (!root) return [];
 
   var parts = selector.trim().split(/\s+/).filter(Boolean);
@@ -84,26 +84,26 @@ function createMockNode(tag, attrs, children) {
   };
 }
 
-var mockDoc = createMockNode('html', {}, [
-  createMockNode('body', {}, [
-    createMockNode('div', { class: 'box' }, [
-      createMockNode('p', { class: 'text' }, []),
-      createMockNode('span', { class: 'box' }, []),
+var mockDoc = createMockNode("html", {}, [
+  createMockNode("body", {}, [
+    createMockNode("div", { class: "box" }, [
+      createMockNode("p", { class: "text" }, []),
+      createMockNode("span", { class: "box" }, []),
     ]),
-    createMockNode('div', { class: 'box' }, [
-      createMockNode('p', { class: 'text' }, []),
+    createMockNode("div", { class: "box" }, [
+      createMockNode("p", { class: "text" }, []),
     ]),
   ]),
 ]);
 
-var boxes = myQuerySelectorAll('.box', mockDoc);
+var boxes = myQuerySelectorAll(".box", mockDoc);
 console.log(boxes.length); // => 3
 
-var texts = myQuerySelectorAll('.text', mockDoc);
+var texts = myQuerySelectorAll(".text", mockDoc);
 console.log(texts.length); // => 2
 
-var divTexts = myQuerySelectorAll('div .text', mockDoc);
+var divTexts = myQuerySelectorAll("div .text", mockDoc);
 console.log(divTexts.length); // => 2
 
-var all = myQuerySelectorAll('*', mockDoc);
+var all = myQuerySelectorAll("*", mockDoc);
 console.log(all.length); // => 7

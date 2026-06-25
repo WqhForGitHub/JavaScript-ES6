@@ -37,7 +37,9 @@ function requestWithRetry(requestFn, options = {}) {
             return;
           }
           const wait =
-            backoff === "exponential" ? delay * Math.pow(2, attempt - 1) : delay;
+            backoff === "exponential"
+              ? delay * Math.pow(2, attempt - 1)
+              : delay;
           onRetry({ attempt, error: err, nextDelay: wait });
           setTimeout(attemptOnce, wait);
         });
@@ -88,7 +90,7 @@ requestWithRetry(makeFlakyRequest(99), {
 })
   .then((res) => console.log("场景2 结果:", res.data))
   .catch((err) =>
-    console.log("场景2 最终失败:", err.message, "status:", err.status)
+    console.log("场景2 最终失败:", err.message, "status:", err.status),
   ); // 场景2 最终失败: Service Unavailable status: 503
 
 // 场景3：4xx 不重试
@@ -96,9 +98,7 @@ requestWithRetry(
   function () {
     return Promise.reject({ status: 404, message: "Not Found" });
   },
-  { retries: 3, delay: 5 }
+  { retries: 3, delay: 5 },
 )
   .then((res) => console.log("场景3 结果:", res))
-  .catch((err) =>
-    console.log("场景3 不重试直接失败:", err.status)
-  ); // 场景3 不重试直接失败: 404
+  .catch((err) => console.log("场景3 不重试直接失败:", err.status)); // 场景3 不重试直接失败: 404

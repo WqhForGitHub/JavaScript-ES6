@@ -17,9 +17,15 @@
  */
 
 class Dep {
-  constructor() { this.subs = []; }
-  addSub(w) { if (!this.subs.includes(w)) this.subs.push(w); }
-  notify() { this.subs.slice().forEach((w) => w.update()); }
+  constructor() {
+    this.subs = [];
+  }
+  addSub(w) {
+    if (!this.subs.includes(w)) this.subs.push(w);
+  }
+  notify() {
+    this.subs.slice().forEach((w) => w.update());
+  }
   static target = null;
 }
 
@@ -42,11 +48,13 @@ function defineReactive(obj, key, val) {
 }
 
 function observe(obj) {
-  if (!obj || typeof obj !== 'object') return obj;
-  Object.keys(obj).forEach((key) => defineReactive(obj, key, observeLike(obj[key])));
+  if (!obj || typeof obj !== "object") return obj;
+  Object.keys(obj).forEach((key) =>
+    defineReactive(obj, key, observeLike(obj[key])),
+  );
 }
 function observeLike(val) {
-  if (val && typeof val === 'object') observe(val);
+  if (val && typeof val === "object") observe(val);
   return val;
 }
 
@@ -59,7 +67,11 @@ class Watcher {
   get() {
     Dep.target = this;
     let v;
-    try { v = this.getter(); } finally { Dep.target = null; }
+    try {
+      v = this.getter();
+    } finally {
+      Dep.target = null;
+    }
     return v;
   }
   update() {
@@ -80,17 +92,21 @@ class MiniVue {
     // Proxy this.x -> this.$data.x
     Object.keys(this.$data).forEach((key) => {
       Object.defineProperty(this, key, {
-        get() { return this.$data[key]; },
-        set(v) { this.$data[key] = v; },
+        get() {
+          return this.$data[key];
+        },
+        set(v) {
+          this.$data[key] = v;
+        },
       });
     });
-    if (options.el && typeof document !== 'undefined') {
+    if (options.el && typeof document !== "undefined") {
       this.$mount(options.el);
     }
   }
 
   $mount(el) {
-    const root = typeof el === 'string' ? document.querySelector(el) : el;
+    const root = typeof el === "string" ? document.querySelector(el) : el;
     this.$el = root;
     const template = root.outerHTML;
     this._renderFn = this._compile(template);
@@ -106,39 +122,43 @@ class MiniVue {
 
   // Compile {{ }} only (very simplified).
   _compile(template) {
-    return (vm) => template.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_, expr) => {
-      return this._eval(expr, vm);
-    });
+    return (vm) =>
+      template.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_, expr) => {
+        return this._eval(expr, vm);
+      });
   }
   _eval(expr, vm) {
-    return expr.split('.').reduce((o, k) => (o == null ? '' : o[k]), vm);
+    return expr.split(".").reduce((o, k) => (o == null ? "" : o[k]), vm);
   }
 }
 
 // ---------- Test cases ----------
 // Reactivity works in any JS environment.
-const data = { count: 0, name: 'vue' };
+const data = { count: 0, name: "vue" };
 observe(data);
 
 let logCount = 0;
-new Watcher(() => data.count, (n, old) => {
-  logCount++;
-  console.log(`count changed: ${old} -> ${n}`);
-});
+new Watcher(
+  () => data.count,
+  (n, old) => {
+    logCount++;
+    console.log(`count changed: ${old} -> ${n}`);
+  },
+);
 
 data.count = 1; // expected: count changed: 0 -> 1
 data.count = 2; // expected: count changed: 1 -> 2
 data.count = 2; // expected: (nothing — same value)
-console.log('watcher fired count:', logCount); // expected: 2
+console.log("watcher fired count:", logCount); // expected: 2
 
 // MiniVue instantiation without DOM.
-const app = new MiniVue({ data: () => ({ msg: 'hello' }) });
-console.log('app.msg =', app.msg); // expected: hello
-app.msg = 'world';
-console.log('app.msg after set =', app.msg); // expected: world
-console.log('is reactive:', app.$data !== null); // expected: is reactive: true
+const app = new MiniVue({ data: () => ({ msg: "hello" }) });
+console.log("app.msg =", app.msg); // expected: hello
+app.msg = "world";
+console.log("app.msg after set =", app.msg); // expected: world
+console.log("is reactive:", app.$data !== null); // expected: is reactive: true
 
 // Template compile demo (no DOM needed).
-const app2 = new MiniVue({ data: () => ({ name: 'Mini' }) });
-const out = app2._compile('<h1>Hello {{ name }}</h1>')(app2);
-console.log('compiled template:', out); // expected: <h1>Hello Mini</h1>
+const app2 = new MiniVue({ data: () => ({ name: "Mini" }) });
+const out = app2._compile("<h1>Hello {{ name }}</h1>")(app2);
+console.log("compiled template:", out); // expected: <h1>Hello Mini</h1>

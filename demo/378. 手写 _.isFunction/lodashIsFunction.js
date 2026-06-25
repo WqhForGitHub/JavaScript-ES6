@@ -15,31 +15,45 @@
  */
 
 function isFunction(value) {
-  if (typeof value !== 'function') return false;
+  if (typeof value !== "function") return false;
   // typeof is reliable for functions in modern environments; the tag check
   // additionally excludes any exotic callable host objects that report
   // 'function' but are not really Function instances.
   const tag = Object.prototype.toString.call(value);
   return (
-    tag === '[object Function]' ||
-    tag === '[object AsyncFunction]' ||
-    tag === '[object GeneratorFunction]' ||
-    tag === '[object AsyncGeneratorFunction]'
+    tag === "[object Function]" ||
+    tag === "[object AsyncFunction]" ||
+    tag === "[object GeneratorFunction]" ||
+    tag === "[object AsyncGeneratorFunction]"
   );
 }
 
 // --- Tests ---
 
-console.log('isFunction regular:', isFunction(function () {})); // true
-console.log('isFunction arrow:', isFunction(() => {})); // true
-console.log('isFunction generator:', isFunction(function* () { yield 1; })); // true
-console.log('isFunction async:', isFunction(async () => {})); // true
-console.log('isFunction class:', isFunction(class Foo {})); // true
-console.log('isFunction Math.sin:', isFunction(Math.sin)); // true
-console.log('isFunction object:', isFunction({})); // false
-console.log('isFunction string:', isFunction('abc')); // false
-console.log('isFunction number:', isFunction(1)); // false
-console.log('isFunction null:', isFunction(null)); // false
-console.log('isFunction undefined:', isFunction(undefined)); // false
-console.log('isFunction array:', isFunction([])); // false
-console.log('isFunction RegExp:', isFunction(/a/)); // false
+console.log(
+  "isFunction regular:",
+  isFunction(function () {}),
+); // true
+console.log(
+  "isFunction arrow:",
+  isFunction(() => {}),
+); // true
+console.log(
+  "isFunction generator:",
+  isFunction(function* () {
+    yield 1;
+  }),
+); // true
+console.log(
+  "isFunction async:",
+  isFunction(async () => {}),
+); // true
+console.log("isFunction class:", isFunction(class Foo {})); // true
+console.log("isFunction Math.sin:", isFunction(Math.sin)); // true
+console.log("isFunction object:", isFunction({})); // false
+console.log("isFunction string:", isFunction("abc")); // false
+console.log("isFunction number:", isFunction(1)); // false
+console.log("isFunction null:", isFunction(null)); // false
+console.log("isFunction undefined:", isFunction(undefined)); // false
+console.log("isFunction array:", isFunction([])); // false
+console.log("isFunction RegExp:", isFunction(/a/)); // false

@@ -84,6 +84,10 @@ console.log("hello".myEndsWith("o", -1)); // false（endPosition 当作 0）
 
 // --- 与原生对比 ---
 console.log("\n--- 与原生对比 ---");
-console.log("hello world".endsWith("world") === "hello world".myEndsWith("world")); // true
-console.log("hello world".endsWith("hello", 5) === "hello world".myEndsWith("hello", 5)); // true
+console.log(
+  "hello world".endsWith("world") === "hello world".myEndsWith("world"),
+); // true
+console.log(
+  "hello world".endsWith("hello", 5) === "hello world".myEndsWith("hello", 5),
+); // true
 console.log("hello".endsWith("", 0) === "hello".myEndsWith("", 0)); // true

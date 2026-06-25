@@ -16,11 +16,11 @@
 class Amplifier {
   on() {
     this.on = true;
-    return 'Amplifier on';
+    return "Amplifier on";
   }
   off() {
     this.on = false;
-    return 'Amplifier off';
+    return "Amplifier off";
   }
   setVolume(v) {
     this.volume = v;
@@ -30,11 +30,11 @@ class Amplifier {
 class Projector {
   on() {
     this.on = true;
-    return 'Projector on';
+    return "Projector on";
   }
   off() {
     this.on = false;
-    return 'Projector off';
+    return "Projector off";
   }
   setMode(mode) {
     return `Projector mode: ${mode}`;
@@ -43,17 +43,17 @@ class Projector {
 class StreamingPlayer {
   on() {
     this.on = true;
-    return 'Player on';
+    return "Player on";
   }
   off() {
     this.on = false;
-    return 'Player off';
+    return "Player off";
   }
   play(title) {
     return `Playing "${title}"`;
   }
   stop() {
-    return 'Player stopped';
+    return "Player stopped";
   }
 }
 class Lights {
@@ -61,15 +61,15 @@ class Lights {
     return `Lights dimmed to ${level}%`;
   }
   on() {
-    return 'Lights on';
+    return "Lights on";
   }
 }
 class Screen {
   down() {
-    return 'Screen down';
+    return "Screen down";
   }
   up() {
-    return 'Screen up';
+    return "Screen up";
   }
 }
 
@@ -87,7 +87,7 @@ class HomeTheaterFacade {
     steps.push(this.lights.dim(10));
     steps.push(this.screen.down());
     steps.push(this.projector.on());
-    steps.push(this.projector.setMode('wide'));
+    steps.push(this.projector.setMode("wide"));
     steps.push(this.amp.on());
     steps.push(this.amp.setVolume(7));
     steps.push(this.player.on());
@@ -130,10 +130,10 @@ const theater = new HomeTheaterFacade(
   new Projector(),
   new StreamingPlayer(),
   new Lights(),
-  new Screen()
+  new Screen(),
 );
 
-console.log(theater.watchMovie('Inception'));
+console.log(theater.watchMovie("Inception"));
 // Expected: [
 //   'Lights dimmed to 10%', 'Screen down', 'Projector on',
 //   'Projector mode: wide', 'Amplifier on', 'Volume 7',
@@ -148,9 +148,9 @@ console.log(theater.endMovie());
 // Event facade: one API for on/off/emit
 const bus = new EventFacade();
 const got = [];
-const off = bus.on('greet', (p) => got.push(p));
-bus.emit('greet', 'hi');
+const off = bus.on("greet", (p) => got.push(p));
+bus.emit("greet", "hi");
 off();
-bus.emit('greet', 'ignored');
+bus.emit("greet", "ignored");
 console.log(got);
 // Expected: [ 'hi' ]

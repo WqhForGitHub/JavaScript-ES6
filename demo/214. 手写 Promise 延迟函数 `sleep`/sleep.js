@@ -44,7 +44,7 @@ function sleepCancelable(ms, signal) {
 // 延迟后 reject（测试超时用）
 function sleepReject(ms, reason = "timeout") {
   return new Promise((_, reject) =>
-    setTimeout(() => reject(new Error(reason)), ms)
+    setTimeout(() => reject(new Error(reason)), ms),
   );
 }
 

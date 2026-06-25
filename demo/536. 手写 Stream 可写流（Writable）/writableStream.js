@@ -21,7 +21,7 @@
  *   - 缓冲排空且 needDrain 时 emit 'drain'
  */
 
-const { EventEmitter } = require('events');
+const { EventEmitter } = require("events");
 
 class Writable extends EventEmitter {
   constructor(options = {}) {
@@ -51,24 +51,24 @@ class Writable extends EventEmitter {
   }
 
   write(chunk, encoding, callback) {
-    if (typeof encoding === 'function') {
+    if (typeof encoding === "function") {
       callback = encoding;
-      encoding = 'utf8';
+      encoding = "utf8";
     }
     if (this._writableState.ended) {
-      throw new Error('write after end');
+      throw new Error("write after end");
     }
-    if (typeof chunk === 'string') {
-      chunk = Buffer.from(chunk, encoding || 'utf8');
+    if (typeof chunk === "string") {
+      chunk = Buffer.from(chunk, encoding || "utf8");
     }
 
     const state = this._writableState;
-    const cb = err => {
-      if (err) this.emit('error', err);
+    const cb = (err) => {
+      if (err) this.emit("error", err);
       else if (callback) callback();
     };
 
-    state.buffer.push({ chunk, encoding: encoding || 'utf8', callback: cb });
+    state.buffer.push({ chunk, encoding: encoding || "utf8", callback: cb });
     state.bufferedLength += chunk.length;
 
     const ret = state.bufferedLength < state.highWaterMark;
@@ -90,14 +90,14 @@ class Writable extends EventEmitter {
       // 触发 drain
       if (state.needDrain) {
         state.needDrain = false;
-        this.emit('drain');
+        this.emit("drain");
       }
       // 如果已 end，执行 final
       if (state.ended && !state.finished) {
         state.finished = true;
-        this._final(err => {
-          if (err) this.emit('error', err);
-          else this.emit('finish');
+        this._final((err) => {
+          if (err) this.emit("error", err);
+          else this.emit("finish");
         });
       }
       return;
@@ -107,7 +107,7 @@ class Writable extends EventEmitter {
     state.bufferedLength -= chunk.length;
 
     try {
-      this._write(chunk, encoding, err => {
+      this._write(chunk, encoding, (err) => {
         callback(err);
         // 继续写下一个
         if (!this._destroyed) this._doWrite();
@@ -119,12 +119,12 @@ class Writable extends EventEmitter {
   }
 
   end(chunk, encoding, callback) {
-    if (typeof chunk === 'function') {
+    if (typeof chunk === "function") {
       callback = chunk;
       chunk = null;
-    } else if (typeof encoding === 'function') {
+    } else if (typeof encoding === "function") {
       callback = encoding;
-      encoding = 'utf8';
+      encoding = "utf8";
     }
 
     if (chunk !== null && chunk !== undefined) {
@@ -134,7 +134,7 @@ class Writable extends EventEmitter {
     const state = this._writableState;
     state.ended = true;
 
-    if (callback) this.once('finish', callback);
+    if (callback) this.once("finish", callback);
 
     if (!state.writing) {
       // 没有正在写，直接进入结束流程
@@ -148,8 +148,8 @@ class Writable extends EventEmitter {
     if (this._destroyed) return;
     this._destroyed = true;
     this._writableState.buffer = [];
-    if (err) this.emit('error', err);
-    this.emit('close');
+    if (err) this.emit("error", err);
+    this.emit("close");
   }
 }
 
@@ -165,12 +165,12 @@ const w1 = new Writable({
   },
 });
 
-w1.write('a');
-w1.write('b');
-w1.write('c');
+w1.write("a");
+w1.write("b");
+w1.write("c");
 w1.end(() => {
-  console.log('test1 written:', written1); // ['a', 'b', 'c']
-  console.log('test1 finish emitted');
+  console.log("test1 written:", written1); // ['a', 'b', 'c']
+  console.log("test1 finish emitted");
 });
 
 // 测试 2：背压（highWaterMark）
@@ -186,25 +186,25 @@ const w2 = new Writable({
 let drained = false;
 let canWriteCount = 0;
 for (let i = 0; i < 5; i++) {
-  const ok = w2.write('xyz'); // 每次写 3 字节
+  const ok = w2.write("xyz"); // 每次写 3 字节
   if (ok) canWriteCount++;
 }
-console.log('test2 initial ok count (backpressure):', canWriteCount); // 3 左右（10/3≈3）
-w2.on('drain', () => {
+console.log("test2 initial ok count (backpressure):", canWriteCount); // 3 左右（10/3≈3）
+w2.on("drain", () => {
   drained = true;
-  console.log('test2 drain fired');
+  console.log("test2 drain fired");
 });
 w2.end(() => {
-  console.log('test2 all written:', written2);
+  console.log("test2 all written:", written2);
 });
 
 // 测试 3：错误处理
 const w3 = new Writable({
   write(chunk, encoding, cb) {
-    cb(new Error('write fail'));
+    cb(new Error("write fail"));
   },
 });
-w3.on('error', err => {
-  console.log('test3 error:', err.message); // 'write fail'
+w3.on("error", (err) => {
+  console.log("test3 error:", err.message); // 'write fail'
 });
-w3.write('data');
+w3.write("data");

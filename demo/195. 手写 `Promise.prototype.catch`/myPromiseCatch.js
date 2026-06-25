@@ -27,9 +27,7 @@ function attachCatch(P) {
 // ===== 测试 =====
 
 // 1. 基本捕获
-myCatch.call(Promise.reject("err"), (e) =>
-  console.log("caught:", e)
-); // caught: err
+myCatch.call(Promise.reject("err"), (e) => console.log("caught:", e)); // caught: err
 
 // 2. 成功时不执行 catch，但可继续 then
 myCatch
@@ -54,8 +52,6 @@ myCatch
   .catch((e) => console.log("second caught:", e.message)); // second caught: second
 
 // 5. 异步 reject 也能捕获
-const asyncP = new Promise((_, rej) =>
-  setTimeout(() => rej("async err"), 30)
-);
+const asyncP = new Promise((_, rej) => setTimeout(() => rej("async err"), 30));
 myCatch.call(asyncP, (e) => console.log("async caught:", e));
 // async caught: async err

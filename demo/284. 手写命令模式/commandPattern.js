@@ -12,7 +12,7 @@
  */
 
 class TextBuffer {
-  constructor(text = '') {
+  constructor(text = "") {
     this.text = text;
   }
   insert(at, str) {
@@ -31,10 +31,10 @@ class TextBuffer {
 // ---- Command interface ----
 class Command {
   execute() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
   undo() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
 }
 
@@ -81,7 +81,7 @@ class DeleteCommand extends Command {
     this.buffer = buffer;
     this.position = position;
     this.length = length;
-    this.removed = '';
+    this.removed = "";
   }
   execute() {
     this.removed = this.buffer.delete(this.position, this.length);
@@ -138,11 +138,11 @@ class CommandHistory {
 }
 
 // ---------------- Test cases ----------------
-const buffer = new TextBuffer('Hello World');
+const buffer = new TextBuffer("Hello World");
 const history = new CommandHistory();
 
 // Insert '!' at end
-history.execute(new InsertCommand(buffer, buffer.text.length, '!'));
+history.execute(new InsertCommand(buffer, buffer.text.length, "!"));
 console.log(buffer.toString());
 // Expected: Hello World!
 
@@ -169,8 +169,8 @@ console.log(buffer.toString());
 // We use AppendTextCommand for the trailing insert because the buffer length is
 // not known until execution (the macro's first insert shifts everything).
 const macro = new MacroCommand([
-  new InsertCommand(buffer, 0, 'JS '),
-  new AppendTextCommand(buffer, '!!'),
+  new InsertCommand(buffer, 0, "JS "),
+  new AppendTextCommand(buffer, "!!"),
 ]);
 history.execute(macro);
 console.log(buffer.toString());

@@ -54,7 +54,7 @@ console.log(e); // [1, 2, [3, 4]]
 
 // --- 空数组推入 ---
 const f = [];
-console.log(f.myPush('a')); // 1
+console.log(f.myPush("a")); // 1
 console.log(f); // ['a']
 
 // --- 返回值是新长度 ---

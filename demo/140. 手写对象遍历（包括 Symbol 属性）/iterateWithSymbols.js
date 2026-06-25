@@ -34,7 +34,11 @@ function forEachOwnKey(obj, callback, { includeNonEnumerable = false } = {}) {
 }
 
 // 方式2：手动组合 getOwnPropertyNames + getOwnPropertySymbols（体现原理）
-function forEachOwnKeyManual(obj, callback, { includeNonEnumerable = false } = {}) {
+function forEachOwnKeyManual(
+  obj,
+  callback,
+  { includeNonEnumerable = false } = {},
+) {
   if (obj === null || typeof obj !== "object") {
     return;
   }
@@ -59,9 +63,13 @@ function forEachOwnKeyManual(obj, callback, { includeNonEnumerable = false } = {
 // 转为 entries 数组（含 Symbol）
 function toEntriesWithSymbols(obj, { includeNonEnumerable = false } = {}) {
   const entries = [];
-  forEachOwnKey(obj, (key, value) => {
-    entries.push([key, value]);
-  }, { includeNonEnumerable });
+  forEachOwnKey(
+    obj,
+    (key, value) => {
+      entries.push([key, value]);
+    },
+    { includeNonEnumerable },
+  );
   return entries;
 }
 
@@ -76,7 +84,10 @@ const obj = {
   [strSym]: "symValue",
 };
 Object.defineProperty(obj, "hidden", { value: "secret", enumerable: false });
-Object.defineProperty(obj, hiddenSym, { value: "hiddenSymValue", enumerable: false });
+Object.defineProperty(obj, hiddenSym, {
+  value: "hiddenSymValue",
+  enumerable: false,
+});
 
 // 默认只遍历可枚举属性（含 Symbol）
 console.log("--- 可枚举属性（含 Symbol）---");
@@ -89,9 +100,13 @@ forEachOwnKey(obj, (key, value) => {
 
 // 包含不可枚举属性
 console.log("--- 含不可枚举属性 ---");
-forEachOwnKey(obj, (key, value) => {
-  console.log(String(key), "=>", value);
-}, { includeNonEnumerable: true });
+forEachOwnKey(
+  obj,
+  (key, value) => {
+    console.log(String(key), "=>", value);
+  },
+  { includeNonEnumerable: true },
+);
 // name, age, Symbol(stringSym), hidden, Symbol(hiddenSym)
 
 // 转为 entries
@@ -101,7 +116,10 @@ console.log(toEntriesWithSymbols(obj));
 // 对比原生各 API
 console.log("Object.keys:", Object.keys(obj)); // ['name', 'age']（不含 Symbol、不可枚举）
 console.log("getOwnPropertyNames:", Object.getOwnPropertyNames(obj)); // ['name','age','hidden']（含不可枚举字符串）
-console.log("getOwnPropertySymbols:", Object.getOwnPropertySymbols(obj).map(String)); // 含两个 Symbol
+console.log(
+  "getOwnPropertySymbols:",
+  Object.getOwnPropertySymbols(obj).map(String),
+); // 含两个 Symbol
 console.log("Reflect.ownKeys:", Reflect.ownKeys(obj).map(String)); // 全部
 
 // 数组也可遍历（含 length 等不可枚举）
@@ -109,9 +127,13 @@ console.log("--- 数组遍历 ---");
 const arr = ["a", "b"];
 const arrSym = Symbol("arrSym");
 arr[arrSym] = "sym";
-forEachOwnKey(arr, (key, value) => {
-  console.log(String(key), "=>", value);
-}, { includeNonEnumerable: true });
+forEachOwnKey(
+  arr,
+  (key, value) => {
+    console.log(String(key), "=>", value);
+  },
+  { includeNonEnumerable: true },
+);
 // 0 => a, 1 => b, length => 2, Symbol(arrSym) => sym
 
 // 手动版与 Reflect 版结果一致

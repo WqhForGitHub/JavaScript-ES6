@@ -73,11 +73,14 @@ const shout = flow(trim, upper, exclaim);
 console.log(shout("  hello  ")); // 'HELLO!'
 
 // 数据处理流水线
-const users = [{ name: "tom", age: 20 }, { name: "jerry", age: 30 }];
+const users = [
+  { name: "tom", age: 20 },
+  { name: "jerry", age: 30 },
+];
 const getNames = flow(
   (list) => list.map((u) => u.name),
   (names) => names.map((n) => n.toUpperCase()),
-  (names) => names.join(", ")
+  (names) => names.join(", "),
 );
 console.log(getNames(users)); // 'TOM, JERRY'
 
@@ -95,7 +98,7 @@ function reduce(fn, init) {
 const sumEvenSquares = flow(
   filter((x) => x % 2 === 0),
   map((x) => x * x),
-  reduce((a, b) => a + b, 0)
+  reduce((a, b) => a + b, 0),
 );
 console.log(sumEvenSquares([1, 2, 3, 4, 5, 6])); // 56 = 4+16+36
 

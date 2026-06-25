@@ -84,7 +84,9 @@ function decompressString2(str) {
 function decompressString3(str) {
   if (typeof str !== "string" || str.length === 0) return "";
   // 匹配非数字字符后跟数字，替换为重复的字符
-  return str.replace(/(\D)(\d+)/g, (_, ch, num) => ch.repeat(parseInt(num, 10)));
+  return str.replace(/(\D)(\d+)/g, (_, ch, num) =>
+    ch.repeat(parseInt(num, 10)),
+  );
 }
 
 // 优点：一行代码，最简洁
@@ -102,7 +104,12 @@ const testCases = [
   { value: "", expected: "", desc: "空字符串" },
   { value: "a1", expected: "a", desc: "a1" },
   { value: "a2b3c4", expected: "aabbbcccc", desc: "a2b3c4" },
-  { value: "x10", expected: "xxxxxxxxxx", expected2: 10, desc: "x10（多位数字）" },
+  {
+    value: "x10",
+    expected: "xxxxxxxxxx",
+    expected2: 10,
+    desc: "x10（多位数字）",
+  },
 ];
 
 const methods = [
@@ -135,7 +142,9 @@ originals.forEach((s) => {
   const compressed = compressString(s);
   const decompressed = decompressString(compressed);
   const status = decompressed === s ? "✓" : "✗";
-  console.log(`  ${status} "${s}" → 压缩 "${compressed}" → 解压 "${decompressed}"`);
+  console.log(
+    `  ${status} "${s}" → 压缩 "${compressed}" → 解压 "${decompressed}"`,
+  );
 });
 
 // --- 总结 ---

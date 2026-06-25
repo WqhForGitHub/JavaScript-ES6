@@ -97,9 +97,18 @@ console.log("浮点数(修复):", sumFloat([0.1, 0.2, 0.3])); // 0.6
 console.log("\n========== 条件求和 ==========");
 const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 console.log("原始:", nums);
-console.log("偶数和:", sumBy(nums, (n) => n % 2 === 0)); // 30
-console.log("奇数和:", sumBy(nums, (n) => n % 2 !== 0)); // 25
-console.log("大于 5 的和:", sumBy(nums, (n) => n > 5)); // 40
+console.log(
+  "偶数和:",
+  sumBy(nums, (n) => n % 2 === 0),
+); // 30
+console.log(
+  "奇数和:",
+  sumBy(nums, (n) => n % 2 !== 0),
+); // 25
+console.log(
+  "大于 5 的和:",
+  sumBy(nums, (n) => n > 5),
+); // 40
 
 // --- 嵌套数组求和 ---
 function sumNested(arr) {

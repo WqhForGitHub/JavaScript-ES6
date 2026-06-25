@@ -6,17 +6,26 @@
  */
 
 class LintContext {
-  constructor(filename) { this.filename = filename; this.reportings = []; }
-  report(node, msg) { this.reportings.push({ node, msg, loc: node.loc || { line: 0 } }); }
+  constructor(filename) {
+    this.filename = filename;
+    this.reportings = [];
+  }
+  report(node, msg) {
+    this.reportings.push({ node, msg, loc: node.loc || { line: 0 } });
+  }
 }
 
 const noConsoleRule = {
-  meta: { type: 'suggestion', docs: { description: 'disallow console' } },
+  meta: { type: "suggestion", docs: { description: "disallow console" } },
   create(ctx) {
     return {
       CallExpression(node) {
-        if (node.callee.type === 'MemberExpression' && node.callee.object.type === 'Identifier' && node.callee.object.name === 'console') {
-          ctx.report(node, 'Unexpected console statement.');
+        if (
+          node.callee.type === "MemberExpression" &&
+          node.callee.object.type === "Identifier" &&
+          node.callee.object.name === "console"
+        ) {
+          ctx.report(node, "Unexpected console statement.");
         }
       },
     };
@@ -27,24 +36,39 @@ const noConsoleRule = {
 function parseConsoleCalls(code) {
   const nodes = [];
   const re = /console\.(\w+)\s*\(/g;
-  let m, line = 1, last = 0;
+  let m,
+    line = 1,
+    last = 0;
   while ((m = re.exec(code)) !== null) {
-    for (let i = last; i < m.index; i++) if (code[i] === '\n') line++;
+    for (let i = last; i < m.index; i++) if (code[i] === "\n") line++;
     last = m.index;
-    nodes.push({ type: 'CallExpression', callee: { type: 'MemberExpression', object: { type: 'Identifier', name: 'console' }, property: { type: 'Identifier', name: m[1] } }, loc: { line, column: m.index } });
+    nodes.push({
+      type: "CallExpression",
+      callee: {
+        type: "MemberExpression",
+        object: { type: "Identifier", name: "console" },
+        property: { type: "Identifier", name: m[1] },
+      },
+      loc: { line, column: m.index },
+    });
   }
   return nodes;
 }
 
-function runRule(code, rule, filename = 'test.js') {
+function runRule(code, rule, filename = "test.js") {
   const ctx = new LintContext(filename);
   const visitors = rule.create(ctx);
-  parseConsoleCalls(code).forEach(node => { if (visitors.CallExpression) visitors.CallExpression(node); });
+  parseConsoleCalls(code).forEach((node) => {
+    if (visitors.CallExpression) visitors.CallExpression(node);
+  });
   return ctx.reportings;
 }
 
 // ===== 测试 =====
-const testCode = "const x = 1;\nconsole.log(x);\nconsole.warn('w');\nconsole.error('e');";
+const testCode =
+  "const x = 1;\nconsole.log(x);\nconsole.warn('w');\nconsole.error('e');";
 const reports = runRule(testCode, noConsoleRule);
-console.log('违规报告数:', reports.length); // 3
-reports.forEach((r, i) => console.log('  [' + (i+1) + '] 行' + r.loc.line + ': ' + r.msg));
+console.log("违规报告数:", reports.length); // 3
+reports.forEach((r, i) =>
+  console.log("  [" + (i + 1) + "] 行" + r.loc.line + ": " + r.msg),
+);

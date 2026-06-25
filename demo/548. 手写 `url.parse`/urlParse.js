@@ -20,9 +20,15 @@
  *   6. parseQueryString=true 时把 query 字符串解析成对象
  */
 
-function urlParse(urlString, parseQueryString = false, slashesDenoteHost = false) {
-  if (typeof urlString !== 'string') {
-    throw new TypeError(`Parameter "url" must be a string, not ${typeof urlString}`);
+function urlParse(
+  urlString,
+  parseQueryString = false,
+  slashesDenoteHost = false,
+) {
+  if (typeof urlString !== "string") {
+    throw new TypeError(
+      `Parameter "url" must be a string, not ${typeof urlString}`,
+    );
   }
 
   const result = {
@@ -44,7 +50,7 @@ function urlParse(urlString, parseQueryString = false, slashesDenoteHost = false
   let hasHash = false;
 
   // 1. 提取 hash
-  const hashIdx = str.indexOf('#');
+  const hashIdx = str.indexOf("#");
   if (hashIdx !== -1) {
     result.hash = str.slice(hashIdx);
     str = str.slice(0, hashIdx);
@@ -56,27 +62,28 @@ function urlParse(urlString, parseQueryString = false, slashesDenoteHost = false
   const protoMatch = /^([a-zA-Z][a-zA-Z0-9+.-]*):/.exec(str);
   let rest = str;
   if (protoMatch) {
-    result.protocol = protoMatch[1] + ':';
+    result.protocol = protoMatch[1] + ":";
     rest = str.slice(protoMatch[0].length);
   }
 
   // 3. 判断 slashes（协议后跟 //）
   let slashes = false;
-  if (rest.startsWith('//')) {
+  if (rest.startsWith("//")) {
     slashes = true;
     rest = rest.slice(2);
-  } else if (slashesDenoteHost && rest.startsWith('/')) {
+  } else if (slashesDenoteHost && rest.startsWith("/")) {
     // 特殊：slashesDenoteHost=true 时，即使没有 protocol 也把 // 当作 host 标记
   }
 
   // 判断是否有 host 部分
-  const hasHost = slashes || (result.protocol && rest[0] !== '/' && rest[0] !== '?');
+  const hasHost =
+    slashes || (result.protocol && rest[0] !== "/" && rest[0] !== "?");
 
   if (hasHost) {
     // host 部分在第一个 / 或 ? 之前
     let hostEnd = rest.length;
-    const slashIdx = rest.indexOf('/');
-    const qIdx = rest.indexOf('?');
+    const slashIdx = rest.indexOf("/");
+    const qIdx = rest.indexOf("?");
     if (slashIdx !== -1) hostEnd = Math.min(hostEnd, slashIdx);
     if (qIdx !== -1) hostEnd = Math.min(hostEnd, qIdx);
 
@@ -84,26 +91,26 @@ function urlParse(urlString, parseQueryString = false, slashesDenoteHost = false
     rest = rest.slice(hostEnd);
 
     // auth: user:pass@
-    const atIdx = hostPart.lastIndexOf('@');
+    const atIdx = hostPart.lastIndexOf("@");
     if (atIdx !== -1) {
       result.auth = hostPart.slice(0, atIdx);
       hostPart = hostPart.slice(atIdx + 1);
     }
 
     // IPv6 [::1]:port
-    if (hostPart[0] === '[') {
-      const bracketEnd = hostPart.indexOf(']');
+    if (hostPart[0] === "[") {
+      const bracketEnd = hostPart.indexOf("]");
       if (bracketEnd !== -1) {
         result.hostname = hostPart.slice(0, bracketEnd + 1);
         const after = hostPart.slice(bracketEnd + 1);
-        if (after.startsWith(':')) {
+        if (after.startsWith(":")) {
           result.port = after.slice(1);
         }
       } else {
         result.hostname = hostPart;
       }
     } else {
-      const colonIdx = hostPart.indexOf(':');
+      const colonIdx = hostPart.indexOf(":");
       if (colonIdx !== -1) {
         result.hostname = hostPart.slice(0, colonIdx);
         result.port = hostPart.slice(colonIdx + 1);
@@ -113,18 +120,18 @@ function urlParse(urlString, parseQueryString = false, slashesDenoteHost = false
     }
 
     result.host = hostPart;
-    if (result.port) result.host = result.hostname + ':' + result.port;
+    if (result.port) result.host = result.hostname + ":" + result.port;
   }
 
   result.slashes = slashes;
 
   // 4. 处理 path 部分（pathname + search）
   // rest 现在以 / 或 ? 开头，或为空
-  if (rest === '' && !result.host) {
+  if (rest === "" && !result.host) {
     result.pathname = null;
     result.path = null;
   } else {
-    const qIdx = rest.indexOf('?');
+    const qIdx = rest.indexOf("?");
     if (qIdx === -1) {
       result.pathname = rest;
       result.search = null;
@@ -133,18 +140,20 @@ function urlParse(urlString, parseQueryString = false, slashesDenoteHost = false
       result.pathname = rest.slice(0, qIdx);
       result.search = rest.slice(qIdx);
       const queryString = rest.slice(qIdx + 1);
-      result.query = parseQueryString ? parseQueryStringFn(queryString) : queryString;
+      result.query = parseQueryString
+        ? parseQueryStringFn(queryString)
+        : queryString;
     }
     result.path = rest;
   }
 
   // 补全默认值
-  if (result.pathname === null) result.pathname = result.host ? '/' : null;
+  if (result.pathname === null) result.pathname = result.host ? "/" : null;
 
   return result;
 }
 
-function parseQueryStringFn(qs, sep = '&', eq = '=') {
+function parseQueryStringFn(qs, sep = "&", eq = "=") {
   const obj = {};
   if (!qs) return obj;
   const pairs = qs.split(sep);
@@ -154,13 +163,13 @@ function parseQueryStringFn(qs, sep = '&', eq = '=') {
     let key, value;
     if (idx === -1) {
       key = pair;
-      value = '';
+      value = "";
     } else {
       key = pair.slice(0, idx);
       value = pair.slice(idx + 1);
     }
-    key = decodeURIComponent(key.replace(/\+/g, ' '));
-    value = decodeURIComponent(value.replace(/\+/g, ' '));
+    key = decodeURIComponent(key.replace(/\+/g, " "));
+    value = decodeURIComponent(value.replace(/\+/g, " "));
     if (key in obj) {
       if (Array.isArray(obj[key])) obj[key].push(value);
       else obj[key] = [obj[key], value];
@@ -173,48 +182,58 @@ function parseQueryStringFn(qs, sep = '&', eq = '=') {
 
 // ===== 测试 =====
 
-console.log(urlParse('http://user:pass@host.com:8080/p/a/t/h?query=string#hash'));
+console.log(
+  urlParse("http://user:pass@host.com:8080/p/a/t/h?query=string#hash"),
+);
 // { protocol: 'http:', slashes: true, auth: 'user:pass',
 //   host: 'host.com:8080', hostname: 'host.com', port: '8080',
 //   pathname: '/p/a/t/h', search: '?query=string', query: 'query=string',
 //   path: '/p/a/t/h?query=string', hash: '#hash' }
 
-console.log(urlParse('https://example.com/'));
+console.log(urlParse("https://example.com/"));
 // { protocol: 'https:', host: 'example.com', hostname: 'example.com', port: null,
 //   pathname: '/', path: '/', search: null, query: null, hash: null }
 
-console.log(urlParse('/local/path?q=1'));
+console.log(urlParse("/local/path?q=1"));
 // { protocol: null, host: null, pathname: '/local/path', search: '?q=1', query: 'q=1' }
 
-console.log(urlParse('mailto:test@example.com'));
+console.log(urlParse("mailto:test@example.com"));
 // { protocol: 'mailto:', pathname: 'test@example.com' }
 
 // parseQueryString=true
-const r = urlParse('http://host/?a=1&b=2&a=3', true);
-console.log('parsed query:', r.query); // { a: ['1','3'], b: '2' }
+const r = urlParse("http://host/?a=1&b=2&a=3", true);
+console.log("parsed query:", r.query); // { a: ['1','3'], b: '2' }
 
 // IPv6
-console.log(urlParse('http://[::1]:3000/path'));
+console.log(urlParse("http://[::1]:3000/path"));
 // hostname: '[::1]', port: '3000'
 
 // 只有 hash
-console.log(urlParse('#section'));
+console.log(urlParse("#section"));
 // { hash: '#section', pathname: null, ... }
 
 // 与原生对比
-if (typeof require === 'function') {
+if (typeof require === "function") {
   try {
-    const url = require('url');
+    const url = require("url");
     const cases = [
-      'http://user:pass@host.com:8080/p/a/t/h?query=string#hash',
-      'https://example.com/',
-      '/local/path?q=1',
+      "http://user:pass@host.com:8080/p/a/t/h?query=string#hash",
+      "https://example.com/",
+      "/local/path?q=1",
     ];
     for (const c of cases) {
       const mine = urlParse(c);
       const native = url.parse(c);
-      console.log(`compare protocol host pathname:`, mine.protocol, mine.host, mine.pathname,
-        '| native:', native.protocol, native.host, native.pathname);
+      console.log(
+        `compare protocol host pathname:`,
+        mine.protocol,
+        mine.host,
+        mine.pathname,
+        "| native:",
+        native.protocol,
+        native.host,
+        native.pathname,
+      );
     }
   } catch (e) {
     // 跳过

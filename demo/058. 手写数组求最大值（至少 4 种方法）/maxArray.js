@@ -113,7 +113,9 @@ const perfMethods = [
 perfMethods.forEach(({ name, fn }) => {
   const start = performance.now();
   const result = fn(bigArr);
-  console.log(`${name}: ${result} (${(performance.now() - start).toFixed(2)}ms)`);
+  console.log(
+    `${name}: ${result} (${(performance.now() - start).toFixed(2)}ms)`,
+  );
 });
 
 // --- 总结 ---

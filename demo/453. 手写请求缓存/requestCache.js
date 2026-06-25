@@ -88,7 +88,9 @@ getUser(1).then((u) => {
   });
 });
 
-getUser(2).then((u) => console.log("不同参数:", u.name, "请求次数:", fetchCount)); // 不同参数: user2 请求次数: 2
+getUser(2).then((u) =>
+  console.log("不同参数:", u.name, "请求次数:", fetchCount),
+); // 不同参数: user2 请求次数: 2
 
 // 等待过期后再次请求
 setTimeout(() => {
@@ -101,5 +103,5 @@ setTimeout(() => {
 // 主动清除
 setTimeout(() => {
   getUser.clear();
-  console.log("clear 后 has(1):", getUser.has('[[1]]')); // clear 后 has(1): false
+  console.log("clear 后 has(1):", getUser.has("[[1]]")); // clear 后 has(1): false
 }, 200);

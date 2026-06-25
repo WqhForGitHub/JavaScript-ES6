@@ -51,7 +51,7 @@ function createPrivateObject(target, { prefix = "_", strict = false } = {}) {
     ownKeys(obj) {
       // 过滤掉私有属性，不在 Object.keys / for...in 中出现
       return Reflect.ownKeys(obj).filter(
-        (k) => !(typeof k === "string" && k.startsWith(prefix))
+        (k) => !(typeof k === "string" && k.startsWith(prefix)),
       );
     },
 
@@ -127,7 +127,7 @@ console.log(user.age); // 21
 console.log("=== 严格模式 ===");
 const strictUser = createPrivateObject(
   { name: "Jerry", _secret: "top" },
-  { strict: true }
+  { strict: true },
 );
 try {
   strictUser._secret;
@@ -138,7 +138,7 @@ try {
 console.log("=== 方式2：WeakMap 真私有 ===");
 const secured = createWithWeakMap(
   { name: "Tom", balance: 1000 },
-  { pin: "9999", token: "abc" }
+  { pin: "9999", token: "abc" },
 );
 console.log(secured.name); // 'Tom'
 console.log(secured.balance); // 1000

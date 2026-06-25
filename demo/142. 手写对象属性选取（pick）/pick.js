@@ -33,7 +33,10 @@ function pick(obj, keys) {
 
   // 处理 Symbol 属性
   for (const key of keysToPick) {
-    if (typeof key === "symbol" && Object.prototype.hasOwnProperty.call(obj, key)) {
+    if (
+      typeof key === "symbol" &&
+      Object.prototype.hasOwnProperty.call(obj, key)
+    ) {
       result[key] = obj[key];
     }
   }

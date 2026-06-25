@@ -116,7 +116,10 @@ methods.forEach(({ name, fn }) => {
 
 // --- 降序 ---
 console.log("\n========== 降序 ==========");
-console.log("降序:", insertionSortBy(arr, (a, b) => b - a)); // [13,12,11,6,5]
+console.log(
+  "降序:",
+  insertionSortBy(arr, (a, b) => b - a),
+); // [13,12,11,6,5]
 
 // --- 边界情况 ---
 console.log("\n========== 边界情况 ==========");
@@ -135,7 +138,10 @@ const objects = [
   { name: "D", score: 80 },
 ];
 const sorted = insertionSortBy(objects, (a, b) => a.score - b.score);
-console.log("按分数排序:", sorted.map((o) => `${o.score}${o.name}`));
+console.log(
+  "按分数排序:",
+  sorted.map((o) => `${o.score}${o.name}`),
+);
 // ['80B','80D','90A','90C'] —— 同分数保持原顺序，稳定
 
 // --- 最佳/最坏情况性能 ---

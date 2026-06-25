@@ -43,7 +43,7 @@ function validateUrl(url, options = {}) {
 
   const fullRegex = new RegExp(
     `${requireProtocol ? protoPattern : "^(?:" + protoPattern.slice(1) + ")?"}${hostPattern}${portPattern}${pathPattern}${queryPattern}${hashPattern}$`,
-    "i"
+    "i",
   );
 
   if (!fullRegex.test(str)) return false;
@@ -55,7 +55,10 @@ function validateUrl(url, options = {}) {
       ? str.replace(/[\u4e00-\u9fa5]+/g, (m) => encodeURIComponent(m))
       : str;
     const u = new URL(normalized);
-    if (protocols.length > 0 && !protocols.includes(u.protocol.replace(":", ""))) {
+    if (
+      protocols.length > 0 &&
+      !protocols.includes(u.protocol.replace(":", ""))
+    ) {
       return false;
     }
     return true;
@@ -67,15 +70,24 @@ function validateUrl(url, options = {}) {
 // ===== 测试 =====
 console.log("https:", validateUrl("https://www.example.com")); // true
 console.log("带端口:", validateUrl("http://localhost:8080/api")); // true
-console.log("带query和hash:", validateUrl("https://example.com/path?key=v#section")); // true
+console.log(
+  "带query和hash:",
+  validateUrl("https://example.com/path?key=v#section"),
+); // true
 console.log("IP:", validateUrl("http://192.168.1.1:3000")); // true
 console.log("中文路径:", validateUrl("https://example.com/中文/路径")); // true
 console.log("无协议:", validateUrl("www.example.com")); // false
-console.log("无协议允许:", validateUrl("www.example.com", { requireProtocol: false })); // true
+console.log(
+  "无协议允许:",
+  validateUrl("www.example.com", { requireProtocol: false }),
+); // true
 console.log("仅协议:", validateUrl("http://")); // false
 console.log("空字符串:", validateUrl("")); // false
 console.log("非法字符空格:", validateUrl("https://exa mple.com")); // false
-console.log("限定 https only:", validateUrl("http://example.com", { protocols: ["https"] })); // false
+console.log(
+  "限定 https only:",
+  validateUrl("http://example.com", { protocols: ["https"] }),
+); // false
 console.log("ws 协议:", validateUrl("wss://socket.example.com")); // true
 console.log("非法协议:", validateUrl("javascript:alert(1)")); // false
 console.log("末尾多点:", validateUrl("https://example.com..")); // false

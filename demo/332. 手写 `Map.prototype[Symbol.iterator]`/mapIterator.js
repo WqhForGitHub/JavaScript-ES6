@@ -45,7 +45,7 @@ SimpleMap.prototype.entries = function () {
         return { value: [keys[index], values[index++]], done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
@@ -59,7 +59,7 @@ SimpleMap.prototype.keys = function () {
         return { value: keys[index++], done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
@@ -73,20 +73,26 @@ SimpleMap.prototype.values = function () {
         return { value: values[index++], done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
 // 默认迭代器等同于 entries
 SimpleMap.prototype[Symbol.iterator] = SimpleMap.prototype.entries;
 
-Object.defineProperty(SimpleMap.prototype, 'size', {
-  get: function () { return this._keys.length; }
+Object.defineProperty(SimpleMap.prototype, "size", {
+  get: function () {
+    return this._keys.length;
+  },
 });
 
 // 测试 1：for...of 遍历键值对
-console.log('--- for...of entries ---');
-var map = new SimpleMap([['a', 1], ['b', 2], ['c', 3]]);
+console.log("--- for...of entries ---");
+var map = new SimpleMap([
+  ["a", 1],
+  ["b", 2],
+  ["c", 3],
+]);
 var pairs = [];
 for (var entry of map) {
   pairs.push(entry);
@@ -94,20 +100,20 @@ for (var entry of map) {
 console.log(pairs); // [['a', 1], ['b', 2], ['c', 3]]
 
 // 测试 2：展开运算符
-console.log('--- Spread ---');
+console.log("--- Spread ---");
 console.log([...map]); // [['a', 1], ['b', 2], ['c', 3]]
 
 // 测试 3：解构
-console.log('--- Destructuring ---');
+console.log("--- Destructuring ---");
 for (var [key, value] of map) {
-  console.log(key + '=' + value);
+  console.log(key + "=" + value);
 }
 // a=1
 // b=2
 // c=3
 
 // 测试 4：keys 迭代器
-console.log('--- keys() ---');
+console.log("--- keys() ---");
 var keys = [];
 var keysIt = map.keys();
 var r;
@@ -115,30 +121,38 @@ while (!(r = keysIt.next()).done) keys.push(r.value);
 console.log(keys); // ['a', 'b', 'c']
 
 // 测试 5：values 迭代器
-console.log('--- values() ---');
+console.log("--- values() ---");
 var values = [];
-for (var v of { [Symbol.iterator]: function () { return map.values(); } }) {
+for (var v of {
+  [Symbol.iterator]: function () {
+    return map.values();
+  },
+}) {
   values.push(v);
 }
 console.log(values); // [1, 2, 3]
 
 // 测试 6：插入顺序保持
-console.log('--- Insertion order ---');
+console.log("--- Insertion order ---");
 var ordered = new SimpleMap();
-ordered.set('z', 26);
-ordered.set('a', 1);
-ordered.set('m', 13);
+ordered.set("z", 26);
+ordered.set("a", 1);
+ordered.set("m", 13);
 console.log([...ordered]); // [['z', 26], ['a', 1], ['m', 13]]
 
 // 测试 7：与原生 Map 对比
-console.log('--- Compare with native Map ---');
-var native = new Map([['a', 1], ['b', 2], ['c', 3]]);
+console.log("--- Compare with native Map ---");
+var native = new Map([
+  ["a", 1],
+  ["b", 2],
+  ["c", 3],
+]);
 var nativePairs = [...native];
 var myPairs = [...map];
 console.log(JSON.stringify(nativePairs) === JSON.stringify(myPairs)); // true
 
 // 测试 8：空 Map
-console.log('--- Empty map ---');
+console.log("--- Empty map ---");
 var empty = new SimpleMap();
 console.log([...empty]); // []
 console.log(empty.size); // 0

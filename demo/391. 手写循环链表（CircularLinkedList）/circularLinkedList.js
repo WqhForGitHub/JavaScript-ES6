@@ -110,14 +110,14 @@ class CircularLinkedList {
   }
 
   toString() {
-    if (this.head === null) return '';
+    if (this.head === null) return "";
     const arr = [];
     let current = this.head;
     do {
       arr.push(current.element);
       current = current.next;
     } while (current !== this.head);
-    return arr.join(' -> ') + ' -> (head)';
+    return arr.join(" -> ") + " -> (head)";
   }
 }
 
@@ -127,7 +127,7 @@ cll.append(1).append(2).append(3).append(4);
 console.log(cll.toString()); // 1 -> 2 -> 3 -> 4 -> (head)
 console.log(cll.size()); // 4
 
-cll.insert(0, 'a');
+cll.insert(0, "a");
 console.log(cll.toString()); // a -> 1 -> 2 -> 3 -> 4 -> (head)
 
 console.log(cll.removeAt(0)); // a

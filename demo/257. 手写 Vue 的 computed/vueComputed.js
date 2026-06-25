@@ -22,24 +22,51 @@ function Dep() {
 }
 Dep.target = null;
 var targetStack = [];
-Dep.pushTarget = function (t) { targetStack.push(t); Dep.target = t; };
-Dep.popTarget = function () { targetStack.pop(); Dep.target = targetStack[targetStack.length - 1] || null; };
-Dep.prototype.addSub = function (s) { if (this.subs.indexOf(s) === -1) this.subs.push(s); };
-Dep.prototype.removeSub = function (s) { var i = this.subs.indexOf(s); if (i !== -1) this.subs.splice(i, 1); };
-Dep.prototype.depend = function () { if (Dep.target) Dep.target.addDep(this); };
-Dep.prototype.notify = function () { this.subs.slice().forEach(function (s) { s.update(); }); };
+Dep.pushTarget = function (t) {
+  targetStack.push(t);
+  Dep.target = t;
+};
+Dep.popTarget = function () {
+  targetStack.pop();
+  Dep.target = targetStack[targetStack.length - 1] || null;
+};
+Dep.prototype.addSub = function (s) {
+  if (this.subs.indexOf(s) === -1) this.subs.push(s);
+};
+Dep.prototype.removeSub = function (s) {
+  var i = this.subs.indexOf(s);
+  if (i !== -1) this.subs.splice(i, 1);
+};
+Dep.prototype.depend = function () {
+  if (Dep.target) Dep.target.addDep(this);
+};
+Dep.prototype.notify = function () {
+  this.subs.slice().forEach(function (s) {
+    s.update();
+  });
+};
 
 function defineReactive(obj, key, val) {
   var dep = new Dep();
   Object.defineProperty(obj, key, {
-    enumerable: true, configurable: true,
-    get: function () { dep.depend(); return val; },
-    set: function (v) { if (v === val) return; val = v; dep.notify(); },
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      dep.depend();
+      return val;
+    },
+    set: function (v) {
+      if (v === val) return;
+      val = v;
+      dep.notify();
+    },
   });
 }
 function observe(obj) {
-  if (!obj || typeof obj !== 'object') return obj;
-  Object.keys(obj).forEach(function (k) { defineReactive(obj, k, obj[k]); });
+  if (!obj || typeof obj !== "object") return obj;
+  Object.keys(obj).forEach(function (k) {
+    defineReactive(obj, k, obj[k]);
+  });
   return obj;
 }
 
@@ -101,7 +128,9 @@ Watcher.prototype.evaluate = function () {
 };
 
 Watcher.prototype.depend = function () {
-  this.deps.forEach(function (dep) { dep.depend(); });
+  this.deps.forEach(function (dep) {
+    dep.depend();
+  });
 };
 
 // ===== computed 实现 =====
@@ -139,7 +168,11 @@ function initComputed(vm, computed) {
         return watcher.value;
       },
       set: function () {
-        console.warn('Computed property "' + key + '" was assigned to but it has no setter.');
+        console.warn(
+          'Computed property "' +
+            key +
+            '" was assigned to but it has no setter.',
+        );
       },
     });
   });
@@ -149,11 +182,11 @@ function initComputed(vm, computed) {
 }
 
 // ===== 测试用例 =====
-var data = observe({ firstName: 'John', lastName: 'Doe', count: 0 });
+var data = observe({ firstName: "John", lastName: "Doe", count: 0 });
 
 var computed = initComputed(data, {
   fullName: function () {
-    return this.firstName + ' ' + this.lastName;
+    return this.firstName + " " + this.lastName;
   },
   double: function () {
     return this.count * 2;
@@ -170,9 +203,9 @@ var computed2 = initComputed(observe({ n: 5 }), {
 });
 
 console.log(computed2.squared); // => 25
-console.log('计算次数：', callCount); // => 1
+console.log("计算次数：", callCount); // => 1
 console.log(computed2.squared); // => 25（缓存）
-console.log('计算次数：', callCount); // => 1（未重新计算）
+console.log("计算次数：", callCount); // => 1（未重新计算）
 
 // 2. 依赖变化后重新计算
 var src = observe({ n: 5 });
@@ -194,7 +227,9 @@ var base = observe({ radius: 2 });
 var pi = observe({ value: 3.14 });
 var areaComputed = initComputed(base, {
   // area = pi * r^2，这里简化为依赖 base.radius
-  area: function () { return this.radius * this.radius * pi.value; },
+  area: function () {
+    return this.radius * this.radius * pi.value;
+  },
 });
 console.log(areaComputed.area); // => 12.56
 base.radius = 3;
@@ -202,7 +237,7 @@ console.log(areaComputed.area); // => 28.26
 
 // 4. 多个 computed
 console.log(computed.fullName); // => John Doe
-data.firstName = 'Jane';
+data.firstName = "Jane";
 console.log(computed.fullName); // => Jane Doe
 console.log(computed.double); // => 0
 data.count = 5;

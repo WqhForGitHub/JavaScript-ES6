@@ -92,7 +92,10 @@ console.log(
 
 // --- 含 NaN ---
 console.log("\n========== 含 NaN ==========");
-console.log("intersection([1, NaN, 2], [NaN, 2, 3]):", intersection3([1, NaN, 2], [NaN, 2, 3])); // [NaN, 2]
+console.log(
+  "intersection([1, NaN, 2], [NaN, 2, 3]):",
+  intersection3([1, NaN, 2], [NaN, 2, 3]),
+); // [NaN, 2]
 // Set 用 SameValueZero，能正确识别 NaN
 
 // --- 边界情况 ---
@@ -122,4 +125,6 @@ console.log("\n========== 总结 ==========");
 console.log("推荐优先级：filter + Set > 去重交集 > filter + includes");
 console.log("filter + Set：性能 O(n+m)，保留 A 中重复");
 console.log("去重交集：结果无重复，遍历两个 Set");
-console.log("交集满足交换律：intersection(A,B) === intersection(B,A)（去重版本）");
+console.log(
+  "交集满足交换律：intersection(A,B) === intersection(B,A)（去重版本）",
+);

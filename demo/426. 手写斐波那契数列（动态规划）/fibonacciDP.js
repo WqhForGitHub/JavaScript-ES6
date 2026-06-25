@@ -9,7 +9,7 @@
 
 // 自底向上 DP（数组）
 function fibonacciDP(n) {
-  if (n < 0) throw new Error('n must be non-negative');
+  if (n < 0) throw new Error("n must be non-negative");
   if (n <= 1) return n;
   const dp = new Array(n + 1);
   dp[0] = 0;
@@ -22,7 +22,7 @@ function fibonacciDP(n) {
 
 // 空间优化版（只用两个变量）
 function fibonacciOptimized(n) {
-  if (n < 0) throw new Error('n must be non-negative');
+  if (n < 0) throw new Error("n must be non-negative");
   if (n <= 1) return n;
   let prev2 = 0; // F(0)
   let prev1 = 1; // F(1)

@@ -123,16 +123,32 @@ function longestCommonPrefix4(strs) {
 console.log("========== 手写最长公共前缀 ==========\n");
 
 const testCases = [
-  { value: ["flower", "flow", "flight"], expected: "fl", desc: "flower/flow/flight" },
-  { value: ["dog", "racecar", "car"], expected: "", desc: "dog/racecar/car（无公共前缀）" },
+  {
+    value: ["flower", "flow", "flight"],
+    expected: "fl",
+    desc: "flower/flow/flight",
+  },
+  {
+    value: ["dog", "racecar", "car"],
+    expected: "",
+    desc: "dog/racecar/car（无公共前缀）",
+  },
   { value: ["abc", "abc", "abc"], expected: "abc", desc: "全相同" },
   { value: [""], expected: "", desc: "单个空字符串" },
   { value: ["a"], expected: "a", desc: "单个字符串" },
   { value: [], expected: "", desc: "空数组" },
   { value: ["", "b"], expected: "", desc: "含空字符串" },
   { value: ["ab", "a"], expected: "a", desc: "ab/a（长度不同）" },
-  { value: ["interspecies", "interstellar", "interstate"], expected: "inters", desc: "interspecies/..." },
-  { value: ["prefix", "preface", "premium"], expected: "pre", desc: "prefix/preface/premium" },
+  {
+    value: ["interspecies", "interstellar", "interstate"],
+    expected: "inters",
+    desc: "interspecies/...",
+  },
+  {
+    value: ["prefix", "preface", "premium"],
+    expected: "pre",
+    desc: "prefix/preface/premium",
+  },
 ];
 
 const methods = [

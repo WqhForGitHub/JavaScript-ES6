@@ -29,7 +29,7 @@ function longestCommonSubstring(str1, str2) {
       }
     }
   }
-  if (maxLen === 0) return '';
+  if (maxLen === 0) return "";
   return str1.slice(endIndex - maxLen, endIndex);
 }
 
@@ -54,12 +54,12 @@ function longestCommonSubstringLength(str1, str2) {
 }
 
 // 测试
-console.log(longestCommonSubstring('abcdef', 'zcdemf')); // cde
-console.log(longestCommonSubstring('ABABC', 'BABCA')); // BABC
-console.log(longestCommonSubstring('hello', 'world')); // l (或 'l')
-console.log(longestCommonSubstring('abc', 'def')); // ''
-console.log(longestCommonSubstring('', 'abc')); // ''
+console.log(longestCommonSubstring("abcdef", "zcdemf")); // cde
+console.log(longestCommonSubstring("ABABC", "BABCA")); // BABC
+console.log(longestCommonSubstring("hello", "world")); // l (或 'l')
+console.log(longestCommonSubstring("abc", "def")); // ''
+console.log(longestCommonSubstring("", "abc")); // ''
 
-console.log(longestCommonSubstringLength('abcdef', 'zcdemf')); // 3
-console.log(longestCommonSubstringLength('ABABC', 'BABCA')); // 4
-console.log(longestCommonSubstringLength('GeeksforGeeks', 'GeeksQuiz')); // 5
+console.log(longestCommonSubstringLength("abcdef", "zcdemf")); // 3
+console.log(longestCommonSubstringLength("ABABC", "BABCA")); // 4
+console.log(longestCommonSubstringLength("GeeksforGeeks", "GeeksQuiz")); // 5

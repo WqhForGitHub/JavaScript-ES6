@@ -47,8 +47,14 @@ function validateEmailLoose(email) {
 
 // ===== 测试 =====
 console.log("user@example.com:", validateEmailCommon("user@example.com")); // true
-console.log("user.name@example.com:", validateEmailCommon("user.name@example.com")); // true
-console.log("user+tag@sub.example.com:", validateEmailCommon("user+tag@sub.example.com")); // true
+console.log(
+  "user.name@example.com:",
+  validateEmailCommon("user.name@example.com"),
+); // true
+console.log(
+  "user+tag@sub.example.com:",
+  validateEmailCommon("user+tag@sub.example.com"),
+); // true
 console.log("user_name@a.b.co:", validateEmailCommon("user_name@a.b.co")); // true
 console.log("无@:", validateEmailCommon("userexample.com")); // false
 console.log("无域名后缀:", validateEmailCommon("user@example")); // false

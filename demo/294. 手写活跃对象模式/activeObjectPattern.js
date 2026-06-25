@@ -97,16 +97,16 @@ class ActiveCounter {
     return this.scheduler.enqueue(new Request(bound, args));
   }
   increment() {
-    return this._enqueue('increment', []);
+    return this._enqueue("increment", []);
   }
   incrementAsync(delay) {
-    return this._enqueue('incrementAsync', [delay]);
+    return this._enqueue("incrementAsync", [delay]);
   }
   add(n) {
-    return this._enqueue('add', [n]);
+    return this._enqueue("add", [n]);
   }
   snapshot() {
-    return this._enqueue('snapshot', []);
+    return this._enqueue("snapshot", []);
   }
 }
 
@@ -129,7 +129,7 @@ class ActiveCounter {
   // Expected: 9 [ 'inc -> 1', 'add(5) -> 6', 'incAsync -> 7', 'add(2) -> 9' ]
 
   // Queue is empty after all tasks complete
-  console.log('queue size:', counter.scheduler.size());
+  console.log("queue size:", counter.scheduler.size());
   // Expected: queue size: 0
 
   // Ordering proof: even though incrementAsync has a delay, later add() calls

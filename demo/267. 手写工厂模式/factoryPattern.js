@@ -16,7 +16,7 @@ class Vehicle {
   constructor(brand, model) {
     this.brand = brand;
     this.model = model;
-    this.type = 'vehicle';
+    this.type = "vehicle";
   }
   describe() {
     return `${this.type}: ${this.brand} ${this.model}`;
@@ -29,7 +29,7 @@ class Vehicle {
 class Car extends Vehicle {
   constructor(brand, model) {
     super(brand, model);
-    this.type = 'Car';
+    this.type = "Car";
     this.wheels = 4;
   }
 }
@@ -37,7 +37,7 @@ class Car extends Vehicle {
 class Truck extends Vehicle {
   constructor(brand, model) {
     super(brand, model);
-    this.type = 'Truck';
+    this.type = "Truck";
     this.wheels = 6;
     this.cargoCapacity = 1000;
   }
@@ -49,7 +49,7 @@ class Truck extends Vehicle {
 class Motorcycle extends Vehicle {
   constructor(brand, model) {
     super(brand, model);
-    this.type = 'Motorcycle';
+    this.type = "Motorcycle";
     this.wheels = 2;
   }
 }
@@ -70,19 +70,18 @@ class VehicleFactory {
 }
 
 // Register products
-VehicleFactory
-  .register('car', Car)
-  .register('truck', Truck)
-  .register('motorcycle', Motorcycle);
+VehicleFactory.register("car", Car)
+  .register("truck", Truck)
+  .register("motorcycle", Motorcycle);
 
 // ---------------- Test cases ----------------
-const car = VehicleFactory.create('car', 'Toyota', 'Camry');
-const truck = VehicleFactory.create('truck', 'Volvo', 'FH16');
-const bike = VehicleFactory.create('motorcycle', 'Honda', 'CBR600');
+const car = VehicleFactory.create("car", "Toyota", "Camry");
+const truck = VehicleFactory.create("truck", "Volvo", "FH16");
+const bike = VehicleFactory.create("motorcycle", "Honda", "CBR600");
 
 console.log(car.drive());
 // Expected: Car: Toyota Camry is driving...
-console.log(truck.drive(), '|', truck.loadCargo(500));
+console.log(truck.drive(), "|", truck.loadCargo(500));
 // Expected: Truck: Volvo FH16 is driving... | Loaded 500kg into Volvo FH16
 console.log(bike.describe());
 // Expected: Motorcycle: Honda CBR600
@@ -93,8 +92,8 @@ console.log([car.wheels, truck.wheels, bike.wheels]);
 
 // Unknown type throws
 try {
-  VehicleFactory.create('spaceship', 'SpaceX', 'Starship');
+  VehicleFactory.create("spaceship", "SpaceX", "Starship");
 } catch (e) {
-  console.log('Error:', e.message);
+  console.log("Error:", e.message);
   // Expected: Error: Unknown vehicle type: spaceship
 }

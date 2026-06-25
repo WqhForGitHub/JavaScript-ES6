@@ -11,15 +11,15 @@ function destructureArray(arr) {
   return {
     a: arr[0],
     b: arr[1],
-    c: arr[2]
+    c: arr[2],
   };
 }
 
 // 带默认值的数组解构：模拟 const [a = 'A', b = 'B'] = arr
 function destructureWithDefault(arr) {
   return {
-    a: arr[0] !== undefined ? arr[0] : 'defaultA',
-    b: arr[1] !== undefined ? arr[1] : 'defaultB'
+    a: arr[0] !== undefined ? arr[0] : "defaultA",
+    b: arr[1] !== undefined ? arr[1] : "defaultB",
   };
 }
 
@@ -27,7 +27,7 @@ function destructureWithDefault(arr) {
 function destructureWithRest(arr) {
   return {
     first: arr[0],
-    rest: arr.slice(1)
+    rest: arr.slice(1),
   };
 }
 
@@ -35,7 +35,7 @@ function destructureWithRest(arr) {
 function destructureWithSkip(arr) {
   return {
     second: arr[1],
-    fourth: arr[3]
+    fourth: arr[3],
   };
 }
 
@@ -43,7 +43,7 @@ function destructureWithSkip(arr) {
 function destructureNested(arr) {
   return {
     a: arr[0][0],
-    b: arr[1][0]
+    b: arr[1][0],
   };
 }
 
@@ -51,7 +51,7 @@ function destructureNested(arr) {
 function pickByIndex(arr, indices) {
   var result = {};
   for (var i = 0; i < indices.length; i++) {
-    result['v' + i] = arr[indices[i]];
+    result["v" + i] = arr[indices[i]];
   }
   return result;
 }
@@ -67,7 +67,7 @@ console.log(r2.a, r2.b); // defaultA 99
 
 var r3 = destructureWithRest(arr);
 console.log(r3.first); // 1
-console.log(r3.rest);  // [2, 3, 4, 5]
+console.log(r3.rest); // [2, 3, 4, 5]
 
 var r4 = destructureWithSkip(arr);
 console.log(r4.second, r4.fourth); // 2 4

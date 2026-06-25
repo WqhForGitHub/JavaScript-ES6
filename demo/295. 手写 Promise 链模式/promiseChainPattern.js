@@ -12,9 +12,9 @@
  * - We add static resolve/reject/all/race and a deferred helper.
  */
 
-const PENDING = 'pending';
-const FULFILLED = 'fulfilled';
-const REJECTED = 'rejected';
+const PENDING = "pending";
+const FULFILLED = "fulfilled";
+const REJECTED = "rejected";
 
 class MyPromise {
   constructor(executor) {
@@ -36,23 +36,26 @@ class MyPromise {
     if (this._state !== PENDING) return;
     // The Promise Resolution Procedure
     if (value === this) {
-      return this._reject(new TypeError('Chaining cycle detected'));
+      return this._reject(new TypeError("Chaining cycle detected"));
     }
     if (value instanceof MyPromise) {
       value.then(
         (v) => this._resolve(v),
-        (r) => this._reject(r)
+        (r) => this._reject(r),
       );
       return;
     }
-    if (value !== null && (typeof value === 'object' || typeof value === 'function')) {
+    if (
+      value !== null &&
+      (typeof value === "object" || typeof value === "function")
+    ) {
       let then;
       try {
         then = value.then;
       } catch (err) {
         return this._reject(err);
       }
-      if (typeof then === 'function') {
+      if (typeof then === "function") {
         let called = false;
         try {
           then.call(
@@ -66,7 +69,7 @@ class MyPromise {
               if (called) return;
               called = true;
               this._reject(r);
-            }
+            },
           );
         } catch (err) {
           if (called) return;
@@ -99,9 +102,9 @@ class MyPromise {
   }
 
   then(onFulfilled, onRejected) {
-    const onF = typeof onFulfilled === 'function' ? onFulfilled : (v) => v;
+    const onF = typeof onFulfilled === "function" ? onFulfilled : (v) => v;
     const onR =
-      typeof onRejected === 'function'
+      typeof onRejected === "function"
         ? onRejected
         : (r) => {
             throw r;
@@ -134,11 +137,16 @@ class MyPromise {
 
   finally(onFinally) {
     return this.then(
-      (v) => MyPromise.resolve(typeof onFinally === 'function' ? onFinally() : undefined).then(() => v),
+      (v) =>
+        MyPromise.resolve(
+          typeof onFinally === "function" ? onFinally() : undefined,
+        ).then(() => v),
       (r) =>
-        MyPromise.resolve(typeof onFinally === 'function' ? onFinally() : undefined).then(() => {
+        MyPromise.resolve(
+          typeof onFinally === "function" ? onFinally() : undefined,
+        ).then(() => {
           throw r;
-        })
+        }),
     );
   }
 
@@ -156,13 +164,10 @@ class MyPromise {
       let remaining = arr.length;
       if (remaining === 0) return resolve([]);
       arr.forEach((p, i) => {
-        MyPromise.resolve(p).then(
-          (v) => {
-            out[i] = v;
-            if (--remaining === 0) resolve(out);
-          },
-          reject
-        );
+        MyPromise.resolve(p).then((v) => {
+          out[i] = v;
+          if (--remaining === 0) resolve(out);
+        }, reject);
       });
     });
   }
@@ -190,31 +195,35 @@ MyPromise.resolve(5)
 // Expected: 10
 
 // Rejection propagation + catch
-MyPromise.reject(new Error('boom'))
-  .then(() => 'unreached')
+MyPromise.reject(new Error("boom"))
+  .then(() => "unreached")
   .catch((e) => `recovered: ${e.message}`)
   .then((s) => console.log(s));
 // Expected: recovered: boom
 
 // all resolves with ordered results
-MyPromise.all([MyPromise.resolve('a'), MyPromise.resolve('b'), MyPromise.resolve('c')]).then(
-  (arr) => console.log(arr)
-);
+MyPromise.all([
+  MyPromise.resolve("a"),
+  MyPromise.resolve("b"),
+  MyPromise.resolve("c"),
+]).then((arr) => console.log(arr));
 // Expected: [ 'a', 'b', 'c' ]
 
 // all rejects on first rejection
-MyPromise.all([MyPromise.resolve(1), MyPromise.reject(new Error('fail'))])
-  .catch((e) => console.log('all error:', e.message));
+MyPromise.all([
+  MyPromise.resolve(1),
+  MyPromise.reject(new Error("fail")),
+]).catch((e) => console.log("all error:", e.message));
 // Expected: all error: fail
 
 // race resolves with the fastest
-const slow = new MyPromise((r) => setTimeout(() => r('slow'), 30));
-const fast = new MyPromise((r) => setTimeout(() => r('fast'), 5));
-MyPromise.race([slow, fast]).then((v) => console.log('race:', v));
+const slow = new MyPromise((r) => setTimeout(() => r("slow"), 30));
+const fast = new MyPromise((r) => setTimeout(() => r("fast"), 5));
+MyPromise.race([slow, fast]).then((v) => console.log("race:", v));
 // Expected: race: fast
 
 // Async executor with setTimeout
-new MyPromise((resolve) => setTimeout(() => resolve('delayed'), 10)).then((v) =>
-  console.log(v)
+new MyPromise((resolve) => setTimeout(() => resolve("delayed"), 10)).then((v) =>
+  console.log(v),
 );
 // Expected: delayed

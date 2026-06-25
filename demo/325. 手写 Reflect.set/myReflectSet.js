@@ -10,8 +10,11 @@
 
 // 手写 Reflect.set
 function myReflectSet(target, propertyKey, value, receiver) {
-  if (target == null || (typeof target !== 'object' && typeof target !== 'function')) {
-    throw new TypeError('Reflect.set called on non-object');
+  if (
+    target == null ||
+    (typeof target !== "object" && typeof target !== "function")
+  ) {
+    throw new TypeError("Reflect.set called on non-object");
   }
   var key = String(propertyKey);
   receiver = receiver || target;
@@ -27,12 +30,12 @@ function myReflectSet(target, propertyKey, value, receiver) {
 
   if (descriptor) {
     // 如果是访问器属性（有 setter）
-    if ('set' in descriptor) {
+    if ("set" in descriptor) {
       descriptor.set.call(receiver, value);
       return true;
     }
     // 如果是数据属性但不可写
-    if ('writable' in descriptor && !descriptor.writable) {
+    if ("writable" in descriptor && !descriptor.writable) {
       return false;
     }
   }
@@ -56,68 +59,74 @@ function myReflectSet(target, propertyKey, value, receiver) {
     value: value,
     writable: true,
     enumerable: true,
-    configurable: true
+    configurable: true,
   });
   return true;
 }
 
 // 测试 1：设置普通属性
-console.log('--- Set data property ---');
+console.log("--- Set data property ---");
 var obj = {};
-console.log(myReflectSet(obj, 'x', 10)); // true
+console.log(myReflectSet(obj, "x", 10)); // true
 console.log(obj.x); // 10
-console.log(myReflectSet(obj, 'y', 20)); // true
+console.log(myReflectSet(obj, "y", 20)); // true
 console.log(obj.y); // 20
 
 // 测试 2：设置访问器属性
-console.log('--- Set accessor property ---');
+console.log("--- Set accessor property ---");
 var person = {
   _age: 0,
-  get age() { return this._age; },
-  set age(v) { this._age = v; }
+  get age() {
+    return this._age;
+  },
+  set age(v) {
+    this._age = v;
+  },
 };
-console.log(myReflectSet(person, 'age', 25)); // true
-console.log(person.age);  // 25
+console.log(myReflectSet(person, "age", 25)); // true
+console.log(person.age); // 25
 console.log(person._age); // 25
 
 // 测试 3：receiver 参数影响 setter 中的 this
-console.log('--- Set with receiver ---');
+console.log("--- Set with receiver ---");
 var base = {
   _val: 0,
-  set val(v) { this._val = v; }
+  set val(v) {
+    this._val = v;
+  },
 };
-console.log(myReflectSet(base, 'val', 100)); // true
+console.log(myReflectSet(base, "val", 100)); // true
 console.log(base._val); // 100
 
 var receiverObj = { _val: 999 };
-console.log(myReflectSet(base, 'val', 555, receiverObj)); // true
+console.log(myReflectSet(base, "val", 555, receiverObj)); // true
 console.log(receiverObj._val); // 555（setter 在 receiver 上执行）
-console.log(base._val);        // 100（未被修改）
+console.log(base._val); // 100（未被修改）
 
 // 测试 4：不可写属性返回 false
-console.log('--- Set non-writable ---');
+console.log("--- Set non-writable ---");
 var frozen = {};
-Object.defineProperty(frozen, 'x', { value: 1, writable: false });
-console.log(myReflectSet(frozen, 'x', 2)); // false
+Object.defineProperty(frozen, "x", { value: 1, writable: false });
+console.log(myReflectSet(frozen, "x", 2)); // false
 console.log(frozen.x); // 1（未改变）
 
 // 测试 5：数组元素
-console.log('--- Set array element ---');
+console.log("--- Set array element ---");
 var arr = [1, 2, 3];
 console.log(myReflectSet(arr, 1, 20)); // true
 console.log(arr); // [1, 20, 3]
 
 // 测试 6：与原生对比
-console.log('--- Compare with native ---');
+console.log("--- Compare with native ---");
 var test = {};
-console.log(myReflectSet(test, 'a', 1)); // true
-console.log(Reflect.set(test, 'a', 1));   // true
+console.log(myReflectSet(test, "a", 1)); // true
+console.log(Reflect.set(test, "a", 1)); // true
 console.log(test.a); // 1
 
 // 测试 7：非对象目标抛错
-console.log('--- Error on non-object ---');
+console.log("--- Error on non-object ---");
 try {
-  myReflectSet(null, 'x', 1);
+  myReflectSet(null, "x", 1);
 } catch (e) {
   console.log(e.message); // Reflect.set called on non-object
 }

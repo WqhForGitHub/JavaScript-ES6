@@ -67,13 +67,13 @@ function myInsertAfter(newNode, referenceNode) {
  */
 function myInsertAdjacentHTML(element, position, html) {
   var positions = {
-    beforebegin: 'beforebegin',
-    afterbegin: 'afterbegin',
-    beforeend: 'beforeend',
-    afterend: 'afterend',
+    beforebegin: "beforebegin",
+    afterbegin: "afterbegin",
+    beforeend: "beforeend",
+    afterend: "afterend",
   };
   if (!positions[position]) {
-    throw new Error('Invalid position: ' + position);
+    throw new Error("Invalid position: " + position);
   }
   element.insertAdjacentHTML(position, html);
 }
@@ -106,11 +106,20 @@ function myInsertAdjacentHTML(element, position, html) {
 
 // 模拟测试：用纯逻辑验证 insertAfter 行为
 function mockList() {
-  var nodes = [{ id: 'item1', val: 1 }, { id: 'item2', val: 2 }];
+  var nodes = [
+    { id: "item1", val: 1 },
+    { id: "item2", val: 2 },
+  ];
   return nodes;
 }
 var list = mockList();
 // 模拟 insertAfter：在 item1 后插入 1.5
-var idx = list.findIndex(function (n) { return n.id === 'item1'; });
-list.splice(idx + 1, 0, { id: 'item15', val: 1.5 });
-console.log(list.map(function (n) { return n.val; })); // => [1, 1.5, 2]
+var idx = list.findIndex(function (n) {
+  return n.id === "item1";
+});
+list.splice(idx + 1, 0, { id: "item15", val: 1.5 });
+console.log(
+  list.map(function (n) {
+    return n.val;
+  }),
+); // => [1, 1.5, 2]

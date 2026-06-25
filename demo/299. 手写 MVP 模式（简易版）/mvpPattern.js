@@ -18,16 +18,16 @@
 class AuthModel {
   constructor() {
     this.users = new Map([
-      ['alice', 'correct-horse'],
-      ['bob', 'battery-staple'],
+      ["alice", "correct-horse"],
+      ["bob", "battery-staple"],
     ]);
   }
   validate(username, password) {
-    if (!username) return { ok: false, error: 'Username is required' };
-    if (!password) return { ok: false, error: 'Password is required' };
-    if (!this.users.has(username)) return { ok: false, error: 'Unknown user' };
+    if (!username) return { ok: false, error: "Username is required" };
+    if (!password) return { ok: false, error: "Password is required" };
+    if (!this.users.has(username)) return { ok: false, error: "Unknown user" };
     if (this.users.get(username) !== password) {
-      return { ok: false, error: 'Wrong password' };
+      return { ok: false, error: "Wrong password" };
     }
     return { ok: true, username };
   }
@@ -36,10 +36,10 @@ class AuthModel {
 // ---- View: passive UI shell. Exposes setters + event callbacks. ----
 class LoginView {
   constructor() {
-    this.username = '';
-    this.password = '';
-    this.error = '';
-    this.info = '';
+    this.username = "";
+    this.password = "";
+    this.error = "";
+    this.info = "";
     this.renderCount = 0;
     // Presenter attaches handlers here.
     this.onSubmit = null;
@@ -55,12 +55,12 @@ class LoginView {
   }
   showError(msg) {
     this.error = msg;
-    this.info = '';
+    this.info = "";
     this._render();
   }
   showSuccess(name) {
     this.info = `Welcome, ${name}!`;
-    this.error = '';
+    this.error = "";
     this._render();
   }
   _render() {
@@ -68,13 +68,13 @@ class LoginView {
     this.lastRender =
       `--- Login ---\n` +
       `user: ${this.username}\n` +
-      `pass: ${'*'.repeat(this.password.length)}\n` +
-      (this.error ? `ERR: ${this.error}\n` : '') +
-      (this.info ? `OK: ${this.info}\n` : '');
+      `pass: ${"*".repeat(this.password.length)}\n` +
+      (this.error ? `ERR: ${this.error}\n` : "") +
+      (this.info ? `OK: ${this.info}\n` : "");
   }
   // Simulated user actions (these would be DOM events in a real app).
   userTypes(field, value) {
-    field === 'username' ? (this.username = value) : (this.password = value);
+    field === "username" ? (this.username = value) : (this.password = value);
     this.onInputChange && this.onInputChange(field, value);
   }
   userClicksSubmit() {
@@ -91,7 +91,7 @@ class LoginPresenter {
     view.onInputChange = (field, value) => this.handleInput(field, value);
   }
   handleInput(field, value) {
-    if (field === 'username') this.view.setUsername(value);
+    if (field === "username") this.view.setUsername(value);
     else this.view.setPassword(value);
   }
   handleSubmit() {
@@ -113,29 +113,29 @@ console.log(view.lastRender);
 // Expected: contains "ERR: Username is required"
 
 // Type username only -> still required password
-view.userTypes('username', 'alice');
+view.userTypes("username", "alice");
 view.userClicksSubmit();
 console.log(view.error);
 // Expected: Password is required
 
 // Wrong password
-view.userTypes('password', 'nope');
+view.userTypes("password", "nope");
 view.userClicksSubmit();
 console.log(view.error);
 // Expected: Wrong password
 
 // Correct credentials -> success
-view.userTypes('password', 'correct-horse');
+view.userTypes("password", "correct-horse");
 view.userClicksSubmit();
-console.log(view.info, '| renders:', view.renderCount);
+console.log(view.info, "| renders:", view.renderCount);
 // Expected: Welcome, alice! | renders: <number>
 
 // Presenter is unit-testable without a real View by stubbing the interface.
 const fakeView = {
-  username: 'bob',
-  password: 'battery-staple',
-  error: '',
-  info: '',
+  username: "bob",
+  password: "battery-staple",
+  error: "",
+  info: "",
   showError(m) {
     this.error = m;
   },

@@ -98,22 +98,22 @@ console.log(b); // [1, 2]
 
 // --- 删除并插入（替换）---
 let c = [1, 2, 3, 4, 5];
-console.log(c.mySplice(1, 2, 'a', 'b')); // [2, 3]
+console.log(c.mySplice(1, 2, "a", "b")); // [2, 3]
 console.log(c); // [1, 'a', 'b', 4, 5]
 
 // --- 插入数量多于删除数量（数组变长）---
 let d = [1, 2, 3];
-console.log(d.mySplice(1, 1, 'x', 'y', 'z')); // [2]
+console.log(d.mySplice(1, 1, "x", "y", "z")); // [2]
 console.log(d); // [1, 'x', 'y', 'z', 3]
 
 // --- 插入数量少于删除数量（数组变短）---
 let e = [1, 2, 3, 4, 5];
-console.log(e.mySplice(1, 3, 'x')); // [2, 3, 4]
+console.log(e.mySplice(1, 3, "x")); // [2, 3, 4]
 console.log(e); // [1, 'x', 5]
 
 // --- 仅插入（deleteCount = 0）---
 let f = [1, 2, 3];
-console.log(f.mySplice(1, 0, 'a', 'b')); // []
+console.log(f.mySplice(1, 0, "a", "b")); // []
 console.log(f); // [1, 'a', 'b', 2, 3]
 
 // --- 负数 start ---
@@ -123,5 +123,5 @@ console.log(g); // [1, 2, 3, 5]
 
 // --- start 超过长度 ---
 let h = [1, 2, 3];
-console.log(h.mySplice(10, 1, 'end')); // []
+console.log(h.mySplice(10, 1, "end")); // []
 console.log(h); // [1, 2, 3, 'end']

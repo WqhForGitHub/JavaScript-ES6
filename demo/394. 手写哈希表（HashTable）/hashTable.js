@@ -93,18 +93,18 @@ class HashTable {
 
 // 测试
 const ht = new HashTable();
-ht.set('apple', 10).set('banana', 20).set('orange', 30);
-console.log(ht.get('apple')); // 10
-console.log(ht.get('banana')); // 20
+ht.set("apple", 10).set("banana", 20).set("orange", 30);
+console.log(ht.get("apple")); // 10
+console.log(ht.get("banana")); // 20
 console.log(ht.size); // 3
-console.log(ht.has('orange')); // true
+console.log(ht.has("orange")); // true
 
-ht.set('apple', 99); // 更新
-console.log(ht.get('apple')); // 99
+ht.set("apple", 99); // 更新
+console.log(ht.get("apple")); // 99
 console.log(ht.size); // 3
 
-console.log(ht.delete('banana')); // true
-console.log(ht.has('banana')); // false
+console.log(ht.delete("banana")); // true
+console.log(ht.has("banana")); // false
 
-console.log(ht.keys());   // ['apple', 'orange']
+console.log(ht.keys()); // ['apple', 'orange']
 console.log(ht.values()); // [99, 30]

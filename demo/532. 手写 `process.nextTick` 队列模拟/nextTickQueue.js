@@ -18,7 +18,7 @@ const nextTickQueue = {
 
   // 注册一个 nextTick 回调
   nextTick(fn) {
-    if (typeof fn !== 'function') {
+    if (typeof fn !== "function") {
       throw new TypeError('The "callback" argument must be of type function');
     }
     this._queue.push(fn);
@@ -42,7 +42,7 @@ const nextTickQueue = {
         cb();
       } catch (err) {
         // Node 中 nextTick 回调抛错会进程退出，这里只打印
-        console.error('nextTick callback error:', err);
+        console.error("nextTick callback error:", err);
       }
     }
   },
@@ -53,20 +53,20 @@ const nextTickQueue = {
 const order = [];
 
 nextTickQueue.nextTick(() => {
-  order.push('tick1');
+  order.push("tick1");
   // 在 tick1 中再注册一个 nextTick，会在本轮一并执行
-  nextTickQueue.nextTick(() => order.push('tick1-inner'));
+  nextTickQueue.nextTick(() => order.push("tick1-inner"));
 });
-nextTickQueue.nextTick(() => order.push('tick2'));
+nextTickQueue.nextTick(() => order.push("tick2"));
 
-Promise.resolve().then(() => order.push('promise'));
+Promise.resolve().then(() => order.push("promise"));
 
-console.log('sync start');
-order.push('sync');
+console.log("sync start");
+order.push("sync");
 
 // 等所有微任务执行完
 setTimeout(() => {
-  console.log('执行顺序:', order);
+  console.log("执行顺序:", order);
   // 期望: ['sync start' -> push 'sync', 'tick1', 'tick1-inner', 'tick2', 'promise']
   // 即 ['sync', 'tick1', 'tick1-inner', 'tick2', 'promise']
   // 说明 nextTick 比 Promise 先执行，且 tick1 中注册的 tick1-inner 也在本轮清空
@@ -74,8 +74,8 @@ setTimeout(() => {
 
 // 验证：nextTick 优先级高于 Promise
 const order2 = [];
-nextTickQueue.nextTick(() => order2.push('nextTick'));
-Promise.resolve().then(() => order2.push('promise'));
+nextTickQueue.nextTick(() => order2.push("nextTick"));
+Promise.resolve().then(() => order2.push("promise"));
 setTimeout(() => {
-  console.log('nextTick 先于 promise:', order2); // ['nextTick', 'promise']
+  console.log("nextTick 先于 promise:", order2); // ['nextTick', 'promise']
 }, 0);

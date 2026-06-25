@@ -12,11 +12,11 @@
  *   - REMOVE：节点删除
  */
 
-var REPLACE = 'REPLACE';
-var PROPS = 'PROPS';
-var TEXT = 'TEXT';
-var REORDER = 'REORDER';
-var REMOVE = 'REMOVE';
+var REPLACE = "REPLACE";
+var PROPS = "PROPS";
+var TEXT = "TEXT";
+var REORDER = "REORDER";
+var REMOVE = "REMOVE";
 
 /**
  * 比较两棵虚拟 DOM 树
@@ -58,7 +58,7 @@ function dfsWalk(oldNode, newNode, index, patches) {
       newNode.children || [],
       index,
       patches,
-      currentIndex
+      currentIndex,
     );
   }
   // 节点类型不同 -> 替换
@@ -184,46 +184,53 @@ function h(tag, props, children) {
     tagName: tag,
     props: props,
     key: props.key,
-    children: (children == null ? [] : Array.isArray(children) ? children : [children]),
+    children:
+      children == null ? [] : Array.isArray(children) ? children : [children],
     text: null,
   };
 }
 function text(t) {
-  return { tagName: null, props: {}, key: undefined, children: [], text: String(t) };
+  return {
+    tagName: null,
+    props: {},
+    key: undefined,
+    children: [],
+    text: String(t),
+  };
 }
 
 // 场景1：属性变更
-var old1 = h('div', { id: 'app', class: 'old' }, [text('hello')]);
-var new1 = h('div', { id: 'app', class: 'new' }, [text('hello')]);
+var old1 = h("div", { id: "app", class: "old" }, [text("hello")]);
+var new1 = h("div", { id: "app", class: "new" }, [text("hello")]);
 var patches1 = diff(old1, new1);
-console.log('属性变更 patches:', JSON.stringify(patches1));
+console.log("属性变更 patches:", JSON.stringify(patches1));
 // => 包含 PROPS 类型补丁，class: 'new'
 
 // 场景2：文本变更
-var old2 = h('p', {}, [text('old text')]);
-var new2 = h('p', {}, [text('new text')]);
+var old2 = h("p", {}, [text("old text")]);
+var new2 = h("p", {}, [text("new text")]);
 var patches2 = diff(old2, new2);
-console.log('文本变更 patches:', JSON.stringify(patches2));
+console.log("文本变更 patches:", JSON.stringify(patches2));
 // => 包含 TEXT 类型补丁
 
 // 场景3：节点替换
-var old3 = h('div', {}, []);
-var new3 = h('span', {}, []);
+var old3 = h("div", {}, []);
+var new3 = h("span", {}, []);
 var patches3 = diff(old3, new3);
-console.log('节点替换 patches:', JSON.stringify(patches3));
+console.log("节点替换 patches:", JSON.stringify(patches3));
 // => 包含 REPLACE 类型补丁
 
 // 场景4：子节点增删（带 key）
-var old4 = h('ul', {}, [
-  h('li', { key: 'a' }, [text('A')]),
-  h('li', { key: 'b' }, [text('B')]),
-  h('li', { key: 'c' }, [text('C')]),
+var old4 = h("ul", {}, [
+  h("li", { key: "a" }, [text("A")]),
+  h("li", { key: "b" }, [text("B")]),
+  h("li", { key: "c" }, [text("C")]),
 ]);
-var new4 = h('ul', {}, [
-  h('li', { key: 'a' }, [text('A')]),
-  h('li', { key: 'c' }, [text('C')]),
-  h('li', { key: 'd' }, [text('D')]),
+var new4 = h("ul", {}, [
+  h("li", { key: "a" }, [text("A")]),
+  h("li", { key: "c" }, [text("C")]),
+  h("li", { key: "d" }, [text("D")]),
 ]);
 var patches4 = diff(old4, new4);
-console.log('子节点 diff patches:', JSON.stringify(patches4));
+console.log("子节点 diff patches:", JSON.stringify(patches4));
 // => 包含 REORDER 补丁：删除 b，插入 d

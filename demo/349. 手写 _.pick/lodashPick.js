@@ -32,12 +32,12 @@ function pick(object, ...paths) {
 
 const obj = { a: 1, b: 2, c: 3, d: 4 };
 
-console.log('pick by keys:', JSON.stringify(pick(obj, 'a', 'c'))); // expected: {"a":1,"c":3}
-console.log('pick array of keys:', JSON.stringify(pick(obj, ['a', 'b', 'z']))); // expected: {"a":1,"b":2}
-console.log('pick missing only:', JSON.stringify(pick(obj, 'x', 'y'))); // expected: {}
-console.log('pick null:', JSON.stringify(pick(null, 'a'))); // expected: {}
+console.log("pick by keys:", JSON.stringify(pick(obj, "a", "c"))); // expected: {"a":1,"c":3}
+console.log("pick array of keys:", JSON.stringify(pick(obj, ["a", "b", "z"]))); // expected: {"a":1,"b":2}
+console.log("pick missing only:", JSON.stringify(pick(obj, "x", "y"))); // expected: {}
+console.log("pick null:", JSON.stringify(pick(null, "a"))); // expected: {}
 
 // pick does not include inherited
 const proto = Object.create({ inherited: 5 });
 proto.own = 9;
-console.log('pick own only:', JSON.stringify(pick(proto, 'own', 'inherited'))); // expected: {"own":9}
+console.log("pick own only:", JSON.stringify(pick(proto, "own", "inherited"))); // expected: {"own":9}

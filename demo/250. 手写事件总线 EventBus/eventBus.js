@@ -12,19 +12,20 @@
 
 function EventBus() {
   this.events = {};
-  this.delimiter = ':';
+  this.delimiter = ":";
 }
 
 /**
  * 判断模式匹配（支持通配符）
  */
 EventBus.prototype._match = function (pattern, event) {
-  if (pattern === event || pattern === '*') return true;
+  if (pattern === event || pattern === "*") return true;
   var patternParts = pattern.split(this.delimiter);
   var eventParts = event.split(this.delimiter);
   for (var i = 0; i < patternParts.length; i++) {
-    if (patternParts[i] === '*') return true;
-    if (i >= eventParts.length || patternParts[i] !== eventParts[i]) return false;
+    if (patternParts[i] === "*") return true;
+    if (i >= eventParts.length || patternParts[i] !== eventParts[i])
+      return false;
   }
   return patternParts.length === eventParts.length;
 };
@@ -36,8 +37,8 @@ EventBus.prototype._match = function (pattern, event) {
  * @returns {Function} dispose 取消订阅函数
  */
 EventBus.prototype.on = function (event, callback) {
-  if (typeof callback !== 'function') {
-    throw new TypeError('callback must be a function');
+  if (typeof callback !== "function") {
+    throw new TypeError("callback must be a function");
   }
   if (!this.events[event]) {
     this.events[event] = [];
@@ -54,8 +55,8 @@ EventBus.prototype.on = function (event, callback) {
  * 订阅一次
  */
 EventBus.prototype.once = function (event, callback) {
-  if (typeof callback !== 'function') {
-    throw new TypeError('callback must be a function');
+  if (typeof callback !== "function") {
+    throw new TypeError("callback must be a function");
   }
   if (!this.events[event]) {
     this.events[event] = [];
@@ -76,28 +77,32 @@ EventBus.prototype.emit = function (event) {
   var triggered = false;
   var toRemove = [];
 
-  Object.keys(this.events).forEach(function (pattern) {
-    if (!this._match(pattern, event)) return;
-    this.events[pattern].slice().forEach(function (item) {
-      item.fn.apply(null, args);
-      triggered = true;
-      if (item.once) {
-        toRemove.push({ pattern: pattern, fn: item.fn });
-      }
-    });
-  }.bind(this));
+  Object.keys(this.events).forEach(
+    function (pattern) {
+      if (!this._match(pattern, event)) return;
+      this.events[pattern].slice().forEach(function (item) {
+        item.fn.apply(null, args);
+        triggered = true;
+        if (item.once) {
+          toRemove.push({ pattern: pattern, fn: item.fn });
+        }
+      });
+    }.bind(this),
+  );
 
   // 清理 once 监听器
-  toRemove.forEach(function (r) {
-    if (this.events[r.pattern]) {
-      this.events[r.pattern] = this.events[r.pattern].filter(function (item) {
-        return item.fn !== r.fn;
-      });
-      if (this.events[r.pattern].length === 0) {
-        delete this.events[r.pattern];
+  toRemove.forEach(
+    function (r) {
+      if (this.events[r.pattern]) {
+        this.events[r.pattern] = this.events[r.pattern].filter(function (item) {
+          return item.fn !== r.fn;
+        });
+        if (this.events[r.pattern].length === 0) {
+          delete this.events[r.pattern];
+        }
       }
-    }
-  }.bind(this));
+    }.bind(this),
+  );
 
   return triggered;
 };
@@ -111,11 +116,13 @@ EventBus.prototype.off = function (event, callback) {
     return this;
   }
   if (!callback) {
-    Object.keys(this.events).forEach(function (pattern) {
-      if (this._match(pattern, event)) {
-        delete this.events[pattern];
-      }
-    }.bind(this));
+    Object.keys(this.events).forEach(
+      function (pattern) {
+        if (this._match(pattern, event)) {
+          delete this.events[pattern];
+        }
+      }.bind(this),
+    );
     return this;
   }
   if (this.events[event]) {
@@ -134,16 +141,21 @@ EventBus.prototype.off = function (event, callback) {
  */
 EventBus.prototype.listenerCount = function (event) {
   if (!event) {
-    return Object.keys(this.events).reduce(function (sum, k) {
-      return sum + this.events[k].length;
-    }.bind(this), 0);
+    return Object.keys(this.events).reduce(
+      function (sum, k) {
+        return sum + this.events[k].length;
+      }.bind(this),
+      0,
+    );
   }
   var count = 0;
-  Object.keys(this.events).forEach(function (pattern) {
-    if (this._match(pattern, event)) {
-      count += this.events[pattern].length;
-    }
-  }.bind(this));
+  Object.keys(this.events).forEach(
+    function (pattern) {
+      if (this._match(pattern, event)) {
+        count += this.events[pattern].length;
+      }
+    }.bind(this),
+  );
   return count;
 };
 
@@ -162,40 +174,40 @@ var eventBus = new EventBus();
 // 跨模块通信示例
 
 // 模块 A：订阅
-var dispose = eventBus.on('user:login', function (user) {
-  console.log('[模块A] 用户登录：', user);
+var dispose = eventBus.on("user:login", function (user) {
+  console.log("[模块A] 用户登录：", user);
 });
 
 // 模块 B：订阅
-eventBus.on('user:login', function (user) {
-  console.log('[模块B] 用户登录：', user);
+eventBus.on("user:login", function (user) {
+  console.log("[模块B] 用户登录：", user);
 });
 
 // 模块 C：通配符订阅
-eventBus.on('user:*', function () {
-  console.log('[模块C] 用户事件触发');
+eventBus.on("user:*", function () {
+  console.log("[模块C] 用户事件触发");
 });
 
 // 触发
-eventBus.emit('user:login', { name: '张三', id: 1 });
+eventBus.emit("user:login", { name: "张三", id: 1 });
 // => [模块A] 用户登录： { name: '张三', id: 1 }
 // => [模块B] 用户登录： { name: '张三', id: 1 }
 // => [模块C] 用户事件触发
 
 // once 测试
-eventBus.once('notify', function (msg) {
-  console.log('通知：', msg);
+eventBus.once("notify", function (msg) {
+  console.log("通知：", msg);
 });
-eventBus.emit('notify', '第一条'); // => 通知： 第一条
-eventBus.emit('notify', '第二条'); // 无输出
+eventBus.emit("notify", "第一条"); // => 通知： 第一条
+eventBus.emit("notify", "第二条"); // 无输出
 
 // dispose 取消订阅
 dispose();
-eventBus.emit('user:login', { name: '李四' });
+eventBus.emit("user:login", { name: "李四" });
 // => [模块B] 用户登录： { name: '李四' }
 // => [模块C] 用户事件触发 （模块A 已取消）
 
-console.log(eventBus.listenerCount('user:login')); // => 2（模块B + user:*）
+console.log(eventBus.listenerCount("user:login")); // => 2（模块B + user:*）
 
 // clear 清空
 eventBus.clear();

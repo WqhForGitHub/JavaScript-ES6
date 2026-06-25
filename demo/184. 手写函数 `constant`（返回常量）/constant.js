@@ -79,12 +79,13 @@ console.log([1, 2, 3].map(constant(0))); // [0, 0, 0]（返回常量）
 
 // 应用：converge 中固定某分支
 function converge(c, branches) {
-  return (...args) => c.apply(null, branches.map((b) => b(...args)));
+  return (...args) =>
+    c.apply(
+      null,
+      branches.map((b) => b(...args)),
+    );
 }
-const alwaysGreet = converge(
-  (name) => `Hi, ${name}`,
-  [constant("Guest")]
-);
+const alwaysGreet = converge((name) => `Hi, ${name}`, [constant("Guest")]);
 console.log(alwaysGreet("anything")); // 'Hi, Guest'
 
 // 应用：缓存命中时返回固定占位

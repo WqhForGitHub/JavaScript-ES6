@@ -19,8 +19,8 @@ function EventEmitter() {
  * @returns {Function} 调用即可取消订阅
  */
 EventEmitter.prototype.on = function (event, callback) {
-  if (typeof callback !== 'function') {
-    throw new TypeError('callback must be a function');
+  if (typeof callback !== "function") {
+    throw new TypeError("callback must be a function");
   }
   if (!this.events[event]) {
     this.events[event] = [];
@@ -97,44 +97,54 @@ EventEmitter.prototype.listenerCount = function (event) {
 var emitter = new EventEmitter();
 
 // 1. 使用返回的 dispose 函数取消订阅
-function handler1() { console.log('handler1'); }
-var dispose1 = emitter.on('click', handler1);
-emitter.emit('click'); // => handler1
+function handler1() {
+  console.log("handler1");
+}
+var dispose1 = emitter.on("click", handler1);
+emitter.emit("click"); // => handler1
 dispose1();
-emitter.emit('click'); // 无输出
-console.log(emitter.listenerCount('click')); // => 0
+emitter.emit("click"); // 无输出
+console.log(emitter.listenerCount("click")); // => 0
 
 // 2. off(event, callback) 移除指定回调
-function handler2() { console.log('handler2'); }
-function handler3() { console.log('handler3'); }
-emitter.on('click', handler2);
-emitter.on('click', handler3);
-emitter.emit('click'); // => handler2 \n handler3
-emitter.off('click', handler2);
-emitter.emit('click'); // => handler3 （handler2 已移除）
-console.log(emitter.listenerCount('click')); // => 1
+function handler2() {
+  console.log("handler2");
+}
+function handler3() {
+  console.log("handler3");
+}
+emitter.on("click", handler2);
+emitter.on("click", handler3);
+emitter.emit("click"); // => handler2 \n handler3
+emitter.off("click", handler2);
+emitter.emit("click"); // => handler3 （handler2 已移除）
+console.log(emitter.listenerCount("click")); // => 1
 
 // 3. off(event) 移除该事件全部
-emitter.off('click');
-console.log(emitter.listenerCount('click')); // => 0
-emitter.emit('click'); // 无输出
+emitter.off("click");
+console.log(emitter.listenerCount("click")); // => 0
+emitter.emit("click"); // 无输出
 
 // 4. off() 移除所有事件
-emitter.on('a', function () { console.log('a'); });
-emitter.on('b', function () { console.log('b'); });
-console.log(emitter.listenerCount('a')); // => 1
-console.log(emitter.listenerCount('b')); // => 1
+emitter.on("a", function () {
+  console.log("a");
+});
+emitter.on("b", function () {
+  console.log("b");
+});
+console.log(emitter.listenerCount("a")); // => 1
+console.log(emitter.listenerCount("b")); // => 1
 emitter.off();
-console.log(emitter.listenerCount('a')); // => 0
-console.log(emitter.listenerCount('b')); // => 0
+console.log(emitter.listenerCount("a")); // => 0
+console.log(emitter.listenerCount("b")); // => 0
 
 // 5. removeAllListeners
-emitter.on('test', function () {});
-emitter.removeAllListeners('test');
-console.log(emitter.listenerCount('test')); // => 0
+emitter.on("test", function () {});
+emitter.removeAllListeners("test");
+console.log(emitter.listenerCount("test")); // => 0
 
 // 6. 回调中取消订阅不会出错
-emitter.on('data', function () {
-  console.log('data received');
+emitter.on("data", function () {
+  console.log("data received");
 });
-emitter.emit('data'); // => data received
+emitter.emit("data"); // => data received

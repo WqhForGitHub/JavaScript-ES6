@@ -93,8 +93,22 @@ function hasCycleInGraph(n, edges) {
   return false;
 }
 
-console.log(hasCycleInGraph(5, [[0, 1], [1, 2], [2, 3], [3, 4]])); // false
-console.log(hasCycleInGraph(5, [[0, 1], [1, 2], [2, 0], [3, 4]])); // true
+console.log(
+  hasCycleInGraph(5, [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 4],
+  ]),
+); // false
+console.log(
+  hasCycleInGraph(5, [
+    [0, 1],
+    [1, 2],
+    [2, 0],
+    [3, 4],
+  ]),
+); // true
 
 // 应用：连通分量
 console.log(uf.getCount()); // 5 个连通分量

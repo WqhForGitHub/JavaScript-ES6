@@ -16,17 +16,17 @@
 // ---- Abstract products (interfaces expressed as base classes) ----
 class Button {
   render() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
 }
 class Input {
   render() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
 }
 class Dialog {
   render() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
 }
 
@@ -67,13 +67,13 @@ class LightDialog extends Dialog {
 // ---- Abstract factory ----
 class UIFactory {
   createButton() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
   createInput() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
   createDialog() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
 }
 
@@ -124,13 +124,13 @@ console.log(renderForm(new LightUIFactory()));
 // Each factory's products share the same theme (family consistency)
 const darkFactory = new DarkUIFactory();
 const b = darkFactory.createButton();
-console.log(b instanceof Button, b.render().includes('dark'));
+console.log(b instanceof Button, b.render().includes("dark"));
 // Expected: true true
 
 // Abstract base methods throw if not overridden
 try {
   new UIFactory().createButton();
 } catch (e) {
-  console.log('Abstract error:', e.message);
+  console.log("Abstract error:", e.message);
   // Expected: Abstract error: abstract
 }

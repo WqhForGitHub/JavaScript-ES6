@@ -57,8 +57,10 @@ function retryWithDelay(fn, times = 3, delay = 0, backoff = false) {
           }
           const wait = backoff ? delayMs * Math.pow(2, attemptNo - 1) : delayMs;
           setTimeout(() => {
-            attemptDelay(fn, args, left - 1, delayMs, attemptNo + 1)
-              .then(resolve, reject);
+            attemptDelay(fn, args, left - 1, delayMs, attemptNo + 1).then(
+              resolve,
+              reject,
+            );
           }, wait);
         });
     });
@@ -106,13 +108,10 @@ try {
 (async () => {
   let asyncFail = 0;
   try {
-    await retry(
-      () => {
-        asyncFail++;
-        return Promise.reject(new Error("async always"));
-      },
-      3
-    )();
+    await retry(() => {
+      asyncFail++;
+      return Promise.reject(new Error("async always"));
+    }, 3)();
   } catch (e) {
     console.log("异步重试耗尽:", e.message, "尝试:", asyncFail); // async always 3
   }
@@ -130,7 +129,7 @@ try {
     },
     5,
     100,
-    true
+    true,
   )();
   const elapsed = Date.now() - start;
   console.log("退避重试结果:", r); // 'success'

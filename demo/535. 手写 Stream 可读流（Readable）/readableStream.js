@@ -22,7 +22,7 @@
  *   - 当 _read 返回 null 且 flowing 时，触发 'end'
  */
 
-const { EventEmitter } = require('events');
+const { EventEmitter } = require("events");
 
 class Readable extends EventEmitter {
   constructor(options = {}) {
@@ -55,8 +55,8 @@ class Readable extends EventEmitter {
     }
 
     // 字符串默认按 utf8 转字节
-    if (typeof chunk === 'string') {
-      chunk = Buffer.from(chunk, this.encoding || 'utf8');
+    if (typeof chunk === "string") {
+      chunk = Buffer.from(chunk, this.encoding || "utf8");
     }
 
     this._buffer.push(chunk);
@@ -79,10 +79,15 @@ class Readable extends EventEmitter {
 
       // 若设置了 encoding，转换为字符串
       const data = this.encoding ? chunk.toString(this.encoding) : chunk;
-      this.emit('data', data);
+      this.emit("data", data);
     }
     // 缓冲空了但还没结束，继续 _read
-    if (this._flowing && !this._ended && this._buffer.length === 0 && !this._reading) {
+    if (
+      this._flowing &&
+      !this._ended &&
+      this._buffer.length === 0 &&
+      !this._reading
+    ) {
       this._reading = true;
       this._read(this.highWaterMark);
       this._reading = false;
@@ -93,7 +98,7 @@ class Readable extends EventEmitter {
   _maybeEnd() {
     if (this._ended && this._buffer.length === 0 && !this._endEmitted) {
       this._endEmitted = true;
-      this.emit('end');
+      this.emit("end");
     }
   }
 
@@ -152,14 +157,14 @@ class Readable extends EventEmitter {
   }
 
   pipe(dest, options = {}) {
-    this.on('data', chunk => {
+    this.on("data", (chunk) => {
       const ret = dest.write(chunk);
       if (ret === false) this.pause();
     });
     if (options.end !== false) {
-      this.on('end', () => dest.end && dest.end());
+      this.on("end", () => dest.end && dest.end());
     }
-    dest.on && dest.on('drain', () => this.resume());
+    dest.on && dest.on("drain", () => this.resume());
     return dest;
   }
 
@@ -169,15 +174,15 @@ class Readable extends EventEmitter {
     this._ended = true;
     this._buffer = [];
     this._bufferLength = 0;
-    if (err) this.emit('error', err);
-    this.emit('close');
+    if (err) this.emit("error", err);
+    this.emit("close");
   }
 }
 
 // ===== 测试 =====
 
 // 测试 1：简单字符串流
-const chunks = ['Hello, ', 'World', '!\n'];
+const chunks = ["Hello, ", "World", "!\n"];
 const r1 = new Readable({
   read(size) {
     if (chunks.length > 0) {
@@ -188,14 +193,14 @@ const r1 = new Readable({
   },
 });
 
-let result1 = '';
-r1.on('data', d => (result1 += d.toString()));
-r1.on('end', () => {
-  console.log('test1 result:', result1); // 'Hello, World!\n'
+let result1 = "";
+r1.on("data", (d) => (result1 += d.toString()));
+r1.on("end", () => {
+  console.log("test1 result:", result1); // 'Hello, World!\n'
 });
 
 // 测试 2：暂停/恢复
-const data2 = ['A', 'B', 'C', 'D'];
+const data2 = ["A", "B", "C", "D"];
 const r2 = new Readable({
   read() {
     if (data2.length) this.push(data2.shift());
@@ -204,15 +209,15 @@ const r2 = new Readable({
 });
 
 const collected2 = [];
-r2.on('data', d => {
+r2.on("data", (d) => {
   collected2.push(d.toString());
   if (collected2.length === 2) {
     r2.pause();
     setTimeout(() => r2.resume(), 10);
   }
 });
-r2.on('end', () => {
-  console.log('test2 (pause/resume):', collected2.join('')); // 'ABCD'
+r2.on("end", () => {
+  console.log("test2 (pause/resume):", collected2.join("")); // 'ABCD'
 });
 
 // 测试 3：read(n) 暂停模式
@@ -225,19 +230,19 @@ const r3 = new Readable({
 r3.pause();
 setTimeout(() => {
   const first = r3.read(2);
-  console.log('test3 read(2):', Array.from(first)); // [1, 2]
+  console.log("test3 read(2):", Array.from(first)); // [1, 2]
   const rest = r3.read();
-  console.log('test3 read() rest:', Array.from(rest)); // [3]
+  console.log("test3 read() rest:", Array.from(rest)); // [3]
 }, 20);
 
 // 测试 4：encoding 模式输出字符串
 const r4 = new Readable({
-  encoding: 'utf8',
+  encoding: "utf8",
   read() {
     this.push(Buffer.from([0x68, 0x69])); // 'hi'
     this.push(null);
   },
 });
-r4.on('data', d => {
-  console.log('test4 encoding:', typeof d, d); // 'string', 'hi'
+r4.on("data", (d) => {
+  console.log("test4 encoding:", typeof d, d); // 'string', 'hi'
 });

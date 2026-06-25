@@ -87,9 +87,11 @@ class GraphAdjList {
   }
 
   toString() {
-    let str = '';
+    let str = "";
     for (const [v, neighbors] of this.adjList) {
-      const edges = neighbors.map((e) => `${e.vertex}(${e.weight})`).join(' -> ');
+      const edges = neighbors
+        .map((e) => `${e.vertex}(${e.weight})`)
+        .join(" -> ");
       str += `${v} -> ${edges}\n`;
     }
     return str;
@@ -98,24 +100,24 @@ class GraphAdjList {
 
 // 测试
 const g = new GraphAdjList();
-g.addEdge('A', 'B', 4);
-g.addEdge('A', 'C', 2);
-g.addEdge('B', 'C', 5);
-g.addEdge('B', 'D', 10);
-g.addEdge('C', 'E', 3);
-g.addEdge('D', 'F', 11);
-g.addEdge('E', 'D', 4);
+g.addEdge("A", "B", 4);
+g.addEdge("A", "C", 2);
+g.addEdge("B", "C", 5);
+g.addEdge("B", "D", 10);
+g.addEdge("C", "E", 3);
+g.addEdge("D", "F", 11);
+g.addEdge("E", "D", 4);
 
 console.log(g.getVertices()); // ['A', 'B', 'C', 'D', 'E', 'F']
-console.log(g.hasEdge('A', 'B')); // true
-console.log(g.hasEdge('A', 'D')); // false
-console.log(g.getNeighbors('B')); // [{vertex:'C',weight:5},{vertex:'D',weight:10}]
+console.log(g.hasEdge("A", "B")); // true
+console.log(g.hasEdge("A", "D")); // false
+console.log(g.getNeighbors("B")); // [{vertex:'C',weight:5},{vertex:'D',weight:10}]
 
-console.log(g.bfs('A')); // ['A', 'B', 'C', 'D', 'E', 'F']
-console.log(g.dfs('A')); // ['A', 'B', 'C', 'E', 'D', 'F']
+console.log(g.bfs("A")); // ['A', 'B', 'C', 'D', 'E', 'F']
+console.log(g.dfs("A")); // ['A', 'B', 'C', 'E', 'D', 'F']
 
 console.log(g.toString());
 
-g.removeEdge('A', 'B');
-console.log(g.hasEdge('A', 'B')); // false
-console.log(g.hasEdge('B', 'A')); // false (无向图)
+g.removeEdge("A", "B");
+console.log(g.hasEdge("A", "B")); // false
+console.log(g.hasEdge("B", "A")); // false (无向图)

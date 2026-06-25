@@ -82,7 +82,10 @@ console.log("difference(B, A):", difference2(B, A)); // [5, 6]
 
 // --- 多个数组的差集 ---
 console.log("\n========== 多个数组差集 ==========");
-console.log("difference([1,2,3,4,5], [2], [4]):", difference2([1, 2, 3, 4, 5], [2], [4]));
+console.log(
+  "difference([1,2,3,4,5], [2], [4]):",
+  difference2([1, 2, 3, 4, 5], [2], [4]),
+);
 // [1, 3, 5]
 
 // --- 对称差集 ---

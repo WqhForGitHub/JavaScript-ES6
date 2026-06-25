@@ -86,33 +86,33 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 (async () => {
   const bus = new AsyncEventSystem();
 
-  bus.on('data', async (x) => {
+  bus.on("data", async (x) => {
     await sleep(20);
     return x * 2;
   });
-  bus.on('data', async (x) => {
+  bus.on("data", async (x) => {
     await sleep(10);
     return x + 1;
   });
 
-  const parallel = await bus.emitParallel('data', 5);
+  const parallel = await bus.emitParallel("data", 5);
   console.log(parallel);
   // Expected: [ 10, 6 ]
 
-  const series = await bus.emitSeries('data', 5);
+  const series = await bus.emitSeries("data", 5);
   console.log(series);
   // Expected: [ 10, 6 ]
 
   // waitOn resolves with the args of the first emit
-  bus.waitOn('ready').then((args) => console.log('waitOn got:', args));
+  bus.waitOn("ready").then((args) => console.log("waitOn got:", args));
   // Expected: waitOn got: [ 'go' ]
-  setTimeout(() => bus.emit('ready', 'go'), 30);
+  setTimeout(() => bus.emit("ready", "go"), 30);
 
   // once fires only one time
   const onceResults = [];
-  bus.once('ping', async () => onceResults.push('pong'));
-  await bus.emit('ping');
-  await bus.emit('ping');
+  bus.once("ping", async () => onceResults.push("pong"));
+  await bus.emit("ping");
+  await bus.emit("ping");
   console.log(onceResults);
   // Expected: [ 'pong' ]
 })();

@@ -18,7 +18,13 @@ class HMRClient {
 
   // 注册模块
   register(id, code, factory) {
-    this.modules.set(id, { code, factory, exports: {}, acceptCallbacks: [], disposeCallbacks: [] });
+    this.modules.set(id, {
+      code,
+      factory,
+      exports: {},
+      acceptCallbacks: [],
+      disposeCallbacks: [],
+    });
   }
 
   // 执行模块
@@ -40,10 +46,13 @@ class HMRClient {
   // 热更新模块
   hotUpdate(id, newCode, newFactory) {
     const oldMod = this.modules.get(id);
-    if (!oldMod) { console.log('[HMR] Module not found:', id); return false; }
-    console.log('[HMR] Updating module:', id);
+    if (!oldMod) {
+      console.log("[HMR] Module not found:", id);
+      return false;
+    }
+    console.log("[HMR] Updating module:", id);
     // 执行 dispose 回调
-    oldMod.disposeCallbacks.forEach(cb => cb());
+    oldMod.disposeCallbacks.forEach((cb) => cb());
     // 更新模块
     oldMod.code = newCode;
     oldMod.factory = newFactory;
@@ -53,8 +62,8 @@ class HMRClient {
     // 重新执行
     this.execute(id);
     // 触发 accept 回调
-    oldMod.acceptCallbacks.forEach(cb => cb());
-    console.log('[HMR] Module updated:', id);
+    oldMod.acceptCallbacks.forEach((cb) => cb());
+    console.log("[HMR] Module updated:", id);
     return true;
   }
 
@@ -62,14 +71,14 @@ class HMRClient {
   handleMessage(msg) {
     const data = JSON.parse(msg);
     switch (data.type) {
-      case 'hot':
+      case "hot":
         this.hotUpdate(data.module, data.code, data.factory);
         break;
-      case 'full-reload':
-        console.log('[HMR] Full reload required');
+      case "full-reload":
+        console.log("[HMR] Full reload required");
         break;
-      case 'connected':
-        console.log('[HMR] Connected to dev server');
+      case "connected":
+        console.log("[HMR] Connected to dev server");
         break;
     }
   }
@@ -80,27 +89,39 @@ const hmr = new HMRClient();
 let counter = 0;
 
 // 注册初始模块
-hmr.register('app', 'counter = 0', function(exports, hot) {
+hmr.register("app", "counter = 0", function (exports, hot) {
   let count = ++counter;
   exports.getCount = () => count;
-  hot.accept(() => console.log('[HMR] app accepted update, count still accessible'));
+  hot.accept(() =>
+    console.log("[HMR] app accepted update, count still accessible"),
+  );
 });
 
-hmr.execute('app');
-console.log('初始 count:', hmr.modules.get('app').exports.getCount()); // 1
+hmr.execute("app");
+console.log("初始 count:", hmr.modules.get("app").exports.getCount()); // 1
 
 // 模拟热更新
-hmr.hotUpdate('app', 'counter = 1', function(exports, hot) {
+hmr.hotUpdate("app", "counter = 1", function (exports, hot) {
   let count = ++counter;
   exports.getCount = () => count;
   exports.doubled = () => count * 2;
-  hot.accept(() => console.log('[HMR] re-accepted'));
+  hot.accept(() => console.log("[HMR] re-accepted"));
 });
 
-console.log('更新后 count:', hmr.modules.get('app').exports.getCount()); // 2
-console.log('新增方法:', hmr.modules.get('app').exports.doubled()); // 4
+console.log("更新后 count:", hmr.modules.get("app").exports.getCount()); // 2
+console.log("新增方法:", hmr.modules.get("app").exports.doubled()); // 4
 
 // 模拟 WebSocket 消息
-hmr.handleMessage(JSON.stringify({ type: 'connected' }));
-hmr.handleMessage(JSON.stringify({ type: 'hot', module: 'app', code: 'new', factory: function(exports, hot) { exports.newProp = true; hot.accept(() => {}); } }));
-console.log('热更新后导出:', hmr.modules.get('app').exports);
+hmr.handleMessage(JSON.stringify({ type: "connected" }));
+hmr.handleMessage(
+  JSON.stringify({
+    type: "hot",
+    module: "app",
+    code: "new",
+    factory: function (exports, hot) {
+      exports.newProp = true;
+      hot.accept(() => {});
+    },
+  }),
+);
+console.log("热更新后导出:", hmr.modules.get("app").exports);

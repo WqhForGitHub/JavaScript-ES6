@@ -62,8 +62,10 @@ class Heap {
       const l = this._left(i);
       const r = this._right(i);
       let smallest = i;
-      if (l < n && this.compare(this.heap[l], this.heap[smallest]) < 0) smallest = l;
-      if (r < n && this.compare(this.heap[r], this.heap[smallest]) < 0) smallest = r;
+      if (l < n && this.compare(this.heap[l], this.heap[smallest]) < 0)
+        smallest = l;
+      if (r < n && this.compare(this.heap[r], this.heap[smallest]) < 0)
+        smallest = r;
       if (smallest === i) break;
       this._swap(i, smallest);
       i = smallest;

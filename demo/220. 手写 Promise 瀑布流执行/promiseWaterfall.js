@@ -21,7 +21,7 @@
 function waterfall(handlers, initialValue) {
   return handlers.reduce(
     (chain, handler) => chain.then((prev) => handler(prev)),
-    Promise.resolve(initialValue)
+    Promise.resolve(initialValue),
   );
 }
 
@@ -64,7 +64,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       },
       (user) => `${user.id}:${user.profile}`,
     ],
-    { name: "Tom" }
+    { name: "Tom" },
   );
   console.log("case2:", r2); // case2: 1:profile-data
 
@@ -76,7 +76,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         (x) => Promise.reject(new Error("step2 broken")),
         (x) => x + 1, // 不会执行
       ],
-      0
+      0,
     );
   } catch (e) {
     console.log("case3 fail:", e.message); // case3 fail: step2 broken
@@ -92,7 +92,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       },
       (x) => x + 100, // 不会执行
     ],
-    0
+    0,
   );
   console.log("case4 (stopped):", r4); // case4 (stopped): Symbol(waterfall.stop)
 
@@ -106,7 +106,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   ];
   const chain5 = handlers5.reduce(
     (c, h) => c.then(async (prev) => (isStopSignal(prev) ? prev : h(prev))),
-    Promise.resolve(0)
+    Promise.resolve(0),
   );
   const r5 = await chain5;
   console.log("case5 stopped with value:", isStopSignal(r5) ? r5.value : r5);

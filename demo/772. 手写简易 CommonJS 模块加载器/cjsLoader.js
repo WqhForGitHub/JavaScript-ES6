@@ -20,10 +20,13 @@ function myRequire(moduleId) {
   const code = moduleSource[moduleId];
   if (!code) throw new Error("Cannot find module '" + moduleId + "'");
 
-  const dirname = moduleId.substring(0, moduleId.lastIndexOf('/'));
+  const dirname = moduleId.substring(0, moduleId.lastIndexOf("/"));
   // 包装模块代码
-  const wrapper = '(function(module, exports, require, __dirname, __filename) {\n' + code + '\n})';
-  const fn = new Function('return ' + wrapper)();
+  const wrapper =
+    "(function(module, exports, require, __dirname, __filename) {\n" +
+    code +
+    "\n})";
+  const fn = new Function("return " + wrapper)();
   fn.call(module.exports, module, module.exports, myRequire, dirname, moduleId);
   module.loaded = true;
   return module.exports;
@@ -31,18 +34,20 @@ function myRequire(moduleId) {
 
 // 模拟模块源码
 const moduleSource = {
-  './math': "exports.add = function(a, b) { return a + b; };\nexports.mul = function(a, b) { return a * b; };",
-  './app':  "const math = require('./math');\nexports.result = math.mul(math.add(2, 3), 4);",
+  "./math":
+    "exports.add = function(a, b) { return a + b; };\nexports.mul = function(a, b) { return a * b; };",
+  "./app":
+    "const math = require('./math');\nexports.result = math.mul(math.add(2, 3), 4);",
 };
 
 // ===== 测试 =====
-const math = myRequire('./math');
-console.log('math.add(2, 3):', math.add(2, 3)); // 5
-console.log('math.mul(2, 3):', math.mul(2, 3)); // 6
+const math = myRequire("./math");
+console.log("math.add(2, 3):", math.add(2, 3)); // 5
+console.log("math.mul(2, 3):", math.mul(2, 3)); // 6
 
-const app = myRequire('./app');
-console.log('(2+3)*4:', app.result); // 20
+const app = myRequire("./app");
+console.log("(2+3)*4:", app.result); // 20
 
 // 缓存命中
-const math2 = myRequire('./math');
-console.log('缓存命中:', math === math2); // true
+const math2 = myRequire("./math");
+console.log("缓存命中:", math === math2); // true

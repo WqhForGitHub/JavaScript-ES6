@@ -52,7 +52,7 @@ console.log(c); // [1, 2]
 
 // --- 空数组 ---
 const d = [];
-console.log(d.myUnshift('a', 'b')); // 2
+console.log(d.myUnshift("a", "b")); // 2
 console.log(d); // ['a', 'b']
 
 // --- 添加对象 ---

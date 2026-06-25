@@ -42,7 +42,7 @@ class Stack {
   }
 
   toString() {
-    return this.items.join(',');
+    return this.items.join(",");
   }
 }
 
@@ -65,17 +65,17 @@ console.log(stack.isEmpty()); // true
 // 应用：判断字符串中的括号是否匹配
 function isBalanced(str) {
   const s = new Stack();
-  const pairs = { ')': '(', ']': '[', '}': '{' };
+  const pairs = { ")": "(", "]": "[", "}": "{" };
   for (const ch of str) {
-    if (ch === '(' || ch === '[' || ch === '{') {
+    if (ch === "(" || ch === "[" || ch === "{") {
       s.push(ch);
-    } else if (ch === ')' || ch === ']' || ch === '}') {
+    } else if (ch === ")" || ch === "]" || ch === "}") {
       if (s.pop() !== pairs[ch]) return false;
     }
   }
   return s.isEmpty();
 }
 
-console.log(isBalanced('({[]})')); // true
-console.log(isBalanced('({[}])')); // false
-console.log(isBalanced('(()'));    // false
+console.log(isBalanced("({[]})")); // true
+console.log(isBalanced("({[}])")); // false
+console.log(isBalanced("(()")); // false

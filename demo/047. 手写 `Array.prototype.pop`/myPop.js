@@ -46,7 +46,7 @@ console.log(d.myPop()); // { y: 2 }
 console.log(d); // [{ x: 1 }]
 
 // --- 弹出后长度更新 ---
-const e = ['a', 'b', 'c', 'd'];
+const e = ["a", "b", "c", "d"];
 e.myPop();
 console.log(e.length); // 3
 console.log(e); // ['a', 'b', 'c']

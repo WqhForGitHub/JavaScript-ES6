@@ -69,7 +69,9 @@ console.log("中".myCharCodeAt(0)); // 20013（"中" 的码元）
 // --- 与原生对比 ---
 console.log("\n--- 与原生对比 ---");
 console.log("ABC".charCodeAt(0) === "ABC".myCharCodeAt(0)); // true
-console.log(Number.isNaN("hello".charCodeAt(5)) === Number.isNaN("hello".myCharCodeAt(5))); // true
+console.log(
+  Number.isNaN("hello".charCodeAt(5)) === Number.isNaN("hello".myCharCodeAt(5)),
+); // true
 
 // --- 常见字符码元对照 ---
 console.log("\n--- 常见字符码元 ---");

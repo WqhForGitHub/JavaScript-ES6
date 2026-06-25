@@ -41,7 +41,7 @@ function makeCancelable(promise) {
       (err) => {
         settled = true;
         if (!hasCanceled) reject(err);
-      }
+      },
     );
   });
 

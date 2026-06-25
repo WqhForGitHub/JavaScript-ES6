@@ -93,4 +93,6 @@ console.log(findKey({ a: 1, b: 2 }, (v) => v > 100)); // undefined
 console.log(findKey({}, (v) => true)); // undefined
 
 // 利用 key 参数
-console.log(findKey({ apple: 1, banana: 2, cherry: 3 }, (v, k) => k.length > 5)); // 'banana'
+console.log(
+  findKey({ apple: 1, banana: 2, cherry: 3 }, (v, k) => k.length > 5),
+); // 'banana'

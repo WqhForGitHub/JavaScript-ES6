@@ -16,7 +16,7 @@ function createHiddenProxy(target, hiddenProps) {
         return false; // 隐藏该属性
       }
       return prop in target;
-    }
+    },
   });
 }
 
@@ -28,7 +28,7 @@ function createWhitelistProxy(target, allowedProps) {
         return prop in target;
       }
       return false;
-    }
+    },
   });
 }
 
@@ -39,7 +39,7 @@ function createHasLoggingProxy(target) {
       var result = prop in target;
       console.log('  [has] checking "' + String(prop) + '": ' + result);
       return result;
-    }
+    },
   });
 }
 
@@ -54,10 +54,14 @@ function createHasProxyES5(target, hiddenProps) {
     if (hiddenProps.indexOf(key) === -1) {
       (function (k) {
         Object.defineProperty(proxy, k, {
-          get: function () { return target[k]; },
-          set: function (v) { target[k] = v; },
+          get: function () {
+            return target[k];
+          },
+          set: function (v) {
+            target[k] = v;
+          },
           enumerable: true,
-          configurable: true
+          configurable: true,
         });
       })(key);
     }
@@ -66,38 +70,40 @@ function createHasProxyES5(target, hiddenProps) {
 }
 
 // 测试 1：隐藏属性
-console.log('--- Hidden Proxy ---');
-var user = createHiddenProxy({ name: 'Alice', password: 'secret', age: 25 }, ['password']);
-console.log('name' in user);     // true
-console.log('age' in user);      // true
-console.log('password' in user); // false（被隐藏）
-console.log(user.password);      // secret（get 未拦截，仍可访问）
+console.log("--- Hidden Proxy ---");
+var user = createHiddenProxy({ name: "Alice", password: "secret", age: 25 }, [
+  "password",
+]);
+console.log("name" in user); // true
+console.log("age" in user); // true
+console.log("password" in user); // false（被隐藏）
+console.log(user.password); // secret（get 未拦截，仍可访问）
 
 // 测试 2：白名单
-console.log('--- Whitelist Proxy ---');
-var safe = createWhitelistProxy({ a: 1, b: 2, c: 3 }, ['a', 'b']);
-console.log('a' in safe); // true
-console.log('b' in safe); // true
-console.log('c' in safe); // false（不在白名单）
+console.log("--- Whitelist Proxy ---");
+var safe = createWhitelistProxy({ a: 1, b: 2, c: 3 }, ["a", "b"]);
+console.log("a" in safe); // true
+console.log("b" in safe); // true
+console.log("c" in safe); // false（不在白名单）
 
 // 测试 3：日志
-console.log('--- Has Logging Proxy ---');
+console.log("--- Has Logging Proxy ---");
 var logged = createHasLoggingProxy({ x: 1, y: 2 });
-console.log('x' in logged); // [has] checking "x": true \n true
-console.log('z' in logged); // [has] checking "z": false \n false
+console.log("x" in logged); // [has] checking "x": true \n true
+console.log("z" in logged); // [has] checking "z": false \n false
 
 // 测试 4：与 for...in 配合（has 拦截会影响 for...in）
-console.log('--- has with for...in ---');
-var obj = createHiddenProxy({ a: 1, b: 2, _private: 3 }, ['_private']);
+console.log("--- has with for...in ---");
+var obj = createHiddenProxy({ a: 1, b: 2, _private: 3 }, ["_private"]);
 var visibleKeys = [];
 for (var key in obj) visibleKeys.push(key);
 console.log(visibleKeys); // ['a', 'b']（_private 被隐藏）
 
 // 测试 5：ES5 模拟
-console.log('--- ES5 Has Proxy ---');
-var source = { name: 'Bob', token: 'abc123', role: 'user' };
-var es5Proxy = createHasProxyES5(source, ['token']);
-console.log('name' in es5Proxy); // true
-console.log('role' in es5Proxy); // true
-console.log('token' in es5Proxy); // false（不在代理对象上）
+console.log("--- ES5 Has Proxy ---");
+var source = { name: "Bob", token: "abc123", role: "user" };
+var es5Proxy = createHasProxyES5(source, ["token"]);
+console.log("name" in es5Proxy); // true
+console.log("role" in es5Proxy); // true
+console.log("token" in es5Proxy); // false（不在代理对象上）
 console.log(es5Proxy.name); // Bob

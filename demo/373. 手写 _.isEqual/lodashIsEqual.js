@@ -17,13 +17,13 @@
 
 function getTag(value) {
   if (value == null) {
-    return value === undefined ? '[object Undefined]' : '[object Null]';
+    return value === undefined ? "[object Undefined]" : "[object Null]";
   }
   return Object.prototype.toString.call(value);
 }
 
 function isObjectLike(value) {
-  return typeof value === 'object' && value !== null;
+  return typeof value === "object" && value !== null;
 }
 
 function isEqual(value, other) {
@@ -52,19 +52,19 @@ function baseIsEqual(value, other, stackA = [], stackB = []) {
   }
 
   switch (tag1) {
-    case '[object Boolean]':
-    case '[object Date]':
+    case "[object Boolean]":
+    case "[object Date]":
       return +value === +other;
-    case '[object Error]':
+    case "[object Error]":
       return value.name === other.name && value.message === other.message;
-    case '[object Number]':
+    case "[object Number]":
       // Object wrappers handled above; this covers Number objects
       return Object.is(+value, +other);
-    case '[object String]':
+    case "[object String]":
       return String(value) === String(other);
-    case '[object RegExp]':
+    case "[object RegExp]":
       return value.source === other.source && value.flags === other.flags;
-    case '[object Map]': {
+    case "[object Map]": {
       if (value.size !== other.size) return false;
       stackA.push(value);
       stackB.push(other);
@@ -81,7 +81,7 @@ function baseIsEqual(value, other, stackA = [], stackB = []) {
       stackB.pop();
       return equal;
     }
-    case '[object Set]': {
+    case "[object Set]": {
       if (value.size !== other.size) return false;
       stackA.push(value);
       stackB.push(other);
@@ -104,7 +104,7 @@ function baseIsEqual(value, other, stackA = [], stackB = []) {
       stackB.pop();
       return equal;
     }
-    case '[object Array]': {
+    case "[object Array]": {
       if (value.length !== other.length) return false;
       stackA.push(value);
       stackB.push(other);
@@ -119,7 +119,7 @@ function baseIsEqual(value, other, stackA = [], stackB = []) {
       stackB.pop();
       return equal;
     }
-    case '[object Object]': {
+    case "[object Object]": {
       const keys1 = Object.keys(value);
       const keys2 = Object.keys(other);
       if (keys1.length !== keys2.length) return false;
@@ -127,8 +127,10 @@ function baseIsEqual(value, other, stackA = [], stackB = []) {
       stackB.push(other);
       let equal = true;
       for (const key of keys1) {
-        if (!Object.prototype.hasOwnProperty.call(other, key) ||
-            !baseIsEqual(value[key], other[key], stackA, stackB)) {
+        if (
+          !Object.prototype.hasOwnProperty.call(other, key) ||
+          !baseIsEqual(value[key], other[key], stackA, stackB)
+        ) {
           equal = false;
           break;
         }
@@ -146,25 +148,34 @@ function baseIsEqual(value, other, stackA = [], stackB = []) {
 
 // --- Tests ---
 
-console.log('isEqual primitives:', isEqual(1, 1)); // true
-console.log('isEqual NaN:', isEqual(NaN, NaN)); // true
-console.log('isEqual nested objects:', isEqual({ a: { b: 2 } }, { a: { b: 2 } })); // true
-console.log('isEqual nested arrays:', isEqual([1, [2, { c: 3 }]], [1, [2, { c: 3 }]])); // true
-console.log('isEqual different order keys:', isEqual({ a: 1, b: 2 }, { b: 2, a: 1 })); // true
-console.log('isEqual date:', isEqual(new Date('2020'), new Date('2020'))); // true
-console.log('isEqual regexp:', isEqual(/abc/gi, /abc/gi)); // true
-console.log('isEqual map:', isEqual(new Map([['a', 1]]), new Map([['a', 1]]))); // true
-console.log('isEqual set:', isEqual(new Set([1, 2, 3]), new Set([3, 2, 1]))); // true
+console.log("isEqual primitives:", isEqual(1, 1)); // true
+console.log("isEqual NaN:", isEqual(NaN, NaN)); // true
+console.log(
+  "isEqual nested objects:",
+  isEqual({ a: { b: 2 } }, { a: { b: 2 } }),
+); // true
+console.log(
+  "isEqual nested arrays:",
+  isEqual([1, [2, { c: 3 }]], [1, [2, { c: 3 }]]),
+); // true
+console.log(
+  "isEqual different order keys:",
+  isEqual({ a: 1, b: 2 }, { b: 2, a: 1 }),
+); // true
+console.log("isEqual date:", isEqual(new Date("2020"), new Date("2020"))); // true
+console.log("isEqual regexp:", isEqual(/abc/gi, /abc/gi)); // true
+console.log("isEqual map:", isEqual(new Map([["a", 1]]), new Map([["a", 1]]))); // true
+console.log("isEqual set:", isEqual(new Set([1, 2, 3]), new Set([3, 2, 1]))); // true
 
-console.log('isEqual not equal objects:', isEqual({ a: 1 }, { a: 2 })); // false
-console.log('isEqual different lengths:', isEqual([1, 2], [1, 2, 3])); // false
-console.log('isEqual different types:', isEqual(1, '1')); // false
-console.log('isEqual different regexp flags:', isEqual(/a/g, /a/i)); // false
+console.log("isEqual not equal objects:", isEqual({ a: 1 }, { a: 2 })); // false
+console.log("isEqual different lengths:", isEqual([1, 2], [1, 2, 3])); // false
+console.log("isEqual different types:", isEqual(1, "1")); // false
+console.log("isEqual different regexp flags:", isEqual(/a/g, /a/i)); // false
 
 // Cyclic references
 const a = { x: 1 };
 a.self = a;
 const b = { x: 1 };
 b.self = b;
-console.log('isEqual cyclic:', isEqual(a, b)); // true
-console.log('isEqual cyclic unequal:', isEqual(a, { x: 1, self: {} })); // false
+console.log("isEqual cyclic:", isEqual(a, b)); // true
+console.log("isEqual cyclic unequal:", isEqual(a, { x: 1, self: {} })); // false

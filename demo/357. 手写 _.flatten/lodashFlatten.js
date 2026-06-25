@@ -26,9 +26,18 @@ function flatten(array) {
 
 // --- Tests ---
 
-console.log('flatten one level:', JSON.stringify(flatten([1, [2, [3, [4]], 5]]))); // expected: [1,2,[3,[4]],5]
-console.log('flatten already flat:', JSON.stringify(flatten([1, 2, 3]))); // expected: [1,2,3]
-console.log('flatten nested arrays:', JSON.stringify(flatten([[1], [2, 3], [4, 5, 6]]))); // expected: [1,2,3,4,5,6]
-console.log('flatten empty:', JSON.stringify(flatten([]))); // expected: []
-console.log('flatten with nulls:', JSON.stringify(flatten([1, [null, undefined], 2]))); // expected: [1,null,undefined,2]
-console.log('flatten non-array:', JSON.stringify(flatten(null))); // expected: []
+console.log(
+  "flatten one level:",
+  JSON.stringify(flatten([1, [2, [3, [4]], 5]])),
+); // expected: [1,2,[3,[4]],5]
+console.log("flatten already flat:", JSON.stringify(flatten([1, 2, 3]))); // expected: [1,2,3]
+console.log(
+  "flatten nested arrays:",
+  JSON.stringify(flatten([[1], [2, 3], [4, 5, 6]])),
+); // expected: [1,2,3,4,5,6]
+console.log("flatten empty:", JSON.stringify(flatten([]))); // expected: []
+console.log(
+  "flatten with nulls:",
+  JSON.stringify(flatten([1, [null, undefined], 2])),
+); // expected: [1,null,undefined,2]
+console.log("flatten non-array:", JSON.stringify(flatten(null))); // expected: []

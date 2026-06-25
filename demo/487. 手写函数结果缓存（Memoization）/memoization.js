@@ -48,10 +48,10 @@ const slowAdd = memoize((a, b) => {
 
 console.log(slowAdd(1, 2)); // expected: 3
 console.log(slowAdd(1, 2)); // expected: 3 (from cache)
-console.log('call count:', calls); // expected: 1
+console.log("call count:", calls); // expected: 1
 
 console.log(slowAdd(3, 4)); // expected: 7
-console.log('call count after new args:', calls); // expected: 2
+console.log("call count after new args:", calls); // expected: 2
 
 // Custom resolver
 let objCalls = 0;
@@ -60,14 +60,14 @@ const getByObj = memoize(
     objCalls++;
     return obj.a + obj.b;
   },
-  (obj) => `${obj.a},${obj.b}`
+  (obj) => `${obj.a},${obj.b}`,
 );
 
 console.log(getByObj({ a: 1, b: 2 })); // expected: 3
 console.log(getByObj({ a: 1, b: 2 })); // expected: 3 (cache hit via resolver key)
-console.log('obj call count:', objCalls); // expected: 1
+console.log("obj call count:", objCalls); // expected: 1
 
 // Fibonacci with memoization
 const fib = memoize((n) => (n < 2 ? n : fib(n - 1) + fib(n - 2)));
-console.log('fib(40):', fib(40)); // expected: 102334155 (computed quickly)
-console.log('fib(40) again from cache:', fib(40)); // expected: 102334155
+console.log("fib(40):", fib(40)); // expected: 102334155 (computed quickly)
+console.log("fib(40) again from cache:", fib(40)); // expected: 102334155

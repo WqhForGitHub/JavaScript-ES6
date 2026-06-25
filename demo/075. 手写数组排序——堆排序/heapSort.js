@@ -110,7 +110,8 @@ function heapSortDesc(arr) {
       const right = 2 * i + 2;
       let smallest = i;
       if (left < heapSize && result[left] < result[smallest]) smallest = left;
-      if (right < heapSize && result[right] < result[smallest]) smallest = right;
+      if (right < heapSize && result[right] < result[smallest])
+        smallest = right;
       if (smallest === i) break;
       [result[i], result[smallest]] = [result[smallest], result[i]];
       i = smallest;
@@ -233,7 +234,10 @@ function findKthLargest(arr, k) {
   return sorted[sorted.length - k];
 }
 console.log("[3,2,1,5,6,4] 第2大:", findKthLargest([3, 2, 1, 5, 6, 4], 2)); // 5
-console.log("[3,2,3,1,2,4,5,5,6] 第4大:", findKthLargest([3, 2, 3, 1, 2, 4, 5, 5, 6], 4)); // 4
+console.log(
+  "[3,2,3,1,2,4,5,5,6] 第4大:",
+  findKthLargest([3, 2, 3, 1, 2, 4, 5, 5, 6], 4),
+); // 4
 
 // --- 性能对比 ---
 console.log("\n========== 性能对比（20000 随机数）==========");
@@ -242,7 +246,9 @@ function timed(fn, arr) {
   fn(arr);
   return (performance.now() - start).toFixed(3);
 }
-const random = Array.from({ length: 20000 }, () => Math.floor(Math.random() * 20000));
+const random = Array.from({ length: 20000 }, () =>
+  Math.floor(Math.random() * 20000),
+);
 console.log(`迭代堆排序: ${timed(heapSort1, [...random])}ms`);
 console.log(`递归堆排序: ${timed(heapSort2, [...random])}ms`);
 

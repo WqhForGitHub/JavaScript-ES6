@@ -30,7 +30,7 @@ function myAllSettled(iterable) {
         (reason) => {
           result[index] = { status: "rejected", reason };
           if (--remaining === 0) resolve(result);
-        }
+        },
       );
     });
   });
@@ -54,13 +54,13 @@ myAllSettled([
 
 // 2. 全部成功
 myAllSettled([Promise.resolve("a"), Promise.resolve("b")]).then((res) =>
-  console.log("all ok:", res)
+  console.log("all ok:", res),
 );
 // all ok: [ { status: 'fulfilled', value: 'a' }, { status: 'fulfilled', value: 'b' } ]
 
 // 3. 全部失败
 myAllSettled([Promise.reject(1), Promise.reject(2)]).then((res) =>
-  console.log("all fail:", res)
+  console.log("all fail:", res),
 );
 // all fail: [ { status: 'rejected', reason: 1 }, { status: 'rejected', reason: 2 } ]
 
@@ -69,6 +69,6 @@ myAllSettled([]).then((res) => console.log("empty:", res)); // empty: []
 
 // 5. 含非 Promise
 myAllSettled([1, Promise.resolve(2)]).then((res) =>
-  console.log("with value:", res)
+  console.log("with value:", res),
 );
 // with value: [ { status: 'fulfilled', value: 1 }, { status: 'fulfilled', value: 2 } ]

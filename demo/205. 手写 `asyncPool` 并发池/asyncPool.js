@@ -79,7 +79,7 @@ function asyncPoolFailFast(limit, items, iterFn) {
             (e) => {
               aborted = true;
               reject(e);
-            }
+            },
           );
       }
     };
@@ -93,8 +93,8 @@ function delay(value, ms, fail = false) {
   return new Promise((resolve, reject) =>
     setTimeout(
       () => (fail ? reject(new Error(value + " fail")) : resolve(value)),
-      ms
-    )
+      ms,
+    ),
   );
 }
 
@@ -116,8 +116,12 @@ function delay(value, ms, fail = false) {
   try {
     await asyncPool(
       2,
-      [["X", 10, true], ["Y", 20], ["Z", 15]],
-      ([v, ms, fail]) => delay(v, ms, fail)
+      [
+        ["X", 10, true],
+        ["Y", 20],
+        ["Z", 15],
+      ],
+      ([v, ms, fail]) => delay(v, ms, fail),
     );
   } catch (e) {
     console.log("classic fail:", e.message); // classic fail: X fail
@@ -125,10 +129,8 @@ function delay(value, ms, fail = false) {
 
   // 3. fail-fast 版
   console.log("\n-- fail-fast --");
-  const r3 = await asyncPoolFailFast(
-    3,
-    [1, 2, 3, 4, 5],
-    (i) => delay("v" + i, 20)
+  const r3 = await asyncPoolFailFast(3, [1, 2, 3, 4, 5], (i) =>
+    delay("v" + i, 20),
   );
   console.log("failfast result:", r3); // failfast result: [ 'v1','v2','v3','v4','v5' ]
 

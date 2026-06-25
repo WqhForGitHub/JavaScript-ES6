@@ -16,7 +16,7 @@
 function mapKeys(object, iteratee = (v) => v) {
   if (object == null) return {};
   const get =
-    typeof iteratee === 'function'
+    typeof iteratee === "function"
       ? iteratee
       : (v) => (v == null ? undefined : v[iteratee]);
   const result = {};
@@ -29,12 +29,24 @@ function mapKeys(object, iteratee = (v) => v) {
 
 // --- Tests ---
 
-console.log('mapKeys function:', JSON.stringify(mapKeys({ a: 1, b: 2 }, (value, key) => key + value))); // expected: {"a1":1,"b2":2}
-console.log('mapKeys prefix:', JSON.stringify(mapKeys({ x: 10, y: 20 }, (value) => 'key_' + value))); // expected: {"key_10":10,"key_20":20}
 console.log(
-  'mapKeys shorthand:',
-  JSON.stringify(mapKeys({ a: { id: 1 }, b: { id: 2 } }, 'id'))
+  "mapKeys function:",
+  JSON.stringify(mapKeys({ a: 1, b: 2 }, (value, key) => key + value)),
+); // expected: {"a1":1,"b2":2}
+console.log(
+  "mapKeys prefix:",
+  JSON.stringify(mapKeys({ x: 10, y: 20 }, (value) => "key_" + value)),
+); // expected: {"key_10":10,"key_20":20}
+console.log(
+  "mapKeys shorthand:",
+  JSON.stringify(mapKeys({ a: { id: 1 }, b: { id: 2 } }, "id")),
 ); // expected: {"1":{"id":1},"2":{"id":2}}
-console.log('mapKeys default identity:', JSON.stringify(mapKeys({ a: 1, b: 2 }))); // expected: {"a":1,"b":2}
-console.log('mapKeys null:', JSON.stringify(mapKeys(null))); // expected: {}
-console.log('mapKeys to numeric string:', JSON.stringify(mapKeys({ a: 1 }, () => 5))); // expected: {"5":1}
+console.log(
+  "mapKeys default identity:",
+  JSON.stringify(mapKeys({ a: 1, b: 2 })),
+); // expected: {"a":1,"b":2}
+console.log("mapKeys null:", JSON.stringify(mapKeys(null))); // expected: {}
+console.log(
+  "mapKeys to numeric string:",
+  JSON.stringify(mapKeys({ a: 1 }, () => 5)),
+); // expected: {"5":1}

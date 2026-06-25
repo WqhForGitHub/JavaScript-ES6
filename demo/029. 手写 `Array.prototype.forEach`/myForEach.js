@@ -11,8 +11,8 @@
  */
 
 Array.prototype.myForEach = function (callback, thisArg) {
-  if (typeof callback !== 'function') {
-    throw new TypeError(callback + ' is not a function');
+  if (typeof callback !== "function") {
+    throw new TypeError(callback + " is not a function");
   }
 
   for (let i = 0; i < this.length; i++) {
@@ -28,12 +28,14 @@ Array.prototype.myForEach = function (callback, thisArg) {
 
 // --- 基本遍历 ---
 const logs = [];
-[1, 2, 3].myForEach(x => logs.push(x));
+[1, 2, 3].myForEach((x) => logs.push(x));
 console.log(logs); // [1, 2, 3]
 
 // --- 使用索引和原数组 ---
 const out = [];
-['a', 'b', 'c'].myForEach((v, i, arr) => out.push(i + ':' + v + '/' + arr.length));
+["a", "b", "c"].myForEach((v, i, arr) =>
+  out.push(i + ":" + v + "/" + arr.length),
+);
 console.log(out); // ['0:a/3', '1:b/3', '2:c/3']
 
 // --- 使用 thisArg ---
@@ -44,7 +46,7 @@ const ctx = { sum: 0 };
 console.log(ctx.sum); // 10
 
 // --- 返回值为 undefined ---
-console.log([1, 2, 3].myForEach(x => x)); // undefined
+console.log([1, 2, 3].myForEach((x) => x)); // undefined
 
 // --- 回调中修改原数组（这是回调的副作用，非 forEach 主动修改）---
 const arr = [1, 2, 3];

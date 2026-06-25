@@ -19,7 +19,7 @@ class Coffee {
     return 5;
   }
   description() {
-    return 'Coffee';
+    return "Coffee";
   }
 }
 
@@ -66,7 +66,7 @@ class WhippedCream extends CoffeeDecorator {
 // ---- Function-style decorators for methods ----
 function withLogging(fn, label = fn.name) {
   return function (...args) {
-    console.log(`[log] calling ${label}(${args.join(', ')})`);
+    console.log(`[log] calling ${label}(${args.join(", ")})`);
     const result = fn.apply(this, args);
     console.log(`[log] ${label} returned`, result);
     return result;
@@ -107,7 +107,9 @@ console.log(drink.cost());
 function slowSquare(n) {
   return n * n;
 }
-const decorated = memoize(withTiming(withLogging(slowSquare, 'slowSquare'), 'slowSquare'));
+const decorated = memoize(
+  withTiming(withLogging(slowSquare, "slowSquare"), "slowSquare"),
+);
 console.log(decorated(4));
 // Expected logs + 16
 console.log(decorated(4)); // second call hits memo cache (same result, no logs)

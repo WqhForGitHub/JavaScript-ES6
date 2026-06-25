@@ -23,13 +23,15 @@
  */
 
 function pathNormalize(path) {
-  if (typeof path !== 'string') {
-    throw new TypeError('Path must be a string. Received ' + JSON.stringify(path));
+  if (typeof path !== "string") {
+    throw new TypeError(
+      "Path must be a string. Received " + JSON.stringify(path),
+    );
   }
-  if (path === '') return '.';
+  if (path === "") return ".";
 
   // 检测 Windows 盘符
-  let device = '';
+  let device = "";
   let rest = path;
   const winDriveMatch = /^([a-zA-Z]:)(.*)/.exec(path);
   if (winDriveMatch) {
@@ -37,24 +39,24 @@ function pathNormalize(path) {
     rest = winDriveMatch[2];
   }
 
-  const isAbsolute = rest[0] === '/';
-  const trailingSlash = rest.length > 0 && rest[rest.length - 1] === '/';
+  const isAbsolute = rest[0] === "/";
+  const trailingSlash = rest.length > 0 && rest[rest.length - 1] === "/";
 
   // 按斜杠拆分
-  const segments = rest.split('/').filter(s => s !== '');
+  const segments = rest.split("/").filter((s) => s !== "");
   const stack = [];
 
   for (const seg of segments) {
-    if (seg === '.') {
+    if (seg === ".") {
       // 跳过
       continue;
     }
-    if (seg === '..') {
-      if (stack.length > 0 && stack[stack.length - 1] !== '..') {
+    if (seg === "..") {
+      if (stack.length > 0 && stack[stack.length - 1] !== "..") {
         stack.pop();
       } else if (!isAbsolute) {
         // 相对路径下保留 ..（无法回退到根之外）
-        stack.push('..');
+        stack.push("..");
       }
       // 绝对路径下 .. 在根处忽略
       continue;
@@ -62,64 +64,72 @@ function pathNormalize(path) {
     stack.push(seg);
   }
 
-  let result = stack.join('/');
+  let result = stack.join("/");
 
   // 拼接
   if (isAbsolute) {
-    result = '/' + result;
+    result = "/" + result;
   }
   if (device) {
     result = device + result;
   }
 
   // 结尾斜杠
-  if (trailingSlash && result.length > 0 && result[result.length - 1] !== '/') {
+  if (trailingSlash && result.length > 0 && result[result.length - 1] !== "/") {
     // 根 '/' 单独处理
-    if (result !== '/' || !device) {
-      if (result !== '/' || device) result += '/';
+    if (result !== "/" || !device) {
+      if (result !== "/" || device) result += "/";
     }
   }
 
-  if (result === '' || result === device) return device ? device + '.' : '.';
+  if (result === "" || result === device) return device ? device + "." : ".";
   return result;
 }
 
 // ===== 测试 =====
 
-console.log(pathNormalize('/foo/bar//baz/asdf/quux/..'));
+console.log(pathNormalize("/foo/bar//baz/asdf/quux/.."));
 // '/foo/bar/baz/asdf'
 
-console.log(pathNormalize('/foo/bar/../baz')); // '/foo/baz'
-console.log(pathNormalize('/foo/./bar')); // '/foo/bar'
-console.log(pathNormalize('foo/bar/../baz')); // 'foo/baz'
-console.log(pathNormalize('a/./b/../c/')); // 'a/c/'
-console.log(pathNormalize('/a/b/../../c')); // '/c'
-console.log(pathNormalize('/a/b/../../../c')); // '/c' (绝对路径下 .. 不会超出根)
-console.log(pathNormalize('')); // '.'
-console.log(pathNormalize('.')); // '.'
-console.log(pathNormalize('./')); // './' -> 实际 Node 返回 './'，这里我们处理为 '.'
-console.log(pathNormalize('..')); // '..'
-console.log(pathNormalize('../..')); // '../..'
-console.log(pathNormalize('/')); // '/'
-console.log(pathNormalize('//server/share/dir')); // '/server/share/dir'
+console.log(pathNormalize("/foo/bar/../baz")); // '/foo/baz'
+console.log(pathNormalize("/foo/./bar")); // '/foo/bar'
+console.log(pathNormalize("foo/bar/../baz")); // 'foo/baz'
+console.log(pathNormalize("a/./b/../c/")); // 'a/c/'
+console.log(pathNormalize("/a/b/../../c")); // '/c'
+console.log(pathNormalize("/a/b/../../../c")); // '/c' (绝对路径下 .. 不会超出根)
+console.log(pathNormalize("")); // '.'
+console.log(pathNormalize(".")); // '.'
+console.log(pathNormalize("./")); // './' -> 实际 Node 返回 './'，这里我们处理为 '.'
+console.log(pathNormalize("..")); // '..'
+console.log(pathNormalize("../..")); // '../..'
+console.log(pathNormalize("/")); // '/'
+console.log(pathNormalize("//server/share/dir")); // '/server/share/dir'
 
 // 多余斜杠合并
-console.log(pathNormalize('a///b//c')); // 'a/b/c'
-console.log(pathNormalize('/a//b//c/')); // '/a/b/c/'
+console.log(pathNormalize("a///b//c")); // 'a/b/c'
+console.log(pathNormalize("/a//b//c/")); // '/a/b/c/'
 
 // Windows 盘符
-console.log(pathNormalize('C:\\foo\\..\\bar')); // 'C:/foo/../bar' -> 简化处理反斜杠
+console.log(pathNormalize("C:\\foo\\..\\bar")); // 'C:/foo/../bar' -> 简化处理反斜杠
 // 注意：本实现不专门处理反斜杠分隔符（POSIX 风格）
 
 // 与原生对比（如果可用）
-if (typeof require === 'function') {
+if (typeof require === "function") {
   try {
-    const path = require('path');
-    const cases = ['/foo/bar//baz/asdf/quux/..', 'a/./b/../c/', '/a/b/../../c', '..', ''];
+    const path = require("path");
+    const cases = [
+      "/foo/bar//baz/asdf/quux/..",
+      "a/./b/../c/",
+      "/a/b/../../c",
+      "..",
+      "",
+    ];
     for (const c of cases) {
       const mine = pathNormalize(c);
       const native = path.posix.normalize(c);
-      console.log(`compare [${c}]: mine=${mine} native=${native} same=${mine === native}`);
+      console.log(
+        `compare [${c}]: mine=${mine} native=${native} same=${mine === native}`,
+      );
     }
   } catch (e) {
     // 跳过

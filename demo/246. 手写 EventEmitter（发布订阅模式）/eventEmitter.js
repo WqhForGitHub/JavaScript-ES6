@@ -21,8 +21,8 @@ function EventEmitter() {
  * @returns {this}
  */
 EventEmitter.prototype.on = function (event, callback) {
-  if (typeof callback !== 'function') {
-    throw new TypeError('callback must be a function');
+  if (typeof callback !== "function") {
+    throw new TypeError("callback must be a function");
   }
   if (!this.events[event]) {
     this.events[event] = [];
@@ -103,38 +103,38 @@ var emitter = new EventEmitter();
 
 // 订阅事件
 function greet(name) {
-  console.log('Hello, ' + name + '!');
+  console.log("Hello, " + name + "!");
 }
-emitter.on('greet', greet);
-emitter.emit('greet', 'World'); // => Hello, World!
+emitter.on("greet", greet);
+emitter.emit("greet", "World"); // => Hello, World!
 
 // 多个监听器
-emitter.on('greet', function (name) {
-  console.log('Hi, ' + name);
+emitter.on("greet", function (name) {
+  console.log("Hi, " + name);
 });
-emitter.emit('greet', 'Alice');
+emitter.emit("greet", "Alice");
 // => Hello, Alice!
 // => Hi, Alice
 
 // 多参数
-emitter.on('data', function (a, b, c) {
-  console.log('收到：', a, b, c);
+emitter.on("data", function (a, b, c) {
+  console.log("收到：", a, b, c);
 });
-emitter.emit('data', 1, 2, 3); // => 收到： 1 2 3
+emitter.emit("data", 1, 2, 3); // => 收到： 1 2 3
 
 // 取消订阅
-emitter.off('greet', greet);
-emitter.emit('greet', 'Bob'); // => Hi, Bob （greet 已被移除）
+emitter.off("greet", greet);
+emitter.emit("greet", "Bob"); // => Hi, Bob （greet 已被移除）
 
 // listenerCount
-console.log(emitter.listenerCount('greet')); // => 1
-console.log(emitter.listenerCount('data')); // => 1
-console.log(emitter.listenerCount('notexist')); // => 0
+console.log(emitter.listenerCount("greet")); // => 1
+console.log(emitter.listenerCount("data")); // => 1
+console.log(emitter.listenerCount("notexist")); // => 0
 
 // 全部移除
-emitter.off('greet');
-console.log(emitter.listenerCount('greet')); // => 0
-emitter.emit('greet', 'Test'); // 无输出
+emitter.off("greet");
+console.log(emitter.listenerCount("greet")); // => 0
+emitter.emit("greet", "Test"); // 无输出
 
 // eventNames
 console.log(emitter.eventNames()); // => ['data']

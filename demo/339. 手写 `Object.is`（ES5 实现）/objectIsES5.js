@@ -35,50 +35,56 @@ function objectIsAlt(x, y) {
 }
 
 // 测试 1：与 === 相同的情况
-console.log('--- Same as === ---');
-console.log(objectIs(1, 1));        // true
-console.log(objectIs('a', 'a'));    // true
-console.log(objectIs(true, true));  // true
-console.log(objectIs(null, null));  // true
+console.log("--- Same as === ---");
+console.log(objectIs(1, 1)); // true
+console.log(objectIs("a", "a")); // true
+console.log(objectIs(true, true)); // true
+console.log(objectIs(null, null)); // true
 console.log(objectIs(undefined, undefined)); // true
-console.log(objectIs(1, '1'));      // false
-console.log(objectIs(1, 2));        // false
+console.log(objectIs(1, "1")); // false
+console.log(objectIs(1, 2)); // false
 console.log(objectIs(null, undefined)); // false
 
 // 测试 2：NaN（与 === 的关键区别）
-console.log('--- NaN ---');
-console.log(objectIs(NaN, NaN));   // true
-console.log(NaN === NaN);          // false
-console.log(objectIs(NaN, 0));     // false
+console.log("--- NaN ---");
+console.log(objectIs(NaN, NaN)); // true
+console.log(NaN === NaN); // false
+console.log(objectIs(NaN, 0)); // false
 console.log(objectIs(NaN, undefined)); // false
 
 // 测试 3：+0 和 -0（与 === 的关键区别）
-console.log('--- +0 vs -0 ---');
-console.log(objectIs(0, -0));      // false
-console.log(0 === -0);             // true
-console.log(objectIs(-0, -0));     // true
-console.log(objectIs(0, 0));       // true
-console.log(objectIs(+0, 0));      // true
+console.log("--- +0 vs -0 ---");
+console.log(objectIs(0, -0)); // false
+console.log(0 === -0); // true
+console.log(objectIs(-0, -0)); // true
+console.log(objectIs(0, 0)); // true
+console.log(objectIs(+0, 0)); // true
 
 // 测试 4：对象引用
-console.log('--- Object reference ---');
+console.log("--- Object reference ---");
 var obj = {};
-console.log(objectIs(obj, obj));   // true（同一引用）
-console.log(objectIs({}, {}));     // false（不同引用）
-console.log(objectIs([], []));     // false
+console.log(objectIs(obj, obj)); // true（同一引用）
+console.log(objectIs({}, {})); // false（不同引用）
+console.log(objectIs([], [])); // false
 
 // 测试 5：特殊值
-console.log('--- Special values ---');
+console.log("--- Special values ---");
 console.log(objectIs(Infinity, Infinity)); // true
 console.log(objectIs(-Infinity, -Infinity)); // true
 console.log(objectIs(Infinity, -Infinity)); // false
-console.log(objectIs('', ''));     // true
+console.log(objectIs("", "")); // true
 
 // 测试 6：两种实现对比
-console.log('--- Compare two implementations ---');
+console.log("--- Compare two implementations ---");
 var testCases = [
-  [NaN, NaN], [0, -0], [1, 1], ['a', 'a'],
-  [null, undefined], [Infinity, -Infinity], [obj, obj], [{}, {}]
+  [NaN, NaN],
+  [0, -0],
+  [1, 1],
+  ["a", "a"],
+  [null, undefined],
+  [Infinity, -Infinity],
+  [obj, obj],
+  [{}, {}],
 ];
 testCases.forEach(function (tc) {
   var r1 = objectIs(tc[0], tc[1]);
@@ -87,15 +93,15 @@ testCases.forEach(function (tc) {
 });
 
 // 测试 7：与原生对比
-console.log('--- Compare with native ---');
+console.log("--- Compare with native ---");
 testCases.forEach(function (tc) {
   console.log(objectIs(tc[0], tc[1]) === Object.is(tc[0], tc[1])); // true
 });
 
 // 测试 8：实用场景 - 安全比较
-console.log('--- Use case: safe comparison ---');
+console.log("--- Use case: safe comparison ---");
 function safeEquals(a, b) {
   return objectIs(a, b);
 }
 console.log(safeEquals(NaN, NaN)); // true（比 === 更符合直觉）
-console.log(safeEquals(0, -0));    // false（区分 +0 和 -0）
+console.log(safeEquals(0, -0)); // false（区分 +0 和 -0）

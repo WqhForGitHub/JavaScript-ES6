@@ -29,8 +29,8 @@ console.log(Array.myOf(3)); // [3]
 console.log(Array(3)); // [empty x 3]（对比：构造函数创建长度为 3 的空数组）
 
 // --- 不同类型 ---
-console.log(Array.myOf('a', 'b', 'c')); // ['a', 'b', 'c']
-console.log(Array.myOf(1, 'a', true, null, undefined)); // [1, 'a', true, null, undefined]
+console.log(Array.myOf("a", "b", "c")); // ['a', 'b', 'c']
+console.log(Array.myOf(1, "a", true, null, undefined)); // [1, 'a', true, null, undefined]
 
 // --- 对象参数 ---
 console.log(Array.myOf({ a: 1 }, [2, 3])); // [{ a: 1 }, [2, 3]]
@@ -40,8 +40,6 @@ console.log(Array.myOf()); // []
 
 // --- 与原生 Array.of 对比 ---
 console.log(
-  JSON.stringify(Array.myOf(1, 2, 3)) === JSON.stringify(Array.of(1, 2, 3))
+  JSON.stringify(Array.myOf(1, 2, 3)) === JSON.stringify(Array.of(1, 2, 3)),
 ); // true
-console.log(
-  JSON.stringify(Array.myOf(7)) === JSON.stringify(Array.of(7))
-); // true
+console.log(JSON.stringify(Array.myOf(7)) === JSON.stringify(Array.of(7))); // true

@@ -109,7 +109,7 @@ function defineReactive(obj, key, val) {
 }
 
 function observe(obj) {
-  if (!obj || typeof obj !== 'object') return obj;
+  if (!obj || typeof obj !== "object") return obj;
   Object.keys(obj).forEach(function (key) {
     defineReactive(obj, key, obj[key]);
   });
@@ -150,14 +150,16 @@ var data = observe({ a: 1, b: 2 });
 
 var updates = [];
 var watcher = createWatcher(
-  function () { return data.a + data.b; },
+  function () {
+    return data.a + data.b;
+  },
   function (newVal, oldVal) {
-    updates.push(oldVal + ' -> ' + newVal);
-  }
+    updates.push(oldVal + " -> " + newVal);
+  },
 );
 
-console.log('初始值：', watcher.value); // => 3
-console.log('收集的 Dep 数量：', watcher.deps.length); // => 2
+console.log("初始值：", watcher.value); // => 3
+console.log("收集的 Dep 数量：", watcher.deps.length); // => 2
 
 // 修改 a，触发更新
 data.a = 10;
@@ -168,17 +170,22 @@ data.b = 20;
 console.log(updates); // => ['3 -> 12', '12 -> 30']
 
 // 测试 target 栈嵌套
-var innerWatcher = createWatcher(function () { return data.a; }, function () {});
-console.log('innerWatcher value:', innerWatcher.value); // => 10
+var innerWatcher = createWatcher(
+  function () {
+    return data.a;
+  },
+  function () {},
+);
+console.log("innerWatcher value:", innerWatcher.value); // => 10
 
 // 测试 depend 双向记录
-console.log('a 的 Dep subs 数量：', watcher.deps[0].subs.length); // => 2（watcher + innerWatcher）
+console.log("a 的 Dep subs 数量：", watcher.deps[0].subs.length); // => 2（watcher + innerWatcher）
 
 // 测试 removeSub
 watcher.deps[0].removeSub(watcher);
-console.log('移除后 subs 数量：', watcher.deps[0].subs.length); // => 1
+console.log("移除后 subs 数量：", watcher.deps[0].subs.length); // => 1
 
 // 测试 Dep.target 为 null 时 depend 不收集
 Dep.target = null;
 watcher.deps[0].depend(); // 不应有副作用
-console.log('depend 后 subs 不变：', watcher.deps[0].subs.length); // => 1
+console.log("depend 后 subs 不变：", watcher.deps[0].subs.length); // => 1

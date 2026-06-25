@@ -40,7 +40,7 @@ class CancelablePromise {
             if (this._cancelled) return;
             reject(err);
           },
-          onCleanup
+          onCleanup,
         );
       } catch (e) {
         reject(e);
@@ -58,9 +58,7 @@ class CancelablePromise {
         fn();
       } catch (_) {}
     });
-    this._reject(
-      reason instanceof Error ? reason : new CancelError(reason)
-    );
+    this._reject(reason instanceof Error ? reason : new CancelError(reason));
   }
 
   get cancelled() {
@@ -88,7 +86,7 @@ class CancelablePromise {
           } catch (err) {
             reject(err);
           }
-        }
+        },
       );
       // 把取消能力串起来：父取消 -> 子也取消
       onCleanup(() => next.cancel(this._cancelReason));

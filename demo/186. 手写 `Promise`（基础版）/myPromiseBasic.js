@@ -52,8 +52,7 @@ class MyPromiseBasic {
 
   then(onFulfilled, onRejected) {
     // 值穿透：非函数时直接把值/原因传下去
-    onFulfilled =
-      typeof onFulfilled === "function" ? onFulfilled : (v) => v;
+    onFulfilled = typeof onFulfilled === "function" ? onFulfilled : (v) => v;
     onRejected =
       typeof onRejected === "function"
         ? onRejected
@@ -103,7 +102,7 @@ p1.then((v) => console.log("p1:", v)); // p1: 1
 const p2 = new MyPromiseBasic((_, reject) => reject("err"));
 p2.then(
   (v) => console.log("p2 ok:", v),
-  (e) => console.log("p2 fail:", e) // p2 fail: err
+  (e) => console.log("p2 fail:", e), // p2 fail: err
 );
 
 // 3. 异步 resolve

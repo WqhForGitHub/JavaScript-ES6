@@ -25,7 +25,9 @@ function myDefineProperty(obj, prop, descriptor) {
 
   // 数据描述符和存取器描述符不能混用
   if ((hasValue || hasWritable) && (hasGet || hasSet)) {
-    throw new TypeError("Invalid property descriptor. Cannot both specify accessors and a value or writable attribute");
+    throw new TypeError(
+      "Invalid property descriptor. Cannot both specify accessors and a value or writable attribute",
+    );
   }
 
   // 取当前描述符（若属性已存在）
@@ -54,8 +56,10 @@ function myDefineProperty(obj, prop, descriptor) {
 
   if (hasGet || hasSet) {
     // 存取器描述符
-    finalDesc.get = typeof descriptor.get === "function" ? descriptor.get : undefined;
-    finalDesc.set = typeof descriptor.set === "function" ? descriptor.set : undefined;
+    finalDesc.get =
+      typeof descriptor.get === "function" ? descriptor.get : undefined;
+    finalDesc.set =
+      typeof descriptor.set === "function" ? descriptor.set : undefined;
   } else {
     // 数据描述符
     if (hasValue) {
@@ -89,7 +93,12 @@ console.log(Object.getOwnPropertyDescriptor(obj, "a"));
 
 // 可写可枚举可配置
 const obj2 = {};
-myDefineProperty(obj2, "b", { value: 2, writable: true, enumerable: true, configurable: true });
+myDefineProperty(obj2, "b", {
+  value: 2,
+  writable: true,
+  enumerable: true,
+  configurable: true,
+});
 console.log(obj2.b); // 2
 obj2.b = 200;
 console.log(obj2.b); // 200
@@ -98,8 +107,12 @@ console.log(obj2.b); // 200
 const obj3 = {};
 let internal = 0;
 myDefineProperty(obj3, "count", {
-  get() { return internal; },
-  set(v) { internal = v; },
+  get() {
+    return internal;
+  },
+  set(v) {
+    internal = v;
+  },
   enumerable: true,
   configurable: true,
 });

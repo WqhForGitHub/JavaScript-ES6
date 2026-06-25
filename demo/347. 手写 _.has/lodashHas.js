@@ -13,7 +13,7 @@
 
 function castPath(path) {
   if (Array.isArray(path)) return path.slice();
-  if (typeof path === 'number') return [String(path)];
+  if (typeof path === "number") return [String(path)];
   const result = [];
   const re = /[^.[\]]+|\[(?:(['"])(.*?)\1|(\d+))\]/g;
   let match;
@@ -36,7 +36,10 @@ function has(object, path) {
   let current = object;
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    if (current == null || !Object.prototype.hasOwnProperty.call(current, key)) {
+    if (
+      current == null ||
+      !Object.prototype.hasOwnProperty.call(current, key)
+    ) {
       return false;
     }
     current = current[key];
@@ -46,12 +49,15 @@ function has(object, path) {
 
 // --- Tests ---
 
-const obj = { a: { b: { c: 1 } }, arr: [10, 20], 'd.e': 'literal' };
+const obj = { a: { b: { c: 1 } }, arr: [10, 20], "d.e": "literal" };
 
-console.log('has nested:', has(obj, 'a.b.c')); // true
-console.log('has missing:', has(obj, 'a.b.z')); // false
-console.log('has array index:', has(obj, 'arr[0]')); // true
-console.log('has array out-of-range:', has(obj, 'arr[5]')); // false
-console.log('has array path:', has(obj, ['a', 'b', 'c'])); // true
-console.log('has inherited false:', has(Object.create({ inherited: 1 }), 'inherited')); // false
-console.log('has null object:', has(null, 'a')); // false
+console.log("has nested:", has(obj, "a.b.c")); // true
+console.log("has missing:", has(obj, "a.b.z")); // false
+console.log("has array index:", has(obj, "arr[0]")); // true
+console.log("has array out-of-range:", has(obj, "arr[5]")); // false
+console.log("has array path:", has(obj, ["a", "b", "c"])); // true
+console.log(
+  "has inherited false:",
+  has(Object.create({ inherited: 1 }), "inherited"),
+); // false
+console.log("has null object:", has(null, "a")); // false

@@ -10,17 +10,22 @@
  */
 
 class Pipeline {
-  constructor() { this.tasks = new Map(); }
+  constructor() {
+    this.tasks = new Map();
+  }
 
   // 注册任务
-  task(name, fn) { this.tasks.set(name, fn); return this; }
+  task(name, fn) {
+    this.tasks.set(name, fn);
+    return this;
+  }
 
   // 串联执行
   series(...fns) {
     return async (input) => {
       let result = input;
       for (const fn of fns) {
-        const task = typeof fn === 'string' ? this.tasks.get(fn) : fn;
+        const task = typeof fn === "string" ? this.tasks.get(fn) : fn;
         result = await task(result);
       }
       return result;
@@ -30,10 +35,12 @@ class Pipeline {
   // 并联执行
   parallel(...fns) {
     return async (input) => {
-      const results = await Promise.all(fns.map(fn => {
-        const task = typeof fn === 'string' ? this.tasks.get(fn) : fn;
-        return task(input);
-      }));
+      const results = await Promise.all(
+        fns.map((fn) => {
+          const task = typeof fn === "string" ? this.tasks.get(fn) : fn;
+          return task(input);
+        }),
+      );
       return results.flat();
     };
   }
@@ -48,32 +55,43 @@ class Pipeline {
 // ===== 测试 =====
 const pipe = new Pipeline();
 
-pipe.task('read', async (files) => {
-  return files.map(f => ({ name: f, content: 'content of ' + f }));
+pipe.task("read", async (files) => {
+  return files.map((f) => ({ name: f, content: "content of " + f }));
 });
 
-pipe.task('transform', async (files) => {
-  return files.map(f => ({ ...f, content: f.content.toUpperCase() }));
+pipe.task("transform", async (files) => {
+  return files.map((f) => ({ ...f, content: f.content.toUpperCase() }));
 });
 
-pipe.task('minify', async (files) => {
-  return files.map(f => ({ ...f, content: f.content.replace(/\s+/g, ' ').trim() }));
+pipe.task("minify", async (files) => {
+  return files.map((f) => ({
+    ...f,
+    content: f.content.replace(/\s+/g, " ").trim(),
+  }));
 });
 
-pipe.task('write', async (files) => {
-  files.forEach(f => console.log('  Written:', f.name, '->', f.content.slice(0, 30)));
+pipe.task("write", async (files) => {
+  files.forEach((f) =>
+    console.log("  Written:", f.name, "->", f.content.slice(0, 30)),
+  );
   return files;
 });
 
 // 串联测试
-console.log('=== 串联执行 ===');
-const result = await pipe.run(['a.js', 'b.js'], 'read', 'transform', 'minify', 'write');
-console.log('处理文件数:', result.length); // 2
+console.log("=== 串联执行 ===");
+const result = await pipe.run(
+  ["a.js", "b.js"],
+  "read",
+  "transform",
+  "minify",
+  "write",
+);
+console.log("处理文件数:", result.length); // 2
 
 // 并联测试
-console.log('\n=== 并联执行 ===');
+console.log("\n=== 并联执行 ===");
 const parallelResult = await pipe.parallel(
-  async (files) => files.map(f => f + '.min'),
-  async (files) => files.map(f => f + '.gz'),
-)(['a.js', 'b.js']);
-console.log('并联结果:', parallelResult); // ['a.js.min', 'b.js.min', 'a.js.gz', 'b.js.gz']
+  async (files) => files.map((f) => f + ".min"),
+  async (files) => files.map((f) => f + ".gz"),
+)(["a.js", "b.js"]);
+console.log("并联结果:", parallelResult); // ['a.js.min', 'b.js.min', 'a.js.gz', 'b.js.gz']

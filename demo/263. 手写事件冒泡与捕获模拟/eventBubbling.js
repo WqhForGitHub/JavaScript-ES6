@@ -41,7 +41,7 @@ class Node {
     return child;
   }
 
-  on(type, fn, phase = 'bubble') {
+  on(type, fn, phase = "bubble") {
     const map = this._listeners[phase];
     if (!map.has(type)) map.set(type, []);
     map.get(type).push(fn);
@@ -69,7 +69,7 @@ function dispatchEvent(target, type) {
   for (let i = 0; i < path.length; i++) {
     const node = path[i];
     event.currentTarget = node;
-    event.phase = i === path.length - 1 ? 'target' : 'capture';
+    event.phase = i === path.length - 1 ? "target" : "capture";
     const fns = node._listeners.capture.get(type);
     if (fns) {
       for (const fn of fns) {
@@ -84,7 +84,7 @@ function dispatchEvent(target, type) {
   for (let i = path.length - 1; i >= 0; i--) {
     const node = path[i];
     event.currentTarget = node;
-    event.phase = i === path.length - 1 ? 'target' : 'bubble';
+    event.phase = i === path.length - 1 ? "target" : "bubble";
     const fns = node._listeners.bubble.get(type);
     if (fns) {
       for (const fn of fns) {
@@ -100,20 +100,20 @@ function dispatchEvent(target, type) {
 
 // ---------------- Test cases ----------------
 // Build tree: body -> div -> button
-const body = new Node('body');
-const div = new Node('div');
-const button = new Node('button');
+const body = new Node("body");
+const div = new Node("div");
+const button = new Node("button");
 body.appendChild(div);
 div.appendChild(button);
 
 const log = [];
-body.on('click', (e) => log.push(`body capture [${e.phase}]`), 'capture');
-div.on('click', (e) => log.push(`div capture [${e.phase}]`), 'capture');
-body.on('click', (e) => log.push(`body bubble [${e.phase}]`), 'bubble');
-div.on('click', (e) => log.push(`div bubble [${e.phase}]`), 'bubble');
-button.on('click', (e) => log.push(`button target [${e.phase}]`), 'bubble');
+body.on("click", (e) => log.push(`body capture [${e.phase}]`), "capture");
+div.on("click", (e) => log.push(`div capture [${e.phase}]`), "capture");
+body.on("click", (e) => log.push(`body bubble [${e.phase}]`), "bubble");
+div.on("click", (e) => log.push(`div bubble [${e.phase}]`), "bubble");
+button.on("click", (e) => log.push(`button target [${e.phase}]`), "bubble");
 
-dispatchEvent(button, 'click');
+dispatchEvent(button, "click");
 console.log(log);
 // Expected order:
 // [ 'body capture [capture]',
@@ -124,11 +124,15 @@ console.log(log);
 
 // stopPropagation test
 const log2 = [];
-div.on('click', (e) => {
-  log2.push('div bubble (stops)');
-  e.stopPropagation();
-}, 'bubble');
-body.on('click', () => log2.push('body bubble'), 'bubble');
-dispatchEvent(button, 'click');
+div.on(
+  "click",
+  (e) => {
+    log2.push("div bubble (stops)");
+    e.stopPropagation();
+  },
+  "bubble",
+);
+body.on("click", () => log2.push("body bubble"), "bubble");
+dispatchEvent(button, "click");
 console.log(log2);
 // Expected: [ 'div bubble (stops)' ]  (body bubble never reached)

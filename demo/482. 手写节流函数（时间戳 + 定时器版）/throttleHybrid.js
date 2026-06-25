@@ -69,13 +69,13 @@ const t = throttleHybrid((msg) => {
   console.log(`invoke: ${msg}, count=${count}`);
 }, 100);
 
-t('first'); // expected: fires immediately, count=1 (leading edge)
-console.log('right after first call, count =', count); // expected: 1
+t("first"); // expected: fires immediately, count=1 (leading edge)
+console.log("right after first call, count =", count); // expected: 1
 
-t('second'); // within window -> scheduled for trailing
-t('third');  // updates args; trailing will use 'third'
-console.log('within window, count =', count); // expected: 1
+t("second"); // within window -> scheduled for trailing
+t("third"); // updates args; trailing will use 'third'
+console.log("within window, count =", count); // expected: 1
 
 setTimeout(() => {
-  console.log('after ~100ms, count =', count); // expected: 2 with message 'third'
+  console.log("after ~100ms, count =", count); // expected: 2 with message 'third'
 }, 120);

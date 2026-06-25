@@ -20,21 +20,21 @@
  */
 function parseSelector(selector) {
   selector = selector.trim();
-  if (selector === '*') {
+  if (selector === "*") {
     return function (node) {
       return node.nodeType !== undefined ? node.nodeType === 1 : true;
     };
   }
-  if (selector[0] === '#') {
+  if (selector[0] === "#") {
     var id = selector.slice(1);
     return function (node) {
-      return node.getAttribute && node.getAttribute('id') === id;
+      return node.getAttribute && node.getAttribute("id") === id;
     };
   }
-  if (selector[0] === '.') {
+  if (selector[0] === ".") {
     var cls = selector.slice(1);
     return function (node) {
-      var nodeClass = node.getAttribute ? node.getAttribute('class') : null;
+      var nodeClass = node.getAttribute ? node.getAttribute("class") : null;
       if (!nodeClass) return false;
       return nodeClass.split(/\s+/).indexOf(cls) !== -1;
     };
@@ -53,7 +53,7 @@ function parseSelector(selector) {
  * @returns {Element | null}
  */
 function myQuerySelector(selector, root) {
-  root = root || (typeof document !== 'undefined' ? document : null);
+  root = root || (typeof document !== "undefined" ? document : null);
   if (!root) return null;
 
   // 按空格拆分为后代选择器序列
@@ -96,19 +96,30 @@ function createMockNode(tag, attrs, children) {
   };
 }
 
-var mockDoc = createMockNode('html', {}, [
-  createMockNode('body', {}, [
-    createMockNode('div', { id: 'app', class: 'container' }, [
-      createMockNode('div', { class: 'box' }, [
-        createMockNode('p', { class: 'text' }, []),
+var mockDoc = createMockNode("html", {}, [
+  createMockNode("body", {}, [
+    createMockNode("div", { id: "app", class: "container" }, [
+      createMockNode("div", { class: "box" }, [
+        createMockNode("p", { class: "text" }, []),
       ]),
-      createMockNode('span', { class: 'box' }, []),
+      createMockNode("span", { class: "box" }, []),
     ]),
   ]),
 ]);
 
-console.log(myQuerySelector('#app', mockDoc) === mockDoc.children[0].children[0]); // => true
-console.log(myQuerySelector('.box', mockDoc) === mockDoc.children[0].children[0].children[0]); // => true
-console.log(myQuerySelector('span', mockDoc) === mockDoc.children[0].children[0].children[1]); // => true
-console.log(myQuerySelector('div .text', mockDoc) === mockDoc.children[0].children[0].children[0].children[0]); // => true
-console.log(myQuerySelector('.not-exist', mockDoc)); // => null
+console.log(
+  myQuerySelector("#app", mockDoc) === mockDoc.children[0].children[0],
+); // => true
+console.log(
+  myQuerySelector(".box", mockDoc) ===
+    mockDoc.children[0].children[0].children[0],
+); // => true
+console.log(
+  myQuerySelector("span", mockDoc) ===
+    mockDoc.children[0].children[0].children[1],
+); // => true
+console.log(
+  myQuerySelector("div .text", mockDoc) ===
+    mockDoc.children[0].children[0].children[0].children[0],
+); // => true
+console.log(myQuerySelector(".not-exist", mockDoc)); // => null

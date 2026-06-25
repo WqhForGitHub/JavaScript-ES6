@@ -19,7 +19,11 @@
 
 function myStringify(value) {
   // 顶层 undefined / function / symbol → undefined
-  if (value === undefined || typeof value === "function" || typeof value === "symbol") {
+  if (
+    value === undefined ||
+    typeof value === "function" ||
+    typeof value === "symbol"
+  ) {
     return undefined;
   }
 
@@ -113,7 +117,11 @@ function stringifyObject(obj) {
   for (const key of Object.keys(obj)) {
     const value = obj[key];
     // undefined / function / symbol 作为属性值时被忽略
-    if (value === undefined || typeof value === "function" || typeof value === "symbol") {
+    if (
+      value === undefined ||
+      typeof value === "function" ||
+      typeof value === "symbol"
+    ) {
       continue;
     }
     const serialized = myStringify(value);
@@ -146,7 +154,9 @@ console.log(myStringify([1, "x", true, null])); // '[1,"x",true,null]'
 console.log(myStringify({ a: { b: [1, 2] } })); // '{"a":{"b":[1,2]}}'
 
 // undefined / function / symbol 作为属性值被忽略
-console.log(myStringify({ a: 1, b: undefined, c: function () {}, d: Symbol("s") }));
+console.log(
+  myStringify({ a: 1, b: undefined, c: function () {}, d: Symbol("s") }),
+);
 // '{"a":1}'
 
 // undefined / function / symbol 作为数组元素转为 null

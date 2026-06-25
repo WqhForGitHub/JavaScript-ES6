@@ -87,7 +87,7 @@ function objectToPromise(obj, ctx) {
       promises.push(
         p.then((v) => {
           result[key] = v;
-        })
+        }),
       );
     } else {
       result[key] = obj[key];
@@ -111,11 +111,7 @@ co(function* () {
 
 // 2. yield 数组（并行）
 co(function* () {
-  const [x, y, z] = yield [
-    delay("a", 40),
-    delay("b", 20),
-    delay("c", 30),
-  ];
+  const [x, y, z] = yield [delay("a", 40), delay("b", 20), delay("c", 30)];
   return x + y + z;
 }).then((v) => console.log("array:", v)); // array: abc
 

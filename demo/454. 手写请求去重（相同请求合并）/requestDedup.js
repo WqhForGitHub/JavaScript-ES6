@@ -65,19 +65,23 @@ function fetchProduct(id) {
 const getProduct = createDedupRequest(fetchProduct);
 
 // 同时发起 3 次相同请求
-Promise.all([
-  getProduct(101),
-  getProduct(101),
-  getProduct(101),
-]).then((results) => {
-  console.log("结果相同:", results[0] === results[1] && results[1] === results[2]); // 结果相同: true
-  console.log("实际请求次数:", requestCount); // 实际请求次数: 1
-  console.log("stats:", getProduct.stats); // stats: { deduped: 2, total: 3 }
-});
+Promise.all([getProduct(101), getProduct(101), getProduct(101)]).then(
+  (results) => {
+    console.log(
+      "结果相同:",
+      results[0] === results[1] && results[1] === results[2],
+    ); // 结果相同: true
+    console.log("实际请求次数:", requestCount); // 实际请求次数: 1
+    console.log("stats:", getProduct.stats); // stats: { deduped: 2, total: 3 }
+  },
+);
 
 // 不同参数不合并
 Promise.all([getProduct(102), getProduct(103)]).then((res) => {
-  console.log("不同参数结果:", res.map((r) => r.name)); // 不同参数结果: [ 'product102', 'product103' ]
+  console.log(
+    "不同参数结果:",
+    res.map((r) => r.name),
+  ); // 不同参数结果: [ 'product102', 'product103' ]
   console.log("累计请求次数:", requestCount); // 累计请求次数: 3
 });
 

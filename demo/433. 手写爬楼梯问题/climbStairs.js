@@ -58,7 +58,7 @@ function minCostClimbingStairs(cost) {
   for (let i = 2; i <= n; i++) {
     const current = Math.min(
       prev1 + cost[i - 1], // 从第 i-1 阶跨 1 步
-      prev2 + cost[i - 2]  // 从第 i-2 阶跨 2 步
+      prev2 + cost[i - 2], // 从第 i-2 阶跨 2 步
     );
     prev2 = prev1;
     prev1 = current;

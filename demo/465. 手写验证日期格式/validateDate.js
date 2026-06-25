@@ -16,8 +16,7 @@ function validateDateFormat(str, format = "YYYY-MM-DD") {
   if (typeof str !== "string" || typeof format !== "string") return false;
 
   // 构建正则：把格式中的占位符替换为捕获组
-  const tokenRegex =
-    /(YYYY|YY|MM|M|DD|D|HH|H|mm|m|ss|s)/g;
+  const tokenRegex = /(YYYY|YY|MM|M|DD|D|HH|H|mm|m|ss|s)/g;
   const tokens = [];
   let regexStr = format.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // 先转义
   // 还原占位符（上面转义不影响字母）
@@ -93,7 +92,8 @@ function validateDateFormat(str, format = "YYYY-MM-DD") {
   });
 
   // 必须有年月日
-  if (parts.year == null || parts.month == null || parts.day == null) return false;
+  if (parts.year == null || parts.month == null || parts.day == null)
+    return false;
 
   return isValidDateParts(parts);
 }
@@ -132,7 +132,10 @@ function isValidDateParts(p) {
 
 function validateDateByPattern(str) {
   // 常见 YYYY-MM-DD 或 YYYY/MM/DD
-  return validateDateFormat(str, "YYYY-MM-DD") || validateDateFormat(str, "YYYY/MM/DD");
+  return (
+    validateDateFormat(str, "YYYY-MM-DD") ||
+    validateDateFormat(str, "YYYY/MM/DD")
+  );
 }
 
 // ===== 测试 =====
@@ -143,11 +146,20 @@ console.log("2024-02-29 闰年:", validateDateFormat("2024-02-29")); // true
 console.log("2023-02-29 平年:", validateDateFormat("2023-02-29")); // false
 console.log("2024-13-01 非法月:", validateDateFormat("2024-13-01")); // false
 console.log("2024-00-01:", validateDateFormat("2024-00-01")); // false
-console.log("带时间:", validateDateFormat("2024-01-15 23:59:59", "YYYY-MM-DD HH:mm:ss")); // true
-console.log("非法时间24:", validateDateFormat("2024-01-15 24:00:00", "YYYY-MM-DD HH:mm:ss")); // false
+console.log(
+  "带时间:",
+  validateDateFormat("2024-01-15 23:59:59", "YYYY-MM-DD HH:mm:ss"),
+); // true
+console.log(
+  "非法时间24:",
+  validateDateFormat("2024-01-15 24:00:00", "YYYY-MM-DD HH:mm:ss"),
+); // false
 console.log("斜杠格式:", validateDateFormat("2024/01/15", "YYYY/MM/DD")); // true
 console.log("点分:", validateDateFormat("2024.01.15", "YYYY.MM.DD")); // true
-console.log("中文分隔:", validateDateFormat("2024年01月15日", "YYYY年MM月DD日")); // true
+console.log(
+  "中文分隔:",
+  validateDateFormat("2024年01月15日", "YYYY年MM月DD日"),
+); // true
 console.log("格式不匹配:", validateDateFormat("2024/01/15", "YYYY-MM-DD")); // false
 console.log("YY 两位:", validateDateFormat("99-01-15", "YY-MM-DD")); // true (1999)
 console.log("非字符串:", validateDateFormat(20240115)); // false

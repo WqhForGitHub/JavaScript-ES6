@@ -12,18 +12,21 @@
  * @returns {{ hidden: string, visibilityChange: string } | null}
  */
 function getVisibilityProp() {
-  if (typeof document === 'undefined') return null;
-  if ('hidden' in document) {
-    return { hidden: 'hidden', visibilityChange: 'visibilitychange' };
+  if (typeof document === "undefined") return null;
+  if ("hidden" in document) {
+    return { hidden: "hidden", visibilityChange: "visibilitychange" };
   }
-  if ('webkitHidden' in document) {
-    return { hidden: 'webkitHidden', visibilityChange: 'webkitvisibilitychange' };
+  if ("webkitHidden" in document) {
+    return {
+      hidden: "webkitHidden",
+      visibilityChange: "webkitvisibilitychange",
+    };
   }
-  if ('mozHidden' in document) {
-    return { hidden: 'mozHidden', visibilityChange: 'mozvisibilitychange' };
+  if ("mozHidden" in document) {
+    return { hidden: "mozHidden", visibilityChange: "mozvisibilitychange" };
   }
-  if ('msHidden' in document) {
-    return { hidden: 'msHidden', visibilityChange: 'msvisibilitychange' };
+  if ("msHidden" in document) {
+    return { hidden: "msHidden", visibilityChange: "msvisibilitychange" };
   }
   return null;
 }
@@ -50,7 +53,7 @@ function onVisibilityChange(handlers) {
   handlers = handlers || {};
   var prop = getVisibilityProp();
   if (!prop) {
-    console.warn('当前浏览器不支持 Page Visibility API');
+    console.warn("当前浏览器不支持 Page Visibility API");
     return function () {};
   }
 
@@ -82,7 +85,9 @@ function createVisibilityDetector() {
   var listeners = [];
   var destroy = onVisibilityChange({
     onChange: function (visible) {
-      listeners.forEach(function (fn) { fn(visible); });
+      listeners.forEach(function (fn) {
+        fn(visible);
+      });
     },
   });
 
@@ -91,7 +96,9 @@ function createVisibilityDetector() {
     onChange: function (fn) {
       listeners.push(fn);
       return function () {
-        listeners = listeners.filter(function (l) { return l !== fn; });
+        listeners = listeners.filter(function (l) {
+          return l !== fn;
+        });
       };
     },
     destroy: destroy,
@@ -120,7 +127,8 @@ function createVisibilityDetector() {
 // 模拟测试
 var mockDoc = { hidden: false, webkitHidden: undefined };
 function mockGetProp() {
-  if ('hidden' in mockDoc) return { hidden: 'hidden', visibilityChange: 'visibilitychange' };
+  if ("hidden" in mockDoc)
+    return { hidden: "hidden", visibilityChange: "visibilitychange" };
   return null;
 }
 function mockIsVisible() {
@@ -135,8 +143,8 @@ console.log(mockIsVisible()); // => false
 // 验证回调逻辑
 var stateLog = [];
 function simulateChange(visible) {
-  if (visible) stateLog.push('visible');
-  else stateLog.push('hidden');
+  if (visible) stateLog.push("visible");
+  else stateLog.push("hidden");
 }
 simulateChange(false);
 simulateChange(true);

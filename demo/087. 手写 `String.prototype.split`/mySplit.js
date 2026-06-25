@@ -24,7 +24,7 @@ String.prototype.mySplit = function (separator, limit) {
   const len = str.length;
 
   // limit 处理
-  let lim = limit === undefined ? 0xFFFFFFFF : Number(limit);
+  let lim = limit === undefined ? 0xffffffff : Number(limit);
   if (Number.isNaN(lim)) lim = 0;
   lim = Math.trunc(lim);
   if (lim < 0) lim = 0;
@@ -54,7 +54,7 @@ String.prototype.mySplit = function (separator, limit) {
     // 确保从头开始，并添加 g 标志
     const rx = new RegExp(
       separator.source,
-      separator.flags.includes("g") ? separator.flags : separator.flags + "g"
+      separator.flags.includes("g") ? separator.flags : separator.flags + "g",
     );
     rx.lastIndex = 0;
 
@@ -155,6 +155,14 @@ console.log(",a,b,".mySplit(",")); // ["", "a", "b", ""]
 
 // --- 与原生对比 ---
 console.log("\n--- 与原生对比 ---");
-console.log(JSON.stringify("hello world".split(" ")) === JSON.stringify("hello world".mySplit(" "))); // true
-console.log(JSON.stringify("a,b,c".split(",", 2)) === JSON.stringify("a,b,c".mySplit(",", 2))); // true
-console.log(JSON.stringify("hello".split("")) === JSON.stringify("hello".mySplit(""))); // true
+console.log(
+  JSON.stringify("hello world".split(" ")) ===
+    JSON.stringify("hello world".mySplit(" ")),
+); // true
+console.log(
+  JSON.stringify("a,b,c".split(",", 2)) ===
+    JSON.stringify("a,b,c".mySplit(",", 2)),
+); // true
+console.log(
+  JSON.stringify("hello".split("")) === JSON.stringify("hello".mySplit("")),
+); // true

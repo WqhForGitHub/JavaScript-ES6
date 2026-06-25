@@ -20,8 +20,8 @@ function cacheWithExpire(fn, ttl = 60000, resolver) {
       typeof resolver === "function"
         ? resolver(...args)
         : args.length === 1
-        ? args[0]
-        : JSON.stringify(args);
+          ? args[0]
+          : JSON.stringify(args);
 
     const entry = cache.get(key);
     const now = Date.now();
@@ -75,7 +75,7 @@ const getValue = cacheWithExpire(
     computeCount++;
     return `computed-${key}`;
   },
-  100 // 100ms 过期
+  100, // 100ms 过期
 );
 
 console.log(getValue("a")); // 'computed-a'（计算）
@@ -111,7 +111,7 @@ const getUser = cacheWithExpire(
     return `data-${user.id}`;
   },
   500,
-  (user) => user.id
+  (user) => user.id,
 );
 console.log(getUser({ id: "u1", name: "Tom" })); // 'data-u1'
 console.log(getUser({ id: "u1", name: "Tom" })); // 'data-u1'（同 id 命中）
@@ -137,9 +137,6 @@ setTimeout(() => {
 }, 60);
 
 // 应用：接口缓存（5 秒内不重复请求）
-const fetchUser = cacheWithExpire(
-  (id) => `userData-${id}`,
-  5000
-);
+const fetchUser = cacheWithExpire((id) => `userData-${id}`, 5000);
 console.log(fetchUser(1)); // 'userData-1'
 console.log(fetchUser(1)); // 'userData-1'（缓存）

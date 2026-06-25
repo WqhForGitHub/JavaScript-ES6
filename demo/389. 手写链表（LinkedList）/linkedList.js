@@ -108,7 +108,7 @@ class LinkedList {
       arr.push(current.element);
       current = current.next;
     }
-    return arr.join(' -> ');
+    return arr.join(" -> ");
   }
 }
 
@@ -118,10 +118,10 @@ list.append(1).append(2).append(3);
 console.log(list.toString()); // 1 -> 2 -> 3
 console.log(list.size()); // 3
 
-list.insert(1, 'x');
+list.insert(1, "x");
 console.log(list.toString()); // 1 -> x -> 2 -> 3
 
-console.log(list.indexOf('x')); // 1
+console.log(list.indexOf("x")); // 1
 console.log(list.removeAt(1)); // x
 console.log(list.toString()); // 1 -> 2 -> 3
 

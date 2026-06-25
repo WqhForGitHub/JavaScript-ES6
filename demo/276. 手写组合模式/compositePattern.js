@@ -16,19 +16,19 @@ class FileSystemNode {
     this.name = name;
   }
   size() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
-  display(indent = '') {
-    throw new Error('abstract');
+  display(indent = "") {
+    throw new Error("abstract");
   }
   find(name) {
     return this.name === name ? this : null;
   }
   add() {
-    throw new Error('Cannot add to a leaf');
+    throw new Error("Cannot add to a leaf");
   }
   remove() {
-    throw new Error('Cannot remove from a leaf');
+    throw new Error("Cannot remove from a leaf");
   }
 }
 
@@ -40,7 +40,7 @@ class File extends FileSystemNode {
   size() {
     return this._size;
   }
-  display(indent = '') {
+  display(indent = "") {
     return `${indent}- ${this.name} (${this._size}B)`;
   }
 }
@@ -62,12 +62,12 @@ class Folder extends FileSystemNode {
   size() {
     return this.children.reduce((sum, c) => sum + c.size(), 0);
   }
-  display(indent = '') {
+  display(indent = "") {
     const lines = [`${indent}+ ${this.name}/`];
     for (const child of this.children) {
-      lines.push(child.display(indent + '  '));
+      lines.push(child.display(indent + "  "));
     }
-    return lines.join('\n');
+    return lines.join("\n");
   }
   find(name) {
     if (this.name === name) return this;
@@ -80,12 +80,12 @@ class Folder extends FileSystemNode {
 }
 
 // ---------------- Test cases ----------------
-const root = new Folder('root');
-const src = new Folder('src');
-src.add(new File('index.js', 100)).add(new File('app.js', 250));
-const docs = new Folder('docs');
-docs.add(new File('readme.md', 80)).add(new File('api.md', 120));
-root.add(src).add(docs).add(new File('package.json', 40));
+const root = new Folder("root");
+const src = new Folder("src");
+src.add(new File("index.js", 100)).add(new File("app.js", 250));
+const docs = new Folder("docs");
+docs.add(new File("readme.md", 80)).add(new File("api.md", 120));
+root.add(src).add(docs).add(new File("package.json", 40));
 
 console.log(root.display());
 // Expected (tree):
@@ -102,13 +102,13 @@ console.log(root.size());
 // Expected: 590
 
 // Uniform treatment: find returns either File or Folder
-console.log(root.find('app.js')?.name, root.find('docs')?.name);
+console.log(root.find("app.js")?.name, root.find("docs")?.name);
 // Expected: app.js docs
 
 // Leaf operations reject add/remove
 try {
-  new File('x', 1).add(new File('y', 1));
+  new File("x", 1).add(new File("y", 1));
 } catch (e) {
-  console.log('Leaf error:', e.message);
+  console.log("Leaf error:", e.message);
   // Expected: Leaf error: Cannot add to a leaf
 }

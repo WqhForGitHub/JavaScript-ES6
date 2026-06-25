@@ -133,7 +133,10 @@ console.log(reCopy.flags); // 'gi'
 console.log(reCopy === re); // false
 
 // Map
-const m = new Map([["k1", { v: 1 }], [{ k: "obj" }, "v2"]]);
+const m = new Map([
+  ["k1", { v: 1 }],
+  [{ k: "obj" }, "v2"],
+]);
 const mCopy = deepCloneFull(m);
 console.log(mCopy.get("k1")); // { v: 1 }
 console.log(mCopy.get("k1") === m.get("k1")); // false（值被深拷贝）
@@ -146,7 +149,9 @@ console.log(sCopy.size); // 3
 sCopy.forEach((v) => {
   if (typeof v === "object" && v !== null && !Array.isArray(v)) {
     console.log(v.a); // 2
-    console.log(v === [...s].find((x) => typeof x === "object" && x && x.a === 2)); // false
+    console.log(
+      v === [...s].find((x) => typeof x === "object" && x && x.a === 2),
+    ); // false
   }
 });
 
@@ -158,8 +163,13 @@ console.log(cCopy.self === cCopy); // true
 
 // 保留原型 / 自定义类
 class Point {
-  constructor(x, y) { this.x = x; this.y = y; }
-  sum() { return this.x + this.y; }
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+  sum() {
+    return this.x + this.y;
+  }
 }
 const p = new Point(1, 2);
 const pCopy = deepCloneFull(p);

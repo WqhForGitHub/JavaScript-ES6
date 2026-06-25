@@ -13,7 +13,7 @@
  */
 
 function isObjectLike(value) {
-  return typeof value === 'object' && value !== null;
+  return typeof value === "object" && value !== null;
 }
 
 function isPlainObject(value) {
@@ -69,19 +69,19 @@ function mergeArray(dst, src) {
 // Test 1: nested objects merge
 const a = { a: [{ b: 2 }, { d: 4 }] };
 merge(a, { a: [{ c: 3 }, { e: 5 }] });
-console.log('merge nested:', JSON.stringify(a)); // expected: {"a":[{"b":2,"c":3},{"d":4,"e":5}]}
+console.log("merge nested:", JSON.stringify(a)); // expected: {"a":[{"b":2,"c":3},{"d":4,"e":5}]}
 
 // Test 2: undefined is not merged
 const b = { x: 1, y: 2 };
 merge(b, { x: undefined, y: 3 });
-console.log('merge skips undefined:', JSON.stringify(b)); // expected: {"x":1,"y":3}
+console.log("merge skips undefined:", JSON.stringify(b)); // expected: {"x":1,"y":3}
 
 // Test 3: arrays merge index by index
 const c = { arr: [1, 2, 3] };
 merge(c, { arr: [undefined, 5, 6, 7] });
-console.log('merge arrays:', JSON.stringify(c)); // expected: {"arr":[1,5,6,7]}
+console.log("merge arrays:", JSON.stringify(c)); // expected: {"arr":[1,5,6,7]}
 
 // Test 4: deep nested merge
-const d = { user: { name: 'a', address: { city: 'X' } } };
-merge(d, { user: { age: 10, address: { zip: '000' } } });
-console.log('merge deep:', JSON.stringify(d)); // expected: {"user":{"name":"a","address":{"city":"X","zip":"000"},"age":10}}
+const d = { user: { name: "a", address: { city: "X" } } };
+merge(d, { user: { age: 10, address: { zip: "000" } } });
+console.log("merge deep:", JSON.stringify(d)); // expected: {"user":{"name":"a","address":{"city":"X","zip":"000"},"age":10}}

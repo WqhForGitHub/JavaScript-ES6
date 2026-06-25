@@ -37,13 +37,15 @@ function camelToUnder(str) {
 
 function camelToUnder2(str) {
   if (typeof str !== "string" || str.length === 0) return "";
-  return str
-    // 大写字母后跟小写字母：在大写前插入下划线（如 GetById → get_by_id）
-    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
-    // 小写字母或数字后跟大写字母：插入下划线（如 getElement → get_element）
-    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
-    .replace(/^_/, "") // 去掉开头下划线
-    .toLowerCase();
+  return (
+    str
+      // 大写字母后跟小写字母：在大写前插入下划线（如 GetById → get_by_id）
+      .replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+      // 小写字母或数字后跟大写字母：插入下划线（如 getElement → get_element）
+      .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+      .replace(/^_/, "") // 去掉开头下划线
+      .toLowerCase()
+  );
 }
 
 // 优点：能正确处理连续大写字母（HTMLElement → html_element）
@@ -75,7 +77,11 @@ function camelToUnder3(str) {
 console.log("========== 手写驼峰转下划线 ==========\n");
 
 const testCases = [
-  { value: "getElementById", expected: "get_element_by_id", desc: "getElementById" },
+  {
+    value: "getElementById",
+    expected: "get_element_by_id",
+    desc: "getElementById",
+  },
   { value: "userName", expected: "user_name", desc: "userName" },
   { value: "firstName", expected: "first_name", desc: "firstName" },
   { value: "apiKey", expected: "api_key", desc: "apiKey" },

@@ -85,6 +85,8 @@ console.log("ababab".myIndexOf("ab", 1)); // 2
 
 // --- 与原生对比 ---
 console.log("\n--- 与原生对比 ---");
-console.log("hello world".indexOf("world") === "hello world".myIndexOf("world")); // true
+console.log(
+  "hello world".indexOf("world") === "hello world".myIndexOf("world"),
+); // true
 console.log("hello world".indexOf("o", 5) === "hello world".myIndexOf("o", 5)); // true
 console.log("hello".indexOf("") === "hello".myIndexOf("")); // true

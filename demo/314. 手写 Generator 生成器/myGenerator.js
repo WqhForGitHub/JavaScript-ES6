@@ -11,7 +11,7 @@ function* simpleGenerator() {
   yield 1;
   yield 2;
   yield 3;
-  return 'done';
+  return "done";
 }
 
 // 手写模拟简单 generator：function* gen() { yield 1; yield 2; yield 3; return 'done'; }
@@ -31,11 +31,11 @@ function makeSimpleGenerator() {
           return { value: 3, done: false };
         case 3:
           state = 4;
-          return { value: 'done', done: true };
+          return { value: "done", done: true };
         default:
           return { value: undefined, done: true };
       }
-    }
+    },
   };
 }
 
@@ -55,50 +55,50 @@ function makeEchoGenerator() {
       switch (state) {
         case 0:
           state = 1;
-          return { value: 1, done: false };       // yield 1
+          return { value: 1, done: false }; // yield 1
         case 1:
-          x = arg;                                 // 接收 next(arg) 传入的值赋给 x
+          x = arg; // 接收 next(arg) 传入的值赋给 x
           state = 2;
-          return { value: x + 1, done: false };    // yield x + 1
+          return { value: x + 1, done: false }; // yield x + 1
         case 2:
-          y = arg;                                 // 接收 next(arg) 传入的值赋给 y
+          y = arg; // 接收 next(arg) 传入的值赋给 y
           state = 3;
-          return { value: x + y, done: true };     // return x + y
+          return { value: x + y, done: true }; // return x + y
         default:
           return { value: undefined, done: true };
       }
-    }
+    },
   };
 }
 
 // 测试原生 generator
-console.log('--- Native Generator ---');
+console.log("--- Native Generator ---");
 var gen = simpleGenerator();
 console.log(gen.next().value); // 1
 console.log(gen.next().value); // 2
 console.log(gen.next().value); // 3
-console.log(gen.next());       // { value: 'done', done: true }
-console.log(gen.next());       // { value: undefined, done: true }
+console.log(gen.next()); // { value: 'done', done: true }
+console.log(gen.next()); // { value: undefined, done: true }
 
 // 测试手写模拟
-console.log('--- Hand-written Generator ---');
+console.log("--- Hand-written Generator ---");
 var myGen = makeSimpleGenerator();
 console.log(myGen.next().value); // 1
 console.log(myGen.next().value); // 2
 console.log(myGen.next().value); // 3
-console.log(myGen.next());       // { value: 'done', done: true }
-console.log(myGen.next());       // { value: undefined, done: true }
+console.log(myGen.next()); // { value: 'done', done: true }
+console.log(myGen.next()); // { value: undefined, done: true }
 
 // 测试带参数传递（原生）
-console.log('--- Native Echo Generator ---');
+console.log("--- Native Echo Generator ---");
 var echo = echoGenerator();
-console.log(echo.next().value);   // 1
+console.log(echo.next().value); // 1
 console.log(echo.next(10).value); // 11 (x=10, yield x+1)
-console.log(echo.next(20));       // { value: 30, done: true } (x+y=10+20)
+console.log(echo.next(20)); // { value: 30, done: true } (x+y=10+20)
 
 // 测试带参数传递（手写）
-console.log('--- Hand-written Echo Generator ---');
+console.log("--- Hand-written Echo Generator ---");
 var myEcho = makeEchoGenerator();
-console.log(myEcho.next().value);   // 1
+console.log(myEcho.next().value); // 1
 console.log(myEcho.next(10).value); // 11
-console.log(myEcho.next(20));       // { value: 30, done: true }
+console.log(myEcho.next(20)); // { value: 30, done: true }

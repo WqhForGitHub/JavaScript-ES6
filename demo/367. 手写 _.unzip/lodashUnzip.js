@@ -31,9 +31,43 @@ function unzip(array) {
 
 // --- Tests ---
 
-console.log('unzip basic:', JSON.stringify(unzip([['a', 1, true], ['b', 2, false]]))); // expected: [["a","b"],[1,2],[true,false]]
-console.log('unzip unequal:', JSON.stringify(unzip([['a', 'b', 'c'], [1, 2]]))); // expected: [["a",1],["b",2],["c",undefined]]
-console.log('unzip inverse of zip:', JSON.stringify(unzip([['a', 1], ['b', 2]]))); // expected: [["a","b"],[1,2]]
-console.log('unzip single group:', JSON.stringify(unzip([[1, 2, 3]]))); // expected: [[1],[2],[3]]
-console.log('unzip empty:', JSON.stringify(unzip([]))); // expected: []
-console.log('unzip three groups:', JSON.stringify(unzip([[1, 5], [2, 6], [3, 7], [4, 8]]))); // expected: [[1,2,3,4],[5,6,7,8]]
+console.log(
+  "unzip basic:",
+  JSON.stringify(
+    unzip([
+      ["a", 1, true],
+      ["b", 2, false],
+    ]),
+  ),
+); // expected: [["a","b"],[1,2],[true,false]]
+console.log(
+  "unzip unequal:",
+  JSON.stringify(
+    unzip([
+      ["a", "b", "c"],
+      [1, 2],
+    ]),
+  ),
+); // expected: [["a",1],["b",2],["c",undefined]]
+console.log(
+  "unzip inverse of zip:",
+  JSON.stringify(
+    unzip([
+      ["a", 1],
+      ["b", 2],
+    ]),
+  ),
+); // expected: [["a","b"],[1,2]]
+console.log("unzip single group:", JSON.stringify(unzip([[1, 2, 3]]))); // expected: [[1],[2],[3]]
+console.log("unzip empty:", JSON.stringify(unzip([]))); // expected: []
+console.log(
+  "unzip three groups:",
+  JSON.stringify(
+    unzip([
+      [1, 5],
+      [2, 6],
+      [3, 7],
+      [4, 8],
+    ]),
+  ),
+); // expected: [[1,2,3,4],[5,6,7,8]]

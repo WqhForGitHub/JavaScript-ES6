@@ -76,15 +76,15 @@ const log = throttleCancelable(
     console.log(`invoke: ${msg}, count=${count}`);
   },
   100,
-  { leading: true, trailing: true }
+  { leading: true, trailing: true },
 );
 
-log('a'); // expected: immediate, count=1
-log('b'); // ignored/scheduled
-log('c'); // updates args
+log("a"); // expected: immediate, count=1
+log("b"); // ignored/scheduled
+log("c"); // updates args
 log.flush(); // expected: immediate trailing, count=2 with 'c'
-console.log('after flush, count =', count); // expected: 2
+console.log("after flush, count =", count); // expected: 2
 
-log('d'); // new leading edge since previous was reset by flush? Actually flush keeps previous; here within wait so scheduled.
+log("d"); // new leading edge since previous was reset by flush? Actually flush keeps previous; here within wait so scheduled.
 log.cancel();
-console.log('after cancel, count =', count); // expected: still 2 (no trailing fires)
+console.log("after cancel, count =", count); // expected: still 2 (no trailing fires)

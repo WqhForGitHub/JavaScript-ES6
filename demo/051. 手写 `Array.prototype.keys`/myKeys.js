@@ -23,14 +23,14 @@ Array.prototype.myKeys = function () {
     },
     [Symbol.iterator]() {
       return this;
-    }
+    },
   };
 };
 
 // ===== 测试 =====
 
 // --- 用 next() 手动消费 ---
-const iter = ['a', 'b', 'c'].myKeys();
+const iter = ["a", "b", "c"].myKeys();
 console.log(iter.next().value); // 0
 console.log(iter.next().value); // 1
 console.log(iter.next().value); // 2
@@ -44,7 +44,7 @@ for (const k of [10, 20, 30].myKeys()) {
 console.log(out); // [0, 1, 2]
 
 // --- 配合下标取值 ---
-const arr = ['x', 'y', 'z'];
+const arr = ["x", "y", "z"];
 const collected = [];
 for (const i of arr.myKeys()) {
   collected.push(arr[i]);

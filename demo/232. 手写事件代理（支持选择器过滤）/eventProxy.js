@@ -21,7 +21,12 @@ function matchesSelector(element, selector) {
     return element.matchesSelector(selector);
   }
   // 兼容前缀
-  var prefixes = ['webkitMatchesSelector', 'mozMatchesSelector', 'msMatchesSelector', 'oMatchesSelector'];
+  var prefixes = [
+    "webkitMatchesSelector",
+    "mozMatchesSelector",
+    "msMatchesSelector",
+    "oMatchesSelector",
+  ];
   for (var i = 0; i < prefixes.length; i++) {
     if (element[prefixes[i]]) {
       return element[prefixes[i]](selector);
@@ -37,18 +42,19 @@ function matchesSelector(element, selector) {
 function simpleMatch(element, selector) {
   selector = selector.trim();
   // id 选择器
-  if (selector[0] === '#') {
+  if (selector[0] === "#") {
     return element.id === selector.slice(1);
   }
   // class 选择器
-  if (selector[0] === '.') {
+  if (selector[0] === ".") {
     var classes = element.className ? element.className.split(/\s+/) : [];
     return classes.indexOf(selector.slice(1)) !== -1;
   }
   // 组合选择器 div.cls
   var combo = selector.match(/^(\w+)?(?:\.([\w-]+))?(?:#([\w-]+))?$/);
   if (combo) {
-    if (combo[1] && element.tagName.toLowerCase() !== combo[1].toLowerCase()) return false;
+    if (combo[1] && element.tagName.toLowerCase() !== combo[1].toLowerCase())
+      return false;
     if (combo[2]) {
       var cls = element.className ? element.className.split(/\s+/) : [];
       if (cls.indexOf(combo[2]) === -1) return false;
@@ -57,7 +63,9 @@ function simpleMatch(element, selector) {
     return true;
   }
   // 标签选择器
-  return element.tagName && element.tagName.toLowerCase() === selector.toLowerCase();
+  return (
+    element.tagName && element.tagName.toLowerCase() === selector.toLowerCase()
+  );
 }
 
 /**
@@ -83,7 +91,7 @@ function eventProxy(parent, type, selector, handler) {
   if (parent.addEventListener) {
     parent.addEventListener(type, wrappedHandler, false);
   } else {
-    parent.attachEvent('on' + type, wrappedHandler);
+    parent.attachEvent("on" + type, wrappedHandler);
   }
   return wrappedHandler;
 }
@@ -103,13 +111,13 @@ function eventProxy(parent, type, selector, handler) {
 
 // 模拟测试
 var mockEl = {
-  tag: 'button',
-  className: 'btn primary',
-  id: 'submit',
+  tag: "button",
+  className: "btn primary",
+  id: "submit",
   parent: null,
 };
-console.log(simpleMatch(mockEl, '.primary')); // => true
-console.log(simpleMatch(mockEl, 'button.btn')); // => true
-console.log(simpleMatch(mockEl, '#submit')); // => true
-console.log(simpleMatch(mockEl, 'button.primary#submit')); // => true
-console.log(simpleMatch(mockEl, '.not-exist')); // => false
+console.log(simpleMatch(mockEl, ".primary")); // => true
+console.log(simpleMatch(mockEl, "button.btn")); // => true
+console.log(simpleMatch(mockEl, "#submit")); // => true
+console.log(simpleMatch(mockEl, "button.primary#submit")); // => true
+console.log(simpleMatch(mockEl, ".not-exist")); // => false

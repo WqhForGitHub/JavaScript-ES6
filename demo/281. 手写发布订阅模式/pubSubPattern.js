@@ -59,9 +59,11 @@ class EventBus {
   }
 
   _matches(pattern, topic) {
-    if (!pattern.includes('*')) return false;
+    if (!pattern.includes("*")) return false;
     const regex = new RegExp(
-      '^' + pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$'
+      "^" +
+        pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*") +
+        "$",
     );
     return regex.test(topic);
   }
@@ -82,15 +84,15 @@ const inbox = [];
 const archive = [];
 const allEvents = [];
 
-bus.on('chat:message', (m) => inbox.push(m));
-bus.on('chat:message', (m) => archive.push(m));
-bus.on('chat.*', (m, topic) => allEvents.push({ topic, m })); // wildcard
-bus.once('system:boot', () => allEvents.push('booted'));
+bus.on("chat:message", (m) => inbox.push(m));
+bus.on("chat:message", (m) => archive.push(m));
+bus.on("chat.*", (m, topic) => allEvents.push({ topic, m })); // wildcard
+bus.once("system:boot", () => allEvents.push("booted"));
 
-bus.emit('chat:message', 'hello');
-bus.emit('chat:message', 'world');
-bus.emit('chat:typing', true);
-bus.emit('system:boot', null);
+bus.emit("chat:message", "hello");
+bus.emit("chat:message", "world");
+bus.emit("chat:typing", true);
+bus.emit("system:boot", null);
 
 console.log(inbox);
 // Expected: [ 'hello', 'world' ]
@@ -105,19 +107,19 @@ console.log(allEvents);
 // ]
 
 // once listener no longer fires
-console.log(bus.emit('system:boot', null));
+console.log(bus.emit("system:boot", null));
 // Expected: 0
 
 // off by topic clears that topic only
-bus.off('chat:message');
-console.log(bus.subscribers('chat:message'));
+bus.off("chat:message");
+console.log(bus.subscribers("chat:message"));
 // Expected: 0
-bus.emit('chat:message', 'ignored');
+bus.emit("chat:message", "ignored");
 console.log(inbox);
 // Expected: [ 'hello', 'world' ]  (unchanged)
 
 // unsubscribe handle
-const handle = bus.on('temp', (d) => allEvents.push(d));
+const handle = bus.on("temp", (d) => allEvents.push(d));
 handle();
-console.log(bus.emit('temp', 1));
+console.log(bus.emit("temp", 1));
 // Expected: 0

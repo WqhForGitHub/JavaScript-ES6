@@ -20,8 +20,10 @@
 const loadedStylesheets = new Map(); // href -> { link, promise }
 
 function loadCssFile(href, opts = {}) {
-  if (typeof document === 'undefined') {
-    return Promise.reject(new Error('loadCssFile requires a browser environment.'));
+  if (typeof document === "undefined") {
+    return Promise.reject(
+      new Error("loadCssFile requires a browser environment."),
+    );
   }
 
   // De-dupe: if we already started loading this href, return the same promise.
@@ -29,9 +31,9 @@ function loadCssFile(href, opts = {}) {
     return loadedStylesheets.get(href).promise;
   }
 
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.type = 'text/css';
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.type = "text/css";
   link.href = href;
   if (opts.media) link.media = opts.media;
   if (opts.crossorigin) link.crossOrigin = opts.crossorigin;
@@ -44,13 +46,14 @@ function loadCssFile(href, opts = {}) {
       loadedStylesheets.delete(href);
       // Best-effort cleanup of the failed link.
       if (link.parentNode) link.parentNode.removeChild(link);
-      reject(new Error('Failed to load CSS: ' + href));
+      reject(new Error("Failed to load CSS: " + href));
     };
   });
 
   loadedStylesheets.set(href, { link, promise });
 
-  const head = document.head || document.getElementsByTagName('head')[0] || document.body;
+  const head =
+    document.head || document.getElementsByTagName("head")[0] || document.body;
   if (head) head.appendChild(link);
   else document.documentElement.appendChild(link);
 
@@ -65,21 +68,46 @@ function loadCssFiles(hrefs, opts) {
 // Simulated DOM to exercise the de-dupe + onload logic without a browser.
 function fakeDom() {
   const created = [];
-  const head = { children: [], appendChild(n) { this.children.push(n); return n; } };
+  const head = {
+    children: [],
+    appendChild(n) {
+      this.children.push(n);
+      return n;
+    },
+  };
   const documentMock = {
     head,
     createElement(tag) {
-      const el = { tagName: tag.toUpperCase(), attrs: {}, _loaded: false, _errored: false };
+      const el = {
+        tagName: tag.toUpperCase(),
+        attrs: {},
+        _loaded: false,
+        _errored: false,
+      };
       const proxy = new Proxy(el, {
         set(t, p, v) {
-          if (p in t || typeof p !== 'string') { t[p] = v; return true; }
+          if (p in t || typeof p !== "string") {
+            t[p] = v;
+            return true;
+          }
           // Treat unknown setters as attribute setters.
-          t.attrs[p] = v; return true;
+          t.attrs[p] = v;
+          return true;
         },
         get(t, p) {
-          if (p === 'appendChild') return (n) => { t.children = t.children || []; t.children.push(n); return n; };
-          if (p === 'removeChild') return (n) => { const i = (t.children || []).indexOf(n); if (i >= 0) t.children.splice(i, 1); return n; };
-          if (p === 'parentNode') return head;
+          if (p === "appendChild")
+            return (n) => {
+              t.children = t.children || [];
+              t.children.push(n);
+              return n;
+            };
+          if (p === "removeChild")
+            return (n) => {
+              const i = (t.children || []).indexOf(n);
+              if (i >= 0) t.children.splice(i, 1);
+              return n;
+            };
+          if (p === "parentNode") return head;
           return t[p];
         },
       });
@@ -93,32 +121,37 @@ function fakeDom() {
 globalThis.document = fakeDom().documentMock;
 const { created } = fakeDom();
 
-const p1 = loadCssFile('https://cdn.example/a.css');
-const p2 = loadCssFile('https://cdn.example/a.css'); // should dedupe -> same promise
-console.log('dedupe returns same promise:', p1 === p2); // expected: true
+const p1 = loadCssFile("https://cdn.example/a.css");
+const p2 = loadCssFile("https://cdn.example/a.css"); // should dedupe -> same promise
+console.log("dedupe returns same promise:", p1 === p2); // expected: true
 
 // Trigger the onload to resolve.
 setTimeout(() => {
   // Find the link we created.
-  const link = loadedStylesheets.get('https://cdn.example/a.css').link;
+  const link = loadedStylesheets.get("https://cdn.example/a.css").link;
   link.onload();
 }, 0);
 
 p1.then((l) => {
-  console.log('resolved link href:', l.href); // expected: https://cdn.example/a.css
+  console.log("resolved link href:", l.href); // expected: https://cdn.example/a.css
 });
 
 // Batch loader.
-loadCssFiles(['https://cdn.example/b.css', 'https://cdn.example/c.css']).then((links) => {
-  console.log('batch loaded count:', links.length); // expected: 2
-});
+loadCssFiles(["https://cdn.example/b.css", "https://cdn.example/c.css"]).then(
+  (links) => {
+    console.log("batch loaded count:", links.length); // expected: 2
+  },
+);
 
 // Resolve those too.
 setTimeout(() => {
-  ['https://cdn.example/b.css', 'https://cdn.example/c.css'].forEach((h) => {
+  ["https://cdn.example/b.css", "https://cdn.example/c.css"].forEach((h) => {
     loadedStylesheets.get(h).link.onload();
   });
 }, 0);
 
 delete globalThis.document;
-console.log('node env rejects:', typeof loadCssFile('x.css').then === 'function'); // expected: true (promise returned)
+console.log(
+  "node env rejects:",
+  typeof loadCssFile("x.css").then === "function",
+); // expected: true (promise returned)

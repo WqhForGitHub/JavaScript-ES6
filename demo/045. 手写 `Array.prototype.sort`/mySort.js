@@ -27,7 +27,7 @@ Array.prototype.mySort = function (compareFn) {
     return 0;
   };
 
-  const compare = typeof compareFn === 'function' ? compareFn : defaultCompare;
+  const compare = typeof compareFn === "function" ? compareFn : defaultCompare;
 
   // 插入排序
   for (let i = 1; i < len; i++) {
@@ -57,16 +57,16 @@ console.log([3, 1, 2, 10, 5].mySort((a, b) => a - b)); // [1, 2, 3, 5, 10]
 console.log([3, 1, 2, 10, 5].mySort((a, b) => b - a)); // [10, 5, 3, 2, 1]
 
 // --- 字符串排序 ---
-console.log(['banana', 'apple', 'cherry'].mySort()); // ['apple', 'banana', 'cherry']
+console.log(["banana", "apple", "cherry"].mySort()); // ['apple', 'banana', 'cherry']
 
 // --- 字符串按长度排序 ---
-console.log(['aaa', 'b', 'cc'].mySort((a, b) => a.length - b.length)); // ['b', 'cc', 'aaa']
+console.log(["aaa", "b", "cc"].mySort((a, b) => a.length - b.length)); // ['b', 'cc', 'aaa']
 
 // --- 对象数组按属性排序 ---
 const users = [
-  { name: 'a', age: 30 },
-  { name: 'b', age: 20 },
-  { name: 'c', age: 25 }
+  { name: "a", age: 30 },
+  { name: "b", age: 20 },
+  { name: "c", age: 25 },
 ];
 users.mySort((x, y) => x.age - y.age);
 console.log(users); // [{ name: 'b', age: 20 }, { name: 'c', age: 25 }, { name: 'a', age: 30 }]

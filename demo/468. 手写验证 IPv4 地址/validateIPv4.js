@@ -47,7 +47,10 @@ function validateIPv4Loose(ip) {
 // 提取 IPv4 段信息
 function parseIPv4(ip) {
   if (!validateIPv4(ip)) return null;
-  return ip.trim().split(".").map((p) => parseInt(p, 10));
+  return ip
+    .trim()
+    .split(".")
+    .map((p) => parseInt(p, 10));
 }
 
 // ===== 测试 =====

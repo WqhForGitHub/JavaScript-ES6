@@ -21,7 +21,7 @@ function myFinally(onFinally) {
     (reason) =>
       Promise.resolve(onFinally()).then(() => {
         throw reason;
-      })
+      }),
   );
 }
 
@@ -37,18 +37,16 @@ function attachFinally(P) {
   // （通过 Function.prototype.call 方式调用，不污染全局原型）
 
   // 1. 成功时执行 finally 并透传 value
-  const r1 = await myFinally.call(
-    Promise.resolve("data"),
-    () => console.log("finally-1 runs")
+  const r1 = await myFinally.call(Promise.resolve("data"), () =>
+    console.log("finally-1 runs"),
   );
   // finally-1 runs
   console.log("after finally-1:", r1); // after finally-1: data
 
   // 2. 失败时执行 finally 并透传 reason
   try {
-    await myFinally.call(
-      Promise.reject("err"),
-      () => console.log("finally-2 runs")
+    await myFinally.call(Promise.reject("err"), () =>
+      console.log("finally-2 runs"),
     );
   } catch (e) {
     // finally-2 runs
@@ -57,7 +55,7 @@ function attachFinally(P) {
 
   // 3. onFinally 返回 fulfilled Promise，值被忽略，仍透传原 value
   const r3 = await myFinally.call(Promise.resolve(1), () =>
-    Promise.resolve("ignored")
+    Promise.resolve("ignored"),
   );
   console.log("finally-3 value:", r3); // finally-3 value: 1
 
@@ -73,7 +71,7 @@ function attachFinally(P) {
   // 5. onFinally 返回 rejected Promise，覆盖原状态
   try {
     await myFinally.call(Promise.reject("orig"), () =>
-      Promise.reject("from finally")
+      Promise.reject("from finally"),
     );
   } catch (e) {
     console.log("finally-5 reject:", e); // finally-5 reject: from finally

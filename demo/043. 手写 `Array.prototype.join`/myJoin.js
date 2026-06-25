@@ -13,11 +13,11 @@
 
 Array.prototype.myJoin = function (separator) {
   const len = this.length;
-  if (len === 0) return '';
+  if (len === 0) return "";
 
-  const sep = separator === undefined ? ',' : String(separator);
+  const sep = separator === undefined ? "," : String(separator);
 
-  let result = '';
+  let result = "";
   for (let i = 0; i < len; i++) {
     if (i > 0) {
       result += sep;
@@ -38,15 +38,15 @@ Array.prototype.myJoin = function (separator) {
 console.log([1, 2, 3].myJoin()); // '1,2,3'
 
 // --- 自定义分隔符 ---
-console.log([1, 2, 3].myJoin('-')); // '1-2-3'
-console.log([1, 2, 3].myJoin('')); // '123'
-console.log(['a', 'b', 'c'].myJoin(' ')); // 'a b c'
+console.log([1, 2, 3].myJoin("-")); // '1-2-3'
+console.log([1, 2, 3].myJoin("")); // '123'
+console.log(["a", "b", "c"].myJoin(" ")); // 'a b c'
 
 // --- null 和 undefined 贡献空字符串 ---
-console.log([1, null, 3].myJoin('-')); // '1--3'
-console.log([1, undefined, 3].myJoin(',')); // '1,,3'
-console.log([null, 1].myJoin('-')); // '-1'
-console.log([1, null].myJoin('-')); // '1-'
+console.log([1, null, 3].myJoin("-")); // '1--3'
+console.log([1, undefined, 3].myJoin(",")); // '1,,3'
+console.log([null, 1].myJoin("-")); // '-1'
+console.log([1, null].myJoin("-")); // '1-'
 
 // --- separator 为 undefined 显式传入 ---
 console.log([1, 2, 3].myJoin(undefined)); // '1,2,3'
@@ -55,7 +55,7 @@ console.log([1, 2, 3].myJoin(undefined)); // '1,2,3'
 console.log([1, 2].myJoin({})); // '1[object Object]2'
 
 // --- 空数组 ---
-console.log([].myJoin('-')); // ''
+console.log([].myJoin("-")); // ''
 
 // --- 字符串数组 ---
-console.log(['h', 'e', 'l', 'l', 'o'].myJoin('')); // 'hello'
+console.log(["h", "e", "l", "l", "o"].myJoin("")); // 'hello'

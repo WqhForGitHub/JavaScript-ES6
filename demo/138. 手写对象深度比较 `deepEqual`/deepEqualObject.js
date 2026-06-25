@@ -119,8 +119,14 @@ console.log(deepEqual(/abc/gi, /abc/gi)); // true
 console.log(deepEqual(/abc/g, /abc/i)); // false
 
 // Map
-const m1 = new Map([["a", 1], ["b", { x: 2 }]]);
-const m2 = new Map([["b", { x: 2 }], ["a", 1]]);
+const m1 = new Map([
+  ["a", 1],
+  ["b", { x: 2 }],
+]);
+const m2 = new Map([
+  ["b", { x: 2 }],
+  ["a", 1],
+]);
 console.log(deepEqual(m1, m2)); // true
 
 // Set

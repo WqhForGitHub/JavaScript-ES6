@@ -16,7 +16,7 @@
  *     - 返回一个 close() 方法停止监听
  */
 
-const { EventEmitter } = require('events');
+const { EventEmitter } = require("events");
 
 class FileWatcher extends EventEmitter {
   constructor(fsDep, options = {}) {
@@ -43,7 +43,7 @@ class FileWatcher extends EventEmitter {
       const stat = this.fs.statSync(path);
       if (stat.isFile()) {
         this._snapshots.set(path, {
-          type: 'file',
+          type: "file",
           mtime: stat.mtimeMs,
           size: stat.size,
           exists: true,
@@ -58,13 +58,13 @@ class FileWatcher extends EventEmitter {
           }
           const childStat = this.fs.statSync(childPath);
           children.set(name, {
-            type: childStat.isFile() ? 'file' : 'dir',
+            type: childStat.isFile() ? "file" : "dir",
             mtime: childStat.mtimeMs,
             size: childStat.size,
           });
         }
         this._snapshots.set(path, {
-          type: 'dir',
+          type: "dir",
           mtime: stat.mtimeMs,
           children,
           exists: true,
@@ -91,7 +91,12 @@ class FileWatcher extends EventEmitter {
     try {
       const stat = this.fs.statSync(path);
       if (stat.isFile()) {
-        cur = { type: 'file', mtime: stat.mtimeMs, size: stat.size, exists: true };
+        cur = {
+          type: "file",
+          mtime: stat.mtimeMs,
+          size: stat.size,
+          exists: true,
+        };
       } else if (stat.isDirectory()) {
         const children = new Map();
         const entries = this.fs.readdirSync(path);
@@ -99,42 +104,42 @@ class FileWatcher extends EventEmitter {
           const childPath = this.fs.join(path, name);
           const childStat = this.fs.statSync(childPath);
           children.set(name, {
-            type: childStat.isFile() ? 'file' : 'dir',
+            type: childStat.isFile() ? "file" : "dir",
             mtime: childStat.mtimeMs,
             size: childStat.size,
           });
           if (this.recursive && !this._snapshots.has(childPath)) {
             // 新增的子项
             this._snapshot(childPath);
-            this.emit('change', 'rename', childPath);
+            this.emit("change", "rename", childPath);
           } else if (this.recursive) {
             this._check(childPath);
           }
         }
-        cur = { type: 'dir', mtime: stat.mtimeMs, children, exists: true };
+        cur = { type: "dir", mtime: stat.mtimeMs, children, exists: true };
       }
     } catch (err) {
       cur = { exists: false };
     }
 
     // 比较文件
-    if (prev.type === 'file') {
+    if (prev.type === "file") {
       if (!prev.exists && !cur.exists) {
         // 都不存在
       } else if (!cur.exists && prev.exists) {
         // 文件被删除
-        this.emit('change', 'rename', path);
+        this.emit("change", "rename", path);
         this._snapshots.set(path, cur);
       } else if (cur.exists && !prev.exists) {
         // 文件被创建
-        this.emit('change', 'rename', path);
+        this.emit("change", "rename", path);
         this._snapshots.set(path, cur);
       } else if (cur.size !== prev.size || cur.mtime !== prev.mtime) {
         // 文件被修改
-        this.emit('change', 'change', path);
+        this.emit("change", "change", path);
         this._snapshots.set(path, cur);
       }
-    } else if (prev.type === 'dir' && cur && cur.type === 'dir') {
+    } else if (prev.type === "dir" && cur && cur.type === "dir") {
       // 比较目录子项
       const prevNames = new Set(prev.children.keys());
       const curNames = new Set(cur.children.keys());
@@ -142,20 +147,20 @@ class FileWatcher extends EventEmitter {
         if (!prevNames.has(name)) {
           // 新增
           const childPath = this.fs.join(path, name);
-          this.emit('change', 'rename', childPath);
+          this.emit("change", "rename", childPath);
         }
       }
       for (const name of prevNames) {
         if (!curNames.has(name)) {
           // 删除
           const childPath = this.fs.join(path, name);
-          this.emit('change', 'rename', childPath);
+          this.emit("change", "rename", childPath);
         }
       }
       this._snapshots.set(path, cur);
     } else if (prev.exists && cur && !cur.exists) {
       // 目录被删除
-      this.emit('change', 'rename', path);
+      this.emit("change", "rename", path);
       this._snapshots.set(path, cur);
     }
   }
@@ -165,7 +170,7 @@ class FileWatcher extends EventEmitter {
     for (const t of this._timers) clearInterval(t);
     this._timers.clear();
     this._snapshots.clear();
-    this.emit('close');
+    this.emit("close");
   }
 }
 
@@ -177,15 +182,15 @@ function createMockFs() {
   return {
     _files: files,
     _dirs: dirs,
-    join: (...p) => p.join('/').replace(/\/+/g, '/'),
+    join: (...p) => p.join("/").replace(/\/+/g, "/"),
     writeFile(path, content) {
       files.set(path, { content, mtime: Date.now() + Math.random() });
       // 确保父目录存在
-      const parts = path.split('/');
+      const parts = path.split("/");
       parts.pop();
-      let cur = '';
+      let cur = "";
       for (const p of parts) {
-        cur = cur ? cur + '/' + p : p;
+        cur = cur ? cur + "/" + p : p;
         if (!dirs.has(cur) && !files.has(cur)) dirs.add(cur);
       }
     },
@@ -216,24 +221,24 @@ function createMockFs() {
         };
       }
       // 检查是否是某文件的父目录
-      const err = new Error('ENOENT');
-      err.code = 'ENOENT';
+      const err = new Error("ENOENT");
+      err.code = "ENOENT";
       throw err;
     },
     readdirSync(path) {
       const result = [];
-      const prefix = path.endsWith('/') ? path : path + '/';
+      const prefix = path.endsWith("/") ? path : path + "/";
       // 列出直接子项
       for (const filePath of files.keys()) {
         if (filePath.startsWith(prefix)) {
           const rest = filePath.slice(prefix.length);
-          if (!rest.includes('/')) result.push(rest);
+          if (!rest.includes("/")) result.push(rest);
         }
       }
       for (const dirPath of dirs) {
         if (dirPath.startsWith(prefix)) {
           const rest = dirPath.slice(prefix.length);
-          if (rest && !rest.includes('/')) result.push(rest);
+          if (rest && !rest.includes("/")) result.push(rest);
         }
       }
       return result;
@@ -245,64 +250,73 @@ function createMockFs() {
 
 // 测试 1：监听文件变化
 const fs1 = createMockFs();
-fs1.writeFile('/tmp/test.txt', 'hello');
+fs1.writeFile("/tmp/test.txt", "hello");
 
 const watcher1 = new FileWatcher(fs1, { interval: 20 });
 const events1 = [];
-watcher1.on('change', (eventType, filename) => {
+watcher1.on("change", (eventType, filename) => {
   events1.push({ eventType, filename });
 });
-watcher1.watch('/tmp/test.txt');
+watcher1.watch("/tmp/test.txt");
 
-setTimeout(() => fs1.writeFile('/tmp/test.txt', 'hello world'), 30);
+setTimeout(() => fs1.writeFile("/tmp/test.txt", "hello world"), 30);
 setTimeout(() => {
-  console.log('test1 events:', events1);
+  console.log("test1 events:", events1);
   // 期望至少一个 { eventType: 'change', filename: '/tmp/test.txt' }
-  console.log('test1 has change:', events1.some(e => e.eventType === 'change'));
+  console.log(
+    "test1 has change:",
+    events1.some((e) => e.eventType === "change"),
+  );
   watcher1.close();
 }, 80);
 
 // 测试 2：监听目录新增文件
 const fs2 = createMockFs();
-fs2.mkdir('/tmp/dir');
+fs2.mkdir("/tmp/dir");
 const watcher2 = new FileWatcher(fs2, { interval: 20 });
 const events2 = [];
-watcher2.on('change', (eventType, filename) => {
+watcher2.on("change", (eventType, filename) => {
   events2.push({ eventType, filename });
 });
-watcher2.watch('/tmp/dir');
+watcher2.watch("/tmp/dir");
 
-setTimeout(() => fs2.writeFile('/tmp/dir/new.txt', 'x'), 30);
+setTimeout(() => fs2.writeFile("/tmp/dir/new.txt", "x"), 30);
 setTimeout(() => {
-  console.log('test2 events:', events2);
+  console.log("test2 events:", events2);
   // 期望有 rename 事件指向 /tmp/dir/new.txt
-  console.log('test2 has new file:', events2.some(e => e.filename.includes('new.txt')));
+  console.log(
+    "test2 has new file:",
+    events2.some((e) => e.filename.includes("new.txt")),
+  );
   watcher2.close();
 }, 80);
 
 // 测试 3：监听文件删除
 const fs3 = createMockFs();
-fs3.writeFile('/tmp/del.txt', 'x');
+fs3.writeFile("/tmp/del.txt", "x");
 const watcher3 = new FileWatcher(fs3, { interval: 20 });
 const events3 = [];
-watcher3.on('change', (et, f) => events3.push({ et, f }));
-watcher3.watch('/tmp/del.txt');
-setTimeout(() => fs3.unlink('/tmp/del.txt'), 30);
+watcher3.on("change", (et, f) => events3.push({ et, f }));
+watcher3.watch("/tmp/del.txt");
+setTimeout(() => fs3.unlink("/tmp/del.txt"), 30);
 setTimeout(() => {
-  console.log('test3 events:', events3);
-  console.log('test3 has rename (delete):', events3.some(e => e.et === 'rename'));
+  console.log("test3 events:", events3);
+  console.log(
+    "test3 has rename (delete):",
+    events3.some((e) => e.et === "rename"),
+  );
   watcher3.close();
 }, 80);
 
 // 测试 4：close 后不再触发
 const fs4 = createMockFs();
-fs4.writeFile('/tmp/c.txt', '1');
+fs4.writeFile("/tmp/c.txt", "1");
 const watcher4 = new FileWatcher(fs4, { interval: 20 });
 let count = 0;
-watcher4.on('change', () => count++);
-watcher4.watch('/tmp/c.txt');
+watcher4.on("change", () => count++);
+watcher4.watch("/tmp/c.txt");
 setTimeout(() => watcher4.close(), 25);
-setTimeout(() => fs4.writeFile('/tmp/c.txt', '2'), 50);
+setTimeout(() => fs4.writeFile("/tmp/c.txt", "2"), 50);
 setTimeout(() => {
-  console.log('test4 events after close:', count); // 0
+  console.log("test4 events after close:", count); // 0
 }, 100);

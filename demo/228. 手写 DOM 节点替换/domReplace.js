@@ -18,7 +18,7 @@
  */
 function myReplaceChild(parent, newChild, oldChild) {
   if (oldChild.parentNode !== parent) {
-    throw new Error('The node to be replaced is not a child of this node.');
+    throw new Error("The node to be replaced is not a child of this node.");
   }
   // 如果新节点已在其他位置，先移除
   if (newChild.parentNode) {
@@ -76,14 +76,22 @@ function myReplaceWithHTML(element, html) {
 // // list 变为：replaced, new, 3
 
 // 模拟测试
-var children = [{ id: 'item1', val: 1 }, { id: 'item2', val: 2 }, { id: 'item3', val: 3 }];
+var children = [
+  { id: "item1", val: 1 },
+  { id: "item2", val: 2 },
+  { id: "item3", val: 3 },
+];
 
 function replaceChild(arr, newChild, oldChild) {
   var idx = arr.indexOf(oldChild);
-  if (idx === -1) throw new Error('not a child');
+  if (idx === -1) throw new Error("not a child");
   arr[idx] = newChild;
   return oldChild;
 }
-var old = replaceChild(children, { id: 'new', val: 'new' }, children[1]);
+var old = replaceChild(children, { id: "new", val: "new" }, children[1]);
 console.log(old.val); // => 2
-console.log(children.map(function (c) { return c.val; })); // => [1, 'new', 3]
+console.log(
+  children.map(function (c) {
+    return c.val;
+  }),
+); // => [1, 'new', 3]

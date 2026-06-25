@@ -47,9 +47,11 @@ Subject.prototype.detach = function (observer) {
  * @param {*} [data] - 通知数据
  */
 Subject.prototype.notify = function (data) {
-  this.observers.slice().forEach(function (observer) {
-    observer.update(data, this);
-  }.bind(this));
+  this.observers.slice().forEach(
+    function (observer) {
+      observer.update(data, this);
+    }.bind(this),
+  );
 };
 
 /**
@@ -73,7 +75,7 @@ Subject.prototype.getState = function () {
  * @param {string} [name] - 观察者名称
  */
 function Observer(name) {
-  this.name = name || 'observer';
+  this.name = name || "observer";
 }
 
 /**
@@ -82,7 +84,7 @@ function Observer(name) {
  * @param {Subject} subject - 目标对象
  */
 Observer.prototype.update = function (data, subject) {
-  console.log('[' + this.name + '] 收到通知：', data);
+  console.log("[" + this.name + "] 收到通知：", data);
 };
 
 // ===== 测试用例 =====
@@ -90,8 +92,8 @@ Observer.prototype.update = function (data, subject) {
 var weatherStation = new Subject();
 
 // 创建观察者
-var phoneDisplay = new Observer('手机显示');
-var windowDisplay = new Observer('窗口显示');
+var phoneDisplay = new Observer("手机显示");
+var windowDisplay = new Observer("窗口显示");
 
 // 订阅
 weatherStation.attach(phoneDisplay);
@@ -108,9 +110,9 @@ weatherStation.setState({ temp: 28, humidity: 55 });
 // => [窗口显示] 收到通知： { temp: 28, humidity: 55 }
 
 // 自定义观察者
-var loggerObserver = new Observer('日志');
+var loggerObserver = new Observer("日志");
 loggerObserver.update = function (data, subject) {
-  console.log('[日志] 记录状态变化：', JSON.stringify(data));
+  console.log("[日志] 记录状态变化：", JSON.stringify(data));
 };
 weatherStation.attach(loggerObserver);
 weatherStation.setState({ temp: 30, humidity: 50 });
@@ -118,8 +120,8 @@ weatherStation.setState({ temp: 30, humidity: 50 });
 // => [日志] 记录状态变化： {"temp":30,"humidity":50}
 
 // 观察者数量
-console.log('当前观察者数量：', weatherStation.observers.length); // => 2
+console.log("当前观察者数量：", weatherStation.observers.length); // => 2
 
 // 验证重复 attach 不会添加
 weatherStation.attach(windowDisplay);
-console.log('重复添加后数量：', weatherStation.observers.length); // => 2
+console.log("重复添加后数量：", weatherStation.observers.length); // => 2

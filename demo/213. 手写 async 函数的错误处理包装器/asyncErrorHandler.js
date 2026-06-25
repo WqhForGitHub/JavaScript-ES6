@@ -20,7 +20,7 @@
 function to(promise) {
   return promise.then(
     (data) => [null, data],
-    (err) => [err, undefined]
+    (err) => [err, undefined],
   );
 }
 
@@ -99,8 +99,9 @@ async function fetchUser(id) {
       this.code = code;
     }
   }
-  const mappedFetch = mapError(fetchUser, (err) =>
-    new BusinessError(err.message, "USER_INVALID")
+  const mappedFetch = mapError(
+    fetchUser,
+    (err) => new BusinessError(err.message, "USER_INVALID"),
   );
   try {
     await mappedFetch(-4);

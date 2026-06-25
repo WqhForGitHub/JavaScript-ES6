@@ -94,6 +94,8 @@ console.log("hello".myLastIndexOf("o", 1000)); // 4
 
 // --- 与原生对比 ---
 console.log("\n--- 与原生对比 ---");
-console.log("hello world".lastIndexOf("o") === "hello world".myLastIndexOf("o")); // true
+console.log(
+  "hello world".lastIndexOf("o") === "hello world".myLastIndexOf("o"),
+); // true
 console.log("ababab".lastIndexOf("ab", 3) === "ababab".myLastIndexOf("ab", 3)); // true
 console.log("hello".lastIndexOf("") === "hello".myLastIndexOf("")); // true

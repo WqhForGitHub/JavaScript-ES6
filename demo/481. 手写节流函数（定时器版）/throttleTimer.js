@@ -50,15 +50,15 @@ const log = throttleTimer((msg) => {
 }, 100);
 
 // Expected: only scheduled; nothing logged synchronously.
-log('a'); // expected: no immediate log (timer version delays first call)
-console.log('after call a, count =', callCount); // expected: 0
+log("a"); // expected: no immediate log (timer version delays first call)
+console.log("after call a, count =", callCount); // expected: 0
 
 // These calls happen within the wait window; they are ignored except for updating args.
-log('b');
-log('c');
-console.log('after b,c within window, count =', callCount); // expected: 0
+log("b");
+log("c");
+console.log("after b,c within window, count =", callCount); // expected: 0
 
 // Wait 110ms then check
 setTimeout(() => {
-  console.log('after 110ms, count =', callCount); // expected: 1, message 'c'
+  console.log("after 110ms, count =", callCount); // expected: 1, message 'c'
 }, 110);

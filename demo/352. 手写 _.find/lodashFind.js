@@ -13,7 +13,7 @@
  */
 
 function isObjectLike(value) {
-  return typeof value === 'object' && value !== null;
+  return typeof value === "object" && value !== null;
 }
 
 function baseMatches(source) {
@@ -25,7 +25,8 @@ function baseMatches(source) {
 function deepMatch(actual, expected) {
   if (actual === expected) return true;
   if (typeof actual !== typeof expected) return false;
-  if (!isObjectLike(actual) || !isObjectLike(expected)) return actual === expected;
+  if (!isObjectLike(actual) || !isObjectLike(expected))
+    return actual === expected;
   for (const key of Object.keys(expected)) {
     if (!Object.prototype.hasOwnProperty.call(actual, key)) return false;
     if (!deepMatch(actual[key], expected[key])) return false;
@@ -46,14 +47,14 @@ function property(key) {
 }
 
 function getIteratee(predicate) {
-  if (typeof predicate === 'function') return predicate;
+  if (typeof predicate === "function") return predicate;
   if (Array.isArray(predicate)) {
     return baseMatchesProperty(predicate[0], predicate[1]);
   }
   if (isObjectLike(predicate)) {
     return baseMatches(predicate);
   }
-  if (typeof predicate === 'string' || typeof predicate === 'number') {
+  if (typeof predicate === "string" || typeof predicate === "number") {
     return (obj) => obj != null && obj[predicate];
   }
   return (obj) => obj;
@@ -79,14 +80,23 @@ function find(collection, predicate, fromIndex = 0) {
 // --- Tests ---
 
 const users = [
-  { user: 'barney', age: 36, active: true },
-  { user: 'fred', age: 40, active: false },
-  { user: 'pebbles', age: 1, active: true },
+  { user: "barney", age: 36, active: true },
+  { user: "fred", age: 40, active: false },
+  { user: "pebbles", age: 1, active: true },
 ];
 
-console.log('find with predicate:', JSON.stringify(find(users, (o) => o.age < 40))); // expected: {"user":"barney","age":36,"active":true}
-console.log('find object shorthand:', JSON.stringify(find(users, { age: 1, active: true }))); // expected: {"user":"pebbles","age":1,"active":true}
-console.log('find array shorthand:', JSON.stringify(find(users, ['active', false]))); // expected: {"user":"fred","age":40,"active":false}
-console.log('find string shorthand:', JSON.stringify(find(users, 'active'))); // expected: {"user":"barney",...}
-console.log('find fromIndex:', JSON.stringify(find(users, 'active', 1))); // expected: {"user":"pebbles",...}
-console.log('find none:', find(users, { user: 'nope' })); // undefined
+console.log(
+  "find with predicate:",
+  JSON.stringify(find(users, (o) => o.age < 40)),
+); // expected: {"user":"barney","age":36,"active":true}
+console.log(
+  "find object shorthand:",
+  JSON.stringify(find(users, { age: 1, active: true })),
+); // expected: {"user":"pebbles","age":1,"active":true}
+console.log(
+  "find array shorthand:",
+  JSON.stringify(find(users, ["active", false])),
+); // expected: {"user":"fred","age":40,"active":false}
+console.log("find string shorthand:", JSON.stringify(find(users, "active"))); // expected: {"user":"barney",...}
+console.log("find fromIndex:", JSON.stringify(find(users, "active", 1))); // expected: {"user":"pebbles",...}
+console.log("find none:", find(users, { user: "nope" })); // undefined

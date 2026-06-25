@@ -96,10 +96,7 @@ const r2 = deepMerge({ a: 1, b: 2 }, { b: 99 });
 console.log(r2); // { a: 1, b: 99 }
 
 // 多层嵌套递归合并
-const r3 = deepMerge(
-  { a: { b: { c: 1 } } },
-  { a: { b: { d: 2 } } }
-);
+const r3 = deepMerge({ a: { b: { c: 1 } } }, { a: { b: { d: 2 } } });
 console.log(r3); // { a: { b: { c: 1, d: 2 } } }
 
 // 不修改源对象（深拷贝避免引用污染）
@@ -113,12 +110,7 @@ const r5 = deepMerge({ list: [1, 2, 3] }, { list: [4] });
 console.log(r5.list); // [4]
 
 // 多个源
-const r6 = deepMerge(
-  { a: 1 },
-  { b: 2 },
-  { c: { d: 3 } },
-  { c: { e: 4 } }
-);
+const r6 = deepMerge({ a: 1 }, { b: 2 }, { c: { d: 3 } }, { c: { e: 4 } });
 console.log(r6); // { a: 1, b: 2, c: { d: 3, e: 4 } }
 
 // 合并配置的典型场景

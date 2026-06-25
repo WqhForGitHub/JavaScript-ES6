@@ -96,9 +96,18 @@ console.log("合法2:", validId2, validateIdCard(validId2)); // ... true
 
 console.log("长度不足:", validateIdCard("1101051949100100")); // false
 console.log("含非法字符:", validateIdCard("1101051949100100A1")); // false
-console.log("非法日期2月30:", validateIdCard(buildValidId("11010520000230001"))); // false
-console.log("闰年2月29合法:", validateIdCard(buildValidId("11010520000229001"))); // true
-console.log("平年2月29非法:", validateIdCard(buildValidId("11010519000229001"))); // false
+console.log(
+  "非法日期2月30:",
+  validateIdCard(buildValidId("11010520000230001")),
+); // false
+console.log(
+  "闰年2月29合法:",
+  validateIdCard(buildValidId("11010520000229001")),
+); // true
+console.log(
+  "平年2月29非法:",
+  validateIdCard(buildValidId("11010519000229001")),
+); // false
 console.log("校验码错误:", validateIdCard("110105194910010011")); // false（应尾 X）
 console.log("小写x也合法:", validateIdCard(validId.slice(0, 17) + "x")); // true
 console.log("年份未来:", validateIdCard(buildValidId("11010520990101001"))); // false（2099 > 当前年，会随时间变化）

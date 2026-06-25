@@ -78,7 +78,10 @@ function makeTask(name, delay, fail = false) {
   ];
 
   const results = await Promise.allSettled(tasks);
-  console.log("results:", results.map((r) => r.status + ":" + (r.value ?? r.reason)));
+  console.log(
+    "results:",
+    results.map((r) => r.status + ":" + (r.value ?? r.reason)),
+  );
   // 期望顺序：A,B,C,D,E 中失败的是 C
   // results: [ 'fulfilled:A', 'fulfilled:B', 'rejected:C fail', 'fulfilled:D', 'fulfilled:E' ]
 

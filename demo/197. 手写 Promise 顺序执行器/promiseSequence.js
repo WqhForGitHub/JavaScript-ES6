@@ -41,7 +41,7 @@ function promiseSequence(tasks, { continueOnError = false } = {}) {
 function runSequenceStrict(tasks) {
   return tasks.reduce(
     (chain, task) => chain.then(() => task()),
-    Promise.resolve()
+    Promise.resolve(),
   );
 }
 

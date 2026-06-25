@@ -13,25 +13,25 @@ var MySymbol = (function () {
 
   function Symbol(description) {
     if (this instanceof Symbol) {
-      throw new TypeError('Symbol is not a constructor');
+      throw new TypeError("Symbol is not a constructor");
     }
     var symbol = Object.create(Symbol.prototype);
-    var desc = description === undefined ? '' : String(description);
+    var desc = description === undefined ? "" : String(description);
     Object.defineProperties(symbol, {
       __description__: { value: desc, enumerable: false },
-      __id__: { value: ++idCounter, enumerable: false }
+      __id__: { value: ++idCounter, enumerable: false },
     });
     return symbol;
   }
 
   Symbol.prototype.toString = function () {
-    return 'Symbol(' + this.__description__ + ')';
+    return "Symbol(" + this.__description__ + ")";
   };
 
   // 为了在 console 中更友好显示
-  if (typeof Symbol.prototype[Symbol.toPrimitive] !== 'undefined') {
+  if (typeof Symbol.prototype[Symbol.toPrimitive] !== "undefined") {
     Symbol.prototype[Symbol.toPrimitive] = function () {
-      return 'Symbol(' + this.__description__ + ')';
+      return "Symbol(" + this.__description__ + ")";
     };
   }
 
@@ -60,29 +60,29 @@ var MySymbol = (function () {
 })();
 
 // 测试
-var s1 = MySymbol('foo');
-var s2 = MySymbol('foo');
+var s1 = MySymbol("foo");
+var s2 = MySymbol("foo");
 console.log(s1.toString()); // Symbol(foo)
 console.log(s2.toString()); // Symbol(foo)
-console.log(s1 === s2);     // false（每次创建都是唯一的）
+console.log(s1 === s2); // false（每次创建都是唯一的）
 
 // Symbol.for 返回相同的 Symbol
-var s3 = MySymbol.for('bar');
-var s4 = MySymbol.for('bar');
-console.log(s3 === s4);           // true
+var s3 = MySymbol.for("bar");
+var s4 = MySymbol.for("bar");
+console.log(s3 === s4); // true
 console.log(MySymbol.keyFor(s3)); // bar
 
-var s5 = MySymbol('baz');
+var s5 = MySymbol("baz");
 console.log(MySymbol.keyFor(s5)); // undefined（未注册）
 
 // 作为对象属性键
 var obj = {};
-obj[s1] = 'value1';
+obj[s1] = "value1";
 console.log(obj[s1]); // value1
 
 // 不能 new
 try {
-  new MySymbol('test');
+  new MySymbol("test");
 } catch (e) {
   console.log(e.message); // Symbol is not a constructor
 }

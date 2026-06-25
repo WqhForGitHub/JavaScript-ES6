@@ -37,31 +37,31 @@ function createVirtualScrollHorizontal(options) {
   }
 
   function attach(container, getItemData, renderItemEl) {
-    const inner = document.createElement('div');
-    inner.style.position = 'relative';
-    inner.style.height = '100%';
-    container.style.overflowX = 'auto';
-    container.style.overflowY = 'hidden';
-    container.style.whiteSpace = 'nowrap';
+    const inner = document.createElement("div");
+    inner.style.position = "relative";
+    inner.style.height = "100%";
+    container.style.overflowX = "auto";
+    container.style.overflowY = "hidden";
+    container.style.whiteSpace = "nowrap";
     container.appendChild(inner);
 
     const draw = () => {
       const { items, totalWidth } = render(container.scrollLeft, getItemData);
-      inner.style.width = totalWidth + 'px';
-      inner.innerHTML = '';
+      inner.style.width = totalWidth + "px";
+      inner.innerHTML = "";
       items.forEach((it) => {
         const el = renderItemEl(it);
-        el.style.position = 'absolute';
-        el.style.left = '0';
-        el.style.top = '0';
+        el.style.position = "absolute";
+        el.style.left = "0";
+        el.style.top = "0";
         el.style.transform = `translateX(${it.offset}px)`;
-        el.style.width = itemWidth + 'px';
-        el.style.height = '100%';
+        el.style.width = itemWidth + "px";
+        el.style.height = "100%";
         inner.appendChild(el);
       });
     };
 
-    container.addEventListener('scroll', draw);
+    container.addEventListener("scroll", draw);
     draw();
     return { redraw: draw };
   }
@@ -70,15 +70,27 @@ function createVirtualScrollHorizontal(options) {
 }
 
 // ---------- Test cases ----------
-const hs = createVirtualScrollHorizontal({ count: 500, itemWidth: 120, viewportWidth: 600, bufferSize: 2 });
+const hs = createVirtualScrollHorizontal({
+  count: 500,
+  itemWidth: 120,
+  viewportWidth: 600,
+  bufferSize: 2,
+});
 
 const r0 = hs.render(0, (i) => `Col ${i}`);
-console.log('scrollLeft=0 start:', r0.start, 'end:', r0.end, 'totalWidth:', r0.totalWidth);
+console.log(
+  "scrollLeft=0 start:",
+  r0.start,
+  "end:",
+  r0.end,
+  "totalWidth:",
+  r0.totalWidth,
+);
 // expected: scrollLeft=0 start: 0 end: 9 totalWidth: 60000 (visibleCount=5 + buffer*2=4 => 9)
-console.log('first item offset:', r0.items[0].offset); // expected: 0
+console.log("first item offset:", r0.items[0].offset); // expected: 0
 
 const rMid = hs.render(2400, (i) => `Col ${i}`);
-console.log('scrollLeft=2400 start:', rMid.start, 'end:', rMid.end);
+console.log("scrollLeft=2400 start:", rMid.start, "end:", rMid.end);
 // expected: scrollLeft=2400 start: 18 end: 27
 
-console.log('attach helper exists:', typeof hs.attach === 'function'); // expected: true
+console.log("attach helper exists:", typeof hs.attach === "function"); // expected: true

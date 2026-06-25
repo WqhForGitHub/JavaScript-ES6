@@ -24,7 +24,8 @@ function createElement(tagName, props, children) {
     tagName: tagName,
     props: props,
     key: key,
-    children: children == null ? [] : Array.isArray(children) ? children : [children],
+    children:
+      children == null ? [] : Array.isArray(children) ? children : [children],
     text: null,
   };
 }
@@ -48,7 +49,7 @@ function createTextVNode(text) {
  * 判断是否为 VNode
  */
 function isVNode(node) {
-  return node && typeof node === 'object' && 'tagName' in node;
+  return node && typeof node === "object" && "tagName" in node;
 }
 
 /**
@@ -70,12 +71,12 @@ function render(vnode) {
   // 设置属性
   var props = vnode.props || {};
   Object.keys(props).forEach(function (key) {
-    if (key === 'key') return;
-    if (key === 'class' || key === 'className') {
+    if (key === "key") return;
+    if (key === "class" || key === "className") {
       el.className = props[key];
-    } else if (key === 'style' && typeof props[key] === 'object') {
+    } else if (key === "style" && typeof props[key] === "object") {
       Object.assign(el.style, props[key]);
-    } else if (key.startsWith('on') && typeof props[key] === 'function') {
+    } else if (key.startsWith("on") && typeof props[key] === "function") {
       var eventName = key.slice(2).toLowerCase();
       el.addEventListener(eventName, props[key]);
     } else {
@@ -106,12 +107,12 @@ function mount(vnode, container) {
 
 // ===== 测试用例 =====
 // 构建虚拟 DOM
-var vnode = createElement('div', { id: 'app', class: 'container' }, [
-  createElement('h1', { style: { color: 'red' } }, ['Hello Virtual DOM']),
-  createElement('p', null, ['这是一段文本']),
-  createElement('ul', null, [
-    createElement('li', { key: '1' }, ['item 1']),
-    createElement('li', { key: '2' }, ['item 2']),
+var vnode = createElement("div", { id: "app", class: "container" }, [
+  createElement("h1", { style: { color: "red" } }, ["Hello Virtual DOM"]),
+  createElement("p", null, ["这是一段文本"]),
+  createElement("ul", null, [
+    createElement("li", { key: "1" }, ["item 1"]),
+    createElement("li", { key: "2" }, ["item 2"]),
   ]),
 ]);
 
@@ -131,7 +132,7 @@ console.log(vnode.children[0].tagName); // => 'h1'
 console.log(vnode.children[2].children[0].children[0]); // => 'item 1'
 
 // 文本节点测试
-var textVNode = createTextVNode('纯文本');
+var textVNode = createTextVNode("纯文本");
 console.log(textVNode.text); // => '纯文本'
 console.log(textVNode.tagName); // => null
 

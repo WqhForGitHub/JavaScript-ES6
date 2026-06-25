@@ -72,7 +72,7 @@ console.log(formatNumber(1234)); // 1,234
 console.log(formatNumber(12)); // 12
 console.log(formatNumber(0)); // 0
 console.log(formatNumber(-1234567)); // -1,234,567
-console.log(formatNumber(1234567.8910)); // 1,234,567.8910
+console.log(formatNumber(1234567.891)); // 1,234,567.8910
 console.log(formatNumber(-1234567.89)); // -1,234,567.89
 console.log(formatNumber("1000000")); // 1,000,000
 console.log(formatNumber("00123456")); // 00,123,456（前导零也按位处理）
@@ -88,4 +88,7 @@ console.log(formatChineseWan(-10000)); // -1,0000
 
 // 与原生 toLocaleString 对比
 console.log("原生:", (1234567.89).toLocaleString("en-US")); // 1,234,567.89
-console.log("自实现 === 原生:", formatNumber(1234567.89) === (1234567.89).toLocaleString("en-US")); // true
+console.log(
+  "自实现 === 原生:",
+  formatNumber(1234567.89) === (1234567.89).toLocaleString("en-US"),
+); // true

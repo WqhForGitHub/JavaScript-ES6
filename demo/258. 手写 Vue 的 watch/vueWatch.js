@@ -13,36 +13,62 @@
 
 // ===== 基础设施 =====
 var depUid = 0;
-function Dep() { this.id = depUid++; this.subs = []; }
+function Dep() {
+  this.id = depUid++;
+  this.subs = [];
+}
 Dep.target = null;
 var targetStack = [];
-Dep.pushTarget = function (t) { targetStack.push(t); Dep.target = t; };
-Dep.popTarget = function () { targetStack.pop(); Dep.target = targetStack[targetStack.length - 1] || null; };
-Dep.prototype.addSub = function (s) { if (this.subs.indexOf(s) === -1) this.subs.push(s); };
-Dep.prototype.removeSub = function (s) { var i = this.subs.indexOf(s); if (i !== -1) this.subs.splice(i, 1); };
-Dep.prototype.depend = function () { if (Dep.target) Dep.target.addDep(this); };
-Dep.prototype.notify = function () { this.subs.slice().forEach(function (s) { s.update(); }); };
+Dep.pushTarget = function (t) {
+  targetStack.push(t);
+  Dep.target = t;
+};
+Dep.popTarget = function () {
+  targetStack.pop();
+  Dep.target = targetStack[targetStack.length - 1] || null;
+};
+Dep.prototype.addSub = function (s) {
+  if (this.subs.indexOf(s) === -1) this.subs.push(s);
+};
+Dep.prototype.removeSub = function (s) {
+  var i = this.subs.indexOf(s);
+  if (i !== -1) this.subs.splice(i, 1);
+};
+Dep.prototype.depend = function () {
+  if (Dep.target) Dep.target.addDep(this);
+};
+Dep.prototype.notify = function () {
+  this.subs.slice().forEach(function (s) {
+    s.update();
+  });
+};
 
 function defineReactive(obj, key, val) {
   var dep = new Dep();
   // 递归 observe
-  if (val && typeof val === 'object') observe(val);
+  if (val && typeof val === "object") observe(val);
   Object.defineProperty(obj, key, {
-    enumerable: true, configurable: true,
-    get: function () { dep.depend(); return val; },
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      dep.depend();
+      return val;
+    },
     set: function (v) {
       if (v === val) return;
       val = v;
-      if (v && typeof v === 'object') observe(v);
+      if (v && typeof v === "object") observe(v);
       dep.notify();
     },
   });
 }
 function observe(obj) {
-  if (!obj || typeof obj !== 'object') return obj;
+  if (!obj || typeof obj !== "object") return obj;
   if (obj.__ob__) return obj;
-  Object.defineProperty(obj, '__ob__', { value: true, enumerable: false });
-  Object.keys(obj).forEach(function (k) { defineReactive(obj, k, obj[k]); });
+  Object.defineProperty(obj, "__ob__", { value: true, enumerable: false });
+  Object.keys(obj).forEach(function (k) {
+    defineReactive(obj, k, obj[k]);
+  });
   return obj;
 }
 
@@ -86,24 +112,30 @@ Watcher.prototype.update = function () {
 Watcher.prototype.run = function () {
   var value = this.get();
   var oldValue = this.value;
-  if (value !== oldValue || this.deep || (value && typeof value === 'object')) {
+  if (value !== oldValue || this.deep || (value && typeof value === "object")) {
     this.value = value;
     this.cb.call(this.vm, value, oldValue);
   }
 };
 
 Watcher.prototype.teardown = function () {
-  this.deps.forEach(function (dep) { dep.removeSub(this); }.bind(this));
+  this.deps.forEach(
+    function (dep) {
+      dep.removeSub(this);
+    }.bind(this),
+  );
   this.deps = [];
   this.depIds = {};
 };
 
 function traverse(val, seen) {
   seen = seen || [];
-  if (val && typeof val === 'object') {
+  if (val && typeof val === "object") {
     if (seen.indexOf(val) !== -1) return;
     seen.push(val);
-    Object.keys(val).forEach(function (k) { traverse(val[k], seen); });
+    Object.keys(val).forEach(function (k) {
+      traverse(val[k], seen);
+    });
   }
 }
 
@@ -115,8 +147,8 @@ function traverse(val, seen) {
  * @returns {Function}
  */
 function parsePath(expOrFn) {
-  if (typeof expOrFn === 'function') return expOrFn;
-  var segments = expOrFn.split('.');
+  if (typeof expOrFn === "function") return expOrFn;
+  var segments = expOrFn.split(".");
   return function () {
     var obj = this;
     for (var i = 0; i < segments.length; i++) {
@@ -165,7 +197,7 @@ function createWatchers(vm, watchDef) {
   Object.keys(watchDef).forEach(function (key) {
     var def = watchDef[key];
     var handler, opts;
-    if (typeof def === 'function') {
+    if (typeof def === "function") {
       handler = def;
       opts = {};
     } else {
@@ -178,46 +210,57 @@ function createWatchers(vm, watchDef) {
 }
 
 // ===== 测试用例 =====
-var data = observe({ count: 0, user: { name: 'vue', info: { age: 3 } } });
+var data = observe({ count: 0, user: { name: "vue", info: { age: 3 } } });
 
 // 1. 基本监听
-var unwatch1 = watch(data, 'count', function (newVal, oldVal) {
-  console.log('count 变化：', oldVal, '->', newVal);
+var unwatch1 = watch(data, "count", function (newVal, oldVal) {
+  console.log("count 变化：", oldVal, "->", newVal);
 });
 data.count = 1; // => count 变化： 0 -> 1
 data.count = 2; // => count 变化： 1 -> 2
 
 // 2. 路径监听
-watch(data, 'user.name', function (newVal, oldVal) {
-  console.log('name 变化：', oldVal, '->', newVal);
+watch(data, "user.name", function (newVal, oldVal) {
+  console.log("name 变化：", oldVal, "->", newVal);
 });
-data.user.name = 'react'; // => name 变化： vue -> react
+data.user.name = "react"; // => name 变化： vue -> react
 
 // 3. 深度监听
 var deepLog = [];
 watch(
   data,
-  'user',
+  "user",
   function (newVal, oldVal) {
-    deepLog.push('user 变化');
+    deepLog.push("user 变化");
   },
-  { deep: true }
+  { deep: true },
 );
 data.user.info.age = 4; // => user 变化（深度监听到内部变化）
-console.log('deep 触发次数：', deepLog.length); // => 1
+console.log("deep 触发次数：", deepLog.length); // => 1
 
 // 4. immediate
 var immediateLog = [];
-watch(data, 'count', function (newVal, oldVal) {
-  immediateLog.push(newVal);
-}, { immediate: true });
+watch(
+  data,
+  "count",
+  function (newVal, oldVal) {
+    immediateLog.push(newVal);
+  },
+  { immediate: true },
+);
 // => 立即执行，immediateLog = [2]
-console.log('immediate 后日志：', immediateLog); // => [2]
+console.log("immediate 后日志：", immediateLog); // => [2]
 
 // 5. 函数 getter
-watch(data, function () { return this.count * 10; }, function (newVal, oldVal) {
-  console.log('十倍 count：', oldVal, '->', newVal);
-});
+watch(
+  data,
+  function () {
+    return this.count * 10;
+  },
+  function (newVal, oldVal) {
+    console.log("十倍 count：", oldVal, "->", newVal);
+  },
+);
 data.count = 5; // => 十倍 count： 20 -> 50
 
 // 6. unwatch 取消监听
@@ -228,8 +271,15 @@ data.count = 100; // unwatch1 已取消，不触发 count 监听
 // 7. 批量 watch
 var vm = observe({ a: 1, b: 2 });
 var unwatches = createWatchers(vm, {
-  a: function (n, o) { console.log('a:', o, '->', n); },
-  b: { handler: function (n, o) { console.log('b:', o, '->', n); }, immediate: true },
+  a: function (n, o) {
+    console.log("a:", o, "->", n);
+  },
+  b: {
+    handler: function (n, o) {
+      console.log("b:", o, "->", n);
+    },
+    immediate: true,
+  },
 });
 // => b: undefined -> 2 （immediate）
 vm.a = 10; // => a: 1 -> 10

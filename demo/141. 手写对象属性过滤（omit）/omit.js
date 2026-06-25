@@ -21,9 +21,7 @@ function omit(obj, keys) {
   }
 
   // 将 keys 统一为数组，并转为 Set 提升查找性能
-  const keysToOmit = new Set(
-    Array.isArray(keys) ? keys : [keys]
-  );
+  const keysToOmit = new Set(Array.isArray(keys) ? keys : [keys]);
 
   const result = {};
   for (const key of Object.keys(obj)) {

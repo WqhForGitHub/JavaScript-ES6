@@ -118,14 +118,30 @@ function myParse(json) {
         index++;
         const esc = str[index];
         switch (esc) {
-          case '"': result += '"'; break;
-          case "\\": result += "\\"; break;
-          case "/": result += "/"; break;
-          case "n": result += "\n"; break;
-          case "r": result += "\r"; break;
-          case "t": result += "\t"; break;
-          case "b": result += "\b"; break;
-          case "f": result += "\f"; break;
+          case '"':
+            result += '"';
+            break;
+          case "\\":
+            result += "\\";
+            break;
+          case "/":
+            result += "/";
+            break;
+          case "n":
+            result += "\n";
+            break;
+          case "r":
+            result += "\r";
+            break;
+          case "t":
+            result += "\t";
+            break;
+          case "b":
+            result += "\b";
+            break;
+          case "f":
+            result += "\f";
+            break;
           case "u":
             const hex = str.slice(index + 1, index + 5);
             result += String.fromCharCode(parseInt(hex, 16));

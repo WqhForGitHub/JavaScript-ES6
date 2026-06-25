@@ -153,7 +153,9 @@ console.log("Map 去重:", unique4(nanArr)); // [NaN, 1] ✅
 
 // --- 总结 ---
 console.log("\n========== 总结 ==========");
-console.log("推荐优先级：Set > Map > includes > filter+indexOf > reduce > 排序");
+console.log(
+  "推荐优先级：Set > Map > includes > filter+indexOf > reduce > 排序",
+);
 console.log("Set 方案：最简洁、性能好、能处理 NaN，现代项目首选");
 console.log("Map 方案：O(n) 时间复杂度，适合大数据量且需要保留顺序");
 console.log("排序方案：不保留原顺序，仅在不关心顺序时使用");

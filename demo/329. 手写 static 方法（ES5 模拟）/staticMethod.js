@@ -15,7 +15,7 @@
 
 // ES5 实现：静态方法直接挂在构造函数上
 function MathUtil() {
-  throw new TypeError('MathUtil is a utility class, cannot be instantiated');
+  throw new TypeError("MathUtil is a utility class, cannot be instantiated");
 }
 
 // 静态方法
@@ -54,25 +54,25 @@ addStaticMethods(StringUtils, {
     return str.charAt(0).toUpperCase() + str.slice(1);
   },
   reverse: function (str) {
-    return str.split('').reverse().join('');
+    return str.split("").reverse().join("");
   },
   repeat: function (str, n) {
-    var result = '';
+    var result = "";
     for (var i = 0; i < n; i++) result += str;
     return result;
   },
   isBlank: function (str) {
     return str == null || str.trim().length === 0;
-  }
+  },
 });
 
 // 静态方法的继承：子类继承父类静态方法
 function Animal() {}
 Animal.staticMethod = function () {
-  return 'Animal static';
+  return "Animal static";
 };
 Animal.create = function (name) {
-  return { name: name, type: 'animal' };
+  return { name: name, type: "animal" };
 };
 
 function Dog() {}
@@ -85,13 +85,13 @@ Object.keys(Animal).forEach(function (key) {
 });
 // 子类自己的静态方法
 Dog.createDog = function (name, breed) {
-  return { name: name, type: 'dog', breed: breed };
+  return { name: name, type: "dog", breed: breed };
 };
 
 // 测试 1：MathUtil 静态方法
-console.log('--- MathUtil static methods ---');
-console.log(MathUtil.square(5));  // 25
-console.log(MathUtil.cube(3));    // 27
+console.log("--- MathUtil static methods ---");
+console.log(MathUtil.square(5)); // 25
+console.log(MathUtil.cube(3)); // 27
 console.log(MathUtil.sum(1, 2, 3)); // 6
 console.log(MathUtil.max(3, 7, 2)); // 7
 
@@ -102,23 +102,23 @@ try {
 }
 
 // 测试 2：StringUtils 静态方法
-console.log('--- StringUtils static methods ---');
-console.log(StringUtils.capitalize('hello')); // Hello
-console.log(StringUtils.reverse('abc'));       // cba
-console.log(StringUtils.repeat('ab', 3));      // ababab
-console.log(StringUtils.isBlank('   '));       // true
-console.log(StringUtils.isBlank('text'));      // false
+console.log("--- StringUtils static methods ---");
+console.log(StringUtils.capitalize("hello")); // Hello
+console.log(StringUtils.reverse("abc")); // cba
+console.log(StringUtils.repeat("ab", 3)); // ababab
+console.log(StringUtils.isBlank("   ")); // true
+console.log(StringUtils.isBlank("text")); // false
 
 // 测试 3：静态方法继承
-console.log('--- Static inheritance ---');
+console.log("--- Static inheritance ---");
 console.log(Animal.staticMethod()); // Animal static
-console.log(Dog.staticMethod());    // Animal static（继承）
-console.log(Dog.create('Rex'));     // { name: 'Rex', type: 'animal' }（继承）
-console.log(Dog.createDog('Buddy', 'Lab')); // { name: 'Buddy', type: 'dog', breed: 'Lab' }
+console.log(Dog.staticMethod()); // Animal static（继承）
+console.log(Dog.create("Rex")); // { name: 'Rex', type: 'animal' }（继承）
+console.log(Dog.createDog("Buddy", "Lab")); // { name: 'Buddy', type: 'dog', breed: 'Lab' }
 
 // 验证静态方法不在实例上
-console.log('--- Not on instance ---');
+console.log("--- Not on instance ---");
 var d = new Dog();
-console.log(typeof d.staticMethod);   // undefined（实例上没有）
-console.log(typeof d.createDog);      // undefined（实例上没有）
+console.log(typeof d.staticMethod); // undefined（实例上没有）
+console.log(typeof d.createDog); // undefined（实例上没有）
 console.log(typeof Dog.staticMethod); // function（类上有）

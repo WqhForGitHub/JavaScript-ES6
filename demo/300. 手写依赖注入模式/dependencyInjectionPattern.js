@@ -30,7 +30,11 @@ class Container {
     this.providers = new Map();
   }
   register(token, provider, options = {}) {
-    this.providers.set(token, { provider, singleton: !!options.singleton, instance: undefined });
+    this.providers.set(token, {
+      provider,
+      singleton: !!options.singleton,
+      instance: undefined,
+    });
     return this;
   }
   registerInstance(token, instance) {
@@ -45,7 +49,8 @@ class Container {
     return this.providers.has(token);
   }
   resolve(token, seen = new Set()) {
-    if (seen.has(token)) throw new Error(`Circular dependency: ${String(token)}`);
+    if (seen.has(token))
+      throw new Error(`Circular dependency: ${String(token)}`);
     const reg = this.providers.get(token);
     if (!reg) throw new Error(`No provider for ${String(token)}`);
     if (reg.singleton && reg.instance !== undefined) return reg.instance;
@@ -59,11 +64,15 @@ class Container {
   }
   _instantiate(provider, seen) {
     // Factory function: call it with the container for manual wiring.
-    if (typeof provider === 'function' && !provider.prototype) {
+    if (typeof provider === "function" && !provider.prototype) {
       return provider(this);
     }
     // Plain factory registered as a class-like function with no __inject:
-    if (typeof provider === 'function' && provider.__inject === undefined && !/^class\s/.test(Function.prototype.toString.call(provider))) {
+    if (
+      typeof provider === "function" &&
+      provider.__inject === undefined &&
+      !/^class\s/.test(Function.prototype.toString.call(provider))
+    ) {
       return provider(this);
     }
     // Class with declared dependencies.
@@ -111,23 +120,23 @@ class OrderService {
   }
 }
 // Declare constructor dependencies.
-OrderService.__inject = ['Logger', 'PaymentGateway'];
+OrderService.__inject = ["Logger", "PaymentGateway"];
 
 // ---------------- Test cases ----------------
 const container = new Container();
-container.register('Logger', Logger, { singleton: true });
-container.register('PaymentGateway', PaymentGateway, { singleton: true });
-container.register('OrderService', OrderService);
+container.register("Logger", Logger, { singleton: true });
+container.register("PaymentGateway", PaymentGateway, { singleton: true });
+container.register("OrderService", OrderService);
 
-const order = container.resolve('OrderService');
+const order = container.resolve("OrderService");
 console.log(order.checkout(42));
 // Expected: charged 42 (real gateway)
 // (checkout() also calls logger.log('checkout 42') internally; Logger.log returns
 //  the formatted string but does not print it, so only the charge result is shown.)
 
 // Singleton: Logger is shared across all consumers.
-const loggerA = container.resolve('Logger');
-const loggerB = container.resolve('Logger');
+const loggerA = container.resolve("Logger");
+const loggerB = container.resolve("Logger");
 console.log(loggerA === loggerB);
 // Expected: true
 
@@ -140,8 +149,8 @@ class Counter {
     return ++this.n;
   }
 }
-container.register('Counter', Counter); // not singleton
-console.log(container.resolve('Counter') !== container.resolve('Counter'));
+container.register("Counter", Counter); // not singleton
+console.log(container.resolve("Counter") !== container.resolve("Counter"));
 // Expected: true
 
 // Test override: swap PaymentGateway with a mock in a child container, no change
@@ -152,30 +161,30 @@ class MockGateway {
     return `MOCK charged ${amount}`;
   }
 }
-testContainer.register('PaymentGateway', MockGateway, { singleton: true });
+testContainer.register("PaymentGateway", MockGateway, { singleton: true });
 // Clear cached OrderService so it rebuilds with the new gateway.
-testContainer.register('OrderService', OrderService);
-const testOrder = testContainer.resolve('OrderService');
+testContainer.register("OrderService", OrderService);
+const testOrder = testContainer.resolve("OrderService");
 console.log(testOrder.checkout(99));
 // Expected: LOG: checkout 99
 //           MOCK charged 99
 
 // Factory provider that receives the container.
-container.register('Config', () => ({ env: 'prod', version: '1.0.0' }));
-console.log(container.resolve('Config'));
+container.register("Config", () => ({ env: "prod", version: "1.0.0" }));
+console.log(container.resolve("Config"));
 // Expected: { env: 'prod', version: '1.0.0' }
 
 // Circular dependency detection
 class A {}
 class B {}
-A.__inject = ['B'];
-B.__inject = ['A'];
+A.__inject = ["B"];
+B.__inject = ["A"];
 const cyclic = new Container();
-cyclic.register('A', A);
-cyclic.register('B', B);
+cyclic.register("A", A);
+cyclic.register("B", B);
 try {
-  cyclic.resolve('A');
+  cyclic.resolve("A");
 } catch (e) {
-  console.log('Cycle:', e.message);
+  console.log("Cycle:", e.message);
   // Expected: Cycle: Circular dependency: A
 }

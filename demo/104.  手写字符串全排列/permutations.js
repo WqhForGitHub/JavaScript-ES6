@@ -149,7 +149,9 @@ methods.forEach(({ name, fn }) => {
   testCases.forEach(({ value, expectedLen, desc }) => {
     const result = fn(value);
     const status = result.length === expectedLen ? "✓" : "✗";
-    console.log(`  ${status} ${desc}: ${result.length} 种排列 (期望 ${expectedLen})`);
+    console.log(
+      `  ${status} ${desc}: ${result.length} 种排列 (期望 ${expectedLen})`,
+    );
     if (value.length <= 3) {
       console.log(`       结果: [${result.join(", ")}]`);
     }

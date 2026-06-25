@@ -21,37 +21,39 @@
  */
 
 function pathJoin(...args) {
-  if (args.length === 0) return '.';
+  if (args.length === 0) return ".";
 
-  let joined = '';
+  let joined = "";
   let firstPart;
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (typeof arg !== 'string') {
-      throw new TypeError('Path must be a string. Received ' + JSON.stringify(arg));
+    if (typeof arg !== "string") {
+      throw new TypeError(
+        "Path must be a string. Received " + JSON.stringify(arg),
+      );
     }
-    if (arg === '') continue;
+    if (arg === "") continue;
 
     // 记录第一段，判断是否是绝对路径
-    if (joined === '') {
+    if (joined === "") {
       firstPart = arg;
       joined = arg;
     } else {
       // 避免重复斜杠
-      if (joined[joined.length - 1] === '/' || arg[0] === '/') {
+      if (joined[joined.length - 1] === "/" || arg[0] === "/") {
         joined += arg;
       } else {
-        joined += '/' + arg;
+        joined += "/" + arg;
       }
     }
   }
 
-  if (joined === '') return '.';
+  if (joined === "") return ".";
 
   // 判断是否绝对路径
-  const isAbsolute = joined[0] === '/';
+  const isAbsolute = joined[0] === "/";
   // 检测盘符
-  let device = '';
+  let device = "";
   const winDriveMatch = /^([a-zA-Z]:)(.*)/.exec(joined);
   if (winDriveMatch) {
     device = winDriveMatch[1];
@@ -62,17 +64,17 @@ function pathJoin(...args) {
   const normalized = normalizeString(joined, !isAbsolute);
 
   let result = normalized;
-  if (device) result = device + (result[0] === '/' ? '' : '/') + result;
-  if (isAbsolute && (!device)) result = '/' + result;
+  if (device) result = device + (result[0] === "/" ? "" : "/") + result;
+  if (isAbsolute && !device) result = "/" + result;
 
   // 若规范化后为空
-  if (result === '' || result === device) return device ? device + '/' : '.';
+  if (result === "" || result === device) return device ? device + "/" : ".";
   return result;
 }
 
 // 复用 normalizeString（处理 . 和 ..）
 function normalizeString(path, allowAboveRoot) {
-  let res = '';
+  let res = "";
   let lastSegmentLength = 0;
   let lastSlash = -1;
   let dots = 0;
@@ -90,20 +92,21 @@ function normalizeString(path, allowAboveRoot) {
         if (
           res.length === 2 ||
           res.length === 1 ||
-          (res.length > 0 && res.charCodeAt(res.length - 1) === 46 &&
+          (res.length > 0 &&
+            res.charCodeAt(res.length - 1) === 46 &&
             (res.length < 2 || res.charCodeAt(res.length - 2) === 46))
         ) {
           // 已经在根，忽略
         } else if (res.length > 0) {
-          const idx = res.lastIndexOf('/', res.length - 2);
-          if (idx === -1) res = '';
+          const idx = res.lastIndexOf("/", res.length - 2);
+          if (idx === -1) res = "";
           else res = res.slice(0, idx);
         }
         dots = 0;
         lastSlash = i;
         continue;
       }
-      if (res) res += '/';
+      if (res) res += "/";
       res += path.slice(lastSlash + 1, i);
       lastSegmentLength = i - lastSlash - 1;
       dots = 0;
@@ -119,37 +122,43 @@ function normalizeString(path, allowAboveRoot) {
 
 // ===== 测试 =====
 
-console.log(pathJoin('/foo', 'bar', 'baz/asdf', 'quux', '..'));
+console.log(pathJoin("/foo", "bar", "baz/asdf", "quux", ".."));
 // '/foo/bar/baz/asdf'
 
-console.log(pathJoin('foo', 'bar', 'baz')); // 'foo/bar/baz'
+console.log(pathJoin("foo", "bar", "baz")); // 'foo/bar/baz'
 
 // 非字符串参数会抛 TypeError
 try {
-  pathJoin('foo', 123, 'bar');
-  console.log('should have thrown');
+  pathJoin("foo", 123, "bar");
+  console.log("should have thrown");
 } catch (e) {
-  console.log('error type:', e instanceof TypeError); // true
+  console.log("error type:", e instanceof TypeError); // true
 }
 
-console.log(pathJoin('a/b', 'c/d', '../e')); // 'a/b/c/e'
-console.log(pathJoin('a/b', '..', '..', 'c')); // 'c'
-console.log(pathJoin('/a', '/b', '/c')); // '/a/b/c'
-console.log(pathJoin('')); // '.'
-console.log(pathJoin('.', '.')); // '.'
-console.log(pathJoin('foo//bar', 'baz')); // 'foo/bar/baz'
-console.log(pathJoin('foo/', '/bar')); // 'foo/bar'
-console.log(pathJoin('./a', './b', './c')); // 'a/b/c'
+console.log(pathJoin("a/b", "c/d", "../e")); // 'a/b/c/e'
+console.log(pathJoin("a/b", "..", "..", "c")); // 'c'
+console.log(pathJoin("/a", "/b", "/c")); // '/a/b/c'
+console.log(pathJoin("")); // '.'
+console.log(pathJoin(".", ".")); // '.'
+console.log(pathJoin("foo//bar", "baz")); // 'foo/bar/baz'
+console.log(pathJoin("foo/", "/bar")); // 'foo/bar'
+console.log(pathJoin("./a", "./b", "./c")); // 'a/b/c'
 
 // 与原生对比（如果可用）
-if (typeof require === 'function') {
+if (typeof require === "function") {
   try {
-    const path = require('path');
-    const cases = [['/foo', 'bar', 'baz/asdf', 'quux', '..'], ['a/b', 'c/d', '../e'], ['foo', 'bar', 'baz']];
+    const path = require("path");
+    const cases = [
+      ["/foo", "bar", "baz/asdf", "quux", ".."],
+      ["a/b", "c/d", "../e"],
+      ["foo", "bar", "baz"],
+    ];
     for (const c of cases) {
       const mine = pathJoin(...c);
       const native = path.join(...c);
-      console.log(`compare [${c.join(',')}]: mine=${mine} native=${native} same=${mine === native}`);
+      console.log(
+        `compare [${c.join(",")}]: mine=${mine} native=${native} same=${mine === native}`,
+      );
     }
   } catch (e) {
     // 模块不可用，跳过

@@ -71,14 +71,19 @@ console.log(mapped); // { 'a!': 1, 'b!': 2 }
 console.log(original); // { a: 1, b: 2 }
 
 // 实用场景：数组转对象，用某个字段作为 key
-const users = [{ id: "u1", name: "Tom" }, { id: "u2", name: "Jerry" }];
+const users = [
+  { id: "u1", name: "Tom" },
+  { id: "u2", name: "Jerry" },
+];
 const usersById = mapKeys(
   Object.fromEntries(users.map((u, i) => [i, u])),
-  (value) => value.id
+  (value) => value.id,
 );
 console.log(usersById.u1.name); // 'Tom'
 console.log(usersById.u2.name); // 'Jerry'
 
 // 带 index 信息的 key
-console.log(mapKeys({ a: 10, b: 20, c: 30 }, (value, key) => `${key}_${value}`));
+console.log(
+  mapKeys({ a: 10, b: 20, c: 30 }, (value, key) => `${key}_${value}`),
+);
 // { 'a_10': 10, 'b_20': 20, 'c_30': 30 }

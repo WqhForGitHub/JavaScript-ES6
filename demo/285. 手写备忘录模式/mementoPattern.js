@@ -25,11 +25,14 @@ class EditorMemento {
 
 class Editor {
   constructor() {
-    this.content = '';
+    this.content = "";
     this.cursor = 0;
   }
   type(text) {
-    this.content = this.content.slice(0, this.cursor) + text + this.content.slice(this.cursor);
+    this.content =
+      this.content.slice(0, this.cursor) +
+      text +
+      this.content.slice(this.cursor);
     this.cursor += text.length;
   }
   moveCursor(pos) {
@@ -37,7 +40,8 @@ class Editor {
   }
   delete(n) {
     const start = Math.max(0, this.cursor - n);
-    this.content = this.content.slice(0, start) + this.content.slice(this.cursor);
+    this.content =
+      this.content.slice(0, start) + this.content.slice(this.cursor);
     this.cursor = start;
   }
 
@@ -85,12 +89,12 @@ const editor = new Editor();
 const history = new History(editor);
 
 history.snapshot();
-editor.type('Hello');
+editor.type("Hello");
 history.snapshot();
-editor.type(' World');
+editor.type(" World");
 history.snapshot();
 editor.moveCursor(5);
-editor.type(',');
+editor.type(",");
 console.log(editor.toString());
 // Expected: "Hello, World" @6
 
@@ -116,7 +120,7 @@ console.log(editor.toString());
 // Memento is immutable (frozen)
 const m = editor.save();
 try {
-  m._state = { content: 'hacked' };
+  m._state = { content: "hacked" };
 } catch (e) {
   // strict mode throws; otherwise silently ignored
 }

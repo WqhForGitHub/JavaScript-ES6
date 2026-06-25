@@ -20,11 +20,7 @@ function juxt(fns) {
 // ===== 测试 =====
 
 // 基本：同一输入多函数
-const f = juxt([
-  (x) => x + 1,
-  (x) => x * 2,
-  (x) => x * x,
-]);
+const f = juxt([(x) => x + 1, (x) => x * 2, (x) => x * x]);
 console.log(f(3)); // [4, 6, 9]
 
 // 字符串：取首尾、长度、大写
@@ -81,16 +77,10 @@ console.log(juxt([])("anything")); // []
 console.log(juxt([(x) => x + 1])(10)); // [11]
 
 // 应用：把对象转成 [key, value] 对数组
-const toPairs = juxt([
-  (obj) => Object.keys(obj),
-  (obj) => Object.values(obj),
-]);
+const toPairs = juxt([(obj) => Object.keys(obj), (obj) => Object.values(obj)]);
 console.log(toPairs({ a: 1, b: 2 })); // [['a','b'], [1,2]]
 
 // 配合 transduce 风格：juxt 对每个元素
-const perChar = juxt([
-  (c) => c.toUpperCase(),
-  (c) => c.charCodeAt(0),
-]);
+const perChar = juxt([(c) => c.toUpperCase(), (c) => c.charCodeAt(0)]);
 console.log("abc".split("").map(perChar));
 // [['A',97], ['B',98], ['C',99]]

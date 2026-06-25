@@ -29,8 +29,23 @@ function defaults(object, ...sources) {
 
 // --- Tests ---
 
-console.log('defaults fills undefined:', JSON.stringify(defaults({ a: 1 }, { a: 2, b: 2 }))); // expected: {"a":1,"b":2}
-console.log('defaults fills null too:', JSON.stringify(defaults({ a: null }, { a: 2, b: 3 }))); // expected: {"a":null,"b":3}  (null is not undefined)
-console.log('defaults fills missing:', JSON.stringify(defaults({}, { x: 1, y: 2 }))); // expected: {"x":1,"y":2}
-console.log('defaults multiple sources:', JSON.stringify(defaults({ a: 1 }, { a: 9, b: 2 }, { b: 9, c: 3 }))); // expected: {"a":1,"b":2,"c":3}
-console.log('defaults chained:', JSON.stringify(defaults({ a: undefined }, { a: 5 }, { a: 9 }))); // expected: {"a":5} (first wins)
+console.log(
+  "defaults fills undefined:",
+  JSON.stringify(defaults({ a: 1 }, { a: 2, b: 2 })),
+); // expected: {"a":1,"b":2}
+console.log(
+  "defaults fills null too:",
+  JSON.stringify(defaults({ a: null }, { a: 2, b: 3 })),
+); // expected: {"a":null,"b":3}  (null is not undefined)
+console.log(
+  "defaults fills missing:",
+  JSON.stringify(defaults({}, { x: 1, y: 2 })),
+); // expected: {"x":1,"y":2}
+console.log(
+  "defaults multiple sources:",
+  JSON.stringify(defaults({ a: 1 }, { a: 9, b: 2 }, { b: 9, c: 3 })),
+); // expected: {"a":1,"b":2,"c":3}
+console.log(
+  "defaults chained:",
+  JSON.stringify(defaults({ a: undefined }, { a: 5 }, { a: 9 })),
+); // expected: {"a":5} (first wins)

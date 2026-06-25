@@ -138,7 +138,10 @@ function bubbleSortBy(arr, compare) {
   }
   return result;
 }
-console.log("按分数排序:", bubbleSortBy(objects, (a, b) => a.score - b.score));
+console.log(
+  "按分数排序:",
+  bubbleSortBy(objects, (a, b) => a.score - b.score),
+);
 // B(80), D(80), A(90), C(90) —— 同分数保持原顺序，稳定
 
 // --- 优化效果对比（已有序数组）---

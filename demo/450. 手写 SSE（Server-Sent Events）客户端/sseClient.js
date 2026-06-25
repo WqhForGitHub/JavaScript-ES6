@@ -34,7 +34,7 @@ class SSEClient {
         reconnectInterval: 3000,
         maxReconnectAttempts: Infinity,
       },
-      options
+      options,
     );
 
     this._listeners = new Map(); // event -> [fn]
@@ -54,7 +54,11 @@ class SSEClient {
 
   off(event, fn) {
     const arr = this._listeners.get(event);
-    if (arr) this._listeners.set(event, arr.filter((f) => f !== fn));
+    if (arr)
+      this._listeners.set(
+        event,
+        arr.filter((f) => f !== fn),
+      );
     return this;
   }
 
@@ -129,8 +133,7 @@ class SSEClient {
       if (!line || line.startsWith(":")) continue; // 空行或注释
       const colonIdx = line.indexOf(":");
       const field = colonIdx === -1 ? line : line.slice(0, colonIdx);
-      let value =
-        colonIdx === -1 ? "" : line.slice(colonIdx + 1);
+      let value = colonIdx === -1 ? "" : line.slice(colonIdx + 1);
       if (value.startsWith(" ")) value = value.slice(1); // 去掉一个前导空格
 
       switch (field) {
@@ -166,7 +169,7 @@ class SSEClient {
     this.reconnectAttempts++;
     this._reconnectTimer = setTimeout(
       () => this.connect(),
-      this.options.reconnectInterval
+      this.options.reconnectInterval,
     );
   }
 
@@ -216,9 +219,9 @@ function makeMockResponse(chunks) {
 const mockChunks = [
   // utf-8 字节
   new TextEncoder().encode(
-    "event: update\ndata: {\"n\":1}\n\n" +
+    'event: update\ndata: {"n":1}\n\n' +
       "data: hello\ndata: world\n\n" +
-      "id: 42\nevent: notice\ndata: notice-msg\n\n"
+      "id: 42\nevent: notice\ndata: notice-msg\n\n",
   ),
 ];
 

@@ -178,7 +178,9 @@ function timed(fn, arr) {
   fn(arr);
   return (performance.now() - start).toFixed(3);
 }
-const random = Array.from({ length: 10000 }, () => Math.floor(Math.random() * 10000));
+const random = Array.from({ length: 10000 }, () =>
+  Math.floor(Math.random() * 10000),
+);
 console.log(`简单版:     ${timed(quickSort1, [...random])}ms`);
 console.log(`原地版:     ${timed(quickSort2, [...random])}ms`);
 console.log(`随机基准:   ${timed(quickSort2Random, [...random])}ms`);

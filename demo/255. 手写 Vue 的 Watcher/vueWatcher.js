@@ -23,24 +23,51 @@ function Dep() {
 Dep.uid = 0;
 Dep.target = null;
 var targetStack = [];
-Dep.pushTarget = function (t) { targetStack.push(t); Dep.target = t; };
-Dep.popTarget = function () { targetStack.pop(); Dep.target = targetStack[targetStack.length - 1] || null; };
-Dep.prototype.addSub = function (s) { if (this.subs.indexOf(s) === -1) this.subs.push(s); };
-Dep.prototype.removeSub = function (s) { var i = this.subs.indexOf(s); if (i !== -1) this.subs.splice(i, 1); };
-Dep.prototype.depend = function () { if (Dep.target) Dep.target.addDep(this); };
-Dep.prototype.notify = function () { this.subs.slice().forEach(function (s) { s.update(); }); };
+Dep.pushTarget = function (t) {
+  targetStack.push(t);
+  Dep.target = t;
+};
+Dep.popTarget = function () {
+  targetStack.pop();
+  Dep.target = targetStack[targetStack.length - 1] || null;
+};
+Dep.prototype.addSub = function (s) {
+  if (this.subs.indexOf(s) === -1) this.subs.push(s);
+};
+Dep.prototype.removeSub = function (s) {
+  var i = this.subs.indexOf(s);
+  if (i !== -1) this.subs.splice(i, 1);
+};
+Dep.prototype.depend = function () {
+  if (Dep.target) Dep.target.addDep(this);
+};
+Dep.prototype.notify = function () {
+  this.subs.slice().forEach(function (s) {
+    s.update();
+  });
+};
 
 function defineReactive(obj, key, val) {
   var dep = new Dep();
   Object.defineProperty(obj, key, {
-    enumerable: true, configurable: true,
-    get: function () { dep.depend(); return val; },
-    set: function (v) { if (v === val) return; val = v; dep.notify(); },
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      dep.depend();
+      return val;
+    },
+    set: function (v) {
+      if (v === val) return;
+      val = v;
+      dep.notify();
+    },
   });
 }
 function observe(obj) {
-  if (!obj || typeof obj !== 'object') return obj;
-  Object.keys(obj).forEach(function (k) { defineReactive(obj, k, obj[k]); });
+  if (!obj || typeof obj !== "object") return obj;
+  Object.keys(obj).forEach(function (k) {
+    defineReactive(obj, k, obj[k]);
+  });
   return obj;
 }
 
@@ -65,13 +92,15 @@ function Watcher(vm, expOrFn, cb, options) {
   this.dirty = this.lazy; // lazy 模式初始为 dirty
 
   // 解析 getter
-  if (typeof expOrFn === 'function') {
+  if (typeof expOrFn === "function") {
     this.getter = expOrFn;
   } else {
     this.getter = function () {
-      var path = expOrFn.split('.');
+      var path = expOrFn.split(".");
       var val = vm;
-      path.forEach(function (k) { val = val[k]; });
+      path.forEach(function (k) {
+        val = val[k];
+      });
       return val;
     };
   }
@@ -141,7 +170,7 @@ Watcher.prototype.update = function () {
 Watcher.prototype.run = function () {
   var value = this.get();
   var oldValue = this.value;
-  if (value !== oldValue || this.deep || typeof value === 'object') {
+  if (value !== oldValue || this.deep || typeof value === "object") {
     this.value = value;
     this.cb.call(this.vm, value, oldValue);
   }
@@ -162,14 +191,20 @@ Watcher.prototype.evaluate = function () {
  * 依赖所有下游 Watcher
  */
 Watcher.prototype.depend = function () {
-  this.deps.forEach(function (dep) { dep.depend(); });
+  this.deps.forEach(function (dep) {
+    dep.depend();
+  });
 };
 
 /**
  * 销毁 Watcher，移除所有依赖
  */
 Watcher.prototype.teardown = function () {
-  this.deps.forEach(function (dep) { dep.removeSub(this); }.bind(this));
+  this.deps.forEach(
+    function (dep) {
+      dep.removeSub(this);
+    }.bind(this),
+  );
   this.deps = [];
   this.depIds = {};
 };
@@ -178,7 +213,7 @@ Watcher.prototype.teardown = function () {
  * 递归遍历对象（深度监听用）
  */
 function traverse(val) {
-  if (val && typeof val === 'object') {
+  if (val && typeof val === "object") {
     Object.keys(val).forEach(function (k) {
       traverse(val[k]);
     });
@@ -186,11 +221,11 @@ function traverse(val) {
 }
 
 // ===== 测试用例 =====
-var data = observe({ count: 0, user: { name: 'vue', age: 3 } });
+var data = observe({ count: 0, user: { name: "vue", age: 3 } });
 
 // 1. 普通 Watcher
-var w1 = new Watcher(data, 'count', function (newVal, oldVal) {
-  console.log('count 变化：', oldVal, '->', newVal);
+var w1 = new Watcher(data, "count", function (newVal, oldVal) {
+  console.log("count 变化：", oldVal, "->", newVal);
 });
 data.count = 1; // => count 变化： 0 -> 1
 data.count = 2; // => count 变化： 1 -> 2
@@ -198,20 +233,26 @@ data.count = 2; // => count 变化： 1 -> 2
 // 2. 深度监听
 var w2 = new Watcher(
   data,
-  function () { return this.user; },
-  function () { console.log('user 对象变化'); },
-  { deep: true }
+  function () {
+    return this.user;
+  },
+  function () {
+    console.log("user 对象变化");
+  },
+  { deep: true },
 );
-data.user.name = 'react'; // => user 对象变化
-data.user.age = 5;        // => user 对象变化
+data.user.name = "react"; // => user 对象变化
+data.user.age = 5; // => user 对象变化
 
 // 3. 函数 getter
 var w3 = new Watcher(
   data,
-  function () { return this.count * 2; },
+  function () {
+    return this.count * 2;
+  },
   function (newVal, oldVal) {
-    console.log('双倍 count：', oldVal, '->', newVal);
-  }
+    console.log("双倍 count：", oldVal, "->", newVal);
+  },
 );
 data.count = 10; // => count 变化： 2 -> 10 \n 双倍 count： 4 -> 20
 
@@ -220,4 +261,4 @@ w1.teardown();
 data.count = 20; // w1 不再触发，只触发 w3
 // => 双倍 count： 20 -> 40
 
-console.log('w3 当前值：', w3.value); // => 40
+console.log("w3 当前值：", w3.value); // => 40

@@ -20,12 +20,12 @@ function parseUrlParams(url) {
   // 提取查询部分
   var query = url;
   // 如果是完整 URL，取 ? 后面的部分
-  var queryIndex = url.indexOf('?');
+  var queryIndex = url.indexOf("?");
   if (queryIndex !== -1) {
     query = url.slice(queryIndex + 1);
   }
   // 去掉 hash 部分
-  var hashIndex = query.indexOf('#');
+  var hashIndex = query.indexOf("#");
   if (hashIndex !== -1) {
     query = query.slice(0, hashIndex);
   }
@@ -33,22 +33,22 @@ function parseUrlParams(url) {
   if (!query) return {};
 
   var params = {};
-  var pairs = query.split('&');
+  var pairs = query.split("&");
 
   pairs.forEach(function (pair) {
     if (!pair) return;
-    var eqIndex = pair.indexOf('=');
+    var eqIndex = pair.indexOf("=");
     var key, value;
     if (eqIndex === -1) {
       key = pair;
-      value = '';
+      value = "";
     } else {
       key = pair.slice(0, eqIndex);
       value = pair.slice(eqIndex + 1);
     }
     // 解码
-    key = decodeURIComponent(key.replace(/\+/g, ' '));
-    value = decodeURIComponent(value.replace(/\+/g, ' '));
+    key = decodeURIComponent(key.replace(/\+/g, " "));
+    value = decodeURIComponent(value.replace(/\+/g, " "));
 
     // 处理重复参数（转为数组）
     if (key in params) {
@@ -72,7 +72,7 @@ function parseUrlParams(url) {
  * @returns {string} 查询字符串（不含 ?）
  */
 function stringifyUrlParams(params, encode) {
-  if (!params || typeof params !== 'object') return '';
+  if (!params || typeof params !== "object") return "";
   encode = encode !== false;
 
   var pairs = [];
@@ -84,16 +84,16 @@ function stringifyUrlParams(params, encode) {
       value.forEach(function (v) {
         var k = encode ? encodeURIComponent(key) : key;
         var val = encode ? encodeURIComponent(v) : v;
-        pairs.push(k + '=' + val);
+        pairs.push(k + "=" + val);
       });
     } else {
       var k = encode ? encodeURIComponent(key) : key;
       var val = encode ? encodeURIComponent(value) : String(value);
-      pairs.push(k + '=' + val);
+      pairs.push(k + "=" + val);
     }
   });
 
-  return pairs.join('&');
+  return pairs.join("&");
 }
 
 /**
@@ -114,13 +114,13 @@ function getUrlParam(url, name) {
  * @returns {Object}
  */
 function parseByURLSearchParams(url) {
-  if (typeof URLSearchParams === 'undefined') {
+  if (typeof URLSearchParams === "undefined") {
     return parseUrlParams(url);
   }
   var query = url;
-  var idx = url.indexOf('?');
+  var idx = url.indexOf("?");
   if (idx !== -1) query = url.slice(idx + 1);
-  var hashIdx = query.indexOf('#');
+  var hashIdx = query.indexOf("#");
   if (hashIdx !== -1) query = query.slice(0, hashIdx);
 
   var usp = new URLSearchParams(query);
@@ -137,36 +137,38 @@ function parseByURLSearchParams(url) {
 }
 
 // ===== 测试用例 =====
-console.log(parseUrlParams('https://example.com?a=1&b=2'));
+console.log(parseUrlParams("https://example.com?a=1&b=2"));
 // => { a: '1', b: '2' }
 
-console.log(parseUrlParams('?name=hello&age=20'));
+console.log(parseUrlParams("?name=hello&age=20"));
 // => { name: 'hello', age: '20' }
 
-console.log(parseUrlParams('a=1&b=2&c=3'));
+console.log(parseUrlParams("a=1&b=2&c=3"));
 // => { a: '1', b: '2', c: '3' }
 
-console.log(parseUrlParams('https://example.com?tags=js&tags=css&tags=html'));
+console.log(parseUrlParams("https://example.com?tags=js&tags=css&tags=html"));
 // => { tags: ['js', 'css', 'html'] }
 
-console.log(parseUrlParams('https://example.com?q=hello%20world&lang=zh'));
+console.log(parseUrlParams("https://example.com?q=hello%20world&lang=zh"));
 // => { q: 'hello world', lang: 'zh' }
 
-console.log(parseUrlParams('https://example.com?name=张三&city=北京'));
+console.log(parseUrlParams("https://example.com?name=张三&city=北京"));
 // => { name: '张三', city: '北京' }
 
-console.log(parseUrlParams('https://example.com?a=1#hash'));
+console.log(parseUrlParams("https://example.com?a=1#hash"));
 // => { a: '1' }
 
-console.log(stringifyUrlParams({ a: 1, b: 'hello', c: [1, 2, 3] }));
+console.log(stringifyUrlParams({ a: 1, b: "hello", c: [1, 2, 3] }));
 // => 'a=1&b=hello&c=1&c=2&c=3'
 
-console.log(getUrlParam('https://example.com?id=123&type=article', 'id'));
+console.log(getUrlParam("https://example.com?id=123&type=article", "id"));
 // => '123'
 
-console.log(getUrlParam('https://example.com?id=123', 'notexist'));
+console.log(getUrlParam("https://example.com?id=123", "notexist"));
 // => null
 
 // 解码测试
-console.log(stringifyUrlParams({ url: 'https://test.com?a=1', name: 'hello world' }));
+console.log(
+  stringifyUrlParams({ url: "https://test.com?a=1", name: "hello world" }),
+);
 // => 'url=https%3A%2F%2Ftest.com%3Fa%3D1&name=hello%20world'

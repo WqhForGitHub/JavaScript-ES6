@@ -14,7 +14,7 @@
 function mapValues(object, iteratee = (v) => v) {
   if (object == null) return {};
   const get =
-    typeof iteratee === 'function'
+    typeof iteratee === "function"
       ? iteratee
       : (v) => (v == null ? undefined : v[iteratee]);
   const result = {};
@@ -27,13 +27,25 @@ function mapValues(object, iteratee = (v) => v) {
 // --- Tests ---
 
 const users = {
-  fred: { user: 'fred', age: 40 },
-  pebbles: { user: 'pebbles', age: 1 },
+  fred: { user: "fred", age: 40 },
+  pebbles: { user: "pebbles", age: 1 },
 };
 
-console.log('mapValues function:', JSON.stringify(mapValues(users, (o) => o.age))); // expected: {"fred":40,"pebbles":1}
-console.log('mapValues shorthand:', JSON.stringify(mapValues(users, 'age'))); // expected: {"fred":40,"pebbles":1}
-console.log('mapValues square:', JSON.stringify(mapValues({ a: 1, b: 2, c: 3 }, (n) => n * n))); // expected: {"a":1,"b":4,"c":9}
-console.log('mapValues default identity:', JSON.stringify(mapValues({ a: 1, b: 2 }))); // expected: {"a":1,"b":2}
-console.log('mapValues null:', JSON.stringify(mapValues(null))); // expected: {}
-console.log('mapValues with key:', JSON.stringify(mapValues({ a: 1, b: 2 }, (v, k) => k + ':' + v))); // expected: {"a":"a:1","b":"b:2"}
+console.log(
+  "mapValues function:",
+  JSON.stringify(mapValues(users, (o) => o.age)),
+); // expected: {"fred":40,"pebbles":1}
+console.log("mapValues shorthand:", JSON.stringify(mapValues(users, "age"))); // expected: {"fred":40,"pebbles":1}
+console.log(
+  "mapValues square:",
+  JSON.stringify(mapValues({ a: 1, b: 2, c: 3 }, (n) => n * n)),
+); // expected: {"a":1,"b":4,"c":9}
+console.log(
+  "mapValues default identity:",
+  JSON.stringify(mapValues({ a: 1, b: 2 })),
+); // expected: {"a":1,"b":2}
+console.log("mapValues null:", JSON.stringify(mapValues(null))); // expected: {}
+console.log(
+  "mapValues with key:",
+  JSON.stringify(mapValues({ a: 1, b: 2 }, (v, k) => k + ":" + v)),
+); // expected: {"a":"a:1","b":"b:2"}

@@ -54,7 +54,7 @@ class Queue {
     for (let i = this.head; i < this.tail; i++) {
       arr.push(this.items[i]);
     }
-    return arr.join(',');
+    return arr.join(",");
   }
 }
 
@@ -62,7 +62,7 @@ class Queue {
 const queue = new Queue();
 console.log(queue.isEmpty()); // true
 
-queue.enqueue('a').enqueue('b').enqueue('c');
+queue.enqueue("a").enqueue("b").enqueue("c");
 console.log(queue.size()); // 3
 console.log(queue.front()); // a
 console.log(queue.toString()); // a,b,c
@@ -84,4 +84,4 @@ function hotPotato(names, num) {
   return q.dequeue(); // 胜者
 }
 
-console.log(hotPotato(['Alice', 'Bob', 'Cindy', 'David', 'Eve'], 3)); // David
+console.log(hotPotato(["Alice", "Bob", "Cindy", "David", "Eve"], 3)); // David

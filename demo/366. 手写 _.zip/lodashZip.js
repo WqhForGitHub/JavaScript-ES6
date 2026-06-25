@@ -31,10 +31,16 @@ function zip(...arrays) {
 
 // --- Tests ---
 
-console.log('zip equal length:', JSON.stringify(zip(['a', 'b'], [1, 2], [true, false]))); // expected: [["a",1,true],["b",2,false]]
-console.log('zip unequal length:', JSON.stringify(zip(['a', 'b', 'c'], [1, 2]))); // expected: [["a",1],["b",2],["c",undefined]]
-console.log('zip single array:', JSON.stringify(zip([1, 2, 3]))); // expected: [[1],[2],[3]]
-console.log('zip empty:', JSON.stringify(zip())); // expected: []
-console.log('zip three arrays:', JSON.stringify(zip([1, 2], [3, 4], [5, 6]))); // expected: [[1,3,5],[2,4,6]]
-console.log('zip empty arrays:', JSON.stringify(zip([], []))); // expected: []
-console.log('zip with empty inner:', JSON.stringify(zip(['x'], [], ['y']))); // expected: [["x",undefined,"y"]]
+console.log(
+  "zip equal length:",
+  JSON.stringify(zip(["a", "b"], [1, 2], [true, false])),
+); // expected: [["a",1,true],["b",2,false]]
+console.log(
+  "zip unequal length:",
+  JSON.stringify(zip(["a", "b", "c"], [1, 2])),
+); // expected: [["a",1],["b",2],["c",undefined]]
+console.log("zip single array:", JSON.stringify(zip([1, 2, 3]))); // expected: [[1],[2],[3]]
+console.log("zip empty:", JSON.stringify(zip())); // expected: []
+console.log("zip three arrays:", JSON.stringify(zip([1, 2], [3, 4], [5, 6]))); // expected: [[1,3,5],[2,4,6]]
+console.log("zip empty arrays:", JSON.stringify(zip([], []))); // expected: []
+console.log("zip with empty inner:", JSON.stringify(zip(["x"], [], ["y"]))); // expected: [["x",undefined,"y"]]

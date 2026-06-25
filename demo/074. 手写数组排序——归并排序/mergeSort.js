@@ -169,7 +169,10 @@ function mergeSortBy(arr, compare) {
   return result;
 }
 const sorted = mergeSortBy(objects, (a, b) => a.score - b.score);
-console.log("按分数排序:", sorted.map((o) => `${o.score}${o.name}`));
+console.log(
+  "按分数排序:",
+  sorted.map((o) => `${o.score}${o.name}`),
+);
 // ['80B','80D','90A','90C'] —— 稳定
 
 // --- 性能对比 ---
@@ -179,7 +182,9 @@ function timed(fn, arr) {
   fn(arr);
   return (performance.now() - start).toFixed(3);
 }
-const random = Array.from({ length: 20000 }, () => Math.floor(Math.random() * 20000));
+const random = Array.from({ length: 20000 }, () =>
+  Math.floor(Math.random() * 20000),
+);
 console.log(`递归归并: ${timed(mergeSort1, [...random])}ms`);
 console.log(`原地归并: ${timed(mergeSort2, [...random])}ms`);
 console.log(`迭代归并: ${timed(mergeSort3, [...random])}ms`);

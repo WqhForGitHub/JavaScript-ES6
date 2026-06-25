@@ -41,7 +41,9 @@ function uploadFile(url, files, options = {}) {
     xhr.open("POST", url, true);
 
     // 不要手动设置 Content-Type，浏览器会自动加 boundary
-    Object.keys(headers).forEach((key) => xhr.setRequestHeader(key, headers[key]));
+    Object.keys(headers).forEach((key) =>
+      xhr.setRequestHeader(key, headers[key]),
+    );
 
     // 进度
     xhr.upload.onprogress = function (e) {
@@ -104,9 +106,17 @@ if (typeof XMLHttpRequest === "undefined") {
     this.send = function () {
       // 模拟进度
       this.upload.onprogress &&
-        this.upload.onprogress({ lengthComputable: true, loaded: 50, total: 100 });
+        this.upload.onprogress({
+          lengthComputable: true,
+          loaded: 50,
+          total: 100,
+        });
       this.upload.onprogress &&
-        this.upload.onprogress({ lengthComputable: true, loaded: 100, total: 100 });
+        this.upload.onprogress({
+          lengthComputable: true,
+          loaded: 100,
+          total: 100,
+        });
       this.status = 200;
       this.responseText = JSON.stringify({ url: "/files/demo.txt", size: 100 });
       this.onload && this.onload();
@@ -126,9 +136,13 @@ uploadFile("https://example.com/upload", file, {
   .catch((err) => console.log("上传失败:", err.message));
 
 // 多文件
-uploadFile("https://example.com/upload", [makeFile("a.txt", "a"), makeFile("b.txt", "b")], {
-  onProgress: () => {},
-})
+uploadFile(
+  "https://example.com/upload",
+  [makeFile("a.txt", "a"), makeFile("b.txt", "b")],
+  {
+    onProgress: () => {},
+  },
+)
   .then((res) => console.log("多文件上传:", res.status)) // 多文件上传: 200
   .catch((err) => console.log("err:", err.message));
 

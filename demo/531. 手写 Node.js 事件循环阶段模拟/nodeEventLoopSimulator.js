@@ -153,18 +153,18 @@ const loop = new NodeEventLoopSimulator();
 
 const order = [];
 
-loop.setTimeout(() => order.push('timer'), 10);
-loop.setImmediate(() => order.push('immediate'));
-loop.addPollCallback(() => order.push('poll/io'));
+loop.setTimeout(() => order.push("timer"), 10);
+loop.setImmediate(() => order.push("immediate"));
+loop.addPollCallback(() => order.push("poll/io"));
 
-loop.nextTick(() => order.push('nextTick1'));
-loop.nextTick(() => order.push('nextTick2'));
+loop.nextTick(() => order.push("nextTick1"));
+loop.nextTick(() => order.push("nextTick2"));
 
-loop.enqueueMicrotask(() => order.push('microtask'));
+loop.enqueueMicrotask(() => order.push("microtask"));
 
 // nextTick 与 microtask 会在阶段切换前清空
 setTimeout(() => {
-  console.log('执行顺序:', order);
+  console.log("执行顺序:", order);
   // 期望顺序大致为:
   // ['nextTick1', 'nextTick2', 'microtask', 'poll/io', 'immediate', 'timer']
   // 因为 nextTick 优先于 microtask，poll 阶段执行 I/O 回调，
@@ -174,8 +174,8 @@ setTimeout(() => {
 // 验证 nextTick 优先于 Promise
 const loop2 = new NodeEventLoopSimulator();
 const order2 = [];
-loop2.nextTick(() => order2.push('nextTick'));
-loop2.enqueueMicrotask(() => order2.push('promise'));
+loop2.nextTick(() => order2.push("nextTick"));
+loop2.enqueueMicrotask(() => order2.push("promise"));
 loop2.setImmediate(() => {
-  console.log('nextTick 先于 promise:', order2); // ['nextTick', 'promise']
+  console.log("nextTick 先于 promise:", order2); // ['nextTick', 'promise']
 });

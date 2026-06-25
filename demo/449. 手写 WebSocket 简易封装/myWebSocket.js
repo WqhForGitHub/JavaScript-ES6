@@ -47,7 +47,7 @@ class MyWebSocket extends EventEmitter {
         heartbeatInterval: 30000,
         heartbeatMessage: "ping",
       },
-      options
+      options,
     );
 
     this.ws = null;
@@ -64,15 +64,15 @@ class MyWebSocket extends EventEmitter {
     const { protocols } = this.options;
     // Node 环境用传入的 WS 实现或 mock
     const WSImpl =
-      typeof WebSocket !== "undefined"
-        ? WebSocket
-        : this.options.WebSocketImpl;
+      typeof WebSocket !== "undefined" ? WebSocket : this.options.WebSocketImpl;
     if (!WSImpl) {
       // 无可用实现，仅做事件演练
       this.emit("error", new Error("No WebSocket implementation"));
       return;
     }
-    this.ws = protocols ? new WSImpl(this.url, protocols) : new WSImpl(this.url);
+    this.ws = protocols
+      ? new WSImpl(this.url, protocols)
+      : new WSImpl(this.url);
 
     this.ws.onopen = (event) => {
       this.reconnectAttempts = 0;

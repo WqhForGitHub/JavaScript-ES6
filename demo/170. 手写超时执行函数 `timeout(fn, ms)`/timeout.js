@@ -23,7 +23,7 @@ function timeout(fn, ms, message = "Timeout") {
     // 这样产生的派生 Promise 是 fulfilled，不会因 task 拒绝而变成 unhandledRejection
     task.then(
       () => clearTimeout(id),
-      () => clearTimeout(id)
+      () => clearTimeout(id),
     );
     return Promise.race([task, timer]);
   };
@@ -57,7 +57,7 @@ function timeoutCancelable(fn, ms) {
         (e) => {
           clearTimeout(timerId);
           reject(e);
-        }
+        },
       );
   });
   promise.cancel = () => {
@@ -78,7 +78,7 @@ function timeoutCancelable(fn, ms) {
 (async () => {
   const slow = timeout(
     () => new Promise((r) => setTimeout(() => r("late"), 300)),
-    100
+    100,
   );
   try {
     await slow();
@@ -92,7 +92,7 @@ function timeoutCancelable(fn, ms) {
   const slow = timeout(
     () => new Promise((r) => setTimeout(r, 200)),
     50,
-    "请求超时"
+    "请求超时",
   );
   try {
     await slow();
@@ -106,7 +106,7 @@ function timeoutCancelable(fn, ms) {
   const slow = timeoutWithDefault(
     () => new Promise((r) => setTimeout(() => r("real"), 200)),
     100,
-    "default"
+    "default",
   );
   console.log("超时默认值:", await slow()); // 'default'
 })();
@@ -116,17 +116,14 @@ function timeoutCancelable(fn, ms) {
   const fast = timeoutWithDefault(
     () => Promise.resolve("real"),
     100,
-    "default"
+    "default",
   );
   console.log("正常返回:", await fast()); // 'real'
 })();
 
 // 应用：请求超时控制
 async function fetchWithTimeout(url, ms) {
-  return timeout(
-    () => Promise.resolve(`response from ${url}`),
-    ms
-  )();
+  return timeout(() => Promise.resolve(`response from ${url}`), ms)();
 }
 (async () => {
   console.log("=== 请求超时控制 ===");

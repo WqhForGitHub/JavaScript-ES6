@@ -81,7 +81,12 @@ console.log(flattenObject({ a: [1, 2, 3] }));
 // { 'a.0': 1, 'a.1': 2, 'a.2': 3 }
 
 // 混合嵌套
-console.log(flattenObject({ user: { name: "Tom", address: { city: "BJ" } }, tags: ["a", "b"] }));
+console.log(
+  flattenObject({
+    user: { name: "Tom", address: { city: "BJ" } },
+    tags: ["a", "b"],
+  }),
+);
 // { 'user.name': 'Tom', 'user.address.city': 'BJ', 'tags.0': 'a', 'tags.1': 'b' }
 
 // 空对象 / 空数组
@@ -91,15 +96,17 @@ console.log(flattenObject({ a: [] }));
 // { a: [] }
 
 // 多层混合
-console.log(flattenObject({
-  level1: {
-    level2: {
-      level3: "deep",
-      num: 42,
+console.log(
+  flattenObject({
+    level1: {
+      level2: {
+        level3: "deep",
+        num: 42,
+      },
     },
-  },
-  top: true,
-}));
+    top: true,
+  }),
+);
 // { 'level1.level2.level3': 'deep', 'level1.level2.num': 42, top: true }
 
 // null 值保留

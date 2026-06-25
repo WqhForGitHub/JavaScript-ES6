@@ -27,16 +27,16 @@ class DataPipeline {
 
   // Primitive operations to be overridden.
   readData() {
-    throw new Error('readData not implemented');
+    throw new Error("readData not implemented");
   }
   validate(data) {
-    throw new Error('validate not implemented');
+    throw new Error("validate not implemented");
   }
   transform(data) {
     return data; // default: identity
   }
   output(data) {
-    throw new Error('output not implemented');
+    throw new Error("output not implemented");
   }
 
   // Hooks with default no-op behaviour (optional overrides).
@@ -51,19 +51,19 @@ class CsvPipeline extends DataPipeline {
   }
   readData() {
     // source like "a,b,c"
-    return this.source.split('\n').map((line) => line.split(','));
+    return this.source.split("\n").map((line) => line.split(","));
   }
   validate(rows) {
-    return rows.filter((r) => r.length > 0 && r.every((c) => c !== ''));
+    return rows.filter((r) => r.length > 0 && r.every((c) => c !== ""));
   }
   transform(rows) {
     return rows.map((r) => r.map((c) => c.trim().toUpperCase()));
   }
   output(rows) {
-    return rows.map((r) => r.join('|')).join('\n');
+    return rows.map((r) => r.join("|")).join("\n");
   }
   afterOutput(result) {
-    this._lastLen = result.split('\n').length;
+    this._lastLen = result.split("\n").length;
   }
 }
 
@@ -76,7 +76,7 @@ class JsonPipeline extends DataPipeline {
     return this.obj;
   }
   validate(data) {
-    if (!data || typeof data !== 'object') throw new Error('Invalid JSON');
+    if (!data || typeof data !== "object") throw new Error("Invalid JSON");
     return data;
   }
   transform(data) {
@@ -91,25 +91,25 @@ class JsonPipeline extends DataPipeline {
 }
 
 // ---------------- Test cases ----------------
-const csv = new CsvPipeline('a, b ,c\nx,y\n,\n1,2,3');
+const csv = new CsvPipeline("a, b ,c\nx,y\n,\n1,2,3");
 console.log(csv.run());
 // Expected:
 // A|B|C
 // X|Y
 // 1|2|3
-console.log('rows emitted:', csv._lastLen);
+console.log("rows emitted:", csv._lastLen);
 // Expected: rows emitted: 3
 
-const json = new JsonPipeline({ name: 'Alice', age: 30, role: 'admin' });
+const json = new JsonPipeline({ name: "Alice", age: 30, role: "admin" });
 console.log(json.run());
 // Expected: ["name=Alice","age=30","role=admin"]
-console.log('entries:', json._count);
+console.log("entries:", json._count);
 // Expected: entries: 3
 
 // Validate throws for bad input
 try {
   new JsonPipeline(null).run();
 } catch (e) {
-  console.log('Validate error:', e.message);
+  console.log("Validate error:", e.message);
   // Expected: Validate error: Invalid JSON
 }

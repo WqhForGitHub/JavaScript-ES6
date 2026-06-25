@@ -79,7 +79,7 @@ class MySet {
   }
 
   toString() {
-    return '{' + this.values().join(', ') + '}';
+    return "{" + this.values().join(", ") + "}";
   }
 }
 
@@ -93,9 +93,9 @@ console.log(setA.size); // 4
 setA.add(5);
 console.log(setA.toString()); // {1, 2, 3, 4, 5}
 
-console.log(setA.union(setB).toString());      // {1, 2, 3, 4, 5, 6}
+console.log(setA.union(setB).toString()); // {1, 2, 3, 4, 5, 6}
 console.log(setA.intersection(setB).toString()); // {3, 4, 5}
-console.log(setA.difference(setB).toString());   // {1, 2}
+console.log(setA.difference(setB).toString()); // {1, 2}
 
 const setC = new MySet([3, 4]);
 console.log(setC.isSubsetOf(setB)); // true

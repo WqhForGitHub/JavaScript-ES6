@@ -45,7 +45,7 @@ class AsyncQueue {
           this._abortReason = err;
         }
         // 吞掉错误，保持 tail resolved，链不断
-      }
+      },
     );
 
     return run.finally(() => this._size--);

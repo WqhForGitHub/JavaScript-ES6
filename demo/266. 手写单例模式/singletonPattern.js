@@ -51,7 +51,7 @@ function singletonify(Constructor) {
 
 // ----- 3. Module-level singleton -----
 const Config = (() => {
-  const state = { env: 'dev', version: '1.0.0' };
+  const state = { env: "dev", version: "1.0.0" };
   return Object.freeze({
     get: (k) => state[k],
     set: (k, v) => {
@@ -64,8 +64,8 @@ const Config = (() => {
 // ---------------- Test cases ----------------
 // getInstance returns the same object
 Singleton.reset();
-const a = Singleton.getInstance('first');
-const b = Singleton.getInstance('second'); // ignored
+const a = Singleton.getInstance("first");
+const b = Singleton.getInstance("second"); // ignored
 console.log(a === b, a.value);
 // Expected: true 'first'
 
@@ -76,22 +76,22 @@ class Db {
   }
 }
 const SingleDb = singletonify(Db);
-const db1 = new SingleDb('prod');
-const db2 = new SingleDb('dev');
+const db1 = new SingleDb("prod");
+const db2 = new SingleDb("dev");
 console.log(db1 === db2, db1.name, db1 instanceof Db);
 // Expected: true 'prod' true
 
 // Module-level singleton is shared & frozen. `env` is internal state accessed via
 // get()/set(); the returned object is frozen so new top-level keys can't be added.
-Config.set('env', 'prod');
-console.log(Config.snapshot(), Config.get('env'));
+Config.set("env", "prod");
+console.log(Config.snapshot(), Config.get("env"));
 // Expected: { env: 'prod', version: '1.0.0' } 'prod'
 try {
   // Direct property assignment on a frozen object is rejected (throws in strict
   // mode, silently ignored otherwise). It never mutates internal state.
-  Config.env = 'x';
+  Config.env = "x";
 } catch (e) {
   // strict mode throws TypeError
 }
-console.log(Config.get('env'));
+console.log(Config.get("env"));
 // Expected: 'prod'

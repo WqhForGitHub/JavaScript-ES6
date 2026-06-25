@@ -15,7 +15,7 @@
  */
 
 function isIndex(value) {
-  return typeof value === 'number'
+  return typeof value === "number"
     ? value > -1 && value % 1 === 0 && value <= Number.MAX_SAFE_INTEGER
     : /^(0|[1-9]\d*)$/.test(String(value));
 }
@@ -23,8 +23,8 @@ function isIndex(value) {
 function isArrayLike(value) {
   return (
     value != null &&
-    typeof value !== 'function' &&
-    typeof value.length === 'number' &&
+    typeof value !== "function" &&
+    typeof value.length === "number" &&
     isIndex(value.length)
   );
 }
@@ -37,7 +37,7 @@ function size(collection) {
   if (isArrayLike(collection)) {
     return collection.length;
   }
-  if (typeof collection === 'object' || typeof collection === 'function') {
+  if (typeof collection === "object" || typeof collection === "function") {
     return Object.keys(collection).length;
   }
   return 0;
@@ -45,14 +45,25 @@ function size(collection) {
 
 // --- Tests ---
 
-console.log('size array:', size([1, 2, 3])); // expected: 3
-console.log('size string:', size('pebbles')); // expected: 7
-console.log('size object:', size({ a: 1, b: 2 })); // expected: 2
-console.log('size map:', size(new Map([['a', 1], ['b', 2]]))); // expected: 2
-console.log('size set:', size(new Set([1, 2, 3, 4]))); // expected: 4
-console.log('size empty array:', size([])); // expected: 0
-console.log('size empty object:', size({})); // expected: 0
-console.log('size null:', size(null)); // expected: 0
-console.log('size undefined:', size(undefined)); // expected: 0
-console.log('size function (props):', size(function (a, b) {})); // expected: 0 (no own props)
-console.log('size array-like:', size({ length: 5, 0: 'a' })); // expected: 5 (array-like length)
+console.log("size array:", size([1, 2, 3])); // expected: 3
+console.log("size string:", size("pebbles")); // expected: 7
+console.log("size object:", size({ a: 1, b: 2 })); // expected: 2
+console.log(
+  "size map:",
+  size(
+    new Map([
+      ["a", 1],
+      ["b", 2],
+    ]),
+  ),
+); // expected: 2
+console.log("size set:", size(new Set([1, 2, 3, 4]))); // expected: 4
+console.log("size empty array:", size([])); // expected: 0
+console.log("size empty object:", size({})); // expected: 0
+console.log("size null:", size(null)); // expected: 0
+console.log("size undefined:", size(undefined)); // expected: 0
+console.log(
+  "size function (props):",
+  size(function (a, b) {}),
+); // expected: 0 (no own props)
+console.log("size array-like:", size({ length: 5, 0: "a" })); // expected: 5 (array-like length)

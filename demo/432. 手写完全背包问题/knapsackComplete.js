@@ -24,13 +24,18 @@ function knapsackComplete(weights, values, capacity) {
 // 二维 DP（便于理解）
 function knapsackComplete2D(weights, values, capacity) {
   const n = weights.length;
-  const dp = Array.from({ length: n + 1 }, () => new Array(capacity + 1).fill(0));
+  const dp = Array.from({ length: n + 1 }, () =>
+    new Array(capacity + 1).fill(0),
+  );
   for (let i = 1; i <= n; i++) {
     for (let j = 0; j <= capacity; j++) {
       dp[i][j] = dp[i - 1][j]; // 不选第 i 个物品
       if (weights[i - 1] <= j) {
         // 选第 i 个物品（注意这里是 dp[i][...] 而非 dp[i-1][...]，可重复选）
-        dp[i][j] = Math.max(dp[i][j], dp[i][j - weights[i - 1]] + values[i - 1]);
+        dp[i][j] = Math.max(
+          dp[i][j],
+          dp[i][j - weights[i - 1]] + values[i - 1],
+        );
       }
     }
   }

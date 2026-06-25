@@ -25,7 +25,7 @@ Range.prototype[Symbol.iterator] = function () {
         return { value: value, done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
@@ -63,12 +63,14 @@ LinkedList.prototype[Symbol.iterator] = function () {
         return { value: value, done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
-Object.defineProperty(LinkedList.prototype, 'size', {
-  get: function () { return this._size; }
+Object.defineProperty(LinkedList.prototype, "size", {
+  get: function () {
+    return this._size;
+  },
 });
 
 // 可迭代的矩阵（按行优先遍历）
@@ -90,12 +92,12 @@ Matrix.prototype[Symbol.iterator] = function () {
         colIndex = 0;
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
 // 测试 Range
-console.log('--- Range ---');
+console.log("--- Range ---");
 var range = new Range(1, 6, 2);
 var rangeArr = [];
 for (var v of range) rangeArr.push(v);
@@ -109,7 +111,7 @@ var [r1, r2] = new Range(10, 13);
 console.log(r1, r2); // 10 11
 
 // 测试 LinkedList
-console.log('--- LinkedList ---');
+console.log("--- LinkedList ---");
 var list = new LinkedList();
 list.add(10).add(20).add(30);
 var listArr = [];
@@ -125,8 +127,12 @@ console.log(first, second); // 10 20
 console.log([...list]); // [10, 20, 30]
 
 // 测试 Matrix
-console.log('--- Matrix ---');
-var matrix = new Matrix([[1, 2, 3], [4, 5], [6, 7, 8, 9]]);
+console.log("--- Matrix ---");
+var matrix = new Matrix([
+  [1, 2, 3],
+  [4, 5],
+  [6, 7, 8, 9],
+]);
 var flat = [];
 for (var v of matrix) flat.push(v);
 console.log(flat); // [1, 2, 3, 4, 5, 6, 7, 8, 9]

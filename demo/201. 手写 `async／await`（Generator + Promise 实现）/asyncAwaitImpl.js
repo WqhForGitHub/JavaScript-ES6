@@ -37,7 +37,7 @@ function asyncToGenerator(generatorFn) {
         // value 通常是 Promise；用 Promise.resolve 兼容非 Promise 值
         Promise.resolve(value).then(
           (v) => step("next", v), // 成功：把值回传，继续执行
-          (err) => step("throw", err) // 失败：把错误抛回 Generator
+          (err) => step("throw", err), // 失败：把错误抛回 Generator
         );
       }
 

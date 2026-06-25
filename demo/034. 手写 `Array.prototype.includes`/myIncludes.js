@@ -28,7 +28,10 @@ Array.prototype.myIncludes = function (searchElement, fromIndex) {
     if (i in this) {
       const current = this[i];
       // SameValueZero：与 === 相同，但 NaN === NaN 视为 true
-      if (current === searchElement || (current !== current && searchElement !== searchElement)) {
+      if (
+        current === searchElement ||
+        (current !== current && searchElement !== searchElement)
+      ) {
         return true;
       }
     }
@@ -44,7 +47,7 @@ console.log([1, 2, 3].myIncludes(2)); // true
 console.log([1, 2, 3].myIncludes(4)); // false
 
 // --- 判断字符串 ---
-console.log(['a', 'b', 'c'].myIncludes('b')); // true
+console.log(["a", "b", "c"].myIncludes("b")); // true
 
 // --- 判断 NaN（includes 能找到，indexOf 找不到）---
 console.log([1, NaN, 3].myIncludes(NaN)); // true

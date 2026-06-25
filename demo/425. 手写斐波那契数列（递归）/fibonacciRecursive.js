@@ -9,7 +9,7 @@
 
 // 朴素递归
 function fibonacciRecursive(n) {
-  if (n < 0) throw new Error('n must be non-negative');
+  if (n < 0) throw new Error("n must be non-negative");
   if (n <= 1) return n;
   return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
 }

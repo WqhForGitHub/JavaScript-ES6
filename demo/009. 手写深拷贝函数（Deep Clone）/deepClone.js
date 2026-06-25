@@ -114,7 +114,10 @@ console.log(clonedReg); // /abc/gi
 console.log(clonedReg === reg); // false
 
 // --- Map ---
-const map = new Map([["k1", { v: 1 }], ["k2", 2]]);
+const map = new Map([
+  ["k1", { v: 1 }],
+  ["k2", 2],
+]);
 const clonedMap = deepClone(map);
 console.log(clonedMap.get("k1")); // { v: 1 }
 console.log(clonedMap.get("k1") === map.get("k1")); // false

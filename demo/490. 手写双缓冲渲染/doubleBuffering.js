@@ -15,12 +15,12 @@
  */
 function createDoubleBuffer(frontCanvas) {
   // Browser path.
-  if (frontCanvas && typeof document !== 'undefined') {
-    const frontCtx = frontCanvas.getContext('2d');
-    const backCanvas = document.createElement('canvas');
+  if (frontCanvas && typeof document !== "undefined") {
+    const frontCtx = frontCanvas.getContext("2d");
+    const backCanvas = document.createElement("canvas");
     backCanvas.width = frontCanvas.width;
     backCanvas.height = frontCanvas.height;
-    const backCtx = backCanvas.getContext('2d');
+    const backCtx = backCanvas.getContext("2d");
 
     let timer = null;
     let frame = 0;
@@ -45,11 +45,19 @@ function createDoubleBuffer(frontCanvas) {
       timer = null;
     }
 
-    return { render, start, stop, get frame() { return frame; } };
+    return {
+      render,
+      start,
+      stop,
+      get frame() {
+        return frame;
+      },
+    };
   }
 
   // Pure-JS fallback for testing in Node: simulate double buffering with arrays.
-  const W = 4, H = 4;
+  const W = 4,
+    H = 4;
   let back = new Array(W * H).fill(0);
   let front = new Array(W * H).fill(0);
   let frame = 0;
@@ -58,7 +66,9 @@ function createDoubleBuffer(frontCanvas) {
     frame++;
     back = new Array(W * H).fill(0);
     drawFn({
-      setPixel(x, y, c) { back[y * W + x] = c; },
+      setPixel(x, y, c) {
+        back[y * W + x] = c;
+      },
       width: W,
       height: H,
       frame,
@@ -72,8 +82,12 @@ function createDoubleBuffer(frontCanvas) {
     render: renderPixel,
     start() {},
     stop() {},
-    get frame() { return frame; },
-    get front() { return front; },
+    get frame() {
+      return frame;
+    },
+    get front() {
+      return front;
+    },
     width: W,
     height: H,
   };
@@ -87,16 +101,19 @@ const f1 = db.render((ctx) => {
   ctx.setPixel(0, 0, 1);
   ctx.setPixel(3, 3, 9);
 });
-console.log('frame 1 pixels:', f1);
+console.log("frame 1 pixels:", f1);
 // expected: [1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,9]
-console.log('frame counter:', db.frame); // expected: 1
+console.log("frame counter:", db.frame); // expected: 1
 
 const f2 = db.render((ctx) => {
   ctx.setPixel(1, 1, 5);
 });
-console.log('frame 2 pixels:', f2);
+console.log("frame 2 pixels:", f2);
 // expected: [0,0,0,0, 0,5,0,0, 0,0,0,0, 0,0,0,0] (previous frame is gone — back buffer was cleared)
-console.log('frame counter:', db.frame); // expected: 2
+console.log("frame counter:", db.frame); // expected: 2
 
-console.log('has start/stop:', typeof db.start === 'function' && typeof db.stop === 'function');
+console.log(
+  "has start/stop:",
+  typeof db.start === "function" && typeof db.stop === "function",
+);
 // expected: has start/stop: true

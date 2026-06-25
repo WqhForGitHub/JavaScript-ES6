@@ -29,12 +29,10 @@ myRace([fast, slow]).then((v) => console.log("fastest:", v)); // fastest: fast
 
 // 2. 最快的是 rejected，整体也 rejected
 const failFast = new Promise((_, rej) =>
-  setTimeout(() => rej("fail-fast"), 10)
+  setTimeout(() => rej("fail-fast"), 10),
 );
 const okSlow = new Promise((r) => setTimeout(() => r("ok-slow"), 100));
-myRace([failFast, okSlow]).catch((e) =>
-  console.log("race rejected:", e)
-); // race rejected: fail-fast
+myRace([failFast, okSlow]).catch((e) => console.log("race rejected:", e)); // race rejected: fail-fast
 
 // 3. 超时控制：3 秒内拿不到数据就超时
 function fetchMock(delay, data) {
@@ -42,16 +40,16 @@ function fetchMock(delay, data) {
 }
 function timeout(ms) {
   return new Promise((_, rej) =>
-    setTimeout(() => rej(new Error("timeout " + ms + "ms")), ms)
+    setTimeout(() => rej(new Error("timeout " + ms + "ms")), ms),
   );
 }
 myRace([fetchMock(80, "data"), timeout(50)]).catch((e) =>
-  console.log("race timeout:", e.message)
+  console.log("race timeout:", e.message),
 ); // race timeout: timeout 50ms
 
 // 4. 含同步 fulfilled 立即决议
 myRace([Promise.resolve("sync"), Promise.resolve("later")]).then((v) =>
-  console.log("sync wins:", v)
+  console.log("sync wins:", v),
 ); // sync wins: sync
 
 // 5. 空数组 -> 永远 pending（这里只打印，不会进入 then）

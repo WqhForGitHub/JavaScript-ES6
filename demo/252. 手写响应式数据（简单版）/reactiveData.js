@@ -59,7 +59,7 @@ function reactive(obj) {
       // 收集依赖
       track(target, key);
       // 如果是对象，递归代理
-      if (result !== null && typeof result === 'object') {
+      if (result !== null && typeof result === "object") {
         return reactive(result);
       }
       return result;
@@ -107,26 +107,26 @@ function effect(fn) {
 function ref(value) {
   return {
     get value() {
-      track(this, 'value');
+      track(this, "value");
       return value;
     },
     set value(newVal) {
       if (newVal !== value) {
         value = newVal;
-        trigger(this, 'value');
+        trigger(this, "value");
       }
     },
   };
 }
 
 // ===== 测试用例 =====
-var state = reactive({ count: 0, name: 'vue' });
+var state = reactive({ count: 0, name: "vue" });
 
 // 注册副作用：依赖 count
 var double = 0;
 effect(function () {
   double = state.count * 2;
-  console.log('副作用执行，double =', double);
+  console.log("副作用执行，double =", double);
 });
 // => 副作用执行，double = 0
 
@@ -137,13 +137,13 @@ state.count = 5;
 // => 副作用执行，double = 10
 
 // 不依赖 count 的修改不触发
-state.name = 'react'; // 无输出
+state.name = "react"; // 无输出
 
 // ref 测试
 var num = ref(10);
-var display = '';
+var display = "";
 effect(function () {
-  display = 'num = ' + num.value;
+  display = "num = " + num.value;
   console.log(display);
 });
 // => num = 10
@@ -156,11 +156,11 @@ num.value = 20; // 相同值不触发（无输出）
 // 嵌套对象响应式
 var nested = reactive({ user: { age: 18 } });
 effect(function () {
-  console.log('用户年龄：', nested.user.age);
+  console.log("用户年龄：", nested.user.age);
 });
 // => 用户年龄： 18
 
 nested.user.age = 20;
 // => 用户年龄： 20
 
-console.log('最终 double：', double); // => 10
+console.log("最终 double：", double); // => 10

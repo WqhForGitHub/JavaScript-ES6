@@ -77,9 +77,7 @@ console.log("打乱后:", shuffleWrong(arr)); // 分布不均匀
 console.log("\n========== 均匀性验证 ==========");
 function testUniformity(shuffleFn, size = 4, trials = 100000) {
   // 统计每个元素在每个位置出现的次数
-  const counts = Array.from({ length: size }, () =>
-    Array(size).fill(0),
-  );
+  const counts = Array.from({ length: size }, () => Array(size).fill(0));
   const base = Array.from({ length: size }, (_, i) => i);
 
   for (let t = 0; t < trials; t++) {
@@ -91,7 +89,9 @@ function testUniformity(shuffleFn, size = 4, trials = 100000) {
 
   // 均匀分布下，每个格子应该约为 trials / size
   const expected = trials / size;
-  console.log(`期望每个格子约 ${expected} 次（${trials} 次试验，${size} 个元素）`);
+  console.log(
+    `期望每个格子约 ${expected} 次（${trials} 次试验，${size} 个元素）`,
+  );
   console.log("Fisher-Yates 分布（值 -> 各位置计数）：");
   counts.forEach((row, value) => {
     console.log(`  值 ${value}: ${row.join(", ")}`);

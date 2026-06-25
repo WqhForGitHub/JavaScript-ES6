@@ -68,8 +68,8 @@ function delay(value, ms, fail = false) {
     new Promise((resolve, reject) =>
       setTimeout(
         () => (fail ? reject(new Error(value + " fail")) : resolve(value)),
-        ms
-      )
+        ms,
+      ),
     );
 }
 

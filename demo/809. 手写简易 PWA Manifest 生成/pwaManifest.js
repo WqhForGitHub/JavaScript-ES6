@@ -10,23 +10,23 @@
 
 class PWAManifestGenerator {
   constructor(config) {
-    this.name = config.name || 'My App';
-    this.shortName = config.shortName || config.name || 'App';
-    this.themeColor = config.themeColor || '#000000';
-    this.backgroundColor = config.backgroundColor || '#ffffff';
-    this.display = config.display || 'standalone';
-    this.startUrl = config.startUrl || '/';
+    this.name = config.name || "My App";
+    this.shortName = config.shortName || config.name || "App";
+    this.themeColor = config.themeColor || "#000000";
+    this.backgroundColor = config.backgroundColor || "#ffffff";
+    this.display = config.display || "standalone";
+    this.startUrl = config.startUrl || "/";
     this.icons = config.icons || [];
   }
 
   // 生成图标配置
   generateIcons(baseIconPath) {
     const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
-    return sizes.map(size => ({
-      src: baseIconPath + '/icon-' + size + 'x' + size + '.png',
-      sizes: size + 'x' + size,
-      type: 'image/png',
-      purpose: size >= 192 ? 'any maskable' : 'any',
+    return sizes.map((size) => ({
+      src: baseIconPath + "/icon-" + size + "x" + size + ".png",
+      sizes: size + "x" + size,
+      type: "image/png",
+      purpose: size >= 192 ? "any maskable" : "any",
     }));
   }
 
@@ -35,20 +35,28 @@ class PWAManifestGenerator {
     return {
       name: this.name,
       short_name: this.shortName,
-      description: this.name + ' - Progressive Web App',
+      description: this.name + " - Progressive Web App",
       start_url: this.startUrl,
       display: this.display,
-      orientation: 'portrait',
+      orientation: "portrait",
       theme_color: this.themeColor,
       background_color: this.backgroundColor,
-      scope: '/',
-      lang: 'zh-CN',
-      dir: 'ltr',
-      icons: this.icons.length ? this.icons : this.generateIcons('/icons'),
-      categories: ['productivity', 'utilities'],
+      scope: "/",
+      lang: "zh-CN",
+      dir: "ltr",
+      icons: this.icons.length ? this.icons : this.generateIcons("/icons"),
+      categories: ["productivity", "utilities"],
       shortcuts: [
-        { name: 'Home', url: '/', icons: [{ src: '/icons/shortcut-home.png', sizes: '96x96' }] },
-        { name: 'Settings', url: '/settings', icons: [{ src: '/icons/shortcut-settings.png', sizes: '96x96' }] },
+        {
+          name: "Home",
+          url: "/",
+          icons: [{ src: "/icons/shortcut-home.png", sizes: "96x96" }],
+        },
+        {
+          name: "Settings",
+          url: "/settings",
+          icons: [{ src: "/icons/shortcut-settings.png", sizes: "96x96" }],
+        },
       ],
     };
   }
@@ -61,14 +69,24 @@ class PWAManifestGenerator {
       '<meta name="theme-color" content="' + this.themeColor + '">',
       '<meta name="apple-mobile-web-app-capable" content="yes">',
       '<meta name="apple-mobile-web-app-status-bar-style" content="default">',
-      '<meta name="apple-mobile-web-app-title" content="' + this.shortName + '">',
+      '<meta name="apple-mobile-web-app-title" content="' +
+        this.shortName +
+        '">',
       '<link rel="apple-touch-icon" href="/icons/icon-152x152.png">',
     ];
 
     // 添加图标 links
-    manifest.icons.forEach(icon => {
-      if (icon.sizes === '192x192' || icon.sizes === '512x512') {
-        links.push('<link rel="icon" type="' + icon.type + '" sizes="' + icon.sizes + '" href="' + icon.src + '">');
+    manifest.icons.forEach((icon) => {
+      if (icon.sizes === "192x192" || icon.sizes === "512x512") {
+        links.push(
+          '<link rel="icon" type="' +
+            icon.type +
+            '" sizes="' +
+            icon.sizes +
+            '" href="' +
+            icon.src +
+            '">',
+        );
       }
     });
 
@@ -88,7 +106,10 @@ class PWAManifestGenerator {
 
   // 生成简易 Service Worker
   generateServiceWorker() {
-    return `const CACHE_NAME = '` + this.name.toLowerCase().replace(/\s+/g, '-') + `-v1';
+    return (
+      `const CACHE_NAME = '` +
+      this.name.toLowerCase().replace(/\s+/g, "-") +
+      `-v1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -125,28 +146,31 @@ self.addEventListener('fetch', (event) => {
     }).catch(() => caches.match('/offline.html'))
   );
 });
-`;
+`
+    );
   }
 }
 
 // ===== 测试 =====
 const pwa = new PWAManifestGenerator({
-  name: 'My Awesome App',
-  shortName: 'Awesome',
-  themeColor: '#6200ee',
-  backgroundColor: '#ffffff',
-  display: 'standalone',
-  startUrl: '/?source=pwa',
+  name: "My Awesome App",
+  shortName: "Awesome",
+  themeColor: "#6200ee",
+  backgroundColor: "#ffffff",
+  display: "standalone",
+  startUrl: "/?source=pwa",
 });
 
-console.log('=== Manifest JSON ===');
+console.log("=== Manifest JSON ===");
 console.log(JSON.stringify(pwa.generateManifest(), null, 2));
 
-console.log('\n=== HTML Links ===');
-pwa.generateHtmlLinks().forEach(l => console.log(l));
+console.log("\n=== HTML Links ===");
+pwa.generateHtmlLinks().forEach((l) => console.log(l));
 
-console.log('\n=== SW Registration ===');
+console.log("\n=== SW Registration ===");
 console.log(pwa.generateSWRegister());
 
-console.log('\n=== Service Worker (前 5 行) ===');
-console.log(pwa.generateServiceWorker().split('\n').slice(0, 5).join('\n') + '\n...');
+console.log("\n=== Service Worker (前 5 行) ===");
+console.log(
+  pwa.generateServiceWorker().split("\n").slice(0, 5).join("\n") + "\n...",
+);

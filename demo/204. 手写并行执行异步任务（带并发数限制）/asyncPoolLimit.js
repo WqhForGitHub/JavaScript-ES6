@@ -38,7 +38,7 @@ async function asyncPoolLimit(tasks, limit) {
             (err) => {
               // 任一失败立即 reject（也可改为收集，见 allSettled 版）
               reject(err);
-            }
+            },
           )
           .finally(() => {
             executing--;
@@ -70,7 +70,7 @@ async function asyncPoolLimitSettled(tasks, limit) {
             },
             (reason) => {
               results[index] = { status: "rejected", reason };
-            }
+            },
           )
           .finally(() => {
             executing--;
@@ -100,9 +100,7 @@ function makeTask(i) {
 
 (async () => {
   // 1. 全部成功
-  const tasks1 = [0, 1, 2, 3, 4, 5].map((i) => () =>
-    Promise.resolve("v" + i)
-  );
+  const tasks1 = [0, 1, 2, 3, 4, 5].map((i) => () => Promise.resolve("v" + i));
   const r1 = await asyncPoolLimit(tasks1, 2);
   console.log("all success:", r1); // all success: [ 'v0','v1','v2','v3','v4','v5' ]
 
@@ -119,6 +117,6 @@ function makeTask(i) {
   const r3 = await asyncPoolLimitSettled([1, 2, 3, 4, 5].map(makeTask), 3);
   console.log(
     "settled:",
-    r3.map((r) => r.status + ":" + (r.value ?? r.reason.message))
+    r3.map((r) => r.status + ":" + (r.value ?? r.reason.message)),
   );
 })();

@@ -123,7 +123,7 @@ class DoublyLinkedList {
       arr.push(current.element);
       current = current.next;
     }
-    return arr.join(' <-> ');
+    return arr.join(" <-> ");
   }
 
   // 反向遍历输出
@@ -134,7 +134,7 @@ class DoublyLinkedList {
       arr.push(current.element);
       current = current.prev;
     }
-    return arr.join(' <-> ');
+    return arr.join(" <-> ");
   }
 }
 
@@ -144,7 +144,7 @@ dll.append(1).append(2).append(3);
 console.log(dll.toString()); // 1 <-> 2 <-> 3
 console.log(dll.toStringReverse()); // 3 <-> 2 <-> 1
 
-dll.insert(1, 'x');
+dll.insert(1, "x");
 console.log(dll.toString()); // 1 <-> x <-> 2 <-> 3
 
 console.log(dll.removeAt(0)); // 1

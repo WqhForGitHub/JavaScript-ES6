@@ -86,7 +86,7 @@ MyMap.prototype.entries = function () {
         return { value: [keys[index], values[index++]], done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
@@ -100,7 +100,7 @@ MyMap.prototype.keys = function () {
         return { value: keys[index++], done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
@@ -114,46 +114,53 @@ MyMap.prototype.values = function () {
         return { value: values[index++], done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
 // 默认迭代器与 entries 相同
 MyMap.prototype[Symbol.iterator] = MyMap.prototype.entries;
 
-Object.defineProperty(MyMap.prototype, 'size', {
-  get: function () { return this._keys.length; }
+Object.defineProperty(MyMap.prototype, "size", {
+  get: function () {
+    return this._keys.length;
+  },
 });
 
 // 测试
-var map = new MyMap([['a', 1], ['b', 2]]);
-console.log(map.size);     // 2
-console.log(map.get('a')); // 1
+var map = new MyMap([
+  ["a", 1],
+  ["b", 2],
+]);
+console.log(map.size); // 2
+console.log(map.get("a")); // 1
 
-map.set('c', 3);
-map.set('a', 10); // 覆盖
-console.log(map.get('a')); // 10
-console.log(map.size);     // 3
+map.set("c", 3);
+map.set("a", 10); // 覆盖
+console.log(map.get("a")); // 10
+console.log(map.size); // 3
 
-console.log(map.has('b')); // true
-map.delete('b');
-console.log(map.has('b')); // false
+console.log(map.has("b")); // true
+map.delete("b");
+console.log(map.has("b")); // false
 
 // 对象作为键
 var objKey = {};
 var funcKey = function () {};
-map.set(objKey, 'object value');
-map.set(funcKey, 'function value');
-console.log(map.get(objKey));  // object value
+map.set(objKey, "object value");
+map.set(funcKey, "function value");
+console.log(map.get(objKey)); // object value
 console.log(map.get(funcKey)); // function value
 
 // NaN 作为键
-map.set(NaN, 'nan value');
+map.set(NaN, "nan value");
 console.log(map.get(NaN)); // nan value
 
 // forEach 遍历
 var entries = [];
-map.forEach(function (v, k) { entries.push([k, v]); });
+map.forEach(function (v, k) {
+  entries.push([k, v]);
+});
 console.log(entries.length); // 5
 
 // for...of 遍历

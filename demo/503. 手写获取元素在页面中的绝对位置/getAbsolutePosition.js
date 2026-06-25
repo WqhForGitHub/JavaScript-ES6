@@ -18,12 +18,14 @@
  */
 function getAbsolutePosition(el) {
   const zero = { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0 };
-  if (!el || typeof el.getBoundingClientRect !== 'function') return zero;
+  if (!el || typeof el.getBoundingClientRect !== "function") return zero;
 
   const rect = el.getBoundingClientRect();
   const docEl = document.documentElement;
-  const scrollLeft = window.pageXOffset || docEl.scrollLeft || document.body.scrollLeft || 0;
-  const scrollTop = window.pageYOffset || docEl.scrollTop || document.body.scrollTop || 0;
+  const scrollLeft =
+    window.pageXOffset || docEl.scrollLeft || document.body.scrollLeft || 0;
+  const scrollTop =
+    window.pageYOffset || docEl.scrollTop || document.body.scrollTop || 0;
   const clientLeft = docEl.clientLeft || 0;
   const clientTop = docEl.clientTop || 0;
 
@@ -44,7 +46,8 @@ function getAbsolutePosition(el) {
 function getAbsolutePositionByOffset(el) {
   const zero = { left: 0, top: 0 };
   if (!el) return zero;
-  let left = 0, top = 0;
+  let left = 0,
+    top = 0;
   let node = el;
   while (node) {
     left += node.offsetLeft || 0;
@@ -59,9 +62,12 @@ function getAbsolutePositionByOffset(el) {
 //   const pos = getAbsolutePosition(document.querySelector('#box'));
 //   console.log(pos.left, pos.top); // absolute document coords
 
-console.log('getAbsolutePosition is a function:', typeof getAbsolutePosition === 'function');
+console.log(
+  "getAbsolutePosition is a function:",
+  typeof getAbsolutePosition === "function",
+);
 // expected: getAbsolutePosition is a function: true
-console.log('handles null:', JSON.stringify(getAbsolutePosition(null)));
+console.log("handles null:", JSON.stringify(getAbsolutePosition(null)));
 // expected: handles null: {"left":0,"top":0,"right":0,"bottom":0,"width":0,"height":0}
 
 // Verify offsetParent-walk variant with a fake DOM tree.
@@ -79,4 +85,4 @@ const fake = {
   },
 };
 const pos = getAbsolutePositionByOffset(fake);
-console.log('walked offset sums:', pos.left, pos.top); // expected: 1110 2220
+console.log("walked offset sums:", pos.left, pos.top); // expected: 1110 2220

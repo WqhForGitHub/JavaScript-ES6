@@ -7,21 +7,24 @@
  */
 
 function MyWeakSet() {
-  var STORAGE_KEY = '__weakset_' + Math.random().toString(36).slice(2) + '__';
+  var STORAGE_KEY = "__weakset_" + Math.random().toString(36).slice(2) + "__";
 
   function isObject(value) {
-    return value !== null && (typeof value === 'object' || typeof value === 'function');
+    return (
+      value !== null &&
+      (typeof value === "object" || typeof value === "function")
+    );
   }
 
   this.add = function (value) {
     if (!isObject(value)) {
-      throw new TypeError('Invalid value used in weak set');
+      throw new TypeError("Invalid value used in weak set");
     }
     Object.defineProperty(value, STORAGE_KEY, {
       value: true,
       enumerable: false,
       configurable: true,
-      writable: true
+      writable: true,
     });
     return this;
   };
@@ -68,7 +71,7 @@ try {
 }
 
 try {
-  ws.add('string');
+  ws.add("string");
 } catch (e) {
   console.log(e.message); // Invalid value used in weak set
 }
@@ -80,7 +83,7 @@ try {
 }
 
 // 隐藏属性不可枚举
-var data = { name: 'test' };
+var data = { name: "test" };
 ws.add(data);
 console.log(Object.keys(data)); // ['name']
-console.log(ws.has(data));      // true
+console.log(ws.has(data)); // true

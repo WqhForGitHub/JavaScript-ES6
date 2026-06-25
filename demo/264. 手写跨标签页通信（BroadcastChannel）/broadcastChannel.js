@@ -25,7 +25,8 @@ class SimBroadcastChannel {
   }
 
   postMessage(message) {
-    if (this._closed) throw new Error('Cannot post on a closed BroadcastChannel');
+    if (this._closed)
+      throw new Error("Cannot post on a closed BroadcastChannel");
     const members = channels.get(this.name);
     if (!members) return;
     const data = { data: message, origin: this.name };
@@ -34,7 +35,7 @@ class SimBroadcastChannel {
       // Defer to mimic async event-loop delivery
       queueMicrotask(() => {
         if (peer._closed || !peer.onmessage) return;
-        peer.onmessage({ type: 'message', target: peer, data: data.data });
+        peer.onmessage({ type: "message", target: peer, data: data.data });
       });
     }
   }
@@ -63,9 +64,9 @@ class SimBroadcastChannel {
  */
 
 // ---------------- Test cases ----------------
-const tabA = new SimBroadcastChannel('app');
-const tabB = new SimBroadcastChannel('app');
-const tabC = new SimBroadcastChannel('app');
+const tabA = new SimBroadcastChannel("app");
+const tabB = new SimBroadcastChannel("app");
+const tabC = new SimBroadcastChannel("app");
 
 const received = { A: [], B: [], C: [] };
 tabA.onmessage = (e) => received.A.push(e.data);
@@ -74,19 +75,19 @@ tabC.onmessage = (e) => received.C.push(e.data);
 
 // Allow queueMicrotask callbacks to flush.
 setTimeout(() => {
-  tabA.postMessage({ greeting: 'from A' });
+  tabA.postMessage({ greeting: "from A" });
   setTimeout(() => {
     console.log(received);
     // Expected: A: [], B: [{ greeting: 'from A' }], C: [{ greeting: 'from A' }]
     // (sender never receives its own message)
 
-    tabB.postMessage('hello from B');
+    tabB.postMessage("hello from B");
     setTimeout(() => {
       console.log(received);
       // Expected: A: ['hello from B'], B still [], C: ['hello from B']
 
       tabC.close();
-      tabA.postMessage('after C closed');
+      tabA.postMessage("after C closed");
       setTimeout(() => {
         console.log(received);
         // Expected: only B receives 'after C closed'; C never gets it

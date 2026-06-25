@@ -95,7 +95,10 @@ console.log(
 // --- 含重复元素 ---
 console.log("\n========== 含重复元素 ==========");
 console.log("complement([2], [1,1,2,3,3]):", complement1([2], [1, 1, 2, 3, 3])); // [1, 1, 3, 3]
-console.log("complementUnique([2], [1,1,2,3,3]):", complementUnique([2], [1, 1, 2, 3, 3])); // [1, 3]
+console.log(
+  "complementUnique([2], [1,1,2,3,3]):",
+  complementUnique([2], [1, 1, 2, 3, 3]),
+); // [1, 3]
 
 // --- 边界情况 ---
 console.log("\n========== 边界情况 ==========");
@@ -121,7 +124,9 @@ console.log("缺失:", complement1(present, fullRange)); // [2, 4, 6, 8, 10]
 // --- 验证补集性质 ---
 console.log("\n========== 验证性质 ==========");
 // A ∪ complement(A, U) = U  （并集等于全集）
-const unionAU = [...new Set([...A, ...complement1(A, U)])].sort((a, b) => a - b);
+const unionAU = [...new Set([...A, ...complement1(A, U)])].sort(
+  (a, b) => a - b,
+);
 console.log("A ∪ complement(A) =", unionAU); // [1,2,3,4,5,6] = U
 // A ∩ complement(A, U) = ∅  （交集为空）
 const interAU = A.filter((x) => complement1(A, U).includes(x));

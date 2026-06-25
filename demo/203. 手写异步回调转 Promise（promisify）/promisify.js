@@ -122,6 +122,9 @@ function queryMulti(id, cb) {
     },
   };
   const fsAsync = promisifyAll(fsMock);
-  const [a, b] = await Promise.all([fsAsync.readAAsync(), fsAsync.readBAsync()]);
+  const [a, b] = await Promise.all([
+    fsAsync.readAAsync(),
+    fsAsync.readBAsync(),
+  ]);
   console.log("promisifyAll:", a, b); // promisifyAll: A B
 })();

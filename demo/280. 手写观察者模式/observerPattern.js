@@ -27,15 +27,15 @@ class Subject {
   }
   notify(data) {
     for (const o of this._observers) {
-      if (typeof o.update === 'function') o.update(data, this);
-      else if (typeof o === 'function') o(data, this);
+      if (typeof o.update === "function") o.update(data, this);
+      else if (typeof o === "function") o(data, this);
     }
   }
 }
 
 class Observer {
   update() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
 }
 
@@ -88,8 +88,8 @@ class LoggingObserver {
 
 // ---------------- Test cases ----------------
 const station = new WeatherStation();
-const phone = new Display('Phone');
-const wall = new Display('Wall');
+const phone = new Display("Phone");
+const wall = new Display("Wall");
 const alarm = new AlertSystem(30);
 const logger = new LoggingObserver();
 

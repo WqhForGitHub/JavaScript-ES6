@@ -45,7 +45,7 @@ SimpleSet.prototype.values = function () {
         return { value: values[index++], done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
@@ -60,15 +60,17 @@ SimpleSet.prototype.entries = function () {
         return { value: [v, v], done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
 // 默认迭代器等同于 values
 SimpleSet.prototype[Symbol.iterator] = SimpleSet.prototype.values;
 
-Object.defineProperty(SimpleSet.prototype, 'size', {
-  get: function () { return this._values.length; }
+Object.defineProperty(SimpleSet.prototype, "size", {
+  get: function () {
+    return this._values.length;
+  },
 });
 
 SimpleSet.prototype.forEach = function (callback, thisArg) {
@@ -79,7 +81,7 @@ SimpleSet.prototype.forEach = function (callback, thisArg) {
 };
 
 // 测试 1：for...of 遍历值
-console.log('--- for...of values ---');
+console.log("--- for...of values ---");
 var set = new SimpleSet([1, 2, 3, 2, 1]);
 var collected = [];
 for (var v of set) {
@@ -88,16 +90,16 @@ for (var v of set) {
 console.log(collected); // [1, 2, 3]
 
 // 测试 2：展开运算符
-console.log('--- Spread ---');
+console.log("--- Spread ---");
 console.log([...set]); // [1, 2, 3]
 
 // 测试 3：解构
-console.log('--- Destructuring ---');
+console.log("--- Destructuring ---");
 var [a, b] = set;
 console.log(a, b); // 1 2
 
 // 测试 4：entries 方法
-console.log('--- entries() ---');
+console.log("--- entries() ---");
 var entriesArr = [];
 var entriesIt = set.entries();
 var r;
@@ -105,36 +107,40 @@ while (!(r = entriesIt.next()).done) entriesArr.push(r.value);
 console.log(entriesArr); // [[1, 1], [2, 2], [3, 3]]
 
 // 测试 5：插入顺序保持
-console.log('--- Insertion order ---');
+console.log("--- Insertion order ---");
 var ordered = new SimpleSet();
-ordered.add('z').add('a').add('m');
+ordered.add("z").add("a").add("m");
 console.log([...ordered]); // ['z', 'a', 'm']
 
 // 测试 6：用于数组去重
-console.log('--- Deduplication ---');
+console.log("--- Deduplication ---");
 var deduped = [...new SimpleSet([1, 1, 2, 3, 3, 3, 4])];
 console.log(deduped); // [1, 2, 3, 4]
 
 // 测试 7：与原生 Set 对比
-console.log('--- Compare with native Set ---');
+console.log("--- Compare with native Set ---");
 var native = new Set([1, 2, 3, 2, 1]);
 var nativeArr = [...native];
 var myArr = [...set];
 console.log(JSON.stringify(nativeArr) === JSON.stringify(myArr)); // true
 
 // 测试 8：空 Set
-console.log('--- Empty set ---');
+console.log("--- Empty set ---");
 var empty = new SimpleSet();
 console.log([...empty]); // []
 console.log(empty.size); // 0
 
 // 测试 9：集合运算
-console.log('--- Set operations ---');
+console.log("--- Set operations ---");
 var s1 = new SimpleSet([1, 2, 3]);
 var s2 = new SimpleSet([3, 4, 5]);
 // 交集
-var intersection = [...s1].filter(function (x) { return s2.has(x); });
+var intersection = [...s1].filter(function (x) {
+  return s2.has(x);
+});
 console.log(intersection); // [3]
 // 差集
-var difference = [...s1].filter(function (x) { return !s2.has(x); });
+var difference = [...s1].filter(function (x) {
+  return !s2.has(x);
+});
 console.log(difference); // [1, 2]

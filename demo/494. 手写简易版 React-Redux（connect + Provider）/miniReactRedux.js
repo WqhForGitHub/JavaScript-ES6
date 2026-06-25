@@ -30,10 +30,12 @@ function createStore(reducer, preloadedState) {
   };
   const subscribe = (l) => {
     listeners.push(l);
-    return () => { listeners = listeners.filter((x) => x !== l); };
+    return () => {
+      listeners = listeners.filter((x) => x !== l);
+    };
   };
   const getState = () => state;
-  dispatch({ type: '@@INIT' });
+  dispatch({ type: "@@INIT" });
   return { getState, dispatch, subscribe };
 }
 
@@ -42,17 +44,19 @@ const ReactReduxContext = { currentStore: null };
 
 function Provider({ store, children }) {
   ReactReduxContext.currentStore = store;
-  return { type: 'PROVIDER_ROOT', props: {}, children };
+  return { type: "PROVIDER_ROOT", props: {}, children };
 }
 
 function getCurrentStore() {
-  if (!ReactReduxContext.currentStore) throw new Error('Store not provided');
+  if (!ReactReduxContext.currentStore) throw new Error("Store not provided");
   return ReactReduxContext.currentStore;
 }
 
 // ---- Minimal Component base (subset of miniReact) ----
 class Component {
-  constructor(props) { this.props = props || {}; }
+  constructor(props) {
+    this.props = props || {};
+  }
   setState(partial) {
     this.state = { ...this.state, ...partial };
     if (this._rerender) this._rerender();
@@ -74,12 +78,16 @@ function connect(mapStateToProps, mapDispatchToProps) {
           }
         });
       }
-      componentWillUnmount() { if (this._unsub) this._unsub(); }
+      componentWillUnmount() {
+        if (this._unsub) this._unsub();
+      }
       render() {
-        const stateProps = mapStateToProps ? mapStateToProps(this.state.storeState, this.props) : {};
+        const stateProps = mapStateToProps
+          ? mapStateToProps(this.state.storeState, this.props)
+          : {};
         let dispatchProps;
         if (mapDispatchToProps) {
-          if (typeof mapDispatchToProps === 'function') {
+          if (typeof mapDispatchToProps === "function") {
             dispatchProps = mapDispatchToProps(this.store.dispatch, this.props);
           } else {
             dispatchProps = {};
@@ -92,51 +100,59 @@ function connect(mapStateToProps, mapDispatchToProps) {
           dispatchProps = { dispatch: this.store.dispatch };
         }
         const merged = { ...this.props, ...stateProps, ...dispatchProps };
-        return new WrappedComponent(merged).render ? new WrappedComponent(merged).render() : new WrappedComponent(merged);
+        return new WrappedComponent(merged).render
+          ? new WrappedComponent(merged).render()
+          : new WrappedComponent(merged);
       }
     }
     Connected.WrappedComponent = WrappedComponent;
     return Connected;
-  }
+  };
 }
 
 // ---------- Test cases ----------
 function counter(state = 0, action) {
   switch (action.type) {
-    case 'INC': return state + 1;
-    default: return state;
+    case "INC":
+      return state + 1;
+    default:
+      return state;
   }
 }
 const store = createStore(counter, 0);
 
 // A dumb presentational "component".
 class CounterView extends Component {
-  render() { return { type: 'div', props: { count: this.props.count }, children: [] }; }
+  render() {
+    return { type: "div", props: { count: this.props.count }, children: [] };
+  }
 }
 
-const ConnectedCounter = connect(
-  (state) => ({ count: state }),
-  { inc: () => ({ type: 'INC' }) }
-)(CounterView);
+const ConnectedCounter = connect((state) => ({ count: state }), {
+  inc: () => ({ type: "INC" }),
+})(CounterView);
 
 Provider({ store, children: null }); // register store in context
 const view = new ConnectedCounter({});
 const rendered = view.render();
-console.log('initial connected props.count:', rendered.props.count); // expected: 0
+console.log("initial connected props.count:", rendered.props.count); // expected: 0
 
-store.dispatch({ type: 'INC' });
-store.dispatch({ type: 'INC' });
+store.dispatch({ type: "INC" });
+store.dispatch({ type: "INC" });
 const rendered2 = view.render();
-console.log('after 2 dispatches, connected props.count:', rendered2.props.count); // expected: 2
+console.log(
+  "after 2 dispatches, connected props.count:",
+  rendered2.props.count,
+); // expected: 2
 
 // mapDispatchToProps object form gives bound action creators.
-console.log('inc is a function:', typeof view.props.inc === 'function'); // expected: true
+console.log("inc is a function:", typeof view.props.inc === "function"); // expected: true
 view.props.inc();
 const rendered3 = view.render();
-console.log('after calling bound inc():', rendered3.props.count); // expected: 3
+console.log("after calling bound inc():", rendered3.props.count); // expected: 3
 
 // Unsubscribe cleans up.
 view.componentWillUnmount();
-store.dispatch({ type: 'INC' });
+store.dispatch({ type: "INC" });
 const rendered4 = view.render();
-console.log('after unsubscribe, count stays:', rendered4.props.count); // expected: 3 (state.storeState not updated)
+console.log("after unsubscribe, count stays:", rendered4.props.count); // expected: 3 (state.storeState not updated)

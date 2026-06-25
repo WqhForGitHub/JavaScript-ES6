@@ -93,17 +93,19 @@ class Trie {
 
 // 测试
 const trie = new Trie();
-['apple', 'app', 'application', 'apply', 'banana', 'band'].forEach((w) => trie.insert(w));
+["apple", "app", "application", "apply", "banana", "band"].forEach((w) =>
+  trie.insert(w),
+);
 
-console.log(trie.search('apple')); // true
-console.log(trie.search('app')); // true
-console.log(trie.search('appl')); // false
-console.log(trie.startsWith('app')); // true
-console.log(trie.startsWith('ban')); // true
-console.log(trie.startsWith('cat')); // false
+console.log(trie.search("apple")); // true
+console.log(trie.search("app")); // true
+console.log(trie.search("appl")); // false
+console.log(trie.startsWith("app")); // true
+console.log(trie.startsWith("ban")); // true
+console.log(trie.startsWith("cat")); // false
 
-console.log(trie.autoComplete('app')); // ['app', 'apple', 'application', 'apply']
+console.log(trie.autoComplete("app")); // ['app', 'apple', 'application', 'apply']
 
-trie.remove('apple');
-console.log(trie.search('apple')); // false
-console.log(trie.search('app')); // true
+trie.remove("apple");
+console.log(trie.search("apple")); // false
+console.log(trie.search("app")); // true

@@ -19,8 +19,8 @@ function memoize(fn, resolver) {
       typeof resolver === "function"
         ? resolver(...args)
         : args.length === 1
-        ? args[0]
-        : JSON.stringify(args);
+          ? args[0]
+          : JSON.stringify(args);
 
     if (cache.has(key)) {
       return cache.get(key);
@@ -63,7 +63,7 @@ const queryUser = memoize(
   function (user) {
     return `data of ${user.id}`;
   },
-  (user) => user.id
+  (user) => user.id,
 );
 const u1 = { id: "u1", name: "Tom" };
 const u1Again = { id: "u1", name: "Tom" }; // 不同对象同 id

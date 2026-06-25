@@ -10,7 +10,7 @@
 function* inner() {
   yield 1;
   yield 2;
-  return 'innerResult';
+  return "innerResult";
 }
 
 function* outer() {
@@ -26,12 +26,19 @@ function makeInner() {
   return {
     next: function () {
       switch (state) {
-        case 0: state = 1; return { value: 1, done: false };
-        case 1: state = 2; return { value: 2, done: false };
-        case 2: state = 3; return { value: 'innerResult', done: true };
-        default: return { value: undefined, done: true };
+        case 0:
+          state = 1;
+          return { value: 1, done: false };
+        case 1:
+          state = 2;
+          return { value: 2, done: false };
+        case 2:
+          state = 3;
+          return { value: "innerResult", done: true };
+        default:
+          return { value: undefined, done: true };
       }
-    }
+    },
   };
 }
 
@@ -64,7 +71,7 @@ function makeOuterWithDelegation() {
             innerReturnValue = r.value;
             state = 2;
             arg = undefined; // 重置传入参数
-            continue;        // 继续执行外部的下一条语句
+            continue; // 继续执行外部的下一条语句
           }
         }
         if (state === 2) {
@@ -79,37 +86,37 @@ function makeOuterWithDelegation() {
         }
         return { value: undefined, done: true };
       }
-    }
+    },
   };
 }
 
 // 测试原生 yield*
-console.log('--- Native yield* ---');
+console.log("--- Native yield* ---");
 var o = outer();
 console.log(o.next().value); // 0
 console.log(o.next().value); // 1
 console.log(o.next().value); // 2
 console.log(o.next().value); // 3
-console.log(o.next());       // { value: 'innerResult', done: true }
+console.log(o.next()); // { value: 'innerResult', done: true }
 
 // 测试手写委托
-console.log('--- Hand-written yield* delegation ---');
+console.log("--- Hand-written yield* delegation ---");
 var myOuter = makeOuterWithDelegation();
 console.log(myOuter.next().value); // 0
 console.log(myOuter.next().value); // 1
 console.log(myOuter.next().value); // 2
 console.log(myOuter.next().value); // 3
-console.log(myOuter.next());       // { value: 'innerResult', done: true }
+console.log(myOuter.next()); // { value: 'innerResult', done: true }
 
 // yield* 委托给数组（原生）
 function* delegateToArray() {
   yield* [10, 20, 30];
-  yield 'end';
+  yield "end";
 }
-console.log('--- Native yield* to array ---');
+console.log("--- Native yield* to array ---");
 var a = delegateToArray();
 console.log(a.next().value); // 10
 console.log(a.next().value); // 20
 console.log(a.next().value); // 30
 console.log(a.next().value); // end
-console.log(a.next().done);  // true
+console.log(a.next().done); // true

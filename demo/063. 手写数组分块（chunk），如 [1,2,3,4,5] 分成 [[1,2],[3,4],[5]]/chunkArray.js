@@ -120,7 +120,9 @@ console.log("\n========== 应用：分页 ==========");
 const allItems = Array.from({ length: 23 }, (_, i) => `item${i + 1}`);
 const pageSize = 5;
 const pages = chunk1(allItems, pageSize);
-console.log(`共 ${allItems.length} 条，每页 ${pageSize} 条 => ${pages.length} 页`);
+console.log(
+  `共 ${allItems.length} 条，每页 ${pageSize} 条 => ${pages.length} 页`,
+);
 console.log("第 3 页:", pages[2]); // ['item11','item12','item13','item14','item15']
 console.log("最后一页:", pages[pages.length - 1]); // ['item21','item22','item23']
 

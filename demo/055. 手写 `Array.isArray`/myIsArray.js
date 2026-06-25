@@ -13,7 +13,7 @@
  */
 
 Array.myIsArray = function (value) {
-  return Object.prototype.toString.call(value) === '[object Array]';
+  return Object.prototype.toString.call(value) === "[object Array]";
 };
 
 // ===== 测试 =====
@@ -24,7 +24,7 @@ console.log(Array.myIsArray([])); // true
 console.log(Array.myIsArray(new Array(3))); // true
 
 // --- 非数组返回 false ---
-console.log(Array.myIsArray('abc')); // false
+console.log(Array.myIsArray("abc")); // false
 console.log(Array.myIsArray(123)); // false
 console.log(Array.myIsArray({})); // false
 console.log(Array.myIsArray({ length: 3 })); // false（类数组不是数组）
@@ -41,5 +41,5 @@ console.log(Array.myIsArray(function () {})); // false
 
 // --- 与原生 Array.isArray 对比 ---
 console.log(Array.myIsArray([1, 2]) === Array.isArray([1, 2])); // true
-console.log(Array.myIsArray('str') === Array.isArray('str')); // true
+console.log(Array.myIsArray("str") === Array.isArray("str")); // true
 console.log(Array.myIsArray({}) === Array.isArray({})); // true

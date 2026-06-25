@@ -58,14 +58,17 @@ var merged2 = arraySpreadPush(arr1, [0], arr2);
 console.log(merged2); // [1, 2, 3, 0, 4, 5, 6]
 
 var copy = copyArray(arr1);
-console.log(copy);          // [1, 2, 3]
+console.log(copy); // [1, 2, 3]
 console.log(copy === arr1); // false
 
-var sum = applyArgs(function () {
-  var total = 0;
-  for (var i = 0; i < arguments.length; i++) total += arguments[i];
-  return total;
-}, [1, 2, 3, 4]);
+var sum = applyArgs(
+  function () {
+    var total = 0;
+    for (var i = 0; i < arguments.length; i++) total += arguments[i];
+    return total;
+  },
+  [1, 2, 3, 4],
+);
 console.log(sum); // 10
 
 console.log(maxOfArray([3, 7, 2, 9, 1])); // 9

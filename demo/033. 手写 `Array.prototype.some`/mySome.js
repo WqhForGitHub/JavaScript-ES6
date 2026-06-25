@@ -11,8 +11,8 @@
  */
 
 Array.prototype.mySome = function (callback, thisArg) {
-  if (typeof callback !== 'function') {
-    throw new TypeError(callback + ' is not a function');
+  if (typeof callback !== "function") {
+    throw new TypeError(callback + " is not a function");
   }
 
   for (let i = 0; i < this.length; i++) {
@@ -29,24 +29,27 @@ Array.prototype.mySome = function (callback, thisArg) {
 // ===== 测试 =====
 
 // --- 存在满足 ---
-console.log([1, 2, 3].mySome(x => x > 2)); // true
+console.log([1, 2, 3].mySome((x) => x > 2)); // true
 
 // --- 全部不满足 ---
-console.log([1, 2, 3].mySome(x => x > 10)); // false
+console.log([1, 2, 3].mySome((x) => x > 10)); // false
 
 // --- 空数组返回 false ---
-console.log([].mySome(x => x > 0)); // false
+console.log([].mySome((x) => x > 0)); // false
 
 // --- 使用索引 ---
 console.log([10, 20, 30].mySome((x, i) => i === 2)); // true
 
 // --- 使用 thisArg ---
 console.log(
-  [1, 2, 3].mySome(function (x) {
-    return x === this.target;
-  }, { target: 2 })
+  [1, 2, 3].mySome(
+    function (x) {
+      return x === this.target;
+    },
+    { target: 2 },
+  ),
 ); // true
 
 // --- 对象数组判断 ---
 const users = [{ age: 17 }, { age: 20 }, { age: 16 }];
-console.log(users.mySome(u => u.age >= 18)); // true
+console.log(users.mySome((u) => u.age >= 18)); // true

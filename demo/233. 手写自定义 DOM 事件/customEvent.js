@@ -23,7 +23,7 @@ function createCustomEvent(type, options) {
   var cancelable = options.cancelable || false;
   var detail = options.detail || null;
 
-  if (typeof CustomEvent === 'function') {
+  if (typeof CustomEvent === "function") {
     // 现代浏览器
     return new CustomEvent(type, {
       bubbles: bubbles,
@@ -32,7 +32,7 @@ function createCustomEvent(type, options) {
     });
   } else {
     // IE9-11 兼容写法
-    var event = document.createEvent('CustomEvent');
+    var event = document.createEvent("CustomEvent");
     event.initCustomEvent(type, bubbles, cancelable, detail);
     return event;
   }
@@ -48,7 +48,7 @@ function on(target, type, handler) {
   if (target.addEventListener) {
     target.addEventListener(type, handler, false);
   } else {
-    target.attachEvent('on' + type, handler);
+    target.attachEvent("on" + type, handler);
   }
 }
 
@@ -58,11 +58,11 @@ function on(target, type, handler) {
  * @param {string|Event} event - 事件类型名或事件对象
  */
 function emit(target, event) {
-  var evt = typeof event === 'string' ? createCustomEvent(event) : event;
+  var evt = typeof event === "string" ? createCustomEvent(event) : event;
   if (target.dispatchEvent) {
     target.dispatchEvent(evt);
   } else {
-    target.fireEvent('on' + evt.type, evt);
+    target.fireEvent("on" + evt.type, evt);
   }
 }
 
@@ -76,7 +76,7 @@ function off(target, type, handler) {
   if (target.removeEventListener) {
     target.removeEventListener(type, handler, false);
   } else {
-    target.detachEvent('on' + type, handler);
+    target.detachEvent("on" + type, handler);
   }
 }
 
@@ -96,17 +96,21 @@ var eventTarget = {
   },
   removeEventListener: function (type, handler) {
     if (!this._listeners[type]) return;
-    this._listeners[type] = this._listeners[type].filter(function (h) { return h !== handler; });
+    this._listeners[type] = this._listeners[type].filter(function (h) {
+      return h !== handler;
+    });
   },
   dispatchEvent: function (event) {
     var handlers = this._listeners[event.type] || [];
-    handlers.forEach(function (h) { h(event); });
+    handlers.forEach(function (h) {
+      h(event);
+    });
     return true;
   },
 };
 
-on(eventTarget, 'greet', function (e) {
-  console.log('收到：', e.detail.message);
+on(eventTarget, "greet", function (e) {
+  console.log("收到：", e.detail.message);
 });
-emit(eventTarget, createCustomEvent('greet', { detail: { message: '你好' } }));
+emit(eventTarget, createCustomEvent("greet", { detail: { message: "你好" } }));
 // => 收到： 你好

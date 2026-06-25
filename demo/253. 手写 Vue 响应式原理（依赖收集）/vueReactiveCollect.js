@@ -77,7 +77,7 @@ Dep.prototype.notify = function () {
  * @param {Object} obj
  */
 function observe(obj) {
-  if (!obj || typeof obj !== 'object') return obj;
+  if (!obj || typeof obj !== "object") return obj;
   Object.keys(obj).forEach(function (key) {
     defineReactive(obj, key, obj[key]);
   });
@@ -102,7 +102,7 @@ function defineReactive(obj, key, val) {
       if (newVal === val) return;
       val = newVal;
       // 新值如果是对象，也要 observe
-      if (typeof newVal === 'object' && newVal !== null) {
+      if (typeof newVal === "object" && newVal !== null) {
         observe(newVal);
       }
       // 派发更新
@@ -160,30 +160,30 @@ Watcher.prototype.update = function () {
 
 // ===== 测试用例 =====
 var data = observe({
-  name: 'Vue',
+  name: "Vue",
   count: 0,
 });
 
 // 创建 Watcher，依赖 name 和 count
-var renderOutput = '';
+var renderOutput = "";
 var watcher = new Watcher(
   data,
   function () {
     // 模拟渲染函数读取数据
-    return this.name + ' - ' + this.count;
+    return this.name + " - " + this.count;
   },
   function (newVal, oldVal) {
     renderOutput = newVal;
-    console.log('更新：', oldVal, '->', newVal);
-  }
+    console.log("更新：", oldVal, "->", newVal);
+  },
 );
 // 首次执行时，name 和 count 的 getter 被触发，依赖被收集
 
-console.log('初始值：', watcher.value); // => Vue - 0
-console.log('收集的 Dep 数量：', watcher.deps.length); // => 2（name + count）
+console.log("初始值：", watcher.value); // => Vue - 0
+console.log("收集的 Dep 数量：", watcher.deps.length); // => 2（name + count）
 
 // 修改 name，触发更新
-data.name = 'React';
+data.name = "React";
 // => 更新： Vue - 0 -> React - 0
 
 // 修改 count，触发更新
@@ -192,5 +192,5 @@ data.count = 1;
 
 // 修改未被收集依赖的属性不会触发（这里所有属性都被收集了）
 // 验证依赖收集：subs 数量
-console.log('name 的 subs 数量：', watcher.deps[0].subs.length); // => 1
-console.log('count 的 subs 数量：', watcher.deps[1].subs.length); // => 1
+console.log("name 的 subs 数量：", watcher.deps[0].subs.length); // => 1
+console.log("count 的 subs 数量：", watcher.deps[1].subs.length); // => 1

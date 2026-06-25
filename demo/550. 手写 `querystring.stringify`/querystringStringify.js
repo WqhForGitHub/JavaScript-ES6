@@ -20,8 +20,8 @@
  *   3. 用 sep 拼接所有对
  */
 
-function querystringStringify(obj, sep = '&', eq = '=', options = {}) {
-  if (obj === null || typeof obj !== 'object') return '';
+function querystringStringify(obj, sep = "&", eq = "=", options = {}) {
+  if (obj === null || typeof obj !== "object") return "";
 
   const encode = options.encodeURIComponent || defaultEncode;
   const pairs = [];
@@ -41,9 +41,9 @@ function querystringStringify(obj, sep = '&', eq = '=', options = {}) {
       }
       return;
     }
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       for (const k of Object.keys(value)) {
-        const key = prefix ? prefix + '[' + k + ']' : k;
+        const key = prefix ? prefix + "[" + k + "]" : k;
         serialize(key, value[k]);
       }
       return;
@@ -61,10 +61,10 @@ function querystringStringify(obj, sep = '&', eq = '=', options = {}) {
 
 function defaultEncode(s) {
   // 转字符串并编码
-  if (typeof s !== 'string') {
-    if (typeof s === 'number' && !isFinite(s)) s = String(s);
-    else if (typeof s === 'bigint') s = String(s);
-    else if (s && typeof s.toString === 'function') s = s.toString();
+  if (typeof s !== "string") {
+    if (typeof s === "number" && !isFinite(s)) s = String(s);
+    else if (typeof s === "bigint") s = String(s);
+    else if (s && typeof s.toString === "function") s = s.toString();
     else s = String(s);
   }
   return encodeURIComponent(s);
@@ -72,39 +72,41 @@ function defaultEncode(s) {
 
 // ===== 测试 =====
 
-console.log(querystringStringify({ foo: 'bar', baz: 'qux', baz2: 'quux' }));
+console.log(querystringStringify({ foo: "bar", baz: "qux", baz2: "quux" }));
 // 'foo=bar&baz=qux&baz2=quux'
 
-console.log(querystringStringify({ a: '1', b: '2', c: '3' }));
+console.log(querystringStringify({ a: "1", b: "2", c: "3" }));
 // 'a=1&b=2&c=3'
 
 // 中文编码
-console.log(querystringStringify({ name: '张三', age: '18' }));
+console.log(querystringStringify({ name: "张三", age: "18" }));
 // 'name=%E5%BC%A0%E4%B8%89&age=18'
 
 // 数组值
-console.log(querystringStringify({ tag: ['js', 'node', 'css'] }));
+console.log(querystringStringify({ tag: ["js", "node", "css"] }));
 // 'tag=js&tag=node&tag=css'
 
 // 嵌套对象
-console.log(querystringStringify({ user: { name: 'Tom', age: '20' } }));
+console.log(querystringStringify({ user: { name: "Tom", age: "20" } }));
 // 'user[name]=Tom&user[age]=20'
 
 // 空对象
 console.log(querystringStringify({})); // ''
 
 // 空值
-console.log(querystringStringify({ a: '', b: null }));
+console.log(querystringStringify({ a: "", b: null }));
 // 'a=&b'
 
 // 自定义 sep/eq
-console.log(querystringStringify({ a: '1', b: '2' }, ';', ':'));
+console.log(querystringStringify({ a: "1", b: "2" }, ";", ":"));
 // 'a:1;b:2'
 
 // 自定义 encode
-console.log(querystringStringify({ x: 'A B' }, '&', '=', {
-  encodeURIComponent: s => encodeURIComponent(s).replace(/%20/g, '+'),
-}));
+console.log(
+  querystringStringify({ x: "A B" }, "&", "=", {
+    encodeURIComponent: (s) => encodeURIComponent(s).replace(/%20/g, "+"),
+  }),
+);
 // 'x=A+B' （空格编码为 +）
 
 // 数字值
@@ -116,23 +118,23 @@ console.log(querystringStringify({ active: true, deleted: false }));
 // 'active=true&deleted=false'
 
 // 嵌套数组
-console.log(querystringStringify({ items: ['a', 'b'], page: '1' }));
+console.log(querystringStringify({ items: ["a", "b"], page: "1" }));
 // 'items=a&items=b&page=1'
 
 // 与原生对比
-if (typeof require === 'function') {
+if (typeof require === "function") {
   try {
-    const qs = require('querystring');
+    const qs = require("querystring");
     const cases = [
-      { foo: 'bar', baz: 'qux' },
-      { name: '张三', age: '18' },
-      { tag: ['js', 'node', 'css'] },
-      { a: '', b: null },
+      { foo: "bar", baz: "qux" },
+      { name: "张三", age: "18" },
+      { tag: ["js", "node", "css"] },
+      { a: "", b: null },
     ];
     for (const c of cases) {
       const mine = querystringStringify(c);
       const native = qs.stringify(c);
-      console.log(`compare:`, mine, 'vs', native, 'same=', mine === native);
+      console.log(`compare:`, mine, "vs", native, "same=", mine === native);
     }
   } catch (e) {
     // 跳过

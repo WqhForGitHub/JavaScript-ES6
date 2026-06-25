@@ -89,35 +89,49 @@ console.log(unflattenObject({ "a.0": 1, "a.1": 2, "a.2": 3 }));
 // { a: [1, 2, 3] }
 
 // 混合：对象与数组
-console.log(unflattenObject({ "user.name": "Tom", "tags.0": "a", "tags.1": "b" }));
+console.log(
+  unflattenObject({ "user.name": "Tom", "tags.0": "a", "tags.1": "b" }),
+);
 // { user: { name: 'Tom' }, tags: ['a', 'b'] }
 
 // 多层混合
-console.log(unflattenObject({
-  "level1.level2.level3": "deep",
-  "level1.level2.num": 42,
-  top: true,
-}));
+console.log(
+  unflattenObject({
+    "level1.level2.level3": "deep",
+    "level1.level2.num": 42,
+    top: true,
+  }),
+);
 // { level1: { level2: { level3: 'deep', num: 42 } }, top: true }
 
 // 与 flatten 互逆验证
 const { flattenObject } = (() => {
   // 内联一个简易 flatten 以验证互逆
-  function isObject(v) { return v !== null && typeof v === "object"; }
+  function isObject(v) {
+    return v !== null && typeof v === "object";
+  }
   function flt(obj, prefix = "", res = {}) {
     if (!isObject(obj)) return obj;
     if (Array.isArray(obj)) {
-      if (obj.length === 0) { res[prefix] = []; return res; }
+      if (obj.length === 0) {
+        res[prefix] = [];
+        return res;
+      }
       obj.forEach((v, i) => {
         const p = prefix ? `${prefix}.${i}` : String(i);
-        if (isObject(v)) flt(v, p, res); else res[p] = v;
+        if (isObject(v)) flt(v, p, res);
+        else res[p] = v;
       });
       return res;
     }
-    if (Object.keys(obj).length === 0) { res[prefix] = {}; return res; }
+    if (Object.keys(obj).length === 0) {
+      res[prefix] = {};
+      return res;
+    }
     for (const k of Object.keys(obj)) {
       const p = prefix ? `${prefix}.${k}` : k;
-      if (isObject(obj[k])) flt(obj[k], p, res); else res[p] = obj[k];
+      if (isObject(obj[k])) flt(obj[k], p, res);
+      else res[p] = obj[k];
     }
     return res;
   }

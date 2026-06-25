@@ -27,7 +27,7 @@ function myAll(iterable) {
           result[index] = value; // 保证顺序
           if (--remaining === 0) resolve(result);
         },
-        (reason) => reject(reason) // 一旦失败立即 reject
+        (reason) => reject(reason), // 一旦失败立即 reject
       );
     });
   });
@@ -37,7 +37,7 @@ function myAll(iterable) {
 
 // 1. 全部成功，顺序与输入一致
 myAll([Promise.resolve(1), 2, Promise.resolve(3)]).then((res) =>
-  console.log("all ok:", res)
+  console.log("all ok:", res),
 ); // all ok: [ 1, 2, 3 ]
 
 // 2. 异步 + 顺序保证（后写的先完成，但结果顺序不变）
@@ -46,16 +46,14 @@ const fast = new Promise((r) => setTimeout(() => r("fast"), 20));
 myAll([slow, fast]).then((res) => console.log("order:", res)); // order: [ 'slow', 'fast' ]
 
 // 3. 任一失败
-myAll([
-  Promise.resolve(1),
-  Promise.reject("err"),
-  Promise.resolve(3),
-]).catch((e) => console.log("rejected:", e)); // rejected: err
+myAll([Promise.resolve(1), Promise.reject("err"), Promise.resolve(3)]).catch(
+  (e) => console.log("rejected:", e),
+); // rejected: err
 
 // 4. 空数组
 myAll([]).then((res) => console.log("empty:", res)); // empty: []
 
 // 5. 支持 Set 等可迭代对象
 myAll(new Set([Promise.resolve("a"), Promise.resolve("b")])).then((res) =>
-  console.log("set:", res)
+  console.log("set:", res),
 ); // set: [ 'a', 'b' ]

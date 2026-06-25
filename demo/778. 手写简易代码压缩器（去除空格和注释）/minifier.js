@@ -10,31 +10,41 @@
  */
 
 function minify(code) {
-  let result = '', i = 0;
+  let result = "",
+    i = 0;
   const len = code.length;
   while (i < len) {
     // 跳过字符串
-    if (code[i] === "'" || code[i] === '"' || code[i] === '`') {
+    if (code[i] === "'" || code[i] === '"' || code[i] === "`") {
       const q = code[i];
       result += code[i++];
       while (i < len && code[i] !== q) {
-        if (code[i] === '\\') result += code[i++];
+        if (code[i] === "\\") result += code[i++];
         result += code[i++];
       }
       if (i < len) result += code[i++];
       continue;
     }
     // 跳过单行注释
-    if (code[i] === '/' && code[i+1] === '/') { i += 2; while (i < len && code[i] !== '\n') i++; continue; }
+    if (code[i] === "/" && code[i + 1] === "/") {
+      i += 2;
+      while (i < len && code[i] !== "\n") i++;
+      continue;
+    }
     // 跳过多行注释
-    if (code[i] === '/' && code[i+1] === '*') { i += 2; while (i < len && !(code[i] === '*' && code[i+1] === '/')) i++; i += 2; continue; }
+    if (code[i] === "/" && code[i + 1] === "*") {
+      i += 2;
+      while (i < len && !(code[i] === "*" && code[i + 1] === "/")) i++;
+      i += 2;
+      continue;
+    }
     result += code[i++];
   }
   // 压缩空白
   result = result
-    .replace(/\s+/g, ' ')
-    .replace(/\s*([;{}()=,<>+\-*/%&|!?:[\]])\s*/g, '$1')
-    .replace(/;}/g, '}')
+    .replace(/\s+/g, " ")
+    .replace(/\s*([;{}()=,<>+\-*/%&|!?:[\]])\s*/g, "$1")
+    .replace(/;}/g, "}")
     .trim();
   return result;
 }
@@ -49,7 +59,7 @@ function add(a, b) {
 const result = add(1, 2);
 `;
 const minified = minify(code);
-console.log('原始长度:', code.length);
-console.log('压缩后长度:', minified.length);
-console.log('压缩后:', minified);
+console.log("原始长度:", code.length);
+console.log("压缩后长度:", minified.length);
+console.log("压缩后:", minified);
 // function add(a,b){return a+b}const result=add(1,2);

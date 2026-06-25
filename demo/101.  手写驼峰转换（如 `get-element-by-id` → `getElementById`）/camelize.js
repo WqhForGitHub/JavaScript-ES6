@@ -87,10 +87,22 @@ function camelize4(str) {
 console.log("========== 手写驼峰转换 ==========\n");
 
 const testCases = [
-  { value: "get-element-by-id", expected: "getElementById", desc: "get-element-by-id" },
-  { value: "background-color", expected: "backgroundColor", desc: "background-color" },
+  {
+    value: "get-element-by-id",
+    expected: "getElementById",
+    desc: "get-element-by-id",
+  },
+  {
+    value: "background-color",
+    expected: "backgroundColor",
+    desc: "background-color",
+  },
   { value: "font-size", expected: "fontSize", desc: "font-size" },
-  { value: "border-bottom-color", expected: "borderBottomColor", desc: "border-bottom-color" },
+  {
+    value: "border-bottom-color",
+    expected: "borderBottomColor",
+    desc: "border-bottom-color",
+  },
   { value: "hello", expected: "hello", desc: "hello（无分隔符）" },
   { value: "", expected: "", desc: "空字符串" },
   { value: "a-b-c", expected: "aBC", desc: "a-b-c" },
@@ -118,7 +130,12 @@ methods.forEach(({ name, fn }) => {
 
 // --- 实际应用场景 ---
 console.log("--- 实际应用场景 ---");
-const cssProperties = ["background-color", "font-size", "margin-top", "border-radius"];
+const cssProperties = [
+  "background-color",
+  "font-size",
+  "margin-top",
+  "border-radius",
+];
 console.log("CSS 属性转 JS 属性名：");
 cssProperties.forEach((prop) => {
   console.log(`  ${prop} → ${camelize(prop)}`);

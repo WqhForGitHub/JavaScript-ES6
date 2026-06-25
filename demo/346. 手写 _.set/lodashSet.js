@@ -14,7 +14,7 @@
 
 function castPath(path) {
   if (Array.isArray(path)) return path.slice();
-  if (typeof path === 'number') return [String(path)];
+  if (typeof path === "number") return [String(path)];
   const result = [];
   const re = /[^.[\]]+|\[(?:(['"])(.*?)\1|(\d+))\]/g;
   let match;
@@ -55,17 +55,17 @@ function set(object, path, value) {
 // --- Tests ---
 
 const obj1 = {};
-set(obj1, 'a.b.c', 1);
-console.log('set creates nested:', JSON.stringify(obj1)); // expected: {"a":{"b":{"c":1}}}
+set(obj1, "a.b.c", 1);
+console.log("set creates nested:", JSON.stringify(obj1)); // expected: {"a":{"b":{"c":1}}}
 
 const obj2 = { a: { b: [0, 0, 0] } };
-set(obj2, 'a.b[1]', 9);
-console.log('set array index:', JSON.stringify(obj2)); // expected: {"a":{"b":[0,9,0]}}
+set(obj2, "a.b[1]", 9);
+console.log("set array index:", JSON.stringify(obj2)); // expected: {"a":{"b":[0,9,0]}}
 
 const obj3 = {};
-set(obj3, ['arr', 0, 'name'], 'hello');
-console.log('set creates array path:', JSON.stringify(obj3)); // expected: {"arr":[{"name":"hello"}]}
+set(obj3, ["arr", 0, "name"], "hello");
+console.log("set creates array path:", JSON.stringify(obj3)); // expected: {"arr":[{"name":"hello"}]}
 
 const obj4 = {};
-set(obj4, 'a.b.c.d', 'deep');
-console.log('set deep path:', JSON.stringify(obj4)); // expected: {"a":{"b":{"c":{"d":"deep"}}}}
+set(obj4, "a.b.c.d", "deep");
+console.log("set deep path:", JSON.stringify(obj4)); // expected: {"a":{"b":{"c":{"d":"deep"}}}}

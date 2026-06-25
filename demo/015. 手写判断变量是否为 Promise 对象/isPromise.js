@@ -15,7 +15,10 @@
 
 function isPromise(value) {
   // 1. null / undefined / 基本类型不是 Promise
-  if (value === null || (typeof value !== "object" && typeof value !== "function")) {
+  if (
+    value === null ||
+    (typeof value !== "object" && typeof value !== "function")
+  ) {
     return false;
   }
 

@@ -13,8 +13,8 @@
  */
 
 Array.prototype.myMap = function (callback, thisArg) {
-  if (typeof callback !== 'function') {
-    throw new TypeError(callback + ' is not a function');
+  if (typeof callback !== "function") {
+    throw new TypeError(callback + " is not a function");
   }
 
   const result = new Array(this.length);
@@ -31,26 +31,29 @@ Array.prototype.myMap = function (callback, thisArg) {
 // ===== 测试 =====
 
 // --- 基本用法 ---
-console.log([1, 2, 3].myMap(x => x * 2)); // [2, 4, 6]
+console.log([1, 2, 3].myMap((x) => x * 2)); // [2, 4, 6]
 
 // --- 使用索引参数 ---
 console.log([10, 20, 30].myMap((x, i) => x + i)); // [10, 21, 32]
 
 // --- 使用 thisArg ---
 console.log(
-  [1, 2, 3].myMap(function (x) {
-    return x + this.offset;
-  }, { offset: 100 })
+  [1, 2, 3].myMap(
+    function (x) {
+      return x + this.offset;
+    },
+    { offset: 100 },
+  ),
 ); // [101, 102, 103]
 
 // --- 不修改原数组 ---
 const original = [1, 2, 3];
-const mapped = original.myMap(x => x * 2);
+const mapped = original.myMap((x) => x * 2);
 console.log(original); // [1, 2, 3]
 console.log(mapped); // [2, 4, 6]
 
 // --- 与原生 map 结果对比 ---
 console.log(
-  JSON.stringify([1, 2, 3].myMap(x => x * 2)) ===
-    JSON.stringify([1, 2, 3].map(x => x * 2))
+  JSON.stringify([1, 2, 3].myMap((x) => x * 2)) ===
+    JSON.stringify([1, 2, 3].map((x) => x * 2)),
 ); // true

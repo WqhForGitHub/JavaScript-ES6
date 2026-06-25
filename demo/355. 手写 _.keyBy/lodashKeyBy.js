@@ -11,7 +11,10 @@
  */
 
 function keyBy(collection, iteratee = (v) => v) {
-  const get = typeof iteratee === 'function' ? iteratee : (v) => (v == null ? undefined : v[iteratee]);
+  const get =
+    typeof iteratee === "function"
+      ? iteratee
+      : (v) => (v == null ? undefined : v[iteratee]);
   const result = Object.create(null);
   if (collection == null) return result;
 
@@ -32,16 +35,26 @@ function keyBy(collection, iteratee = (v) => v) {
 // --- Tests ---
 
 const array = [
-  { dir: 'left', code: 97 },
-  { dir: 'right', code: 100 },
+  { dir: "left", code: 97 },
+  { dir: "right", code: 100 },
 ];
 
-console.log('keyBy property:', JSON.stringify(keyBy(array, 'dir'))); // expected: {"left":{"dir":"left","code":97},"right":{"dir":"right","code":100}}
-console.log('keyBy function:', JSON.stringify(keyBy(array, (o) => String.fromCharCode(o.code)))); // expected: {"a":{"dir":"left","code":97},"d":{"dir":"right","code":100}}
+console.log("keyBy property:", JSON.stringify(keyBy(array, "dir"))); // expected: {"left":{"dir":"left","code":97},"right":{"dir":"right","code":100}}
+console.log(
+  "keyBy function:",
+  JSON.stringify(keyBy(array, (o) => String.fromCharCode(o.code))),
+); // expected: {"a":{"dir":"left","code":97},"d":{"dir":"right","code":100}}
 
 // Duplicate keys: last element wins
-const dup = [{ id: 1, v: 'a' }, { id: 1, v: 'b' }, { id: 2, v: 'c' }];
-console.log('keyBy duplicate wins:', JSON.stringify(keyBy(dup, 'id'))); // expected: {"1":{"id":1,"v":"b"},"2":{"id":2,"v":"c"}}
+const dup = [
+  { id: 1, v: "a" },
+  { id: 1, v: "b" },
+  { id: 2, v: "c" },
+];
+console.log("keyBy duplicate wins:", JSON.stringify(keyBy(dup, "id"))); // expected: {"1":{"id":1,"v":"b"},"2":{"id":2,"v":"c"}}
 
-console.log('keyBy default:', JSON.stringify(keyBy(['x', 'y']))); // expected: {"x":"x","y":"y"}
-console.log('keyBy numbers:', JSON.stringify(keyBy([{ n: 10 }, { n: 20 }], 'n'))); // expected: {"10":{"n":10},"20":{"n":20}}
+console.log("keyBy default:", JSON.stringify(keyBy(["x", "y"]))); // expected: {"x":"x","y":"y"}
+console.log(
+  "keyBy numbers:",
+  JSON.stringify(keyBy([{ n: 10 }, { n: 20 }], "n")),
+); // expected: {"10":{"n":10},"20":{"n":20}}

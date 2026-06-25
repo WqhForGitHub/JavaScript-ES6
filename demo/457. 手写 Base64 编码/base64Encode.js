@@ -84,5 +84,5 @@ console.log("原生对比 foo:", Buffer.from("foo").toString("base64")); // Zm9v
 console.log("原生对比 中文:", Buffer.from("中文测试").toString("base64")); // 5Lit5paH5rWL6K+V
 console.log(
   "自实现 === 原生:",
-  base64Encode("Hello World") === Buffer.from("Hello World").toString("base64") // true
+  base64Encode("Hello World") === Buffer.from("Hello World").toString("base64"), // true
 );

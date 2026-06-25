@@ -94,9 +94,9 @@ console.log(ctx.calculate(pkg));
 
 // Sorting strategies
 const files = [
-  { name: 'b.txt', size: 3, date: 3 },
-  { name: 'a.txt', size: 1, date: 2 },
-  { name: 'c.txt', size: 2, date: 1 },
+  { name: "b.txt", size: 3, date: 3 },
+  { name: "a.txt", size: 1, date: 2 },
+  { name: "c.txt", size: 2, date: 1 },
 ];
 console.log(sortItems(files, sortStrategies.byName).map((f) => f.name));
 // Expected: [ 'a.txt', 'b.txt', 'c.txt' ]

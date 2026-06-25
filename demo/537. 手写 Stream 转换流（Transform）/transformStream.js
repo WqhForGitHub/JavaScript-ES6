@@ -18,7 +18,7 @@
  *   - 当 Writable 结束时，调用 _flush（若有），然后 push(null) 结束 Readable
  */
 
-const { EventEmitter } = require('events');
+const { EventEmitter } = require("events");
 
 class Transform extends EventEmitter {
   constructor(options = {}) {
@@ -48,7 +48,8 @@ class Transform extends EventEmitter {
 
   // 可写端：写入
   write(chunk, encoding, callback) {
-    if (typeof chunk === 'string') chunk = Buffer.from(chunk, encoding || 'utf8');
+    if (typeof chunk === "string")
+      chunk = Buffer.from(chunk, encoding || "utf8");
     this._writeBuffer.push({ chunk, callback });
     this._writeLength += chunk.length;
     this._processWrite();
@@ -57,7 +58,7 @@ class Transform extends EventEmitter {
 
   end(chunk, encoding, callback) {
     if (chunk !== undefined && chunk !== null) this.write(chunk, encoding);
-    if (typeof callback === 'function') this.once('finish', callback);
+    if (typeof callback === "function") this.once("finish", callback);
     this._ended = true;
     this._processWrite();
     return this;
@@ -70,18 +71,18 @@ class Transform extends EventEmitter {
       if (this._ended && !this._finished) {
         this._writing = true;
         try {
-          this._flushFn(err => {
+          this._flushFn((err) => {
             this._writing = false;
             if (err) {
-              this.emit('error', err);
+              this.emit("error", err);
               return;
             }
             this._finished = true;
             this._pushReadable(null); // 结束可读端
-            this.emit('finish');
+            this.emit("finish");
           });
         } catch (err) {
-          this.emit('error', err);
+          this.emit("error", err);
         }
       }
       return;
@@ -92,10 +93,10 @@ class Transform extends EventEmitter {
     this._writeLength -= chunk.length;
 
     try {
-      this._transformFn(chunk, 'utf8', (err, output) => {
+      this._transformFn(chunk, "utf8", (err, output) => {
         this._writing = false;
         if (err) {
-          this.emit('error', err);
+          this.emit("error", err);
           if (callback) callback(err);
           return;
         }
@@ -107,7 +108,7 @@ class Transform extends EventEmitter {
       });
     } catch (err) {
       this._writing = false;
-      this.emit('error', err);
+      this.emit("error", err);
     }
   }
 
@@ -118,7 +119,7 @@ class Transform extends EventEmitter {
       this._emitReadable();
       return;
     }
-    if (typeof chunk === 'string') chunk = Buffer.from(chunk, 'utf8');
+    if (typeof chunk === "string") chunk = Buffer.from(chunk, "utf8");
     this._readBuffer.push(chunk);
     this._readLength += chunk.length;
     if (this._flowing) this._emitReadable();
@@ -129,11 +130,11 @@ class Transform extends EventEmitter {
     while (this._flowing && this._readBuffer.length > 0) {
       const chunk = this._readBuffer.shift();
       this._readLength -= chunk.length;
-      this.emit('data', chunk);
+      this.emit("data", chunk);
     }
     if (this._flowing && this._ended && this._readBuffer.length === 0) {
       this._endEmitted = true;
-      this.emit('end');
+      this.emit("end");
     }
   }
 
@@ -150,8 +151,8 @@ class Transform extends EventEmitter {
   }
 
   pipe(dest) {
-    this.on('data', c => dest.write(c));
-    this.on('end', () => dest.end && dest.end());
+    this.on("data", (c) => dest.write(c));
+    this.on("end", () => dest.end && dest.end());
     this.resume();
     return dest;
   }
@@ -166,31 +167,31 @@ const upper = new Transform({
   },
 });
 
-let result1 = '';
-upper.on('data', d => (result1 += d.toString()));
-upper.on('end', () => {
-  console.log('test1 upper:', result1); // 'HELLO WORLD'
+let result1 = "";
+upper.on("data", (d) => (result1 += d.toString()));
+upper.on("end", () => {
+  console.log("test1 upper:", result1); // 'HELLO WORLD'
 });
-upper.write('hello ');
-upper.write('world');
+upper.write("hello ");
+upper.write("world");
 upper.end();
 
 // 测试 2：累积计数（每次输出累积字符数）
 const counter = new Transform({
   transform(chunk, encoding, callback) {
     this._count = (this._count || 0) + chunk.length;
-    callback(null, Buffer.from(this._count.toString() + ' '));
+    callback(null, Buffer.from(this._count.toString() + " "));
   },
 });
 
-let result2 = '';
-counter.on('data', d => (result2 += d.toString()));
-counter.on('end', () => {
-  console.log('test2 counter:', result2.trim()); // '5 11 14' (按块累积)
+let result2 = "";
+counter.on("data", (d) => (result2 += d.toString()));
+counter.on("end", () => {
+  console.log("test2 counter:", result2.trim()); // '5 11 14' (按块累积)
 });
-counter.write('hello');
-counter.write(' world66'); // 8 字节 -> 5+8=13
-counter.write('!'); // 1 -> 14
+counter.write("hello");
+counter.write(" world66"); // 8 字节 -> 5+8=13
+counter.write("!"); // 1 -> 14
 counter.end();
 
 // 测试 3：使用 _flush 输出汇总
@@ -202,33 +203,33 @@ const collecter = new Transform({
   },
   flush(callback) {
     // 结束时输出汇总
-    callback(null, Buffer.from(this._parts.join('|')));
+    callback(null, Buffer.from(this._parts.join("|")));
   },
 });
 
-let result3 = '';
-collecter.on('data', d => (result3 += d.toString()));
-collecter.on('end', () => {
-  console.log('test3 flush:', result3); // 'a|b|c'
+let result3 = "";
+collecter.on("data", (d) => (result3 += d.toString()));
+collecter.on("end", () => {
+  console.log("test3 flush:", result3); // 'a|b|c'
 });
-collecter.write('a');
-collecter.write('b');
-collecter.write('c');
+collecter.write("a");
+collecter.write("b");
+collecter.write("c");
 collecter.end();
 
 // 测试 4：Base64 编码流（演示实用场景）
 function bytesToBase64(bytes) {
-  return Buffer.from(bytes).toString('base64');
+  return Buffer.from(bytes).toString("base64");
 }
 const b64Encoder = new Transform({
   transform(chunk, encoding, callback) {
     callback(null, Buffer.from(bytesToBase64(chunk)));
   },
 });
-let result4 = '';
-b64Encoder.on('data', d => (result4 += d.toString()));
-b64Encoder.on('end', () => {
-  console.log('test4 base64:', result4); // 'aGVsbG8=' (一段时)；多段会分别编码
+let result4 = "";
+b64Encoder.on("data", (d) => (result4 += d.toString()));
+b64Encoder.on("end", () => {
+  console.log("test4 base64:", result4); // 'aGVsbG8=' (一段时)；多段会分别编码
 });
-b64Encoder.write('hello');
+b64Encoder.write("hello");
 b64Encoder.end();

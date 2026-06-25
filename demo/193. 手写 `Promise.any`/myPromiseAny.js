@@ -29,11 +29,9 @@ function myAny(iterable) {
         (reason) => {
           errors[index] = reason; // 保留顺序
           if (++rejectedCount === arr.length) {
-            reject(
-              new AggregateError(errors, "All promises were rejected")
-            );
+            reject(new AggregateError(errors, "All promises were rejected"));
           }
-        }
+        },
       );
     });
   });
@@ -53,9 +51,7 @@ if (typeof AggregateError === "undefined") {
 // ===== 测试 =====
 
 // 1. 第一个成功即返回（即使有更快失败）
-const failFast = new Promise((_, rej) =>
-  setTimeout(() => rej("fail"), 10)
-);
+const failFast = new Promise((_, rej) => setTimeout(() => rej("fail"), 10));
 const okSlow = new Promise((r) => setTimeout(() => r("ok"), 50));
 myAny([failFast, okSlow]).then((v) => console.log("first ok:", v)); // first ok: ok
 
@@ -67,21 +63,15 @@ myAny([
 ]).then((v) => console.log("fastest ok:", v)); // fastest ok: b
 
 // 3. 全部失败 -> AggregateError
-myAny([
-  Promise.reject(1),
-  Promise.reject(2),
-  Promise.reject(3),
-]).catch((e) => {
+myAny([Promise.reject(1), Promise.reject(2), Promise.reject(3)]).catch((e) => {
   console.log("aggregate message:", e.message); // All promises were rejected
   console.log("aggregate errors:", e.errors); // aggregate errors: [ 1, 2, 3 ]
 });
 
 // 4. 空数组 -> 立即 rejected
-myAny([]).catch((e) =>
-  console.log("empty rejected:", e.constructor.name)
-); // empty rejected: AggregateError
+myAny([]).catch((e) => console.log("empty rejected:", e.constructor.name)); // empty rejected: AggregateError
 
 // 5. 含同步成功立即决议
 myAny([Promise.reject("x"), Promise.resolve("win")]).then((v) =>
-  console.log("sync ok:", v)
+  console.log("sync ok:", v),
 ); // sync ok: win

@@ -23,7 +23,10 @@ function eventDelegate(parent, type, tagName, handler) {
     var target = e.target || e.srcElement;
     // 沿 DOM 树向上查找，直到找到匹配的标签或到达 parent
     while (target && target !== parent) {
-      if (target.tagName && target.tagName.toLowerCase() === tagName.toLowerCase()) {
+      if (
+        target.tagName &&
+        target.tagName.toLowerCase() === tagName.toLowerCase()
+      ) {
         // 修正 this 指向为实际触发的元素
         return handler.call(target, e);
       }
@@ -33,7 +36,7 @@ function eventDelegate(parent, type, tagName, handler) {
   if (parent.addEventListener) {
     parent.addEventListener(type, wrappedHandler, false);
   } else {
-    parent.attachEvent('on' + type, wrappedHandler);
+    parent.attachEvent("on" + type, wrappedHandler);
   }
   return wrappedHandler;
 }
@@ -59,7 +62,9 @@ function eventDelegate(parent, type, tagName, handler) {
 function createMockEventDelegate() {
   var events = {};
   return {
-    on: function (type, handler) { events[type] = handler; },
+    on: function (type, handler) {
+      events[type] = handler;
+    },
     trigger: function (type, target) {
       // 模拟冒泡过程
       var node = target;
@@ -74,12 +79,12 @@ function createMockEventDelegate() {
 }
 
 var mockParent = createMockEventDelegate();
-var child1 = { tag: 'li', text: 'item 1', parent: mockParent };
-var child2 = { tag: 'li', text: 'item 2', parent: mockParent };
+var child1 = { tag: "li", text: "item 1", parent: mockParent };
+var child2 = { tag: "li", text: "item 2", parent: mockParent };
 
-eventDelegate(mockParent, 'click', 'li', function (e) {
-  console.log('你点击了', this.text);
+eventDelegate(mockParent, "click", "li", function (e) {
+  console.log("你点击了", this.text);
 });
 // 模拟触发
-mockParent.trigger('click', child1); // => 你点击了 item 1
-mockParent.trigger('click', child2); // => 你点击了 item 2
+mockParent.trigger("click", child1); // => 你点击了 item 1
+mockParent.trigger("click", child2); // => 你点击了 item 2

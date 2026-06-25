@@ -14,7 +14,7 @@
  * @returns {Element[]}
  */
 function myGetElementsByClassName(className, root) {
-  root = root || (typeof document !== 'undefined' ? document : null);
+  root = root || (typeof document !== "undefined" ? document : null);
   if (!root) return [];
 
   var result = [];
@@ -23,7 +23,7 @@ function myGetElementsByClassName(className, root) {
 
   function dfs(node) {
     if (!node) return;
-    var nodeClass = node.getAttribute ? node.getAttribute('class') : null;
+    var nodeClass = node.getAttribute ? node.getAttribute("class") : null;
     if (nodeClass) {
       var nodeClasses = nodeClass.trim().split(/\s+/);
       // 检查是否包含全部目标类名
@@ -56,24 +56,24 @@ function createMockNode(tag, attrs, children) {
   };
 }
 
-var mockDoc = createMockNode('html', {}, [
-  createMockNode('body', {}, [
-    createMockNode('div', { class: 'container' }, [
-      createMockNode('div', { class: 'box active' }, []),
-      createMockNode('div', { class: 'box' }, []),
-      createMockNode('span', { class: 'active' }, []),
+var mockDoc = createMockNode("html", {}, [
+  createMockNode("body", {}, [
+    createMockNode("div", { class: "container" }, [
+      createMockNode("div", { class: "box active" }, []),
+      createMockNode("div", { class: "box" }, []),
+      createMockNode("span", { class: "active" }, []),
     ]),
   ]),
 ]);
 
-var boxes = myGetElementsByClassName('box', mockDoc);
+var boxes = myGetElementsByClassName("box", mockDoc);
 console.log(boxes.length); // => 2
 console.log(boxes[0].attributes.class); // => 'box active'
 console.log(boxes[1].attributes.class); // => 'box'
 
-var actives = myGetElementsByClassName('active', mockDoc);
+var actives = myGetElementsByClassName("active", mockDoc);
 console.log(actives.length); // => 2
 
 // 同时匹配多个类名（需要同时拥有 box 和 active）
-var boxActives = myGetElementsByClassName('box active', mockDoc);
+var boxActives = myGetElementsByClassName("box active", mockDoc);
 console.log(boxActives.length); // => 1

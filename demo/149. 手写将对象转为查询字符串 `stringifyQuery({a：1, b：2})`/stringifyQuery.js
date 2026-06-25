@@ -78,7 +78,9 @@ function stringifyQuery(params, options = {}) {
       const value = params[key];
       if (Array.isArray(value)) {
         order.push(key);
-        grouped[key] = value.filter((v) => v !== null && v !== undefined).map(String);
+        grouped[key] = value
+          .filter((v) => v !== null && v !== undefined)
+          .map(String);
       }
     }
     // 重新构建 parts（简化：仅演示，实际可优化）
@@ -100,7 +102,9 @@ function stringifyQuerySimple(params) {
         parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(item)}`);
       }
     } else {
-      parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`);
+      parts.push(
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+      );
     }
   }
   return parts.join("&");
@@ -141,6 +145,6 @@ console.log(native); // 'a=1&b=2'
 const api = "/api/users";
 const query = stringifyQuery(
   { page: 1, size: 10, keyword: "js" },
-  { prefix: "?" }
+  { prefix: "?" },
 );
 console.log(api + query); // '/api/users?page=1&size=10&keyword=js'

@@ -63,7 +63,7 @@ function defineReactive(obj, key, val) {
 }
 
 function observe(obj) {
-  if (!obj || typeof obj !== 'object') return obj;
+  if (!obj || typeof obj !== "object") return obj;
   Object.keys(obj).forEach(function (key) {
     defineReactive(obj, key, obj[key]);
   });
@@ -71,9 +71,9 @@ function observe(obj) {
 }
 
 // ===== 更新队列调度 =====
-var queue = [];       // 待更新的 Watcher 队列
-var has = {};         // 去重记录
-var waiting = false;  // 是否已在等待刷新
+var queue = []; // 待更新的 Watcher 队列
+var has = {}; // 去重记录
+var waiting = false; // 是否已在等待刷新
 var flushing = false;
 var index = 0;
 
@@ -107,7 +107,9 @@ function queueWatcher(watcher) {
  */
 function flushQueue() {
   flushing = true;
-  queue.sort(function (a, b) { return a.id - b; });
+  queue.sort(function (a, b) {
+    return a.id - b;
+  });
 
   for (index = 0; index < queue.length; index++) {
     var watcher = queue[index];
@@ -176,23 +178,27 @@ Watcher.prototype.run = function () {
 };
 
 // ===== 测试用例 =====
-var data = observe({ count: 0, name: 'test' });
+var data = observe({ count: 0, name: "test" });
 
 var log = [];
 var watcher1 = new Watcher(
   data,
-  function () { return this.count; },
+  function () {
+    return this.count;
+  },
   function (newVal, oldVal) {
-    log.push('watcher1: ' + oldVal + ' -> ' + newVal);
-  }
+    log.push("watcher1: " + oldVal + " -> " + newVal);
+  },
 );
 
 var watcher2 = new Watcher(
   data,
-  function () { return this.count; },
+  function () {
+    return this.count;
+  },
   function (newVal, oldVal) {
-    log.push('watcher2: ' + oldVal + ' -> ' + newVal);
-  }
+    log.push("watcher2: " + oldVal + " -> " + newVal);
+  },
 );
 
 // 同步多次修改 count，只会触发一次批量更新
@@ -207,5 +213,5 @@ setTimeout(function () {
   // 多次同步修改被合并为一次更新
 
   // 验证 id 排序
-  console.log('watcher1 id < watcher2 id:', watcher1.id < watcher2.id); // => true
+  console.log("watcher1 id < watcher2 id:", watcher1.id < watcher2.id); // => true
 }, 10);

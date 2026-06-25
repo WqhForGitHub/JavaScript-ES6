@@ -25,7 +25,8 @@ function jsonp(url, options = {}) {
   } = options;
 
   return new Promise((resolve, reject) => {
-    const callbackName = prefix + Date.now() + "_" + Math.floor(Math.random() * 1e6);
+    const callbackName =
+      prefix + Date.now() + "_" + Math.floor(Math.random() * 1e6);
     let scriptEl = null;
     let timer = null;
     let settled = false;
@@ -111,5 +112,5 @@ function buildJsonpUrl(url, params, callbackName) {
 }
 console.log(
   "URL 拼接:",
-  buildJsonpUrl("https://api.example.com/list", { page: 1 }, "cb1")
+  buildJsonpUrl("https://api.example.com/list", { page: 1 }, "cb1"),
 ); // URL 拼接: https://api.example.com/list?page=1&callback=cb1

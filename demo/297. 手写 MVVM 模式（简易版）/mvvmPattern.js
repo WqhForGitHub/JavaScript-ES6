@@ -85,7 +85,9 @@ class ViewModel {
     this.state = reactive(initial);
     // Computed properties derived from state.
     this.computed = {
-      fullName: computed(() => `${this.state.firstName} ${this.state.lastName}`),
+      fullName: computed(
+        () => `${this.state.firstName} ${this.state.lastName}`,
+      ),
       greeting: computed(() => `Hello, ${this.state.firstName}!`),
     };
     this._changeListeners = new Set();
@@ -131,25 +133,25 @@ class View {
 }
 
 // ---------------- Test cases ----------------
-const vm = new ViewModel({ firstName: 'Arthur', lastName: 'Dent' });
+const vm = new ViewModel({ firstName: "Arthur", lastName: "Dent" });
 const view = new View(vm);
 
-console.log(view.lastOutput, '| renders:', view.renderCount);
+console.log(view.lastOutput, "| renders:", view.renderCount);
 // Expected: [View] Hello, Arthur! (full: Arthur Dent) | renders: 1
 
 // Simulate user typing in the first-name input (two-way binding).
-view.inputFirstName('Ford');
-console.log(view.lastOutput, '| renders:', view.renderCount);
+view.inputFirstName("Ford");
+console.log(view.lastOutput, "| renders:", view.renderCount);
 // Expected: [View] Hello, Ford! (full: Ford Dent) | renders: 2
 
-view.inputLastName('Prefect');
-console.log(view.lastOutput, '| renders:', view.renderCount);
+view.inputLastName("Prefect");
+console.log(view.lastOutput, "| renders:", view.renderCount);
 // Expected: [View] Hello, Ford! (full: Ford Prefect) | renders: 3
 
 // Multiple views share one ViewModel and stay in sync.
 const view2 = new View(vm);
 console.log(view2.lastOutput);
 // Expected: [View] Hello, Ford! (full: Ford Prefect)
-view.inputFirstName('Zaphod');
+view.inputFirstName("Zaphod");
 console.log(view.lastOutput, view2.lastOutput);
 // Expected: [View] Hello, Zaphod! (full: Zaphod Prefect) [View] Hello, Zaphod! (full: Zaphod Prefect)

@@ -15,13 +15,15 @@
 
 Array.myFrom = function (arrayLike, mapFn, thisArg) {
   if (arrayLike == null) {
-    throw new TypeError('Array.from requires an array-like object - not null or undefined');
+    throw new TypeError(
+      "Array.from requires an array-like object - not null or undefined",
+    );
   }
 
-  const hasMapFn = typeof mapFn === 'function';
+  const hasMapFn = typeof mapFn === "function";
   const result = [];
 
-  if (typeof arrayLike[Symbol.iterator] === 'function') {
+  if (typeof arrayLike[Symbol.iterator] === "function") {
     // 可迭代对象
     let index = 0;
     const iterator = arrayLike[Symbol.iterator]();
@@ -54,17 +56,17 @@ Array.myFrom = function (arrayLike, mapFn, thisArg) {
 // ===== 测试 =====
 
 // --- 从字符串创建数组（字符串可迭代）---
-console.log(Array.myFrom('hello')); // ['h', 'e', 'l', 'l', 'o']
+console.log(Array.myFrom("hello")); // ['h', 'e', 'l', 'l', 'o']
 
 // --- 从 Set 创建数组 ---
 console.log(Array.myFrom(new Set([1, 2, 2, 3]))); // [1, 2, 3]
 
 // --- 从类数组对象创建 ---
-const arrayLike = { 0: 'a', 1: 'b', 2: 'c', length: 3 };
+const arrayLike = { 0: "a", 1: "b", 2: "c", length: 3 };
 console.log(Array.myFrom(arrayLike)); // ['a', 'b', 'c']
 
 // --- 使用 mapFn ---
-console.log(Array.myFrom([1, 2, 3], x => x * 2)); // [2, 4, 6]
+console.log(Array.myFrom([1, 2, 3], (x) => x * 2)); // [2, 4, 6]
 console.log(Array.myFrom({ length: 3 }, (_, i) => i)); // [0, 1, 2]
 
 // --- 使用 thisArg ---
@@ -74,8 +76,8 @@ console.log(
     function (x) {
       return x + this.base;
     },
-    { base: 10 }
-  )
+    { base: 10 },
+  ),
 ); // [11, 12, 13]
 
 // --- 从 arguments 类数组（通过函数调用）---
@@ -85,11 +87,11 @@ function fn() {
 console.log(fn(1, 2, 3)); // [1, 2, 3]
 
 // --- 从 NodeList 类数组 ---
-const fakeNodeList = { 0: 'div1', 1: 'div2', length: 2 };
+const fakeNodeList = { 0: "div1", 1: "div2", length: 2 };
 console.log(Array.myFrom(fakeNodeList)); // ['div1', 'div2']
 
 // --- 与原生 Array.from 对比 ---
 console.log(
-  JSON.stringify(Array.myFrom('abc', x => x.toUpperCase())) ===
-    JSON.stringify(Array.from('abc', x => x.toUpperCase()))
+  JSON.stringify(Array.myFrom("abc", (x) => x.toUpperCase())) ===
+    JSON.stringify(Array.from("abc", (x) => x.toUpperCase())),
 ); // true

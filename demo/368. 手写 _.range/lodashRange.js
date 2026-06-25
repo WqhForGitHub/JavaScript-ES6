@@ -24,7 +24,7 @@ function range(start, end, step) {
   }
   step = Number(step);
   if (step === 0) {
-    throw new Error('step cannot be zero');
+    throw new Error("step cannot be zero");
   }
   start = Number(start);
   end = Number(end);
@@ -50,11 +50,11 @@ function range(start, end, step) {
 
 // --- Tests ---
 
-console.log('range default:', JSON.stringify(range(4))); // expected: [0,1,2,3]
-console.log('range start end:', JSON.stringify(range(1, 5))); // expected: [1,2,3,4]
-console.log('range with step:', JSON.stringify(range(0, 20, 5))); // expected: [0,5,10,15]
-console.log('range descending:', JSON.stringify(range(5, 0, -1))); // expected: [5,4,3,2,1]
-console.log('range auto step:', JSON.stringify(range(4, -1))); // expected: [4,3,2,1,0]
-console.log('range zero end:', JSON.stringify(range(0))); // expected: []
-console.log('range equal start end:', JSON.stringify(range(2, 2))); // expected: []
-console.log('range fractional step:', JSON.stringify(range(0, 1, 0.25))); // expected: [0,0.25,0.5,0.75]
+console.log("range default:", JSON.stringify(range(4))); // expected: [0,1,2,3]
+console.log("range start end:", JSON.stringify(range(1, 5))); // expected: [1,2,3,4]
+console.log("range with step:", JSON.stringify(range(0, 20, 5))); // expected: [0,5,10,15]
+console.log("range descending:", JSON.stringify(range(5, 0, -1))); // expected: [5,4,3,2,1]
+console.log("range auto step:", JSON.stringify(range(4, -1))); // expected: [4,3,2,1,0]
+console.log("range zero end:", JSON.stringify(range(0))); // expected: []
+console.log("range equal start end:", JSON.stringify(range(2, 2))); // expected: []
+console.log("range fractional step:", JSON.stringify(range(0, 1, 0.25))); // expected: [0,0.25,0.5,0.75]

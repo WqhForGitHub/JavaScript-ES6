@@ -6,7 +6,7 @@
 function buildSuffixArray(s) {
   const n = s.length;
   const sa = Array.from({ length: n }, (_, i) => i);
-  const rank = s.split('').map(c => c.charCodeAt(0));
+  const rank = s.split("").map((c) => c.charCodeAt(0));
   const tmp = new Array(n);
   for (let k = 1; k < n; k <<= 1) {
     sa.sort((a, b) => {
@@ -18,14 +18,21 @@ function buildSuffixArray(s) {
     tmp[sa[0]] = 0;
     for (let i = 1; i < n; i++) {
       tmp[sa[i]] = tmp[sa[i - 1]];
-      if (rank[sa[i]] !== rank[sa[i-1]] || (sa[i]+k<n?rank[sa[i]+k]:-1) !== (sa[i-1]+k<n?rank[sa[i-1]+k]:-1)) tmp[sa[i]]++;
+      if (
+        rank[sa[i]] !== rank[sa[i - 1]] ||
+        (sa[i] + k < n ? rank[sa[i] + k] : -1) !==
+          (sa[i - 1] + k < n ? rank[sa[i - 1] + k] : -1)
+      )
+        tmp[sa[i]]++;
     }
     for (let i = 0; i < n; i++) rank[i] = tmp[i];
   }
   return sa;
 }
 function buildLCP(s, sa) {
-  const n = s.length; const rank = new Array(n); const lcp = new Array(n);
+  const n = s.length;
+  const rank = new Array(n);
+  const lcp = new Array(n);
   for (let i = 0; i < n; i++) rank[sa[i]] = i;
   let h = 0;
   for (let i = 0; i < n; i++) {
@@ -39,9 +46,9 @@ function buildLCP(s, sa) {
   return lcp;
 }
 // ===== 测试 =====
-const s = 'banana';
+const s = "banana";
 const sa = buildSuffixArray(s);
 const lcp = buildLCP(s, sa);
-console.log('后缀数组:', sa.map(i => s.substring(i)).join(', '));
-console.log('SA:', sa); // [5, 3, 1, 0, 4, 2]
-console.log('LCP:', lcp); // [0, 1, 3, 0, 0, 2]
+console.log("后缀数组:", sa.map((i) => s.substring(i)).join(", "));
+console.log("SA:", sa); // [5, 3, 1, 0, 4, 2]
+console.log("LCP:", lcp); // [0, 1, 3, 0, 0, 2]

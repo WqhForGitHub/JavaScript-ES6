@@ -62,7 +62,7 @@ console.log(e.myShift()); // { a: 1 }
 console.log(e); // [{ b: 2 }]
 
 // --- 移除后长度更新 ---
-const f = ['a', 'b', 'c', 'd'];
+const f = ["a", "b", "c", "d"];
 f.myShift();
 console.log(f.length); // 3
 console.log(f); // ['b', 'c', 'd']

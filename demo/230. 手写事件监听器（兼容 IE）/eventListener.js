@@ -29,19 +29,30 @@ function addEvent(element, event, handler) {
       // IE 中事件对象在 window.event，且 this 指向 window
       var e = window.event;
       e.target = e.target || e.srcElement;
-      e.preventDefault = e.preventDefault || function () { e.returnValue = false; };
-      e.stopPropagation = e.stopPropagation || function () { e.cancelBubble = true; };
+      e.preventDefault =
+        e.preventDefault ||
+        function () {
+          e.returnValue = false;
+        };
+      e.stopPropagation =
+        e.stopPropagation ||
+        function () {
+          e.cancelBubble = true;
+        };
       handler.call(element, e);
     };
-    element.attachEvent('on' + event, wrappedHandler);
+    element.attachEvent("on" + event, wrappedHandler);
     // 存储映射关系以便移除
     element._eventMap = element._eventMap || {};
     element._eventMap[event] = element._eventMap[event] || [];
-    element._eventMap[event].push({ original: handler, wrapped: wrappedHandler });
+    element._eventMap[event].push({
+      original: handler,
+      wrapped: wrappedHandler,
+    });
     return wrappedHandler;
   } else {
     // 最后退路：使用 onxxx 属性
-    element['on' + event] = handler;
+    element["on" + event] = handler;
     return handler;
   }
 }
@@ -61,14 +72,14 @@ function removeEvent(element, event, handler) {
       var list = element._eventMap[event];
       for (var i = 0; i < list.length; i++) {
         if (list[i].original === handler) {
-          element.detachEvent('on' + event, list[i].wrapped);
+          element.detachEvent("on" + event, list[i].wrapped);
           list.splice(i, 1);
           break;
         }
       }
     }
   } else {
-    element['on' + event] = null;
+    element["on" + event] = null;
   }
 }
 
@@ -85,12 +96,18 @@ function removeEvent(element, event, handler) {
 // 模拟测试：验证事件存取逻辑
 var mockEl = {
   _events: {},
-  addEventListener: function (event, handler) { this._events[event] = handler; },
-  removeEventListener: function (event, handler) { delete this._events[event]; },
+  addEventListener: function (event, handler) {
+    this._events[event] = handler;
+  },
+  removeEventListener: function (event, handler) {
+    delete this._events[event];
+  },
 };
 
-var handler = function (e) { console.log('handle', e); };
-addEvent(mockEl, 'click', handler);
-console.log(mockEl._events['click'] === handler); // => true
-removeEvent(mockEl, 'click', handler);
-console.log(mockEl._events['click']); // => undefined
+var handler = function (e) {
+  console.log("handle", e);
+};
+addEvent(mockEl, "click", handler);
+console.log(mockEl._events["click"] === handler); // => true
+removeEvent(mockEl, "click", handler);
+console.log(mockEl._events["click"]); // => undefined

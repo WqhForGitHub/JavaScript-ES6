@@ -17,7 +17,7 @@
  */
 function myRemoveChild(parent, child) {
   if (child.parentNode !== parent) {
-    throw new Error('The node to be removed is not a child of this node.');
+    throw new Error("The node to be removed is not a child of this node.");
   }
   parent.removeChild(child);
   return child;
@@ -50,7 +50,7 @@ function myRemoveAllChildren(parent) {
  * @param {Node} parent - 父节点
  */
 function myEmpty(parent) {
-  parent.innerHTML = '';
+  parent.innerHTML = "";
 }
 
 // ===== 测试用例（需浏览器环境） =====
@@ -70,17 +70,25 @@ function myEmpty(parent) {
 // myRemoveAllChildren(list);    // 清空所有子节点
 
 // 模拟测试：用数组模拟子节点删除逻辑
-var children = [{ id: 'item1', val: 1 }, { id: 'item2', val: 2 }, { id: 'item3', val: 3 }];
+var children = [
+  { id: "item1", val: 1 },
+  { id: "item2", val: 2 },
+  { id: "item3", val: 3 },
+];
 
 // 模拟 removeChild
 function removeChild(arr, child) {
   var idx = arr.indexOf(child);
-  if (idx === -1) throw new Error('not a child');
+  if (idx === -1) throw new Error("not a child");
   return arr.splice(idx, 1)[0];
 }
 var removed = removeChild(children, children[1]);
 console.log(removed.val); // => 2
-console.log(children.map(function (c) { return c.val; })); // => [1, 3]
+console.log(
+  children.map(function (c) {
+    return c.val;
+  }),
+); // => [1, 3]
 
 // 模拟 removeAllChildren
 function removeAllChildren(arr) {

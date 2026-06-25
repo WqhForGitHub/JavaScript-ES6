@@ -60,5 +60,9 @@ console.log("abc123".myIncludes(123)); // true（数字 123 转为 "123"）
 
 // --- 与原生对比 ---
 console.log("\n--- 与原生对比 ---");
-console.log("hello world".includes("world") === "hello world".myIncludes("world")); // true
-console.log("hello world".includes("hello", 6) === "hello world".myIncludes("hello", 6)); // true
+console.log(
+  "hello world".includes("world") === "hello world".myIncludes("world"),
+); // true
+console.log(
+  "hello world".includes("hello", 6) === "hello world".myIncludes("hello", 6),
+); // true

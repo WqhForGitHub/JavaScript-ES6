@@ -15,7 +15,7 @@ function createArrayIterator(arr) {
         return { value: arr[index++], done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 }
 
@@ -31,7 +31,7 @@ function createRangeIterator(start, end, step) {
         return { value: value, done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 }
 
@@ -41,7 +41,7 @@ function createInfiniteIterator(start) {
   return {
     next: function () {
       return { value: current++, done: false };
-    }
+    },
   };
 }
 
@@ -58,9 +58,9 @@ function createIteratorWithReturn(arr) {
     },
     return: function (value) {
       closed = true;
-      console.log('  [iterator return() called - cleanup]');
+      console.log("  [iterator return() called - cleanup]");
       return { value: value, done: true };
-    }
+    },
   };
 }
 
@@ -75,7 +75,7 @@ function createObjectIterator(obj) {
         return { value: { key: key, value: obj[key] }, done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 }
 
@@ -90,17 +90,17 @@ function consume(iterator) {
 }
 
 // 测试
-console.log('--- Array Iterator ---');
-var arrIt = createArrayIterator(['a', 'b', 'c']);
+console.log("--- Array Iterator ---");
+var arrIt = createArrayIterator(["a", "b", "c"]);
 console.log(arrIt.next().value); // a
 console.log(arrIt.next().value); // b
 console.log(arrIt.next().value); // c
-console.log(arrIt.next().done);  // true
+console.log(arrIt.next().done); // true
 
-console.log('--- Range Iterator ---');
+console.log("--- Range Iterator ---");
 console.log(consume(createRangeIterator(1, 5, 2))); // [1, 3]
 
-console.log('--- Infinite Iterator (take 5) ---');
+console.log("--- Infinite Iterator (take 5) ---");
 var infIt = createInfiniteIterator(1);
 var first5 = [];
 for (var i = 0; i < 5; i++) {
@@ -108,15 +108,15 @@ for (var i = 0; i < 5; i++) {
 }
 console.log(first5); // [1, 2, 3, 4, 5]
 
-console.log('--- Iterator with return() ---');
+console.log("--- Iterator with return() ---");
 var retIt = createIteratorWithReturn([1, 2, 3, 4, 5]);
 console.log(retIt.next().value); // 1
 console.log(retIt.next().value); // 2
-retIt.return('stopped');         // [iterator return() called - cleanup]
-console.log(retIt.next().done);  // true
+retIt.return("stopped"); // [iterator return() called - cleanup]
+console.log(retIt.next().done); // true
 
-console.log('--- Object Iterator ---');
+console.log("--- Object Iterator ---");
 var objIt = createObjectIterator({ x: 10, y: 20 });
 console.log(objIt.next().value); // { key: 'x', value: 10 }
 console.log(objIt.next().value); // { key: 'y', value: 20 }
-console.log(objIt.next().done);  // true
+console.log(objIt.next().done); // true

@@ -102,10 +102,10 @@ class SkipList {
       let str = `Level ${i}: `;
       let current = this.head.forward[i];
       while (current !== null) {
-        str += current.value + ' -> ';
+        str += current.value + " -> ";
         current = current.forward[i];
       }
-      str += 'null';
+      str += "null";
       console.log(str);
     }
   }
@@ -137,5 +137,5 @@ sl.delete(3);
 sl.delete(26);
 console.log(sl.toArray()); // [6,7,12,17,19,21,25]
 
-console.log('--- 跳表结构 ---');
+console.log("--- 跳表结构 ---");
 sl.print();

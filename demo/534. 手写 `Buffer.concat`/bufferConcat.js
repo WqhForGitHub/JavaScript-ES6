@@ -19,7 +19,7 @@
 
 class MyBuffer extends Uint8Array {
   constructor(arg) {
-    if (typeof arg === 'number') super(arg);
+    if (typeof arg === "number") super(arg);
     else if (Array.isArray(arg)) super(arg);
     else if (arg instanceof ArrayBuffer) super(arg);
     else if (arg instanceof Uint8Array) {
@@ -28,8 +28,8 @@ class MyBuffer extends Uint8Array {
     } else super(0);
   }
 
-  toString(encoding = 'utf8') {
-    return new TextDecoder('utf-8').decode(this);
+  toString(encoding = "utf8") {
+    return new TextDecoder("utf-8").decode(this);
   }
 }
 
@@ -49,7 +49,7 @@ function bufferConcat(list, totalLength) {
   if (totalLength === undefined) {
     totalLength = 0;
     for (const buf of list) totalLength += buf.length;
-  } else if (typeof totalLength !== 'number' || totalLength < 0) {
+  } else if (typeof totalLength !== "number" || totalLength < 0) {
     throw new TypeError('"totalLength" argument must be a non-negative number');
   }
 
@@ -81,34 +81,34 @@ const b = new MyBuffer([4, 5, 6, 7]);
 const c = new MyBuffer([8, 9]);
 
 const r1 = bufferConcat([a, b, c]);
-console.log('concat bytes:', Array.from(r1)); // [1,2,3,4,5,6,7,8,9]
-console.log('length:', r1.length); // 9
+console.log("concat bytes:", Array.from(r1)); // [1,2,3,4,5,6,7,8,9]
+console.log("length:", r1.length); // 9
 
 // 拼接字符串 Buffer
-const s1 = new MyBuffer(Array.from(new TextEncoder().encode('Hello, ')));
-const s2 = new MyBuffer(Array.from(new TextEncoder().encode('World!')));
+const s1 = new MyBuffer(Array.from(new TextEncoder().encode("Hello, ")));
+const s2 = new MyBuffer(Array.from(new TextEncoder().encode("World!")));
 const r2 = bufferConcat([s1, s2]);
-console.log('concat string:', r2.toString()); // 'Hello, World!'
+console.log("concat string:", r2.toString()); // 'Hello, World!'
 
 // 空数组
 const r3 = bufferConcat([]);
-console.log('empty concat length:', r3.length); // 0
+console.log("empty concat length:", r3.length); // 0
 
 // 指定 totalLength 大于实际
 const r4 = bufferConcat([a, b], 20);
-console.log('totalLength > actual:', Array.from(r4)); // [1,2,3,4,5,6,7,0,0,0,0,0,0,0,0,0,0,0,0,0]
-console.log('length:', r4.length); // 20
+console.log("totalLength > actual:", Array.from(r4)); // [1,2,3,4,5,6,7,0,0,0,0,0,0,0,0,0,0,0,0,0]
+console.log("length:", r4.length); // 20
 
 // 指定 totalLength 小于实际（只拷贝前 N 字节）
 const r5 = bufferConcat([a, b, c], 5);
-console.log('totalLength < actual:', Array.from(r5)); // [1,2,3,4,5]
+console.log("totalLength < actual:", Array.from(r5)); // [1,2,3,4,5]
 
 // 传入 Uint8Array（非 MyBuffer 也能用）
 const r6 = bufferConcat([new Uint8Array([10, 20]), new Uint8Array([30])]);
-console.log('concat Uint8Array:', Array.from(r6)); // [10, 20, 30]
+console.log("concat Uint8Array:", Array.from(r6)); // [10, 20, 30]
 
 // 大量小 Buffer 拼接
 const parts = [];
 for (let i = 0; i < 5; i++) parts.push(new MyBuffer([i]));
 const r7 = bufferConcat(parts);
-console.log('concat many:', Array.from(r7)); // [0, 1, 2, 3, 4]
+console.log("concat many:", Array.from(r7)); // [0, 1, 2, 3, 4]

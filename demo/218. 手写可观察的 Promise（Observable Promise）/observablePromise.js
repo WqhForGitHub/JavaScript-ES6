@@ -105,7 +105,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   });
   console.log("initial state:", p1.state); // initial state: pending
   p1.subscribe((s) =>
-    console.log("  [p1 listener] state:", s.state, "value:", s.value)
+    console.log("  [p1 listener] state:", s.state, "value:", s.value),
   );
   p1.onFulfilled((v) => console.log("  [p1 onFulfilled] got:", v));
   await p1;
@@ -129,12 +129,16 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   let received;
   p3.subscribe((s) => (received = s));
   await sleep(10); // 等微任务
-  console.log("sync received:", received && received.state, received && received.value);
+  console.log(
+    "sync received:",
+    received && received.state,
+    received && received.value,
+  );
   // sync received: fulfilled sync
 
   // 4. 取消订阅
   const p4 = new ObservablePromise((resolve) =>
-    setTimeout(() => resolve("x"), 30)
+    setTimeout(() => resolve("x"), 30),
   );
   let callCount = 0;
   const unsub = p4.subscribe(() => callCount++);
@@ -144,7 +148,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   // 5. 链式调用仍可用
   const r5 = await new ObservablePromise((resolve) => resolve(1)).then(
-    (v) => v + 41
+    (v) => v + 41,
   );
   console.log("chained:", r5); // chained: 42
 })();

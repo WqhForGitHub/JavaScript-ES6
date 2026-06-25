@@ -11,8 +11,8 @@
  */
 
 Array.prototype.myFilter = function (callback, thisArg) {
-  if (typeof callback !== 'function') {
-    throw new TypeError(callback + ' is not a function');
+  if (typeof callback !== "function") {
+    throw new TypeError(callback + " is not a function");
   }
 
   const result = [];
@@ -31,30 +31,33 @@ Array.prototype.myFilter = function (callback, thisArg) {
 // ===== 测试 =====
 
 // --- 基本用法 ---
-console.log([1, 2, 3, 4, 5].myFilter(x => x > 2)); // [3, 4, 5]
+console.log([1, 2, 3, 4, 5].myFilter((x) => x > 2)); // [3, 4, 5]
 
 // --- 过滤偶数 ---
-console.log([1, 2, 3, 4, 5, 6].myFilter(x => x % 2 === 0)); // [2, 4, 6]
+console.log([1, 2, 3, 4, 5, 6].myFilter((x) => x % 2 === 0)); // [2, 4, 6]
 
 // --- 使用索引 ---
 console.log([10, 20, 30, 40].myFilter((x, i) => i % 2 === 0)); // [10, 30]
 
 // --- 使用 thisArg ---
 console.log(
-  [1, 2, 3, 4].myFilter(function (x) {
-    return x > this.min;
-  }, { min: 2 })
+  [1, 2, 3, 4].myFilter(
+    function (x) {
+      return x > this.min;
+    },
+    { min: 2 },
+  ),
 ); // [3, 4]
 
 // --- 过滤对象数组 ---
 const users = [
-  { name: 'a', age: 17 },
-  { name: 'b', age: 20 },
-  { name: 'c', age: 18 }
+  { name: "a", age: 17 },
+  { name: "b", age: 20 },
+  { name: "c", age: 18 },
 ];
-console.log(users.myFilter(u => u.age >= 18)); // [{ name: 'b', age: 20 }, { name: 'c', age: 18 }]
+console.log(users.myFilter((u) => u.age >= 18)); // [{ name: 'b', age: 20 }, { name: 'c', age: 18 }]
 
 // --- 不修改原数组 ---
 const original = [1, 2, 3];
-original.myFilter(x => x > 1);
+original.myFilter((x) => x > 1);
 console.log(original); // [1, 2, 3]

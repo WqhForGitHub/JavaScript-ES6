@@ -53,12 +53,7 @@ String.prototype.myReplace = function (pattern, replacement) {
     result.push(str.slice(lastIndex, matchIndex));
 
     // 计算替换文本
-    const replaced = computeReplacement(
-      replacement,
-      match,
-      str,
-      matchIndex
-    );
+    const replaced = computeReplacement(replacement, match, str, matchIndex);
     result.push(replaced);
 
     lastIndex = matchIndex + matchStr.length;
@@ -146,17 +141,18 @@ console.log("hello".myReplace(/l/, "[$`]")); // "he[he]lo"
 console.log("hello".myReplace(/l/, "[$']")); // "he[lo]lo"
 
 // --- 使用函数作为替换值 ---
-console.log(
-  "hello world".myReplace(/\w+/g, (word) => word.toUpperCase())
-); // "HELLO WORLD"
-console.log(
-  "hello".myReplace(/l/g, (m, offset) => `${m}@${offset}`)
-); // "hel@2l@3o"
+console.log("hello world".myReplace(/\w+/g, (word) => word.toUpperCase())); // "HELLO WORLD"
+console.log("hello".myReplace(/l/g, (m, offset) => `${m}@${offset}`)); // "hel@2l@3o"
 
 // --- 特殊字符转义 ---
 console.log("a.b.c".myReplace(".", "x")); // "axb.c"（只替换第一个 .）
 
 // --- 与原生对比 ---
 console.log("\n--- 与原生对比 ---");
-console.log("hello world".replace(/o/g, "0") === "hello world".myReplace(/o/g, "0")); // true
-console.log("John Smith".replace(/(\w+) (\w+)/, "$2, $1") === "John Smith".myReplace(/(\w+) (\w+)/, "$2, $1")); // true
+console.log(
+  "hello world".replace(/o/g, "0") === "hello world".myReplace(/o/g, "0"),
+); // true
+console.log(
+  "John Smith".replace(/(\w+) (\w+)/, "$2, $1") ===
+    "John Smith".myReplace(/(\w+) (\w+)/, "$2, $1"),
+); // true

@@ -130,7 +130,11 @@ console.log("========== 手写统计字符串中出现最多的字符 ==========
 const testCases = [
   { value: "abcaaa", expected: { char: "a", count: 4 }, desc: "abcaaa" },
   { value: "hello", expected: { char: "l", count: 2 }, desc: "hello" },
-  { value: "abc", expected: { char: "a", count: 1 }, desc: "abc（并列返回第一个）" },
+  {
+    value: "abc",
+    expected: { char: "a", count: 1 },
+    desc: "abc（并列返回第一个）",
+  },
   { value: "", expected: { char: null, count: 0 }, desc: "空字符串" },
   { value: "a", expected: { char: "a", count: 1 }, desc: "单字符" },
   { value: "aabbbcccc", expected: { char: "c", count: 4 }, desc: "aabbbcccc" },
@@ -148,10 +152,13 @@ methods.forEach(({ name, fn }) => {
   let allPassed = true;
   testCases.forEach(({ value, expected, desc }) => {
     const result = fn(value);
-    const passed = result.char === expected.char && result.count === expected.count;
+    const passed =
+      result.char === expected.char && result.count === expected.count;
     const status = passed ? "✓" : "✗";
     if (!passed) allPassed = false;
-    console.log(`  ${status} ${desc}: { char: "${result.char}", count: ${result.count} }`);
+    console.log(
+      `  ${status} ${desc}: { char: "${result.char}", count: ${result.count} }`,
+    );
   });
   console.log(`  结果：${allPassed ? "全部通过" : "存在失败"}\n`);
 });

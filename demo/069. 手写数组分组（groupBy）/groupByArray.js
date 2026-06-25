@@ -109,7 +109,10 @@ console.log(JSON.stringify(groupBy1(people, "city"), null, 2));
 console.log("\n--- 按函数（奇偶）分组 ---");
 const nums = [1, 2, 3, 4, 5, 6];
 console.log("原始:", nums);
-console.log("奇偶分组:", groupBy1(nums, (n) => (n % 2 === 0 ? "even" : "odd")));
+console.log(
+  "奇偶分组:",
+  groupBy1(nums, (n) => (n % 2 === 0 ? "even" : "odd")),
+);
 // { odd: [1,3,5], even: [2,4,6] }
 
 console.log("\n--- 按函数（长度区间）分组 ---");
@@ -137,10 +140,7 @@ console.log(
 // --- 边界情况 ---
 console.log("\n========== 边界情况 ==========");
 console.log("空数组:", groupBy1([], "age")); // {}
-console.log(
-  "单元素:",
-  groupBy1([{ a: 1 }], "a"),
-); // { '1': [{a:1}] }
+console.log("单元素:", groupBy1([{ a: 1 }], "a")); // { '1': [{a:1}] }
 
 // --- 应用：统计每个部门人数 ---
 console.log("\n========== 应用：统计每个部门人数 ==========");

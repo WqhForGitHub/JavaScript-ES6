@@ -35,7 +35,7 @@ console.log([1, 2, 3, 4].myReverse()); // [4, 3, 2, 1]
 console.log([1, 2, 3, 4, 5].myReverse()); // [5, 4, 3, 2, 1]
 
 // --- 字符串数组 ---
-console.log(['a', 'b', 'c'].myReverse()); // ['c', 'b', 'a']
+console.log(["a", "b", "c"].myReverse()); // ['c', 'b', 'a']
 
 // --- 空数组 ---
 console.log([].myReverse()); // []

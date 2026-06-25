@@ -30,12 +30,16 @@ function asyncToPromise(generatorFn) {
         // 将 yield 的值包装为 Promise
         var promise = Promise.resolve(result.value);
         promise.then(
-          function (val) { step('next', val); },
-          function (err) { step('throw', err); }
+          function (val) {
+            step("next", val);
+          },
+          function (err) {
+            step("throw", err);
+          },
         );
       }
 
-      step('next', undefined);
+      step("next", undefined);
     });
   };
 }
@@ -43,13 +47,17 @@ function asyncToPromise(generatorFn) {
 // 模拟一个异步操作
 function delay(ms, value) {
   return new Promise(function (resolve) {
-    setTimeout(function () { resolve(value); }, ms);
+    setTimeout(function () {
+      resolve(value);
+    }, ms);
   });
 }
 
 function failAfter(ms, error) {
   return new Promise(function (resolve, reject) {
-    setTimeout(function () { reject(error); }, ms);
+    setTimeout(function () {
+      reject(error);
+    }, ms);
   });
 }
 
@@ -71,10 +79,10 @@ var fetchData = asyncToPromise(fetchDataGen);
 // 带错误处理的模拟
 function* fetchWithErrorGen() {
   try {
-    var data = yield failAfter(50, new Error('Network error'));
+    var data = yield failAfter(50, new Error("Network error"));
     return data;
   } catch (e) {
-    return 'caught: ' + e.message;
+    return "caught: " + e.message;
   }
 }
 var fetchWithError = asyncToPromise(fetchWithErrorGen);
@@ -93,51 +101,51 @@ var sequentialFetch = asyncToPromise(sequentialFetchGen);
 // 并行请求（await Promise.all）
 function* parallelFetchGen() {
   var values = yield Promise.all([
-    delay(50, 'a'),
-    delay(50, 'b'),
-    delay(50, 'c')
+    delay(50, "a"),
+    delay(50, "b"),
+    delay(50, "c"),
   ]);
   return values;
 }
 var parallelFetch = asyncToPromise(parallelFetchGen);
 
 // 测试
-console.log('--- Sequential await ---');
+console.log("--- Sequential await ---");
 fetchData().then(function (result) {
-  console.log('Result:', result); // Result: 3
+  console.log("Result:", result); // Result: 3
 });
 
 setTimeout(function () {
-  console.log('--- Error handling ---');
+  console.log("--- Error handling ---");
   fetchWithError().then(function (result) {
     console.log(result); // caught: Network error
   });
 }, 300);
 
 setTimeout(function () {
-  console.log('--- Loop with await ---');
+  console.log("--- Loop with await ---");
   sequentialFetch().then(function (result) {
-    console.log('Results:', result); // Results: [10, 20, 30]
+    console.log("Results:", result); // Results: [10, 20, 30]
   });
 }, 600);
 
 setTimeout(function () {
-  console.log('--- Parallel with Promise.all ---');
+  console.log("--- Parallel with Promise.all ---");
   parallelFetch().then(function (result) {
-    console.log('Parallel:', result); // Parallel: ['a', 'b', 'c']
+    console.log("Parallel:", result); // Parallel: ['a', 'b', 'c']
   });
 }, 1000);
 
 // 对比原生 async/await
 setTimeout(function () {
-  console.log('--- Compare with native async/await ---');
+  console.log("--- Compare with native async/await ---");
   async function nativeFetchData() {
     var a = await delay(50, 1);
     var b = await delay(50, 2);
     return a + b;
   }
   nativeFetchData().then(function (r) {
-    console.log('Native result:', r); // Native result: 3
-    console.log('Done!');
+    console.log("Native result:", r); // Native result: 3
+    console.log("Done!");
   });
 }, 1300);

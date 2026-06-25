@@ -10,8 +10,8 @@
  */
 
 Array.prototype.myFindIndex = function (callback, thisArg) {
-  if (typeof callback !== 'function') {
-    throw new TypeError(callback + ' is not a function');
+  if (typeof callback !== "function") {
+    throw new TypeError(callback + " is not a function");
   }
 
   for (let i = 0; i < this.length; i++) {
@@ -28,28 +28,31 @@ Array.prototype.myFindIndex = function (callback, thisArg) {
 // ===== 测试 =====
 
 // --- 基本查找 ---
-console.log([1, 2, 3, 4].myFindIndex(x => x > 2)); // 2
+console.log([1, 2, 3, 4].myFindIndex((x) => x > 2)); // 2
 
 // --- 查找对象 ---
 const users = [
-  { name: 'a', age: 17 },
-  { name: 'b', age: 20 },
-  { name: 'c', age: 18 }
+  { name: "a", age: 17 },
+  { name: "b", age: 20 },
+  { name: "c", age: 18 },
 ];
-console.log(users.myFindIndex(u => u.age >= 18)); // 1
+console.log(users.myFindIndex((u) => u.age >= 18)); // 1
 
 // --- 找不到返回 -1 ---
-console.log([1, 2, 3].myFindIndex(x => x > 10)); // -1
+console.log([1, 2, 3].myFindIndex((x) => x > 10)); // -1
 
 // --- 使用索引 ---
 console.log([10, 20, 30, 40].myFindIndex((x, i) => i === 2)); // 2
 
 // --- 使用 thisArg ---
 console.log(
-  [1, 2, 3, 4].myFindIndex(function (x) {
-    return x === this.target;
-  }, { target: 4 })
+  [1, 2, 3, 4].myFindIndex(
+    function (x) {
+      return x === this.target;
+    },
+    { target: 4 },
+  ),
 ); // 3
 
 // --- 只返回第一个匹配项的下标 ---
-console.log([1, 2, 3, 2, 1].myFindIndex(x => x === 2)); // 1
+console.log([1, 2, 3, 2, 1].myFindIndex((x) => x === 2)); // 1

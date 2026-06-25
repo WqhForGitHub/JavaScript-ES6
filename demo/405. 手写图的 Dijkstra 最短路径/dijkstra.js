@@ -11,10 +11,18 @@ class MinHeap {
   constructor() {
     this.heap = [];
   }
-  size() { return this.heap.length; }
-  isEmpty() { return this.heap.length === 0; }
-  _parent(i) { return (i - 1) >> 1; }
-  _swap(i, j) { [this.heap[i], this.heap[j]] = [this.heap[j], this.heap[i]]; }
+  size() {
+    return this.heap.length;
+  }
+  isEmpty() {
+    return this.heap.length === 0;
+  }
+  _parent(i) {
+    return (i - 1) >> 1;
+  }
+  _swap(i, j) {
+    [this.heap[i], this.heap[j]] = [this.heap[j], this.heap[i]];
+  }
   push(item) {
     this.heap.push(item);
     let i = this.heap.length - 1;
@@ -32,7 +40,9 @@ class MinHeap {
       let i = 0;
       const n = this.heap.length;
       while (true) {
-        let l = 2 * i + 1, r = 2 * i + 2, smallest = i;
+        let l = 2 * i + 1,
+          r = 2 * i + 2,
+          smallest = i;
         if (l < n && this.heap[l].dist < this.heap[smallest].dist) smallest = l;
         if (r < n && this.heap[r].dist < this.heap[smallest].dist) smallest = r;
         if (smallest === i) break;
@@ -85,7 +95,8 @@ class GraphDijkstra {
   // 获取从 start 到 target 的最短路径
   shortestPath(start, target) {
     const { dist, prev } = this.dijkstra(start);
-    if (dist.get(target) === Infinity) return { distance: Infinity, path: null };
+    if (dist.get(target) === Infinity)
+      return { distance: Infinity, path: null };
     const path = [];
     let cur = target;
     while (cur !== undefined) {
@@ -98,27 +109,27 @@ class GraphDijkstra {
 
 // 测试
 const g = new GraphDijkstra();
-g.addEdge('A', 'B', 4);
-g.addEdge('A', 'C', 2);
-g.addEdge('B', 'C', 1);
-g.addEdge('B', 'D', 5);
-g.addEdge('C', 'B', 1);
-g.addEdge('C', 'D', 8);
-g.addEdge('C', 'E', 10);
-g.addEdge('D', 'E', 2);
-g.addEdge('D', 'F', 6);
-g.addEdge('E', 'F', 3);
+g.addEdge("A", "B", 4);
+g.addEdge("A", "C", 2);
+g.addEdge("B", "C", 1);
+g.addEdge("B", "D", 5);
+g.addEdge("C", "B", 1);
+g.addEdge("C", "D", 8);
+g.addEdge("C", "E", 10);
+g.addEdge("D", "E", 2);
+g.addEdge("D", "F", 6);
+g.addEdge("E", "F", 3);
 
-const { dist } = g.dijkstra('A');
-console.log(dist.get('A')); // 0
-console.log(dist.get('B')); // 3 (A->C->B)
-console.log(dist.get('C')); // 2
-console.log(dist.get('D')); // 8 (A->C->B->D)
-console.log(dist.get('E')); // 10 (A->C->B->D->E)
-console.log(dist.get('F')); // 13
+const { dist } = g.dijkstra("A");
+console.log(dist.get("A")); // 0
+console.log(dist.get("B")); // 3 (A->C->B)
+console.log(dist.get("C")); // 2
+console.log(dist.get("D")); // 8 (A->C->B->D)
+console.log(dist.get("E")); // 10 (A->C->B->D->E)
+console.log(dist.get("F")); // 13
 
-const result = g.shortestPath('A', 'F');
+const result = g.shortestPath("A", "F");
 console.log(result); // { distance: 13, path: ['A','C','B','D','E','F'] }
 
-const unreachable = g.shortestPath('A', 'Z');
+const unreachable = g.shortestPath("A", "Z");
 console.log(unreachable.distance); // Infinity

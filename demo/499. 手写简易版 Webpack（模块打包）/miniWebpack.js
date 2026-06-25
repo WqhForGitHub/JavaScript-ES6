@@ -19,7 +19,7 @@
  */
 function createBundler(entry, readModule) {
   let moduleId = 0;
-  const modules = new Map();      // path -> { id, code, deps, mapping }
+  const modules = new Map(); // path -> { id, code, deps, mapping }
   const pathToId = new Map();
 
   function addModule(absolutePath) {
@@ -56,7 +56,9 @@ function createBundler(entry, readModule) {
     const modulesArray = [];
     for (const [abs, mod] of modules) {
       const translated = translate(mod.code, mod.deps);
-      modulesArray.push(`${mod.id}: function(module, exports, require) {\n${translated}\n}`);
+      modulesArray.push(
+        `${mod.id}: function(module, exports, require) {\n${translated}\n}`,
+      );
     }
     return `
 (function (modules) {
@@ -69,12 +71,17 @@ function createBundler(entry, readModule) {
   }
   require(${entryId});
 })({
-${modulesArray.join(',\n')}
+${modulesArray.join(",\n")}
 });
 `;
   }
 
-  return { bundle, get modules() { return modules; } };
+  return {
+    bundle,
+    get modules() {
+      return modules;
+    },
+  };
 }
 
 function runBundle(bundleSrc) {
@@ -87,20 +94,20 @@ function runBundle(bundleSrc) {
 // ---------- Test cases ----------
 // A tiny fake file system.
 const fakeFs = {
-  '/entry.js': {
+  "/entry.js": {
     code: `var greet = require('./greet'); console.log('entry:', greet('world')); module.exports = greet;`,
-    deps: { './greet': '/greet.js' },
+    deps: { "./greet": "/greet.js" },
   },
-  '/greet.js': {
+  "/greet.js": {
     code: `module.exports = function (name) { return 'Hello, ' + name + '!'; };`,
     deps: {},
   },
 };
 
-const bundler = createBundler('/entry.js', (p) => fakeFs[p]);
+const bundler = createBundler("/entry.js", (p) => fakeFs[p]);
 const bundle = bundler.bundle();
-console.log(bundle.indexOf('function(module, exports, require)') > -1); // expected: true
-console.log('module count:', bundler.modules.size); // expected: 2
+console.log(bundle.indexOf("function(module, exports, require)") > -1); // expected: true
+console.log("module count:", bundler.modules.size); // expected: 2
 
 // Execute the bundle (prints "entry: Hello, world!").
 runBundle(bundle); // expected console output: entry: Hello, world!

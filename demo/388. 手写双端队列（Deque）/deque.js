@@ -60,7 +60,7 @@ class Deque {
   }
 
   toString() {
-    return this.items.join(',');
+    return this.items.join(",");
   }
 }
 
@@ -68,8 +68,8 @@ class Deque {
 const deque = new Deque();
 console.log(deque.isEmpty()); // true
 
-deque.addBack('a').addBack('b');
-deque.addFront('c');
+deque.addBack("a").addBack("b");
+deque.addFront("c");
 console.log(deque.toString()); // c,a,b
 console.log(deque.peekFront()); // c
 console.log(deque.peekBack()); // b
@@ -90,6 +90,6 @@ function isPalindrome(str) {
   return true;
 }
 
-console.log(isPalindrome('A man a plan a canal Panama')); // true
-console.log(isPalindrome('racecar')); // true
-console.log(isPalindrome('hello')); // false
+console.log(isPalindrome("A man a plan a canal Panama")); // true
+console.log(isPalindrome("racecar")); // true
+console.log(isPalindrome("hello")); // false

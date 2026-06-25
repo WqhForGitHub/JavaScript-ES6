@@ -15,11 +15,11 @@ function promiseAllSettled(promises) {
   var wrapped = promises.map(function (promise) {
     return Promise.resolve(promise).then(
       function (value) {
-        return { status: 'fulfilled', value: value };
+        return { status: "fulfilled", value: value };
       },
       function (reason) {
-        return { status: 'rejected', reason: reason };
-      }
+        return { status: "rejected", reason: reason };
+      },
     );
   });
   // 因为每个 wrapped Promise 都不会 reject，所以 Promise.all 一定会 resolve
@@ -41,15 +41,15 @@ function promiseAllSettledManual(promises) {
     promises.forEach(function (promise, index) {
       Promise.resolve(promise).then(
         function (value) {
-          results[index] = { status: 'fulfilled', value: value };
+          results[index] = { status: "fulfilled", value: value };
           count++;
           if (count === total) resolve(results);
         },
         function (reason) {
-          results[index] = { status: 'rejected', reason: reason };
+          results[index] = { status: "rejected", reason: reason };
           count++;
           if (count === total) resolve(results);
-        }
+        },
       );
     });
   });
@@ -58,22 +58,26 @@ function promiseAllSettledManual(promises) {
 // 测试辅助函数
 function resolveLater(value, ms) {
   return new Promise(function (resolve) {
-    setTimeout(function () { resolve(value); }, ms);
+    setTimeout(function () {
+      resolve(value);
+    }, ms);
   });
 }
 
 function rejectLater(reason, ms) {
   return new Promise(function (_, reject) {
-    setTimeout(function () { reject(reason); }, ms);
+    setTimeout(function () {
+      reject(reason);
+    }, ms);
   });
 }
 
 // 测试 1：全部 fulfilled
-console.log('--- All fulfilled ---');
+console.log("--- All fulfilled ---");
 promiseAllSettled([
   resolveLater(1, 50),
   resolveLater(2, 100),
-  resolveLater(3, 30)
+  resolveLater(3, 30),
 ]).then(function (results) {
   console.log(results);
   // [
@@ -85,17 +89,17 @@ promiseAllSettled([
 
 // 测试 2：混合 fulfilled 和 rejected
 setTimeout(function () {
-  console.log('--- Mixed ---');
+  console.log("--- Mixed ---");
   promiseAllSettled([
-    resolveLater('ok', 50),
-    rejectLater(new Error('fail'), 100),
-    resolveLater(42, 30)
+    resolveLater("ok", 50),
+    rejectLater(new Error("fail"), 100),
+    resolveLater(42, 30),
   ]).then(function (results) {
     results.forEach(function (r, i) {
-      if (r.status === 'fulfilled') {
-        console.log('  [' + i + '] fulfilled:', r.value);
+      if (r.status === "fulfilled") {
+        console.log("  [" + i + "] fulfilled:", r.value);
       } else {
-        console.log('  [' + i + '] rejected:', r.reason.message);
+        console.log("  [" + i + "] rejected:", r.reason.message);
       }
     });
     // [0] fulfilled: ok
@@ -106,23 +110,22 @@ setTimeout(function () {
 
 // 测试 3：全部 rejected
 setTimeout(function () {
-  console.log('--- All rejected ---');
-  promiseAllSettled([
-    rejectLater('err1', 50),
-    rejectLater('err2', 30)
-  ]).then(function (results) {
-    console.log(results);
-    // [
-    //   { status: 'rejected', reason: 'err1' },
-    //   { status: 'rejected', reason: 'err2' }
-    // ]
-  });
+  console.log("--- All rejected ---");
+  promiseAllSettled([rejectLater("err1", 50), rejectLater("err2", 30)]).then(
+    function (results) {
+      console.log(results);
+      // [
+      //   { status: 'rejected', reason: 'err1' },
+      //   { status: 'rejected', reason: 'err2' }
+      // ]
+    },
+  );
 }, 400);
 
 // 测试 4：非 Promise 值
 setTimeout(function () {
-  console.log('--- Non-promise values ---');
-  promiseAllSettled([1, 'hello', { x: 1 }]).then(function (results) {
+  console.log("--- Non-promise values ---");
+  promiseAllSettled([1, "hello", { x: 1 }]).then(function (results) {
     console.log(results);
     // [
     //   { status: 'fulfilled', value: 1 },
@@ -134,7 +137,7 @@ setTimeout(function () {
 
 // 测试 5：空数组
 setTimeout(function () {
-  console.log('--- Empty array ---');
+  console.log("--- Empty array ---");
   promiseAllSettled([]).then(function (results) {
     console.log(results); // []
   });
@@ -142,27 +145,30 @@ setTimeout(function () {
 
 // 测试 6：手动实现对比
 setTimeout(function () {
-  console.log('--- Compare manual implementation ---');
+  console.log("--- Compare manual implementation ---");
   Promise.all([
-    promiseAllSettled([resolveLater(1, 50), rejectLater('e', 30)]),
-    promiseAllSettledManual([resolveLater(1, 50), rejectLater('e', 30)])
+    promiseAllSettled([resolveLater(1, 50), rejectLater("e", 30)]),
+    promiseAllSettledManual([resolveLater(1, 50), rejectLater("e", 30)]),
   ]).then(function (results) {
     var r1 = results[0];
     var r2 = results[1];
     console.log(JSON.stringify(r1) === JSON.stringify(r2)); // true
-    console.log('Both implementations match!');
+    console.log("Both implementations match!");
   });
 }, 800);
 
 // 测试 7：与原生对比
 setTimeout(function () {
-  console.log('--- Compare with native ---');
-  var promises = [resolveLater(1, 50), rejectLater('e', 30), resolveLater(2, 40)];
-  Promise.all([
-    promiseAllSettled(promises),
-    Promise.allSettled(promises)
-  ]).then(function (results) {
-    console.log(JSON.stringify(results[0]) === JSON.stringify(results[1])); // true
-    console.log('Matches native Promise.allSettled!');
-  });
+  console.log("--- Compare with native ---");
+  var promises = [
+    resolveLater(1, 50),
+    rejectLater("e", 30),
+    resolveLater(2, 40),
+  ];
+  Promise.all([promiseAllSettled(promises), Promise.allSettled(promises)]).then(
+    function (results) {
+      console.log(JSON.stringify(results[0]) === JSON.stringify(results[1])); // true
+      console.log("Matches native Promise.allSettled!");
+    },
+  );
 }, 1000);

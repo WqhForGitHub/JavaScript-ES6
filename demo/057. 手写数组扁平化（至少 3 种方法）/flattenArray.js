@@ -73,7 +73,10 @@ function flatten3(arr, depth = Infinity) {
 // 数组 toString 会自动用逗号连接所有元素
 
 function flatten4(arr) {
-  return arr.toString().split(",").map((item) => Number(item));
+  return arr
+    .toString()
+    .split(",")
+    .map((item) => Number(item));
 }
 
 // 优点：一行代码搞定

@@ -15,13 +15,13 @@
 class Meal {
   constructor() {
     this.items = [];
-    this.tag = 'Meal';
+    this.tag = "Meal";
   }
   add(item) {
     this.items.push(item);
   }
   describe() {
-    return `${this.tag}: ${this.items.join(', ')}`;
+    return `${this.tag}: ${this.items.join(", ")}`;
   }
   get price() {
     return this.items.reduce((sum, it) => {
@@ -40,13 +40,13 @@ class MealBuilder {
     return this;
   }
   buildMain() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
   buildDrink() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
   buildDessert() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
   getResult() {
     const m = this.meal;
@@ -58,22 +58,22 @@ class MealBuilder {
 class KidsMealBuilder extends MealBuilder {
   constructor() {
     super();
-    this.meal.tag = 'KidsMeal';
+    this.meal.tag = "KidsMeal";
   }
   buildMain() {
-    this.meal.add('CheeseBurger(5)');
+    this.meal.add("CheeseBurger(5)");
     return this;
   }
   buildDrink() {
-    this.meal.add('AppleJuice(2)');
+    this.meal.add("AppleJuice(2)");
     return this;
   }
   buildDessert() {
-    this.meal.add('IceCream(3)');
+    this.meal.add("IceCream(3)");
     return this;
   }
   buildToy() {
-    this.meal.add('Toy(0)');
+    this.meal.add("Toy(0)");
     return this;
   }
 }
@@ -81,18 +81,18 @@ class KidsMealBuilder extends MealBuilder {
 class VeggieMealBuilder extends MealBuilder {
   constructor() {
     super();
-    this.meal.tag = 'VeggieMeal';
+    this.meal.tag = "VeggieMeal";
   }
   buildMain() {
-    this.meal.add('VeggieBurger(6)');
+    this.meal.add("VeggieBurger(6)");
     return this;
   }
   buildDrink() {
-    this.meal.add('SparklingWater(2)');
+    this.meal.add("SparklingWater(2)");
     return this;
   }
   buildDessert() {
-    this.meal.add('FruitCup(3)');
+    this.meal.add("FruitCup(3)");
     return this;
   }
 }
@@ -101,7 +101,7 @@ class Director {
   construct(builder) {
     builder.reset();
     builder.buildMain().buildDrink().buildDessert();
-    if (typeof builder.buildToy === 'function') builder.buildToy();
+    if (typeof builder.buildToy === "function") builder.buildToy();
     return builder.getResult();
   }
 }
@@ -139,9 +139,9 @@ console.log(veggie.price);
 
 // Fluent builder usage
 const user = new FluentBuilder()
-  .set('name', 'Alice')
-  .set('age', 30)
-  .set('role', 'admin')
+  .set("name", "Alice")
+  .set("age", 30)
+  .set("role", "admin")
   .build();
 console.log(user);
 // Expected: { name: 'Alice', age: 30, role: 'admin' }

@@ -60,7 +60,11 @@ class Deferred {
 // 对标 Promise.withResolvers()（ES2024）
 Deferred.withResolvers = function () {
   const d = new Deferred();
-  return { promise: d.promise, resolve: d.resolve.bind(d), reject: d.reject.bind(d) };
+  return {
+    promise: d.promise,
+    resolve: d.resolve.bind(d),
+    reject: d.reject.bind(d),
+  };
 };
 
 // 工具：把 Node error-first 回调转成 Deferred

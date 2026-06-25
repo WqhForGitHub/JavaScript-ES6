@@ -114,7 +114,7 @@ class MyPromiseFull {
       (reason) =>
         MyPromiseFull.resolve(cb()).then(() => {
           throw reason;
-        })
+        }),
     );
   }
 
@@ -139,7 +139,7 @@ class MyPromiseFull {
             res[i] = v;
             if (++count === arr.length) resolve(res);
           },
-          (e) => reject(e)
+          (e) => reject(e),
         );
       });
     });
@@ -148,7 +148,7 @@ class MyPromiseFull {
   static race(list) {
     return new MyPromiseFull((resolve, reject) => {
       Array.from(list).forEach((p) =>
-        MyPromiseFull.resolve(p).then(resolve, reject)
+        MyPromiseFull.resolve(p).then(resolve, reject),
       );
     });
   }
@@ -183,7 +183,7 @@ function resolvePromise(promise2, x, resolve, reject) {
             if (called) return;
             called = true;
             reject(r);
-          }
+          },
         );
       } catch (err) {
         if (called) return;

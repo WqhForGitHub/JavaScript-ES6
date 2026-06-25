@@ -56,30 +56,30 @@ class BloomFilter {
 const bf = new BloomFilter(2048, 5);
 
 // 添加元素
-['apple', 'banana', 'cherry', 'date'].forEach((v) => bf.add(v));
+["apple", "banana", "cherry", "date"].forEach((v) => bf.add(v));
 
 // 存在的元素应返回 true
-console.log(bf.mightContain('apple')); // true
-console.log(bf.mightContain('banana')); // true
-console.log(bf.mightContain('cherry')); // true
-console.log(bf.mightContain('date')); // true
+console.log(bf.mightContain("apple")); // true
+console.log(bf.mightContain("banana")); // true
+console.log(bf.mightContain("cherry")); // true
+console.log(bf.mightContain("date")); // true
 
 // 不存在的元素大概率返回 false（极小概率假阳性）
-console.log(bf.mightContain('grape')); // false
-console.log(bf.mightContain('orange')); // false
-console.log(bf.mightContain('kiwi')); // false
+console.log(bf.mightContain("grape")); // false
+console.log(bf.mightContain("orange")); // false
+console.log(bf.mightContain("kiwi")); // false
 
 // 统计假阳性率（大量随机数据）
 const bf2 = new BloomFilter(10000, 5);
 const existing = new Set();
 for (let i = 0; i < 1000; i++) {
-  bf2.add('item_' + i);
-  existing.add('item_' + i);
+  bf2.add("item_" + i);
+  existing.add("item_" + i);
 }
 let falsePositive = 0;
 let total = 0;
 for (let i = 1000; i < 11000; i++) {
   total++;
-  if (bf2.mightContain('item_' + i)) falsePositive++;
+  if (bf2.mightContain("item_" + i)) falsePositive++;
 }
-console.log('假阳性率: ' + (falsePositive / total * 100).toFixed(2) + '%'); // 应较低
+console.log("假阳性率: " + ((falsePositive / total) * 100).toFixed(2) + "%"); // 应较低

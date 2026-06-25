@@ -14,12 +14,14 @@
  * @returns {Function} Throttled function with `.cancel()`.
  */
 function rafThrottle(fn) {
-  const raf = (typeof requestAnimationFrame !== 'undefined')
-    ? requestAnimationFrame
-    : (cb) => setTimeout(cb, 16);
-  const cancelRaf = (typeof cancelAnimationFrame !== 'undefined')
-    ? cancelAnimationFrame
-    : (id) => clearTimeout(id);
+  const raf =
+    typeof requestAnimationFrame !== "undefined"
+      ? requestAnimationFrame
+      : (cb) => setTimeout(cb, 16);
+  const cancelRaf =
+    typeof cancelAnimationFrame !== "undefined"
+      ? cancelAnimationFrame
+      : (id) => clearTimeout(id);
 
   let scheduled = false;
   let rafId = null;
@@ -59,17 +61,17 @@ function rafThrottle(fn) {
 let calls = 0;
 const log = rafThrottle((msg) => {
   calls++;
-  console.log('raf invoke:', msg, 'count=', calls);
+  console.log("raf invoke:", msg, "count=", calls);
 });
 
 // Multiple synchronous calls collapse into one rAF callback.
-log('a');
-log('b');
-log('c');
-console.log('synchronously after 3 calls, count =', calls); // expected: 0 (rAF is async)
+log("a");
+log("b");
+log("c");
+console.log("synchronously after 3 calls, count =", calls); // expected: 0 (rAF is async)
 
 // After a frame (use setTimeout to allow rAF/timeout fallback to fire).
 setTimeout(() => {
-  console.log('after frame, count =', calls); // expected: 1, message 'c' (latest args win)
+  console.log("after frame, count =", calls); // expected: 1, message 'c' (latest args win)
   log.cancel(); // no-op if nothing pending, but tests API exists
 }, 50);

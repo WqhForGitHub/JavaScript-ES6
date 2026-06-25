@@ -14,12 +14,12 @@ class MyMap {
 
   // 将任意键转换为字符串标识
   _stringifyKey(key) {
-    if (key === null) return 'NULL';
-    if (key === undefined) return 'UNDEFINED';
-    if (typeof key === 'object' || typeof key === 'function') {
-      return '@@' + key.toString();
+    if (key === null) return "NULL";
+    if (key === undefined) return "UNDEFINED";
+    if (typeof key === "object" || typeof key === "function") {
+      return "@@" + key.toString();
     }
-    return typeof key + ':' + String(key);
+    return typeof key + ":" + String(key);
   }
 
   set(key, value) {
@@ -43,7 +43,9 @@ class MyMap {
     const strKey = this._stringifyKey(key);
     if (strKey in this.items) {
       delete this.items[strKey];
-      const idx = this.keysArr.findIndex((k) => this._stringifyKey(k) === strKey);
+      const idx = this.keysArr.findIndex(
+        (k) => this._stringifyKey(k) === strKey,
+      );
       if (idx !== -1) this.keysArr.splice(idx, 1);
       return true;
     }
@@ -80,23 +82,23 @@ class MyMap {
 
 // 测试
 const map = new MyMap();
-map.set('name', 'Tom').set('age', 20).set(1, 'number key');
+map.set("name", "Tom").set("age", 20).set(1, "number key");
 console.log(map.size); // 3
-console.log(map.get('name')); // Tom
+console.log(map.get("name")); // Tom
 console.log(map.get(1)); // number key
-console.log(map.has('age')); // true
+console.log(map.has("age")); // true
 
-map.set('name', 'Jerry'); // 覆盖
-console.log(map.get('name')); // Jerry
+map.set("name", "Jerry"); // 覆盖
+console.log(map.get("name")); // Jerry
 console.log(map.size); // 3
 
-console.log(map.keys());   // ['name', 'age', 1]
+console.log(map.keys()); // ['name', 'age', 1]
 console.log(map.values()); // ['Jerry', 20, 'number key']
 
 map.forEach((value, key) => {
-  console.log(key + ' => ' + value);
+  console.log(key + " => " + value);
 });
 
-map.delete('age');
-console.log(map.has('age')); // false
+map.delete("age");
+console.log(map.has("age")); // false
 console.log(map.size); // 2

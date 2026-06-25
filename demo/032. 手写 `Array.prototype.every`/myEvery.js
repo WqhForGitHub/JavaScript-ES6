@@ -11,8 +11,8 @@
  */
 
 Array.prototype.myEvery = function (callback, thisArg) {
-  if (typeof callback !== 'function') {
-    throw new TypeError(callback + ' is not a function');
+  if (typeof callback !== "function") {
+    throw new TypeError(callback + " is not a function");
   }
 
   for (let i = 0; i < this.length; i++) {
@@ -29,24 +29,27 @@ Array.prototype.myEvery = function (callback, thisArg) {
 // ===== 测试 =====
 
 // --- 全部满足 ---
-console.log([2, 4, 6].myEvery(x => x % 2 === 0)); // true
+console.log([2, 4, 6].myEvery((x) => x % 2 === 0)); // true
 
 // --- 有一个不满足 ---
-console.log([2, 4, 5].myEvery(x => x % 2 === 0)); // false
+console.log([2, 4, 5].myEvery((x) => x % 2 === 0)); // false
 
 // --- 空数组返回 true ---
-console.log([].myEvery(x => x > 0)); // true
+console.log([].myEvery((x) => x > 0)); // true
 
 // --- 使用索引 ---
 console.log([10, 20, 30].myEvery((x, i) => x > i)); // true
 
 // --- 使用 thisArg ---
 console.log(
-  [5, 10, 15].myEvery(function (x) {
-    return x >= this.min;
-  }, { min: 5 })
+  [5, 10, 15].myEvery(
+    function (x) {
+      return x >= this.min;
+    },
+    { min: 5 },
+  ),
 ); // true
 
 // --- 对象数组判断 ---
 const users = [{ age: 18 }, { age: 20 }, { age: 19 }];
-console.log(users.myEvery(u => u.age >= 18)); // true
+console.log(users.myEvery((u) => u.age >= 18)); // true

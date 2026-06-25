@@ -79,7 +79,7 @@ async function pipeline(input) {
     .catch(
       chainCatch((err) => {
         console.log("  [pipeline] real error:", err.message);
-      })
+      }),
     );
 }
 

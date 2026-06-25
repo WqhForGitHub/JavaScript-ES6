@@ -20,7 +20,7 @@ class TodoModel extends EventTarget {
     this.todos = [];
   }
   _emit() {
-    this.dispatchEvent(new Event('change'));
+    this.dispatchEvent(new Event("change"));
   }
   add(text) {
     this.todos.push({ id: Date.now() + Math.random(), text, done: false });
@@ -50,8 +50,8 @@ class TodoView {
   constructor(model) {
     this.model = model;
     this.controller = null;
-    this.lastRender = '';
-    this.model.addEventListener('change', () => this.render());
+    this.lastRender = "";
+    this.model.addEventListener("change", () => this.render());
     this.render();
   }
   setController(c) {
@@ -59,12 +59,12 @@ class TodoView {
   }
   render() {
     const lines = this.model.todos.map(
-      (t) => `[${t.done ? 'x' : ' '}] #${String(t.id).slice(-3)} ${t.text}`
+      (t) => `[${t.done ? "x" : " "}] #${String(t.id).slice(-3)} ${t.text}`,
     );
     const s = this.model.stats();
     this.lastRender =
       `=== Todos (${s.done}/${s.total}) ===\n` +
-      (lines.length ? lines.join('\n') : '(empty)');
+      (lines.length ? lines.join("\n") : "(empty)");
   }
   // Simulated user actions -> forward to controller.
   userAdds(text) {
@@ -108,8 +108,8 @@ console.log(view.lastRender);
 //           (empty)
 
 // Simulate user adding todos via the View (input -> Controller -> Model -> View).
-view.userAdds('Learn MVC');
-view.userAdds('Write demo');
+view.userAdds("Learn MVC");
+view.userAdds("Write demo");
 console.log(view.lastRender);
 // Expected: === Todos (0/2) ===
 //           [ ] #... Learn MVC
@@ -118,7 +118,7 @@ console.log(view.lastRender);
 // Capture an id to toggle/remove deterministically.
 const firstId = model.todos[0].id;
 view.userToggles(firstId);
-console.log(view.lastRender.split('\n')[1]);
+console.log(view.lastRender.split("\n")[1]);
 // Expected: [x] #... Learn MVC
 
 console.log(model.stats());
@@ -129,6 +129,6 @@ console.log(model.todos.map((t) => t.text));
 // Expected: [ 'Write demo' ]
 
 // Controller enforces business rules (no empty todos)
-view.userAdds('   ');
+view.userAdds("   ");
 console.log(model.todos.length);
 // Expected: 1  (unchanged)

@@ -54,7 +54,7 @@ class PromiseCache {
         (err) => {
           // 失败：抛出，但不要缓存错误
           throw err;
-        }
+        },
       )
       .finally(() => {
         // 无论成功失败，从进行中移除（失败后允许重试）
@@ -104,7 +104,10 @@ function makeFetcher() {
     cache1.get("user:1", f1.fetch),
     cache1.get("user:1", f1.fetch),
   ]);
-  console.log("all same:", results.every((r) => r === results[0])); // all same: true
+  console.log(
+    "all same:",
+    results.every((r) => r === results[0]),
+  ); // all same: true
   console.log("fetcher called:", f1.count(), "times"); // fetcher called: 1 times
 
   // 2. 失败后允许重试

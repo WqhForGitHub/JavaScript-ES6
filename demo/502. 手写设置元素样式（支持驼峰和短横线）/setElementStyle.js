@@ -16,9 +16,24 @@
  * @returns {Element} The element (for chaining).
  */
 const UNITLESS_PROPS = new Set([
-  'opacity', 'zIndex', 'z-index', 'fontWeight', 'font-weight', 'lineHeight', 'line-height',
-  'zoom', 'flex', 'flexGrow', 'flex-grow', 'flexShrink', 'flex-shrink', 'order',
-  'animationIterationCount', 'animation-iteration-count', 'columnCount', 'column-count',
+  "opacity",
+  "zIndex",
+  "z-index",
+  "fontWeight",
+  "font-weight",
+  "lineHeight",
+  "line-height",
+  "zoom",
+  "flex",
+  "flexGrow",
+  "flex-grow",
+  "flexShrink",
+  "flex-shrink",
+  "order",
+  "animationIterationCount",
+  "animation-iteration-count",
+  "columnCount",
+  "column-count",
 ]);
 
 function toCamelCase(s) {
@@ -27,12 +42,14 @@ function toCamelCase(s) {
 }
 
 function normalizeValue(prop, value) {
-  if (value == null || typeof value === 'string') return value == null ? '' : value;
-  if (typeof value === 'number') {
+  if (value == null || typeof value === "string")
+    return value == null ? "" : value;
+  if (typeof value === "number") {
     // Check both camel and kebab forms against the unitless set.
-    const kebab = prop.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase());
-    if (UNITLESS_PROPS.has(prop) || UNITLESS_PROPS.has(kebab)) return String(value);
-    return value + 'px';
+    const kebab = prop.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
+    if (UNITLESS_PROPS.has(prop) || UNITLESS_PROPS.has(kebab))
+      return String(value);
+    return value + "px";
   }
   return String(value);
 }
@@ -43,9 +60,9 @@ function setElementStyle(el, propOrObj, value) {
     el.style[camelProp] = normalizeValue(rawProp, val);
   };
 
-  if (typeof propOrObj === 'string') {
+  if (typeof propOrObj === "string") {
     apply(toCamelCase(propOrObj), propOrObj, value);
-  } else if (propOrObj && typeof propOrObj === 'object') {
+  } else if (propOrObj && typeof propOrObj === "object") {
     for (const key in propOrObj) {
       if (Object.prototype.hasOwnProperty.call(propOrObj, key)) {
         apply(toCamelCase(key), key, propOrObj[key]);
@@ -57,8 +74,8 @@ function setElementStyle(el, propOrObj, value) {
 
 // Convenience: setStyle + getStyle-like read helper using inline style only.
 function getElementInlineStyle(el, prop) {
-  if (!el || !el.style) return '';
-  return el.style[toCamelCase(prop)] || '';
+  if (!el || !el.style) return "";
+  return el.style[toCamelCase(prop)] || "";
 }
 
 // ---------- Test cases ----------
@@ -67,8 +84,12 @@ function fakeEl() {
   const style = {};
   return {
     style,
-    set(k, v) { style[k] = v; },
-    get style_() { return style; },
+    set(k, v) {
+      style[k] = v;
+    },
+    get style_() {
+      return style;
+    },
   };
 }
 // Real fake that mimics CSSStyleDeclaration object access.
@@ -77,34 +98,42 @@ function fakeDomEl() {
   return {
     get style() {
       return new Proxy(store, {
-        set(target, p, value) { target[p] = value; return true; },
-        get(target, p) { return target[p]; },
+        set(target, p, value) {
+          target[p] = value;
+          return true;
+        },
+        get(target, p) {
+          return target[p];
+        },
       });
     },
   };
 }
 
 const el = fakeDomEl();
-setElementStyle(el, 'background-color', 'red');
-console.log('kebab prop set:', el.style.backgroundColor); // expected: red
+setElementStyle(el, "background-color", "red");
+console.log("kebab prop set:", el.style.backgroundColor); // expected: red
 
-setElementStyle(el, 'fontSize', 14);
-console.log('numeric camel prop:', el.style.fontSize); // expected: 14px
+setElementStyle(el, "fontSize", 14);
+console.log("numeric camel prop:", el.style.fontSize); // expected: 14px
 
-setElementStyle(el, 'opacity', 0.5);
-console.log('unitless prop:', el.style.opacity); // expected: 0.5
+setElementStyle(el, "opacity", 0.5);
+console.log("unitless prop:", el.style.opacity); // expected: 0.5
 
-setElementStyle(el, 'z-index', 100);
-console.log('z-index kebab unitless:', el.style.zIndex); // expected: 100
+setElementStyle(el, "z-index", 100);
+console.log("z-index kebab unitless:", el.style.zIndex); // expected: 100
 
 // Object form mixing camelCase + kebab-case.
 setElementStyle(el, {
   marginTop: 8,
-  'padding-left': '12px',
+  "padding-left": "12px",
   lineHeight: 1.5,
 });
-console.log('object marginTop:', el.style.marginTop); // expected: 8px
-console.log('object paddingLeft:', el.style.paddingLeft); // expected: 12px
-console.log('object lineHeight:', el.style.lineHeight); // expected: 1.5
+console.log("object marginTop:", el.style.marginTop); // expected: 8px
+console.log("object paddingLeft:", el.style.paddingLeft); // expected: 12px
+console.log("object lineHeight:", el.style.lineHeight); // expected: 1.5
 
-console.log('returns element for chaining:', setElementStyle(el, 'color', 'blue') === el); // expected: true
+console.log(
+  "returns element for chaining:",
+  setElementStyle(el, "color", "blue") === el,
+); // expected: true

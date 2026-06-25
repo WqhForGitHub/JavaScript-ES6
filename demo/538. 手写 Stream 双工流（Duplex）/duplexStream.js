@@ -15,7 +15,7 @@
  *   - 两端互不干扰，可分别 end
  */
 
-const { EventEmitter } = require('events');
+const { EventEmitter } = require("events");
 
 class Duplex extends EventEmitter {
   constructor(options = {}) {
@@ -65,7 +65,7 @@ class Duplex extends EventEmitter {
       this._maybeEndRead();
       return false;
     }
-    if (typeof chunk === 'string') chunk = Buffer.from(chunk, 'utf8');
+    if (typeof chunk === "string") chunk = Buffer.from(chunk, "utf8");
     s.buffer.push(chunk);
     s.length += chunk.length;
     if (s.flowing === true) this._emitData();
@@ -77,7 +77,7 @@ class Duplex extends EventEmitter {
     while (s.flowing && s.buffer.length > 0) {
       const chunk = s.buffer.shift();
       s.length -= chunk.length;
-      this.emit('data', chunk);
+      this.emit("data", chunk);
     }
     if (s.flowing && !s.ended && s.buffer.length === 0 && !s.reading) {
       s.reading = true;
@@ -91,7 +91,7 @@ class Duplex extends EventEmitter {
     const s = this._readState;
     if (s.ended && s.buffer.length === 0 && !s.endEmitted) {
       s.endEmitted = true;
-      this.emit('end');
+      this.emit("end");
     }
   }
 
@@ -115,20 +115,21 @@ class Duplex extends EventEmitter {
 
   // ===== 可写端 API =====
   write(chunk, encoding, callback) {
-    if (typeof encoding === 'function') {
+    if (typeof encoding === "function") {
       callback = encoding;
-      encoding = 'utf8';
+      encoding = "utf8";
     }
-    if (this._writeState.ended) throw new Error('write after end');
-    if (typeof chunk === 'string') chunk = Buffer.from(chunk, encoding || 'utf8');
+    if (this._writeState.ended) throw new Error("write after end");
+    if (typeof chunk === "string")
+      chunk = Buffer.from(chunk, encoding || "utf8");
 
     const s = this._writeState;
-    const cb = err => {
-      if (err) this.emit('error', err);
+    const cb = (err) => {
+      if (err) this.emit("error", err);
       else if (callback) callback();
     };
 
-    s.buffer.push({ chunk, encoding: encoding || 'utf8', callback: cb });
+    s.buffer.push({ chunk, encoding: encoding || "utf8", callback: cb });
     s.length += chunk.length;
 
     const ret = s.length < s.highWaterMark;
@@ -147,13 +148,13 @@ class Duplex extends EventEmitter {
       s.writing = false;
       if (s.needDrain) {
         s.needDrain = false;
-        this.emit('drain');
+        this.emit("drain");
       }
       if (s.ended && !s.finished) {
         s.finished = true;
-        this._final(err => {
-          if (err) this.emit('error', err);
-          else this.emit('finish');
+        this._final((err) => {
+          if (err) this.emit("error", err);
+          else this.emit("finish");
         });
       }
       return;
@@ -161,7 +162,7 @@ class Duplex extends EventEmitter {
     const { chunk, encoding, callback } = s.buffer.shift();
     s.length -= chunk.length;
     try {
-      this._write(chunk, encoding, err => {
+      this._write(chunk, encoding, (err) => {
         callback(err);
         if (!this._destroyed) this._doWrite();
       });
@@ -172,17 +173,17 @@ class Duplex extends EventEmitter {
   }
 
   end(chunk, encoding, callback) {
-    if (typeof chunk === 'function') {
+    if (typeof chunk === "function") {
       callback = chunk;
       chunk = null;
-    } else if (typeof encoding === 'function') {
+    } else if (typeof encoding === "function") {
       callback = encoding;
-      encoding = 'utf8';
+      encoding = "utf8";
     }
     if (chunk !== null && chunk !== undefined) this.write(chunk, encoding);
     const s = this._writeState;
     s.ended = true;
-    if (callback) this.once('finish', callback);
+    if (callback) this.once("finish", callback);
     if (!s.writing) {
       s.writing = true;
       this._doWrite();
@@ -196,8 +197,8 @@ class Duplex extends EventEmitter {
     this._destroyed = true;
     this._readState.buffer = [];
     this._writeState.buffer = [];
-    if (err) this.emit('error', err);
-    this.emit('close');
+    if (err) this.emit("error", err);
+    this.emit("close");
   }
 }
 
@@ -214,10 +215,10 @@ const socket = new Duplex({
     // 服务端推送两条消息
     if (!this._sent1) {
       this._sent1 = true;
-      this.push(Buffer.from('server-msg-1\n'));
+      this.push(Buffer.from("server-msg-1\n"));
     } else if (!this._sent2) {
       this._sent2 = true;
-      this.push(Buffer.from('server-msg-2\n'));
+      this.push(Buffer.from("server-msg-2\n"));
     } else {
       this.push(null);
     }
@@ -225,16 +226,16 @@ const socket = new Duplex({
 });
 
 const received = [];
-socket.on('data', d => received.push(d.toString()));
-socket.on('end', () => {
-  console.log('test1 received:', received.join('')); // 'server-msg-1\nserver-msg-2\n'
+socket.on("data", (d) => received.push(d.toString()));
+socket.on("end", () => {
+  console.log("test1 received:", received.join("")); // 'server-msg-1\nserver-msg-2\n'
 });
 
-socket.write('client-hello');
-socket.write('client-bye');
+socket.write("client-hello");
+socket.write("client-bye");
 socket.end(() => {
-  console.log('test1 sent:', sentMessages); // ['client-hello', 'client-bye']
-  console.log('test1 write finished');
+  console.log("test1 sent:", sentMessages); // ['client-hello', 'client-bye']
+  console.log("test1 write finished");
 });
 
 // 测试 2：读端和写端独立结束
@@ -244,17 +245,17 @@ const echo = new Duplex({
     setTimeout(cb, 1);
   },
   read() {
-    this.push(Buffer.from('only-read'));
+    this.push(Buffer.from("only-read"));
     this.push(null);
   },
 });
 
-let readResult = '';
-echo.on('data', d => (readResult += d.toString()));
-echo.on('end', () => console.log('test2 read end:', readResult)); // 'only-read'
+let readResult = "";
+echo.on("data", (d) => (readResult += d.toString()));
+echo.on("end", () => console.log("test2 read end:", readResult)); // 'only-read'
 
-echo.write('something');
-echo.end(() => console.log('test2 write finish'));
+echo.write("something");
+echo.end(() => console.log("test2 write finish"));
 
 // 测试 3：背压（写端水位线）
 const w = new Duplex({
@@ -269,8 +270,8 @@ const w = new Duplex({
 });
 let okCount = 0;
 for (let i = 0; i < 10; i++) {
-  if (w.write('x')) okCount++;
+  if (w.write("x")) okCount++;
 }
-console.log('test3 backpressure ok count:', okCount); // 大约 5 左右
-w.on('drain', () => console.log('test3 drained'));
+console.log("test3 backpressure ok count:", okCount); // 大约 5 左右
+w.on("drain", () => console.log("test3 drained"));
 w.end();

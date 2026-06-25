@@ -21,7 +21,7 @@ async function copyToClipboard(text) {
       return;
     } catch (e) {
       // 权限不足或环境不支持，降级到 execCommand
-      console.warn('Clipboard API 不可用，降级到 execCommand');
+      console.warn("Clipboard API 不可用，降级到 execCommand");
     }
   }
   // 降级方案
@@ -35,13 +35,13 @@ async function copyToClipboard(text) {
  */
 function copyByExecCommand(text) {
   return new Promise(function (resolve, reject) {
-    var textarea = document.createElement('textarea');
+    var textarea = document.createElement("textarea");
     textarea.value = text;
     // 移出可视区域，避免页面跳动
-    textarea.style.position = 'fixed';
-    textarea.style.top = '-9999px';
-    textarea.style.left = '-9999px';
-    textarea.style.opacity = '0';
+    textarea.style.position = "fixed";
+    textarea.style.top = "-9999px";
+    textarea.style.left = "-9999px";
+    textarea.style.opacity = "0";
     document.body.appendChild(textarea);
 
     // 选中并复制
@@ -50,7 +50,7 @@ function copyByExecCommand(text) {
 
     var success = false;
     try {
-      success = document.execCommand('copy');
+      success = document.execCommand("copy");
     } catch (e) {
       success = false;
     }
@@ -60,7 +60,7 @@ function copyByExecCommand(text) {
     if (success) {
       resolve();
     } else {
-      reject(new Error('复制失败，请手动复制'));
+      reject(new Error("复制失败，请手动复制"));
     }
   });
 }
@@ -72,8 +72,12 @@ function copyByExecCommand(text) {
  */
 function copyWithCallback(text, callback) {
   copyToClipboard(text)
-    .then(function () { callback && callback(null); })
-    .catch(function (err) { callback && callback(err); });
+    .then(function () {
+      callback && callback(null);
+    })
+    .catch(function (err) {
+      callback && callback(err);
+    });
 }
 
 /**
@@ -84,7 +88,7 @@ async function readFromClipboard() {
   if (navigator.clipboard && navigator.clipboard.readText) {
     return await navigator.clipboard.readText();
   }
-  throw new Error('当前环境不支持读取剪贴板');
+  throw new Error("当前环境不支持读取剪贴板");
 }
 
 // ===== 测试用例（需浏览器环境） =====
@@ -103,8 +107,8 @@ async function readFromClipboard() {
 
 // 模拟测试：验证 execCommand 方案的选择逻辑
 function chooseMethod(hasClipboardAPI, isSecureContext) {
-  if (hasClipboardAPI && isSecureContext) return 'clipboard-api';
-  return 'exec-command';
+  if (hasClipboardAPI && isSecureContext) return "clipboard-api";
+  return "exec-command";
 }
 console.log(chooseMethod(true, true)); // => 'clipboard-api'
 console.log(chooseMethod(true, false)); // => 'exec-command'
@@ -115,6 +119,6 @@ console.log(chooseMethod(false, false)); // => 'exec-command'
 function createTextareaValue(text) {
   return { value: text, selected: false, removed: false };
 }
-var t = createTextareaValue('test');
+var t = createTextareaValue("test");
 console.log(t.value); // => 'test'
 console.log(t.selected); // => false

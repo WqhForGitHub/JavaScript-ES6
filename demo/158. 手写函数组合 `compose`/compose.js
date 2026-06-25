@@ -22,7 +22,7 @@ function compose(...fns) {
   return fns.reduce(
     (f, g) =>
       (...args) =>
-        f(g(...args))
+        f(g(...args)),
   );
 }
 
@@ -59,7 +59,10 @@ const right = compose(compose(inc, double), square)(3);
 console.log(left === right); // true
 
 // 实际应用：数据转换管道
-const users = [{ name: "tom", age: 20 }, { name: "jerry", age: 30 }];
+const users = [
+  { name: "tom", age: 20 },
+  { name: "jerry", age: 30 },
+];
 const getNames = (list) => list.map((u) => u.name);
 const toUpper = (list) => list.map((s) => s.toUpperCase());
 const joinByComma = (list) => list.join(", ");

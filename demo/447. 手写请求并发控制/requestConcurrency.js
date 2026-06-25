@@ -42,7 +42,7 @@ function concurrencyControl(tasks, limit) {
             },
             (reason) => {
               results[index] = { status: "rejected", reason };
-            }
+            },
           )
           .finally(() => {
             activeCount--;
@@ -79,7 +79,10 @@ const tasks = [
 const start = Date.now();
 concurrencyControl(tasks, 2).then((results) => {
   console.log("总耗时(ms):", Date.now() - start); // 约 550ms（受限并发2）
-  console.log("结果顺序:", results.map((r) => r.value)); // 结果顺序: [1,2,3,4,5]
+  console.log(
+    "结果顺序:",
+    results.map((r) => r.value),
+  ); // 结果顺序: [1,2,3,4,5]
 });
 
 // 测试含失败任务
@@ -89,7 +92,7 @@ concurrencyControl(
     () => Promise.reject("fail"),
     () => Promise.resolve("ok2"),
   ],
-  2
+  2,
 ).then((results) => {
   console.log("含失败结果:", results);
   // 含失败结果: [

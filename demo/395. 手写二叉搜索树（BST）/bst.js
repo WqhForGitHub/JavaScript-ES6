@@ -147,11 +147,13 @@ class BinarySearchTree {
 
 // 测试
 const bst = new BinarySearchTree();
-[11, 7, 15, 5, 3, 9, 8, 10, 13, 12, 14, 20, 18, 25].forEach((k) => bst.insert(k));
+[11, 7, 15, 5, 3, 9, 8, 10, 13, 12, 14, 20, 18, 25].forEach((k) =>
+  bst.insert(k),
+);
 
-console.log(bst.inOrder().join(','));  // 3,5,7,8,9,10,11,12,13,14,15,18,20,25
-console.log(bst.preOrder().join(',')); // 11,7,5,3,9,8,10,15,13,12,14,20,18,25
-console.log(bst.postOrder().join(',')); // 3,5,8,10,9,7,12,14,13,18,25,20,15,11
+console.log(bst.inOrder().join(",")); // 3,5,7,8,9,10,11,12,13,14,15,18,20,25
+console.log(bst.preOrder().join(",")); // 11,7,5,3,9,8,10,15,13,12,14,20,18,25
+console.log(bst.postOrder().join(",")); // 3,5,8,10,9,7,12,14,13,18,25,20,15,11
 
 console.log(bst.min()); // 3
 console.log(bst.max()); // 25
@@ -159,5 +161,5 @@ console.log(bst.search(8)); // true
 console.log(bst.search(100)); // false
 
 bst.remove(15);
-console.log(bst.inOrder().join(',')); // 3,5,7,8,9,10,11,12,13,14,18,20,25
+console.log(bst.inOrder().join(",")); // 3,5,7,8,9,10,11,12,13,14,18,20,25
 console.log(bst.search(15)); // false

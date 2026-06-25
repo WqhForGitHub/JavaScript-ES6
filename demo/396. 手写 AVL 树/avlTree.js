@@ -29,7 +29,8 @@ class AVLTree {
   }
 
   _updateHeight(node) {
-    node.height = 1 + Math.max(this._height(node.left), this._height(node.right));
+    node.height =
+      1 + Math.max(this._height(node.left), this._height(node.right));
   }
 
   // 右旋（LL 情况）
@@ -137,7 +138,7 @@ class AVLTree {
 const avl = new AVLTree();
 [10, 20, 30, 40, 50, 25].forEach((k) => avl.insert(k));
 
-console.log(avl.inOrder().join(',')); // 10,20,25,30,40,50
+console.log(avl.inOrder().join(",")); // 10,20,25,30,40,50
 console.log(avl.isBalanced()); // true
 console.log(avl.search(25)); // true
 console.log(avl.search(99)); // false

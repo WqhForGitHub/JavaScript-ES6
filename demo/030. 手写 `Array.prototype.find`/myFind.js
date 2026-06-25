@@ -10,8 +10,8 @@
  */
 
 Array.prototype.myFind = function (callback, thisArg) {
-  if (typeof callback !== 'function') {
-    throw new TypeError(callback + ' is not a function');
+  if (typeof callback !== "function") {
+    throw new TypeError(callback + " is not a function");
   }
 
   for (let i = 0; i < this.length; i++) {
@@ -28,28 +28,31 @@ Array.prototype.myFind = function (callback, thisArg) {
 // ===== 测试 =====
 
 // --- 基本查找 ---
-console.log([1, 2, 3, 4].myFind(x => x > 2)); // 3
+console.log([1, 2, 3, 4].myFind((x) => x > 2)); // 3
 
 // --- 查找对象 ---
 const users = [
-  { name: 'a', age: 17 },
-  { name: 'b', age: 20 },
-  { name: 'c', age: 18 }
+  { name: "a", age: 17 },
+  { name: "b", age: 20 },
+  { name: "c", age: 18 },
 ];
-console.log(users.myFind(u => u.age >= 18)); // { name: 'b', age: 20 }
+console.log(users.myFind((u) => u.age >= 18)); // { name: 'b', age: 20 }
 
 // --- 找不到返回 undefined ---
-console.log([1, 2, 3].myFind(x => x > 10)); // undefined
+console.log([1, 2, 3].myFind((x) => x > 10)); // undefined
 
 // --- 使用索引 ---
 console.log([10, 20, 30, 40].myFind((x, i) => i === 2)); // 30
 
 // --- 使用 thisArg ---
 console.log(
-  [1, 2, 3, 4].myFind(function (x) {
-    return x === this.target;
-  }, { target: 3 })
+  [1, 2, 3, 4].myFind(
+    function (x) {
+      return x === this.target;
+    },
+    { target: 3 },
+  ),
 ); // 3
 
 // --- 只返回第一个匹配项 ---
-console.log([1, 2, 3, 2, 1].myFind(x => x === 2)); // 2
+console.log([1, 2, 3, 2, 1].myFind((x) => x === 2)); // 2

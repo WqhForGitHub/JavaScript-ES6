@@ -22,7 +22,7 @@ function createMyAxios(adapter) {
   function dispatchRequest(config) {
     return adapter(config).then(
       (response) => ({ ...response, config }),
-      (error) => Promise.reject({ ...error, config })
+      (error) => Promise.reject({ ...error, config }),
     );
   }
 
@@ -100,7 +100,7 @@ axios.interceptors.request.use(
   },
   function (error) {
     return Promise.reject(error);
-  }
+  },
 );
 
 // 响应拦截器：只取 data
@@ -111,7 +111,7 @@ axios.interceptors.response.use(
   },
   function (error) {
     return Promise.reject(error);
-  }
+  },
 );
 
 axios.get("https://example.com/info").then((data) => {

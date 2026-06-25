@@ -14,7 +14,7 @@
 
 function castPath(path) {
   if (Array.isArray(path)) return path.slice();
-  if (typeof path === 'number') return [String(path)];
+  if (typeof path === "number") return [String(path)];
   // Match dot notation and bracket notation (with single/double quotes)
   const result = [];
   const re = /[^.[\]]+|\[(?:(['"])(.*?)\1|(\d+))\]/g;
@@ -45,11 +45,15 @@ function get(object, path, defaultValue) {
 
 // --- Tests ---
 
-const obj = { a: { b: { c: 1 } }, arr: [{ x: 10 }, { x: 20 }], 'd.e': 'literal' };
+const obj = {
+  a: { b: { c: 1 } },
+  arr: [{ x: 10 }, { x: 20 }],
+  "d.e": "literal",
+};
 
-console.log('get nested string:', get(obj, 'a.b.c')); // 1
-console.log('get array index:', get(obj, 'arr[0].x')); // 10
-console.log('get array path:', get(obj, ['arr', 1, 'x'])); // 20
-console.log('get missing -> default:', get(obj, 'a.b.z', 'fallback')); // 'fallback'
-console.log('get null object:', get(null, 'a.b', 'none')); // 'none'
-console.log('get deep missing:', get(obj, 'x.y.z', undefined)); // undefined
+console.log("get nested string:", get(obj, "a.b.c")); // 1
+console.log("get array index:", get(obj, "arr[0].x")); // 10
+console.log("get array path:", get(obj, ["arr", 1, "x"])); // 20
+console.log("get missing -> default:", get(obj, "a.b.z", "fallback")); // 'fallback'
+console.log("get null object:", get(null, "a.b", "none")); // 'none'
+console.log("get deep missing:", get(obj, "x.y.z", undefined)); // undefined

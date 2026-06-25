@@ -81,18 +81,24 @@ function mockNode(tag, attrs, children) {
     attributes: attrs || {},
     children: children || [],
     cloneNode: function (deep) {
-      var cloned = mockNode(this.tagName, Object.assign({}, this.attributes), []);
+      var cloned = mockNode(
+        this.tagName,
+        Object.assign({}, this.attributes),
+        [],
+      );
       if (deep) {
-        cloned.children = this.children.map(function (c) { return c.cloneNode(true); });
+        cloned.children = this.children.map(function (c) {
+          return c.cloneNode(true);
+        });
       }
       return cloned;
     },
   };
 }
 
-var original = mockNode('div', { class: 'box' }, [
-  mockNode('p', {}, []),
-  mockNode('span', {}, []),
+var original = mockNode("div", { class: "box" }, [
+  mockNode("p", {}, []),
+  mockNode("span", {}, []),
 ]);
 
 var shallow = original.cloneNode(false);

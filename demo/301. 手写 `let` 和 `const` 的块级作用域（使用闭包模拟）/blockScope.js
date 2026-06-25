@@ -9,9 +9,9 @@
 // 使用 IIFE 模拟块级作用域：变量在块外不可访问
 function blockScopeDemo() {
   (function () {
-    var letLike = 'I am like let';
-    var constLike = 'I am like const';
-    console.log(letLike);   // I am like let
+    var letLike = "I am like let";
+    var constLike = "I am like const";
+    console.log(letLike); // I am like let
     console.log(constLike); // I am like const
   })();
 
@@ -25,7 +25,7 @@ function createConst(target, name, value) {
     value: value,
     writable: false,
     enumerable: true,
-    configurable: false
+    configurable: false,
   });
   return target;
 }
@@ -37,8 +37,12 @@ function simulateLetAndConst() {
   // 模拟 let：块内可变，块外不可直接访问
   (function (s) {
     var count = 0; // 模拟 let count = 0
-    s.getCount = function () { return count; };
-    s.setCount = function (v) { count = v; };
+    s.getCount = function () {
+      return count;
+    };
+    s.setCount = function (v) {
+      count = v;
+    };
   })(scope);
 
   console.log(scope.getCount()); // 0
@@ -47,9 +51,9 @@ function simulateLetAndConst() {
 
   // 模拟 const
   var obj = {};
-  createConst(obj, 'PI', 3.14159);
+  createConst(obj, "PI", 3.14159);
   console.log(obj.PI); // 3.14159
-  obj.PI = 3.14;       // 严格模式抛错，非严格模式静默失败
+  obj.PI = 3.14; // 严格模式抛错，非严格模式静默失败
   console.log(obj.PI); // 3.14159（值未被修改）
 }
 
@@ -60,13 +64,14 @@ function tdzDemo() {
     var value;
     return {
       get: function () {
-        if (!initialized) throw new ReferenceError('Cannot access before initialization');
+        if (!initialized)
+          throw new ReferenceError("Cannot access before initialization");
         return value;
       },
       init: function (v) {
         value = v;
         initialized = true;
-      }
+      },
     };
   })();
 

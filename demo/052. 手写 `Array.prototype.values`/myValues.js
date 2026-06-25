@@ -24,14 +24,14 @@ Array.prototype.myValues = function () {
     },
     [Symbol.iterator]() {
       return this;
-    }
+    },
   };
 };
 
 // ===== 测试 =====
 
 // --- 用 next() 手动消费 ---
-const iter = ['a', 'b', 'c'].myValues();
+const iter = ["a", "b", "c"].myValues();
 console.log(iter.next().value); // 'a'
 console.log(iter.next().value); // 'b'
 console.log(iter.next().value); // 'c'

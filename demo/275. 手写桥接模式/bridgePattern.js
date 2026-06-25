@@ -14,7 +14,7 @@
 // ---- Implementor hierarchy ----
 class Renderer {
   render(shape) {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
 }
 
@@ -33,17 +33,17 @@ class RasterRenderer extends Renderer {
 // Color is also an implementor dimension.
 class Color {
   fill() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
 }
 class RedColor extends Color {
   fill() {
-    return 'red';
+    return "red";
   }
 }
 class BlueColor extends Color {
   fill() {
-    return 'blue';
+    return "blue";
   }
 }
 
@@ -54,7 +54,7 @@ class Shape {
     this.color = color;
   }
   name() {
-    return 'shape';
+    return "shape";
   }
   draw() {
     return `${this.renderer.render(this.name())} filled with ${this.color.fill()}`;
@@ -70,7 +70,7 @@ class Circle extends Shape {
     this.radius = radius;
   }
   name() {
-    return 'circle';
+    return "circle";
   }
   resize(factor) {
     this.radius *= factor;
@@ -80,7 +80,7 @@ class Circle extends Shape {
 
 class Square extends Shape {
   name() {
-    return 'square';
+    return "square";
   }
 }
 

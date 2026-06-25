@@ -25,13 +25,13 @@ function forOfBreakable(iterable, callback) {
     var ret = callback(result.value);
     if (ret === false) {
       // 提前退出时调用 return 方法进行清理
-      if (typeof iterator.return === 'function') {
+      if (typeof iterator.return === "function") {
         iterator.return();
       }
-      return 'break';
+      return "break";
     }
   }
-  return 'complete';
+  return "complete";
 }
 
 // 自定义可迭代对象
@@ -49,26 +49,32 @@ var range = {
         return { value: undefined, done: true };
       },
       return: function () {
-        console.log('  [iterator cleanup called]');
+        console.log("  [iterator cleanup called]");
         return { value: undefined, done: true };
-      }
+      },
     };
-  }
+  },
 };
 
 // 测试 1：完整遍历
 var collected = [];
-forOf(range, function (v) { collected.push(v); });
+forOf(range, function (v) {
+  collected.push(v);
+});
 console.log(collected); // [1, 2, 3, 4, 5]
 
 // 测试 2：对原生数组使用
 var sum = 0;
-forOf([10, 20, 30], function (v) { sum += v; });
+forOf([10, 20, 30], function (v) {
+  sum += v;
+});
 console.log(sum); // 60
 
 // 测试 3：对字符串使用（字符串也是可迭代的）
 var chars = [];
-forOf('abc', function (c) { chars.push(c); });
+forOf("abc", function (c) {
+  chars.push(c);
+});
 console.log(chars); // ['a', 'b', 'c']
 
 // 测试 4：带 break 提前退出
@@ -80,7 +86,7 @@ var status = forOfBreakable([1, 2, 3, 10, 20, 30], function (v) {
   }
 });
 console.log(firstBig); // 10
-console.log(status);   // break
+console.log(status); // break
 
 // 测试 5：带 break 退出自定义可迭代对象（会触发 return 清理）
 var partial = [];

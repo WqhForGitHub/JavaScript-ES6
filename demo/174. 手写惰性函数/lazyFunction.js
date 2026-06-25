@@ -105,7 +105,7 @@ const process = lazyFn(
   function fast(x) {
     fastCount++;
     return x + 100;
-  }
+  },
 );
 
 console.log(process(1)); // 101（慢路径）

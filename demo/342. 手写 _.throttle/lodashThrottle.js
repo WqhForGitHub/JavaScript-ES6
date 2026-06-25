@@ -15,8 +15,8 @@
  */
 
 function throttle(func, wait = 0, options = {}) {
-  if (typeof func !== 'function') {
-    throw new TypeError('Expected a function');
+  if (typeof func !== "function") {
+    throw new TypeError("Expected a function");
   }
   const leading = options.leading !== false;
   const trailing = options.trailing !== false;
@@ -112,12 +112,12 @@ function throttle(func, wait = 0, options = {}) {
 (function () {
   let calls = [];
   const throttled = throttle((x) => calls.push(x), 100);
-  throttled('a'); // fires immediately (leading)
-  throttled('b'); // ignored, but queued for trailing
-  throttled('c'); // ignored, but queued for trailing
-  console.log('throttle immediate:', calls); // expected: ['a']
+  throttled("a"); // fires immediately (leading)
+  throttled("b"); // ignored, but queued for trailing
+  throttled("c"); // ignored, but queued for trailing
+  console.log("throttle immediate:", calls); // expected: ['a']
   setTimeout(() => {
-    console.log('throttle after wait:', calls); // expected: ['a', 'c']
+    console.log("throttle after wait:", calls); // expected: ['a', 'c']
   }, 200);
 })();
 
@@ -125,11 +125,11 @@ function throttle(func, wait = 0, options = {}) {
 (function () {
   let calls = [];
   const throttled = throttle((x) => calls.push(x), 100);
-  throttled('x');
-  throttled('y');
+  throttled("x");
+  throttled("y");
   throttled.cancel();
   setTimeout(() => {
-    console.log('throttle cancel:', calls); // expected: ['x']
+    console.log("throttle cancel:", calls); // expected: ['x']
   }, 200);
 })();
 
@@ -137,9 +137,9 @@ function throttle(func, wait = 0, options = {}) {
 (function () {
   let calls = [];
   const throttled = throttle((x) => calls.push(x), 100, { leading: false });
-  throttled('a');
-  console.log('throttle no-leading immediate:', calls); // expected: []
+  throttled("a");
+  console.log("throttle no-leading immediate:", calls); // expected: []
   setTimeout(() => {
-    console.log('throttle no-leading after wait:', calls); // expected: ['a']
+    console.log("throttle no-leading after wait:", calls); // expected: ['a']
   }, 200);
 })();

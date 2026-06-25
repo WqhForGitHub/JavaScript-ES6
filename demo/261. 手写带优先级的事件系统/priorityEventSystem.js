@@ -20,7 +20,8 @@ class PriorityEventSystem {
     if (!this._events.has(event)) {
       this._events.set(event, []);
     }
-    const priority = typeof options.priority === 'number' ? options.priority : 0;
+    const priority =
+      typeof options.priority === "number" ? options.priority : 0;
     this._events.get(event).push({ fn, priority, seq: this._seq++ });
     return this;
   }
@@ -67,10 +68,12 @@ class PriorityEventSystem {
   listeners(event) {
     const list = this._events.get(event);
     if (!list) return [];
-    return [...list].sort((a, b) => {
-      if (b.priority !== a.priority) return b.priority - a.priority;
-      return a.seq - b.seq;
-    }).map((item) => item.fn);
+    return [...list]
+      .sort((a, b) => {
+        if (b.priority !== a.priority) return b.priority - a.priority;
+        return a.seq - b.seq;
+      })
+      .map((item) => item.fn);
   }
 }
 
@@ -78,28 +81,28 @@ class PriorityEventSystem {
 const bus = new PriorityEventSystem();
 
 const calls = [];
-bus.on('tick', () => calls.push('low-default'));
-bus.on('tick', () => calls.push('high'), { priority: 10 });
-bus.on('tick', () => calls.push('medium'), { priority: 5 });
-bus.on('tick', () => calls.push('high-2'), { priority: 10 });
+bus.on("tick", () => calls.push("low-default"));
+bus.on("tick", () => calls.push("high"), { priority: 10 });
+bus.on("tick", () => calls.push("medium"), { priority: 5 });
+bus.on("tick", () => calls.push("high-2"), { priority: 10 });
 
-bus.emit('tick');
+bus.emit("tick");
 console.log(calls);
 // Expected: [ 'high', 'high-2', 'medium', 'low-default' ]
 
 // once listener removed after emit
 const onceCalls = [];
-bus.once('boom', () => onceCalls.push('once'));
-bus.emit('boom');
-bus.emit('boom');
+bus.once("boom", () => onceCalls.push("once"));
+bus.emit("boom");
+bus.emit("boom");
 console.log(onceCalls);
 // Expected: [ 'once' ]
 
 // off removes a specific listener
 const removed = [];
-const handler = () => removed.push('a');
-bus.on('x', handler, { priority: 3 });
-bus.off('x', handler);
-bus.emit('x');
+const handler = () => removed.push("a");
+bus.on("x", handler, { priority: 3 });
+bus.off("x", handler);
+bus.emit("x");
 console.log(removed);
 // Expected: []

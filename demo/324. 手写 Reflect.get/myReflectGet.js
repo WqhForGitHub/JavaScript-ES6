@@ -9,8 +9,11 @@
 
 // 手写 Reflect.get
 function myReflectGet(target, propertyKey, receiver) {
-  if (target == null || (typeof target !== 'object' && typeof target !== 'function')) {
-    throw new TypeError('Reflect.get called on non-object');
+  if (
+    target == null ||
+    (typeof target !== "object" && typeof target !== "function")
+  ) {
+    throw new TypeError("Reflect.get called on non-object");
   }
   var key = String(propertyKey);
   receiver = receiver || target;
@@ -26,7 +29,7 @@ function myReflectGet(target, propertyKey, receiver) {
 
   if (!descriptor) return undefined;
 
-  if ('get' in descriptor) {
+  if ("get" in descriptor) {
     // 如果是访问器属性，使用 receiver 作为 this 调用 getter
     return descriptor.get.call(receiver);
   }
@@ -35,54 +38,58 @@ function myReflectGet(target, propertyKey, receiver) {
 }
 
 // 测试 1：获取普通属性
-console.log('--- Get data property ---');
-var obj = { x: 1, y: 2, name: 'Alice' };
-console.log(myReflectGet(obj, 'x'));    // 1
-console.log(myReflectGet(obj, 'name')); // Alice
-console.log(myReflectGet(obj, 'z'));    // undefined
+console.log("--- Get data property ---");
+var obj = { x: 1, y: 2, name: "Alice" };
+console.log(myReflectGet(obj, "x")); // 1
+console.log(myReflectGet(obj, "name")); // Alice
+console.log(myReflectGet(obj, "z")); // undefined
 
 // 测试 2：获取访问器属性
-console.log('--- Get accessor property ---');
+console.log("--- Get accessor property ---");
 var person = {
-  _name: 'Bob',
-  get name() { return this._name; }
+  _name: "Bob",
+  get name() {
+    return this._name;
+  },
 };
-console.log(myReflectGet(person, 'name')); // Bob
+console.log(myReflectGet(person, "name")); // Bob
 
 // 测试 3：receiver 参数影响 getter 中的 this
-console.log('--- Get with receiver ---');
+console.log("--- Get with receiver ---");
 var base = {
   _val: 100,
-  get val() { return this._val; }
+  get val() {
+    return this._val;
+  },
 };
-console.log(myReflectGet(base, 'val')); // 100
-console.log(myReflectGet(base, 'val', { _val: 200 })); // 200（receiver 改变了 this）
+console.log(myReflectGet(base, "val")); // 100
+console.log(myReflectGet(base, "val", { _val: 200 })); // 200（receiver 改变了 this）
 
 // 测试 4：沿原型链获取
-console.log('--- Get from prototype chain ---');
-var child = Object.create({ inherited: 'from proto' });
-child.own = 'own value';
-console.log(myReflectGet(child, 'own'));       // own value
-console.log(myReflectGet(child, 'inherited')); // from proto
+console.log("--- Get from prototype chain ---");
+var child = Object.create({ inherited: "from proto" });
+child.own = "own value";
+console.log(myReflectGet(child, "own")); // own value
+console.log(myReflectGet(child, "inherited")); // from proto
 
 // 测试 5：数组索引
-console.log('--- Get array element ---');
+console.log("--- Get array element ---");
 var arr = [10, 20, 30];
 console.log(myReflectGet(arr, 0)); // 10
 console.log(myReflectGet(arr, 1)); // 20
-console.log(myReflectGet(arr, 'length')); // 3
+console.log(myReflectGet(arr, "length")); // 3
 
 // 测试 6：与原生对比
-console.log('--- Compare with native ---');
-console.log(myReflectGet(obj, 'x'));  // 1
-console.log(Reflect.get(obj, 'x'));   // 1
-console.log(myReflectGet(base, 'val', { _val: 200 })); // 200
-console.log(Reflect.get(base, 'val', { _val: 200 }));  // 200
+console.log("--- Compare with native ---");
+console.log(myReflectGet(obj, "x")); // 1
+console.log(Reflect.get(obj, "x")); // 1
+console.log(myReflectGet(base, "val", { _val: 200 })); // 200
+console.log(Reflect.get(base, "val", { _val: 200 })); // 200
 
 // 测试 7：非对象目标抛错
-console.log('--- Error on non-object ---');
+console.log("--- Error on non-object ---");
 try {
-  myReflectGet(42, 'x');
+  myReflectGet(42, "x");
 } catch (e) {
   console.log(e.message); // Reflect.get called on non-object
 }

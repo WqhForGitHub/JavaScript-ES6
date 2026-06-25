@@ -16,7 +16,7 @@
 // ---- Element interface ----
 class Shape {
   accept(visitor) {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
 }
 
@@ -55,13 +55,13 @@ class Triangle extends Shape {
 // ---- Visitor base ----
 class Visitor {
   visitCircle() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
   visitRectangle() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
   visitTriangle() {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
 }
 
@@ -81,13 +81,13 @@ class AreaVisitor extends Visitor {
 // ---- Concrete visitor: serialize to JSON-ish ----
 class JSONExportVisitor extends Visitor {
   visitCircle(c) {
-    return { type: 'circle', radius: c.radius };
+    return { type: "circle", radius: c.radius };
   }
   visitRectangle(r) {
-    return { type: 'rectangle', width: r.width, height: r.height };
+    return { type: "rectangle", width: r.width, height: r.height };
   }
   visitTriangle(t) {
-    return { type: 'triangle', base: t.base, height: t.height };
+    return { type: "triangle", base: t.base, height: t.height };
   }
 }
 
@@ -110,11 +110,7 @@ function visitAll(shapes, visitor) {
 }
 
 // ---------------- Test cases ----------------
-const shapes = [
-  new Circle(3),
-  new Rectangle(4, 5),
-  new Triangle(6, 2),
-];
+const shapes = [new Circle(3), new Rectangle(4, 5), new Triangle(6, 2)];
 
 console.log(visitAll(shapes, new AreaVisitor()).map((a) => a.toFixed(2)));
 // Expected: [ '28.27', '20.00', '6.00' ]

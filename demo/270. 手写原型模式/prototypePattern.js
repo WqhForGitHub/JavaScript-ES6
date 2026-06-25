@@ -15,8 +15,8 @@
 
 // Generic deep-clone helper that respects nested clone() methods when present.
 function deepClone(obj, seen = new WeakMap()) {
-  if (obj === null || typeof obj !== 'object') return obj;
-  if (typeof obj.clone === 'function') return obj.clone();
+  if (obj === null || typeof obj !== "object") return obj;
+  if (typeof obj.clone === "function") return obj.clone();
   if (seen.has(obj)) return seen.get(obj);
 
   let copy;
@@ -70,16 +70,19 @@ const ShapePrototype = {
     return copy;
   },
   describe() {
-    return `${this.type} @ (${this.x},${this.y}) tags=[${this.tags.join(',')}]`;
+    return `${this.type} @ (${this.x},${this.y}) tags=[${this.tags.join(",")}]`;
   },
 };
 
 // ---------------- Test cases ----------------
-const original = Object.create(ShapePrototype).init('Circle', 10, 20, ['red', 'big']);
+const original = Object.create(ShapePrototype).init("Circle", 10, 20, [
+  "red",
+  "big",
+]);
 const copy = original.clone();
 
 // Mutating the clone must not affect the original (independent nested arrays).
-copy.tags.push('cloned');
+copy.tags.push("cloned");
 copy.move(5, 5);
 
 console.log(original.describe());
@@ -92,21 +95,25 @@ console.log(original !== copy, original.tags !== copy.tags);
 // Deep-clone preserves own properties AND the prototype chain. We use a plain
 // prototype object (with no inherited clone() method) so deepClone performs a
 // structural copy instead of delegating to a prototype's clone().
-const proto = { inherited: 'yes' };
+const proto = { inherited: "yes" };
 const child = Object.create(proto);
 child.own = 42;
 const childClone = deepClone(child);
-console.log(childClone.own, childClone.inherited, Object.getPrototypeOf(childClone) === proto);
+console.log(
+  childClone.own,
+  childClone.inherited,
+  Object.getPrototypeOf(childClone) === proto,
+);
 // Expected: 42 'yes' true
 
 // Deep-clone arrays/maps/dates round-trip
 const complex = {
   list: [1, { nested: 2 }],
   date: new Date(0),
-  map: new Map([['k', { v: 7 }]]),
+  map: new Map([["k", { v: 7 }]]),
 };
 const complexClone = deepClone(complex);
 complexClone.list[1].nested = 999;
-complexClone.map.get('k').v = 999;
-console.log(complex.list[1].nested, complex.map.get('k').v);
+complexClone.map.get("k").v = 999;
+console.log(complex.list[1].nested, complex.map.get("k").v);
 // Expected: 2 7  (original unchanged)

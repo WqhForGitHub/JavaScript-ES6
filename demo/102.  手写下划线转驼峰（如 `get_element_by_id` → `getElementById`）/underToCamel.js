@@ -74,7 +74,11 @@ function underToCamel3(str) {
 console.log("========== 手写下划线转驼峰 ==========\n");
 
 const testCases = [
-  { value: "get_element_by_id", expected: "getElementById", desc: "get_element_by_id" },
+  {
+    value: "get_element_by_id",
+    expected: "getElementById",
+    desc: "get_element_by_id",
+  },
   { value: "user_name", expected: "userName", desc: "user_name" },
   { value: "first_name", expected: "firstName", desc: "first_name" },
   { value: "api_key", expected: "apiKey", desc: "api_key" },

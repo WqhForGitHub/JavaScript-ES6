@@ -23,14 +23,14 @@ Array.prototype.myEntries = function () {
     },
     [Symbol.iterator]() {
       return this;
-    }
+    },
   };
 };
 
 // ===== 测试 =====
 
 // --- 用 next() 手动消费 ---
-const iter1 = ['a', 'b', 'c'].myEntries();
+const iter1 = ["a", "b", "c"].myEntries();
 console.log(iter1.next().value); // [0, 'a']
 console.log(iter1.next().value); // [1, 'b']
 console.log(iter1.next().value); // [2, 'c']
@@ -38,7 +38,7 @@ console.log(iter1.next()); // { value: undefined, done: true }
 
 // --- 用 for...of 消费 ---
 const out1 = [];
-for (const entry of ['x', 'y', 'z'].myEntries()) {
+for (const entry of ["x", "y", "z"].myEntries()) {
   out1.push(entry);
 }
 console.log(out1); // [[0, 'x'], [1, 'y'], [2, 'z']]
@@ -46,7 +46,7 @@ console.log(out1); // [[0, 'x'], [1, 'y'], [2, 'z']]
 // --- 解构使用索引和值 ---
 const out2 = [];
 for (const [i, v] of [10, 20, 30].myEntries()) {
-  out2.push(i + ':' + v);
+  out2.push(i + ":" + v);
 }
 console.log(out2); // ['0:10', '1:20', '2:30']
 

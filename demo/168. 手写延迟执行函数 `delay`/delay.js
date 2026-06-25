@@ -44,7 +44,7 @@ delay(
   },
   100,
   10,
-  20
+  20,
 );
 
 // await 用法（IIFE）
@@ -77,10 +77,8 @@ delay(() => 1, 100)
 (async () => {
   const r = await delay(
     () =>
-      new Promise((resolve) =>
-        setTimeout(() => resolve("async value"), 50)
-      ),
-    100
+      new Promise((resolve) => setTimeout(() => resolve("async value"), 50)),
+    100,
   );
   console.log("fn 返回 Promise:", r); // 'async value'
 })();

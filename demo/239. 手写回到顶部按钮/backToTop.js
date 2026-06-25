@@ -13,9 +13,15 @@
  * 缓动函数集合
  */
 var easing = {
-  linear: function (t) { return t; },
-  easeInQuad: function (t) { return t * t; },
-  easeOutQuad: function (t) { return t * (2 - t); },
+  linear: function (t) {
+    return t;
+  },
+  easeInQuad: function (t) {
+    return t * t;
+  },
+  easeOutQuad: function (t) {
+    return t * (2 - t);
+  },
   easeInOutCubic: function (t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   },
@@ -30,7 +36,10 @@ function scrollToTop(duration, easingFn) {
   duration = duration || 500;
   easingFn = easingFn || easing.easeInOutCubic;
 
-  var startY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+  var startY =
+    window.pageYOffset ||
+    document.documentElement.scrollTop ||
+    document.body.scrollTop;
   var startTime = Date.now();
 
   function step() {
@@ -59,31 +68,32 @@ function scrollToTop(duration, easingFn) {
  */
 function createBackToTopButton(options) {
   options = options || {};
-  var showThreshold = options.showThreshold != null ? options.showThreshold : 300;
+  var showThreshold =
+    options.showThreshold != null ? options.showThreshold : 300;
   var duration = options.duration || 500;
-  var text = options.text || '回到顶部';
+  var text = options.text || "回到顶部";
 
   // 创建按钮元素
-  var button = document.createElement('button');
+  var button = document.createElement("button");
   button.textContent = text;
   button.style.cssText = [
-    'position: fixed',
-    'right: 30px',
-    'bottom: 30px',
-    'display: none',
-    'padding: 10px 16px',
-    'background: #4CAF50',
-    'color: #fff',
-    'border: none',
-    'border-radius: 6px',
-    'cursor: pointer',
-    'z-index: 9999',
-    'box-shadow: 0 2px 8px rgba(0,0,0,0.2)',
-  ].join(';');
+    "position: fixed",
+    "right: 30px",
+    "bottom: 30px",
+    "display: none",
+    "padding: 10px 16px",
+    "background: #4CAF50",
+    "color: #fff",
+    "border: none",
+    "border-radius: 6px",
+    "cursor: pointer",
+    "z-index: 9999",
+    "box-shadow: 0 2px 8px rgba(0,0,0,0.2)",
+  ].join(";");
   document.body.appendChild(button);
 
   // 点击事件
-  button.addEventListener('click', function () {
+  button.addEventListener("click", function () {
     scrollToTop(duration, easing.easeInOutCubic);
   });
 
@@ -92,19 +102,20 @@ function createBackToTopButton(options) {
   function onScroll() {
     if (!ticking) {
       window.requestAnimationFrame(function () {
-        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        button.style.display = scrollTop > showThreshold ? 'block' : 'none';
+        var scrollTop =
+          window.pageYOffset || document.documentElement.scrollTop;
+        button.style.display = scrollTop > showThreshold ? "block" : "none";
         ticking = false;
       });
       ticking = true;
     }
   }
-  window.addEventListener('scroll', onScroll);
+  window.addEventListener("scroll", onScroll);
 
   return {
     button: button,
     destroy: function () {
-      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener("scroll", onScroll);
       document.body.removeChild(button);
     },
   };

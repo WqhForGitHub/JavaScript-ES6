@@ -9,11 +9,11 @@
  * 注意：本文件需要在浏览器环境中运行。
  */
 
-var REPLACE = 'REPLACE';
-var PROPS = 'PROPS';
-var TEXT = 'TEXT';
-var REORDER = 'REORDER';
-var REMOVE = 'REMOVE';
+var REPLACE = "REPLACE";
+var PROPS = "PROPS";
+var TEXT = "TEXT";
+var REORDER = "REORDER";
+var REMOVE = "REMOVE";
 
 /**
  * 将补丁应用到真实 DOM
@@ -29,7 +29,9 @@ function walk(node, patches, walker) {
   var currentPatches = patches[walker.index];
 
   // 遍历子节点
-  var children = node.childNodes ? Array.prototype.slice.call(node.childNodes) : [];
+  var children = node.childNodes
+    ? Array.prototype.slice.call(node.childNodes)
+    : [];
   children.forEach(function (child) {
     walker.index++;
     walk(child, patches, walker);
@@ -45,9 +47,10 @@ function applyPatches(node, currentPatches) {
   currentPatches.forEach(function (p) {
     switch (p.type) {
       case REPLACE:
-        var newNode = typeof p.node === 'string'
-          ? document.createTextNode(p.node)
-          : render(p.node); // render 来自 virtualDom.js
+        var newNode =
+          typeof p.node === "string"
+            ? document.createTextNode(p.node)
+            : render(p.node); // render 来自 virtualDom.js
         node.parentNode.replaceChild(newNode, node);
         break;
       case PROPS:
@@ -75,7 +78,7 @@ function setProps(node, props) {
   Object.keys(props).forEach(function (key) {
     if (props[key] == null) {
       node.removeAttribute(key);
-    } else if (key === 'class' || key === 'className') {
+    } else if (key === "class" || key === "className") {
       node.className = props[key];
     } else {
       node.setAttribute(key, props[key]);
@@ -89,11 +92,15 @@ function setProps(node, props) {
 function reorderChildren(node, removes, inserts) {
   // 先删除
   if (removes) {
-    removes.sort(function (a, b) { return b - a; }).forEach(function (idx) {
-      if (node.childNodes[idx]) {
-        node.removeChild(node.childNodes[idx]);
-      }
-    });
+    removes
+      .sort(function (a, b) {
+        return b - a;
+      })
+      .forEach(function (idx) {
+        if (node.childNodes[idx]) {
+          node.removeChild(node.childNodes[idx]);
+        }
+      });
   }
   // 再插入（此处简化，实际需要完整 render 新节点）
   if (inserts) {
@@ -112,9 +119,9 @@ function render(vnode) {
   var el = document.createElement(vnode.tagName);
   var props = vnode.props || {};
   Object.keys(props).forEach(function (key) {
-    if (key === 'class' || key === 'className') {
+    if (key === "class" || key === "className") {
       el.className = props[key];
-    } else if (key !== 'key') {
+    } else if (key !== "key") {
       el.setAttribute(key, props[key]);
     }
   });
@@ -134,18 +141,28 @@ function render(vnode) {
 
 // 模拟测试：用对象验证 patch 逻辑
 var mockDom = {
-  tagName: 'div',
-  attrs: { class: 'old' },
+  tagName: "div",
+  attrs: { class: "old" },
   childNodes: [
-    { tagName: 'p', attrs: { class: 'old' }, text: 'hello', childNodes: [], nodeType: 1 },
+    {
+      tagName: "p",
+      attrs: { class: "old" },
+      text: "hello",
+      childNodes: [],
+      nodeType: 1,
+    },
   ],
   nodeType: 1,
-  setAttribute: function (k, v) { this.attrs[k] = v; },
-  removeAttribute: function (k) { delete this.attrs[k]; },
+  setAttribute: function (k, v) {
+    this.attrs[k] = v;
+  },
+  removeAttribute: function (k) {
+    delete this.attrs[k];
+  },
 };
 
 // 模拟属性补丁
-var testPatches = { 1: [{ type: PROPS, props: { class: 'new' } }] };
+var testPatches = { 1: [{ type: PROPS, props: { class: "new" } }] };
 
 // 简化 walk 模拟
 function mockWalk(node, patches, idx) {

@@ -16,8 +16,10 @@
  */
 
 function createWorkerFromFunction(fn) {
-  if (typeof Worker === 'undefined' || typeof Blob === 'undefined') {
-    console.warn('[webWorkerTask] Web Workers unsupported; running on main thread.');
+  if (typeof Worker === "undefined" || typeof Blob === "undefined") {
+    console.warn(
+      "[webWorkerTask] Web Workers unsupported; running on main thread.",
+    );
     return {
       run: (payload) => Promise.resolve().then(() => fn(payload)),
       terminate() {},
@@ -36,7 +38,7 @@ function createWorkerFromFunction(fn) {
       }
     };
   `;
-  const blob = new Blob([source], { type: 'application/javascript' });
+  const blob = new Blob([source], { type: "application/javascript" });
   const url = URL.createObjectURL(blob);
   const worker = new Worker(url);
   let nextId = 1;
@@ -90,17 +92,20 @@ function heavySum(n) {
   return total;
 }
 
-if (typeof Worker !== 'undefined') {
+if (typeof Worker !== "undefined") {
   // Browser path.
   runInWorker(heavySum, 10000000).then((r) => {
-    console.log('worker result:', r); // expected: a large number computed off main thread
+    console.log("worker result:", r); // expected: a large number computed off main thread
   });
 } else {
   // Node fallback: run synchronously to verify the function itself works.
   const r = heavySum(1000);
-  console.log('fallback heavySum(1000):', r); // expected: 332833500
-  console.log('createWorkerFromFunction is a function:', typeof createWorkerFromFunction === 'function');
+  console.log("fallback heavySum(1000):", r); // expected: 332833500
+  console.log(
+    "createWorkerFromFunction is a function:",
+    typeof createWorkerFromFunction === "function",
+  );
   // expected: createWorkerFromFunction is a function: true
-  console.log('runInWorker is a function:', typeof runInWorker === 'function');
+  console.log("runInWorker is a function:", typeof runInWorker === "function");
   // expected: runInWorker is a function: true
 }

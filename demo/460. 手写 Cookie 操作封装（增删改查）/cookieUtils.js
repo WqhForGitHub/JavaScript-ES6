@@ -18,7 +18,8 @@
 
 const cookieUtils = (function () {
   // 是否有真实 document
-  const hasDoc = typeof document !== "undefined" && typeof document === "object";
+  const hasDoc =
+    typeof document !== "undefined" && typeof document === "object";
   // 内存模拟存储（Node 环境测试用）
   const memStore = new Map();
 

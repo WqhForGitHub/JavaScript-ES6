@@ -27,11 +27,13 @@ function levenshteinDistance(word1, word2) {
       if (word1[i - 1] === word2[j - 1]) {
         dp[i][j] = dp[i - 1][j - 1];
       } else {
-        dp[i][j] = 1 + Math.min(
-          dp[i - 1][j],    // 删除
-          dp[i][j - 1],    // 插入
-          dp[i - 1][j - 1] // 替换
-        );
+        dp[i][j] =
+          1 +
+          Math.min(
+            dp[i - 1][j], // 删除
+            dp[i][j - 1], // 插入
+            dp[i - 1][j - 1], // 替换
+          );
       }
     }
   }
@@ -70,15 +72,15 @@ function similarity(word1, word2) {
 }
 
 // 测试
-console.log(levenshteinDistance('horse', 'ros')); // 3
-console.log(levenshteinDistance('intention', 'execution')); // 5
-console.log(levenshteinDistance('', 'abc')); // 3
-console.log(levenshteinDistance('abc', 'abc')); // 0
-console.log(levenshteinDistance('kitten', 'sitting')); // 3
+console.log(levenshteinDistance("horse", "ros")); // 3
+console.log(levenshteinDistance("intention", "execution")); // 5
+console.log(levenshteinDistance("", "abc")); // 3
+console.log(levenshteinDistance("abc", "abc")); // 0
+console.log(levenshteinDistance("kitten", "sitting")); // 3
 
-console.log(levenshteinDistanceOptimized('horse', 'ros')); // 3
-console.log(levenshteinDistanceOptimized('intention', 'execution')); // 5
+console.log(levenshteinDistanceOptimized("horse", "ros")); // 3
+console.log(levenshteinDistanceOptimized("intention", "execution")); // 5
 
-console.log(similarity('abc', 'abc')); // 1
-console.log(similarity('kitten', 'sitting').toFixed(4)); // 0.5714
-console.log(similarity('', '')); // 1
+console.log(similarity("abc", "abc")); // 1
+console.log(similarity("kitten", "sitting").toFixed(4)); // 0.5714
+console.log(similarity("", "")); // 1

@@ -10,7 +10,7 @@
 function destructureObject(obj) {
   return {
     name: obj.name,
-    age: obj.age
+    age: obj.age,
   };
 }
 
@@ -18,7 +18,7 @@ function destructureObject(obj) {
 function destructureRename(obj) {
   return {
     n: obj.name,
-    a: obj.age
+    a: obj.age,
   };
 }
 
@@ -26,21 +26,21 @@ function destructureRename(obj) {
 function destructureWithDefault(obj) {
   return {
     x: obj.x !== undefined ? obj.x : 10,
-    y: obj.y !== undefined ? obj.y : 20
+    y: obj.y !== undefined ? obj.y : 20,
   };
 }
 
 // 嵌套解构：模拟 const {info: {city}} = obj
 function destructureNested(obj) {
   return {
-    city: obj.info.city
+    city: obj.info.city,
   };
 }
 
 // 重命名 + 默认值：模拟 const {name: n = 'default'} = obj
 function destructureRenameDefault(obj) {
   return {
-    n: obj.name !== undefined ? obj.name : 'default'
+    n: obj.name !== undefined ? obj.name : "default",
   };
 }
 
@@ -58,9 +58,9 @@ function pick(obj, keys) {
 
 // 测试
 var person = {
-  name: 'Alice',
+  name: "Alice",
   age: 25,
-  info: { city: 'Beijing' }
+  info: { city: "Beijing" },
 };
 
 var r1 = destructureObject(person);
@@ -78,5 +78,5 @@ console.log(r4.city); // Beijing
 var r5 = destructureRenameDefault({});
 console.log(r5.n); // default
 
-var r6 = pick(person, ['name', 'age']);
+var r6 = pick(person, ["name", "age"]);
 console.log(r6); // { name: 'Alice', age: 25 }

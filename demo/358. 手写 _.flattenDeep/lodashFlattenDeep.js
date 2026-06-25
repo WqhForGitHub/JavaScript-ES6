@@ -26,9 +26,21 @@ function flattenDeep(array) {
 
 // --- Tests ---
 
-console.log('flattenDeep deeply nested:', JSON.stringify(flattenDeep([1, [2, [3, [4]], 5]]))); // expected: [1,2,3,4,5]
-console.log('flattenDeep all arrays:', JSON.stringify(flattenDeep([[[[1]]], [[2]], [3]]))); // expected: [1,2,3]
-console.log('flattenDeep already flat:', JSON.stringify(flattenDeep([1, 2, 3]))); // expected: [1,2,3]
-console.log('flattenDeep empty:', JSON.stringify(flattenDeep([]))); // expected: []
-console.log('flattenDeep mixed types:', JSON.stringify(flattenDeep([1, ['a', ['b', [true, null]]], 2]))); // expected: [1,"a","b",true,null,2]
-console.log('flattenDeep non-array:', JSON.stringify(flattenDeep('nope'))); // expected: []
+console.log(
+  "flattenDeep deeply nested:",
+  JSON.stringify(flattenDeep([1, [2, [3, [4]], 5]])),
+); // expected: [1,2,3,4,5]
+console.log(
+  "flattenDeep all arrays:",
+  JSON.stringify(flattenDeep([[[[1]]], [[2]], [3]])),
+); // expected: [1,2,3]
+console.log(
+  "flattenDeep already flat:",
+  JSON.stringify(flattenDeep([1, 2, 3])),
+); // expected: [1,2,3]
+console.log("flattenDeep empty:", JSON.stringify(flattenDeep([]))); // expected: []
+console.log(
+  "flattenDeep mixed types:",
+  JSON.stringify(flattenDeep([1, ["a", ["b", [true, null]]], 2])),
+); // expected: [1,"a","b",true,null,2]
+console.log("flattenDeep non-array:", JSON.stringify(flattenDeep("nope"))); // expected: []

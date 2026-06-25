@@ -99,7 +99,10 @@ methods.forEach(({ name, fn }) => {
 
 // --- 降序排序 ---
 console.log("\n========== 降序排序 ==========");
-console.log("降序:", selectionSortBy(arr, (a, b) => b - a)); // [64,25,22,12,11]
+console.log(
+  "降序:",
+  selectionSortBy(arr, (a, b) => b - a),
+); // [64,25,22,12,11]
 
 // --- 边界情况 ---
 console.log("\n========== 边界情况 ==========");
@@ -119,7 +122,10 @@ const unstableExample = [
   { v: 2, id: "c" },
 ];
 const afterSort = selectionSortBy(unstableExample, (x, y) => x.v - y.v);
-console.log("排序后:", afterSort.map((o) => `${o.v}${o.id}`));
+console.log(
+  "排序后:",
+  afterSort.map((o) => `${o.v}${o.id}`),
+);
 // ['2c','5b','5a'] —— 5a/5b 顺序被破坏，证明不稳定
 
 // --- 交换次数对比 ---
@@ -144,7 +150,9 @@ console.log("结果:", r.result, "交换次数:", r.swaps); // 3 次（冒泡可
 
 // --- 性能对比 ---
 console.log("\n========== 性能对比（1000 随机数）==========");
-const random = Array.from({ length: 1000 }, () => Math.floor(Math.random() * 1000));
+const random = Array.from({ length: 1000 }, () =>
+  Math.floor(Math.random() * 1000),
+);
 function timed(fn) {
   const start = performance.now();
   fn([...random]);

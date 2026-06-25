@@ -24,7 +24,7 @@ function ajax(options) {
       async: true,
       dataType: "json", // 响应数据类型
     },
-    options
+    options,
   );
 
   return new Promise(function (resolve, reject) {

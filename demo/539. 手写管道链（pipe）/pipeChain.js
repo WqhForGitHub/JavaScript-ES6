@@ -15,7 +15,7 @@
  *   - 配合简单的 Readable / Writable / Transform 实现链式管道
  */
 
-const { EventEmitter } = require('events');
+const { EventEmitter } = require("events");
 
 // ===== 简化版 Readable =====
 class Readable extends EventEmitter {
@@ -38,7 +38,7 @@ class Readable extends EventEmitter {
       this._maybeEnd();
       return false;
     }
-    if (typeof chunk === 'string') chunk = Buffer.from(chunk);
+    if (typeof chunk === "string") chunk = Buffer.from(chunk);
     this._buffer.push(chunk);
     this._length += chunk.length;
     if (this._flowing) this._emitData();
@@ -48,9 +48,14 @@ class Readable extends EventEmitter {
     while (this._flowing && this._buffer.length > 0) {
       const chunk = this._buffer.shift();
       this._length -= chunk.length;
-      this.emit('data', chunk);
+      this.emit("data", chunk);
     }
-    if (this._flowing && !this._ended && this._buffer.length === 0 && !this._reading) {
+    if (
+      this._flowing &&
+      !this._ended &&
+      this._buffer.length === 0 &&
+      !this._reading
+    ) {
       this._reading = true;
       this._read(this.highWaterMark);
       this._reading = false;
@@ -60,7 +65,7 @@ class Readable extends EventEmitter {
   _maybeEnd() {
     if (this._ended && this._buffer.length === 0 && !this._endEmitted) {
       this._endEmitted = true;
-      this.emit('end');
+      this.emit("end");
     }
   }
   resume() {
@@ -75,37 +80,37 @@ class Readable extends EventEmitter {
     return this;
   }
   pipe(dest, options = {}) {
-    const ondata = chunk => {
+    const ondata = (chunk) => {
       const ret = dest.write(chunk);
       if (ret === false) this.pause();
     };
-    this.on('data', ondata);
+    this.on("data", ondata);
 
     const ondrain = () => this.resume();
-    if (dest.on) dest.on('drain', ondrain);
+    if (dest.on) dest.on("drain", ondrain);
 
     const onend = () => {
       if (options.end !== false && dest.end) dest.end();
     };
-    this.on('end', onend);
+    this.on("end", onend);
 
-    const onerror = err => {
+    const onerror = (err) => {
       this.destroy && this.destroy(err);
       if (dest.destroy) dest.destroy(err);
     };
-    this.on('error', onerror);
-    if (dest.on) dest.on('error', onerror);
+    this.on("error", onerror);
+    if (dest.on) dest.on("error", onerror);
 
     // 启动流动
     this.resume();
 
     // 支持解绑
     dest.unpipe = () => {
-      this.removeListener('data', ondata);
-      this.removeListener('end', onend);
-      this.removeListener('error', onerror);
+      this.removeListener("data", ondata);
+      this.removeListener("end", onend);
+      this.removeListener("error", onerror);
       if (dest.removeListener) {
-        dest.removeListener('drain', ondrain);
+        dest.removeListener("drain", ondrain);
       }
     };
 
@@ -115,8 +120,8 @@ class Readable extends EventEmitter {
     if (this._destroyed) return;
     this._destroyed = true;
     this._buffer = [];
-    if (err) this.emit('error', err);
-    this.emit('close');
+    if (err) this.emit("error", err);
+    this.emit("close");
   }
 }
 
@@ -138,13 +143,16 @@ class Writable extends EventEmitter {
     cb();
   }
   write(chunk, encoding, cb) {
-    if (typeof chunk === 'string') chunk = Buffer.from(chunk);
-    if (this._ended) throw new Error('write after end');
+    if (typeof chunk === "string") chunk = Buffer.from(chunk);
+    if (this._ended) throw new Error("write after end");
     const state = this;
-    this._buffer.push({ chunk, cb: err => {
-      if (err) this.emit('error', err);
-      else if (cb) cb();
-    } });
+    this._buffer.push({
+      chunk,
+      cb: (err) => {
+        if (err) this.emit("error", err);
+        else if (cb) cb();
+      },
+    });
     this._length += chunk.length;
     const ret = this._length < this.highWaterMark;
     if (!ret) this._needDrain = true;
@@ -159,11 +167,11 @@ class Writable extends EventEmitter {
       this._writing = false;
       if (this._needDrain) {
         this._needDrain = false;
-        this.emit('drain');
+        this.emit("drain");
       }
       if (this._ended && !this._finished) {
         this._finished = true;
-        this.emit('finish');
+        this.emit("finish");
       }
       return;
     }
@@ -171,7 +179,7 @@ class Writable extends EventEmitter {
     this._length -= chunk.length;
     this.chunks.push(chunk);
     try {
-      this._write(chunk, 'utf8', err => {
+      this._write(chunk, "utf8", (err) => {
         cb(err);
         if (!this._destroyed) this._doWrite();
       });
@@ -181,7 +189,7 @@ class Writable extends EventEmitter {
   }
   end(chunk, cb) {
     if (chunk !== undefined && chunk !== null) this.write(chunk);
-    if (cb) this.once('finish', cb);
+    if (cb) this.once("finish", cb);
     this._ended = true;
     if (!this._writing) {
       this._writing = true;
@@ -210,7 +218,7 @@ class Transform extends Writable {
     this._transform(chunk, encoding, (err, out) => {
       if (err) return cb(err);
       if (out !== undefined && out !== null) {
-        if (typeof out === 'string') out = Buffer.from(out);
+        if (typeof out === "string") out = Buffer.from(out);
         this._tBuffer.push(out);
         this._tLength += out.length;
         if (this._tFlowing) this._tEmitData();
@@ -230,11 +238,16 @@ class Transform extends Writable {
     while (this._tFlowing && this._tBuffer.length > 0) {
       const chunk = this._tBuffer.shift();
       this._tLength -= chunk.length;
-      this.emit('data', chunk);
+      this.emit("data", chunk);
     }
-    if (this._tFlowing && this._tEnded && this._tBuffer.length === 0 && !this._tEndEmitted) {
+    if (
+      this._tFlowing &&
+      this._tEnded &&
+      this._tBuffer.length === 0 &&
+      !this._tEndEmitted
+    ) {
       this._tEndEmitted = true;
-      this.emit('end');
+      this.emit("end");
     }
   }
   resume() {
@@ -253,8 +266,8 @@ class Transform extends Writable {
 // 测试 1：简单 pipe
 const src1 = new Readable({
   read() {
-    this.push(Buffer.from('hello '));
-    this.push(Buffer.from('world'));
+    this.push(Buffer.from("hello "));
+    this.push(Buffer.from("world"));
     this.push(null);
   },
 });
@@ -264,8 +277,8 @@ const dest1 = new Writable({
   },
 });
 src1.pipe(dest1);
-dest1.on('finish', () => {
-  console.log('test1 piped:', Buffer.concat(dest1.chunks).toString()); // 'hello world'
+dest1.on("finish", () => {
+  console.log("test1 piped:", Buffer.concat(dest1.chunks).toString()); // 'hello world'
 });
 
 // 测试 2：链式 pipe (src -> upper -> reverse -> dest)
@@ -277,14 +290,14 @@ const upper = new Transform({
 const reverse = new Transform({
   transform(chunk, enc, cb) {
     const s = chunk.toString();
-    cb(null, Buffer.from(s.split('').reverse().join('')));
+    cb(null, Buffer.from(s.split("").reverse().join("")));
   },
 });
 
 const src2 = new Readable({
   read() {
-    this.push(Buffer.from('abc'));
-    this.push(Buffer.from('XYZ'));
+    this.push(Buffer.from("abc"));
+    this.push(Buffer.from("XYZ"));
     this.push(null);
   },
 });
@@ -297,8 +310,8 @@ const dest2 = new Writable({
 // 链式调用核心：pipe 返回 dest，对返回值再 pipe
 src2.pipe(upper).pipe(reverse).pipe(dest2);
 
-dest2.on('finish', () => {
-  console.log('test2 chain:', Buffer.concat(dest2.chunks).toString());
+dest2.on("finish", () => {
+  console.log("test2 chain:", Buffer.concat(dest2.chunks).toString());
   // 'abc' -> 'ABC' -> 'CBA'
   // 'XYZ' -> 'XYZ' -> 'ZYX'
   // 结果: 'CBAZYX'
@@ -313,11 +326,11 @@ const slowDest = new Writable({
 });
 const src3 = new Readable({
   read() {
-    for (let i = 0; i < 10; i++) this.push(Buffer.from('xxxxx')); // 每块 5 字节
+    for (let i = 0; i < 10; i++) this.push(Buffer.from("xxxxx")); // 每块 5 字节
     this.push(null);
   },
 });
 src3.pipe(slowDest);
-slowDest.on('finish', () => {
-  console.log('test3 backpressure piped bytes:', slowDest.chunks.length * 5); // 50
+slowDest.on("finish", () => {
+  console.log("test3 backpressure piped bytes:", slowDest.chunks.length * 5); // 50
 });

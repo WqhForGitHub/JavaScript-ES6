@@ -42,10 +42,7 @@ function capitalize2(str) {
   for (let i = 1; i < str.length; i++) {
     const code = str.charCodeAt(i);
     // 大写 A-Z (65-90) → 小写 a-z (97-122)
-    rest +=
-      code >= 65 && code <= 90
-        ? String.fromCharCode(code + 32)
-        : str[i];
+    rest += code >= 65 && code <= 90 ? String.fromCharCode(code + 32) : str[i];
   }
   return first + rest;
 }

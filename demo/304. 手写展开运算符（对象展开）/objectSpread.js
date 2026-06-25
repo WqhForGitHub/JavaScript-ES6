@@ -11,7 +11,7 @@ function objectSpread() {
   var result = {};
   for (var i = 0; i < arguments.length; i++) {
     var source = arguments[i];
-    if (source != null && typeof source === 'object') {
+    if (source != null && typeof source === "object") {
       for (var key in source) {
         if (Object.prototype.hasOwnProperty.call(source, key)) {
           result[key] = source[key];
@@ -60,7 +60,7 @@ console.log(merged2); // { a: 1, b: 3, c: 4 }
 
 // 浅拷贝
 var copy = shallowCopy(obj1);
-console.log(copy);        // { a: 1, b: 2 }
+console.log(copy); // { a: 1, b: 2 }
 console.log(copy === obj1); // false
 
 // 展开后添加新属性

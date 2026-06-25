@@ -11,7 +11,12 @@
  */
 
 function pxToRem(css, options = {}) {
-  const { rootValue = 16, unitPrecision = 5, minPixelValue = 2, excludeProps = [] } = options;
+  const {
+    rootValue = 16,
+    unitPrecision = 5,
+    minPixelValue = 2,
+    excludeProps = [],
+  } = options;
   // 解析 CSS
   const re = /([^{}]+)\{([^}]*)\}/g;
   let m;
@@ -19,18 +24,25 @@ function pxToRem(css, options = {}) {
   while ((m = re.exec(css)) !== null) {
     const selector = m[1].trim();
     const declarations = m[2].trim();
-    result.push(selector + ' {');
+    result.push(selector + " {");
     // 替换 px 值
     const fixed = declarations.replace(/([\d.]+)px/g, (match, valStr) => {
       const val = parseFloat(valStr);
       if (val < minPixelValue) return match;
       const rem = (val / rootValue).toFixed(unitPrecision);
-      return rem + 'rem';
+      return rem + "rem";
     });
-    result.push('  ' + fixed.split(';').filter(d => d.trim()).map(d => d.trim() + ';').join('\n  '));
-    result.push('}');
+    result.push(
+      "  " +
+        fixed
+          .split(";")
+          .filter((d) => d.trim())
+          .map((d) => d.trim() + ";")
+          .join("\n  "),
+    );
+    result.push("}");
   }
-  return result.join('\n');
+  return result.join("\n");
 }
 
 // ===== 测试 =====
@@ -44,8 +56,8 @@ const css = `
   margin-top: 32px;
 }
 `;
-console.log('=== rootValue: 16 ===');
+console.log("=== rootValue: 16 ===");
 console.log(pxToRem(css, { rootValue: 16 }));
 /* width: 20rem; height: 12.5rem; font-size: 1rem; border: 1px (不转); padding: 0.625rem 1.25rem; margin-top: 2rem */
-console.log('\n=== rootValue: 32 ===');
+console.log("\n=== rootValue: 32 ===");
 console.log(pxToRem(css, { rootValue: 32 }));

@@ -23,13 +23,15 @@ function collectRest() {
 // 带固定参数和剩余参数：function greet(greeting, ...names)
 function greet(greeting) {
   var names = Array.prototype.slice.call(arguments, 1);
-  return greeting + ', ' + names.join(' and ') + '!';
+  return greeting + ", " + names.join(" and ") + "!";
 }
 
 // 收集剩余参数并转换：function multiply(factor, ...nums)
 function multiply(factor) {
   var nums = Array.prototype.slice.call(arguments, 1);
-  return nums.map(function (n) { return n * factor; });
+  return nums.map(function (n) {
+    return n * factor;
+  });
 }
 
 // 将剩余参数转发给另一个函数（模拟 fn(...args) 调用）
@@ -40,11 +42,11 @@ function forward(fn) {
 
 // 测试
 console.log(sum(1, 2, 3, 4, 5)); // 15
-console.log(sum(10));             // 10
+console.log(sum(10)); // 10
 
 console.log(collectRest(1, 2, 3)); // [1, 2, 3]
 
-console.log(greet('Hello', 'Alice', 'Bob')); // Hello, Alice and Bob!
+console.log(greet("Hello", "Alice", "Bob")); // Hello, Alice and Bob!
 
 console.log(multiply(2, 1, 2, 3)); // [2, 4, 6]
 

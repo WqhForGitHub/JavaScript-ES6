@@ -20,7 +20,7 @@ function removeDirRecursiveSync(targetPath, fsDep) {
   try {
     stat = fsDep.statSync(targetPath);
   } catch (err) {
-    if (err.code === 'ENOENT') return; // 不存在视为已删除
+    if (err.code === "ENOENT") return; // 不存在视为已删除
     throw err;
   }
 
@@ -46,7 +46,7 @@ async function removeDirRecursive(targetPath, fsDep) {
   try {
     stat = await fsDep.stat(targetPath);
   } catch (err) {
-    if (err.code === 'ENOENT') return;
+    if (err.code === "ENOENT") return;
     throw err;
   }
 
@@ -59,7 +59,9 @@ async function removeDirRecursive(targetPath, fsDep) {
     const entries = await fsDep.readdir(targetPath);
     // 并发删除子项
     await Promise.all(
-      entries.map(entry => removeDirRecursive(fsDep.join(targetPath, entry), fsDep))
+      entries.map((entry) =>
+        removeDirRecursive(fsDep.join(targetPath, entry), fsDep),
+      ),
     );
     await fsDep.rmdir(targetPath);
   }
@@ -74,21 +76,21 @@ function createMockFs(initialTree) {
 
   function lookup(path) {
     // path 形如 '/tmp/sub'，拆分为 ['', 'tmp', 'sub']
-    const parts = path.split('/').filter(Boolean);
+    const parts = path.split("/").filter(Boolean);
     let node = fsTree;
     for (const p of parts) {
-      if (node == null || typeof node !== 'object') return null;
+      if (node == null || typeof node !== "object") return null;
       node = node[p];
     }
     return node;
   }
 
   function lookupParent(path) {
-    const parts = path.split('/').filter(Boolean);
+    const parts = path.split("/").filter(Boolean);
     const name = parts.pop();
     let node = fsTree;
     for (const p of parts) {
-      if (node == null || typeof node !== 'object') return null;
+      if (node == null || typeof node !== "object") return null;
       node = node[p];
     }
     return { parent: node, name };
@@ -97,18 +99,18 @@ function createMockFs(initialTree) {
   return {
     _tree: fsTree,
     join(...parts) {
-      return parts.join('/').replace(/\/+/g, '/');
+      return parts.join("/").replace(/\/+/g, "/");
     },
     statSync(path) {
       const node = lookup(path);
       if (node === null || node === undefined) {
-        const err = new Error('ENOENT');
-        err.code = 'ENOENT';
+        const err = new Error("ENOENT");
+        err.code = "ENOENT";
         throw err;
       }
       return {
-        isFile: () => typeof node === 'string',
-        isDirectory: () => typeof node === 'object' && node !== null,
+        isFile: () => typeof node === "string",
+        isDirectory: () => typeof node === "object" && node !== null,
       };
     },
     async stat(path) {
@@ -116,9 +118,9 @@ function createMockFs(initialTree) {
     },
     readdirSync(path) {
       const node = lookup(path);
-      if (typeof node !== 'object' || node === null) {
-        const err = new Error('ENOTDIR');
-        err.code = 'ENOTDIR';
+      if (typeof node !== "object" || node === null) {
+        const err = new Error("ENOTDIR");
+        err.code = "ENOTDIR";
         throw err;
       }
       return Object.keys(node);
@@ -129,8 +131,8 @@ function createMockFs(initialTree) {
     unlinkSync(path) {
       const { parent, name } = lookupParent(path);
       if (!parent || !(name in parent)) {
-        const err = new Error('ENOENT');
-        err.code = 'ENOENT';
+        const err = new Error("ENOENT");
+        err.code = "ENOENT";
         throw err;
       }
       delete parent[name];
@@ -141,8 +143,8 @@ function createMockFs(initialTree) {
     rmdirSync(path) {
       const { parent, name } = lookupParent(path);
       if (!parent || !(name in parent)) {
-        const err = new Error('ENOENT');
-        err.code = 'ENOENT';
+        const err = new Error("ENOENT");
+        err.code = "ENOENT";
         throw err;
       }
       delete parent[name];
@@ -158,49 +160,49 @@ function createMockFs(initialTree) {
 // 测试 1：同步删除
 const tree1 = {
   tmp: {
-    'a.txt': 'aaa',
-    'b.txt': 'bbb',
+    "a.txt": "aaa",
+    "b.txt": "bbb",
     sub: {
-      'c.txt': 'ccc',
+      "c.txt": "ccc",
       deep: {
-        'd.txt': 'ddd',
+        "d.txt": "ddd",
       },
     },
   },
 };
 const fs1 = createMockFs(tree1);
-console.log('before delete tmp keys:', Object.keys(fs1._tree.tmp)); // ['a.txt','b.txt','sub']
-removeDirRecursiveSync('tmp', fs1);
-console.log('after delete tmp exists:', 'tmp' in fs1._tree); // false
+console.log("before delete tmp keys:", Object.keys(fs1._tree.tmp)); // ['a.txt','b.txt','sub']
+removeDirRecursiveSync("tmp", fs1);
+console.log("after delete tmp exists:", "tmp" in fs1._tree); // false
 
 // 测试 2：删除单个文件
-const tree2 = { tmp: { 'file.txt': 'x', 'keep.txt': 'y' } };
+const tree2 = { tmp: { "file.txt": "x", "keep.txt": "y" } };
 const fs2 = createMockFs(tree2);
-removeDirRecursiveSync('tmp/file.txt', fs2);
-console.log('test2 remaining:', Object.keys(fs2._tree.tmp)); // ['keep.txt']
+removeDirRecursiveSync("tmp/file.txt", fs2);
+console.log("test2 remaining:", Object.keys(fs2._tree.tmp)); // ['keep.txt']
 
 // 测试 3：删除不存在的路径（不报错）
-const tree3 = { tmp: { 'a.txt': 'x' } };
+const tree3 = { tmp: { "a.txt": "x" } };
 const fs3 = createMockFs(tree3);
-removeDirRecursiveSync('tmp/not-exists', fs3);
-console.log('test3 no error, tmp still there:', 'tmp' in fs3._tree); // true
+removeDirRecursiveSync("tmp/not-exists", fs3);
+console.log("test3 no error, tmp still there:", "tmp" in fs3._tree); // true
 
 // 测试 4：异步删除
 const tree4 = {
   data: {
-    '1.txt': '1',
-    sub1: { '2.txt': '2' },
-    sub2: { deep: { '3.txt': '3' } },
+    "1.txt": "1",
+    sub1: { "2.txt": "2" },
+    sub2: { deep: { "3.txt": "3" } },
   },
 };
 const fs4 = createMockFs(tree4);
 (async () => {
-  await removeDirRecursive('data', fs4);
-  console.log('test4 async deleted:', !('data' in fs4._tree)); // true
+  await removeDirRecursive("data", fs4);
+  console.log("test4 async deleted:", !("data" in fs4._tree)); // true
 })();
 
 // 测试 5：删除空目录
 const tree5 = { tmp: { empty: {} } };
 const fs5 = createMockFs(tree5);
-removeDirRecursiveSync('tmp/empty', fs5);
-console.log('test5 empty dir removed:', !('empty' in fs5._tree.tmp)); // true
+removeDirRecursiveSync("tmp/empty", fs5);
+console.log("test5 empty dir removed:", !("empty" in fs5._tree.tmp)); // true

@@ -33,7 +33,7 @@ class EventEmitter {
     list.push(fn);
     if (list.length > this._maxListeners) {
       console.warn(
-        `Possible memory leak: ${event} has ${list.length} listeners (max ${this._maxListeners})`
+        `Possible memory leak: ${event} has ${list.length} listeners (max ${this._maxListeners})`,
       );
     }
     return this;
@@ -59,7 +59,9 @@ class EventEmitter {
     if (!list) return this;
     if (!fn) {
       // remove all for this event
-      list.forEach((f) => this._hooks.removeListener.forEach((h) => h(event, f)));
+      list.forEach((f) =>
+        this._hooks.removeListener.forEach((h) => h(event, f)),
+      );
       this._events.delete(event);
       return this;
     }
@@ -90,7 +92,7 @@ class EventEmitter {
       }
     }
     // Wildcard listeners receive every event.
-    const wild = this._events.get('*');
+    const wild = this._events.get("*");
     if (wild) {
       for (const fn of [...wild]) {
         fn(event, ...args);
@@ -98,7 +100,7 @@ class EventEmitter {
       }
     }
     // Node semantics: unhandled 'error' throws.
-    if (delivered === 0 && event === 'error') {
+    if (delivered === 0 && event === "error") {
       throw args[0] instanceof Error ? args[0] : new Error(String(args[0]));
     }
     return delivered > 0;
@@ -131,12 +133,12 @@ class Downloader extends EventEmitter {
   async start() {
     for (let i = 1; i <= this.totalChunks; i++) {
       await new Promise((r) => setTimeout(r, 5));
-      if (i === 2 && this.url.includes('fail')) {
-        return this.emit('error', new Error(`Failed at chunk ${i}`));
+      if (i === 2 && this.url.includes("fail")) {
+        return this.emit("error", new Error(`Failed at chunk ${i}`));
       }
-      this.emit('progress', { chunk: i, total: this.totalChunks });
+      this.emit("progress", { chunk: i, total: this.totalChunks });
     }
-    this.emit('done', { url: this.url });
+    this.emit("done", { url: this.url });
   }
 }
 
@@ -144,13 +146,15 @@ class Downloader extends EventEmitter {
 const uiLog = [];
 const loggerLog = [];
 
-const dl = new Downloader('https://example.com/file', 3);
-dl.on('progress', (p) => uiLog.push(`${p.chunk}/${p.total}`));
-dl.on('done', (info) => uiLog.push(`complete ${info.url}`));
-dl.prependListener('progress', (p) => loggerLog.push(`[start] chunk ${p.chunk}`));
+const dl = new Downloader("https://example.com/file", 3);
+dl.on("progress", (p) => uiLog.push(`${p.chunk}/${p.total}`));
+dl.on("done", (info) => uiLog.push(`complete ${info.url}`));
+dl.prependListener("progress", (p) =>
+  loggerLog.push(`[start] chunk ${p.chunk}`),
+);
 // Wildcard: log every event type
 const allEvents = [];
-dl.on('*', (name) => allEvents.push(name));
+dl.on("*", (name) => allEvents.push(name));
 
 dl.start().then(() => {
   console.log(uiLog);
@@ -164,24 +168,24 @@ dl.start().then(() => {
 // once listener fires a single time
 let onceCount = 0;
 const ee = new EventEmitter();
-ee.once('ping', () => onceCount++);
-ee.emit('ping');
-ee.emit('ping');
+ee.once("ping", () => onceCount++);
+ee.emit("ping");
+ee.emit("ping");
 console.log(onceCount);
 // Expected: 1
 
 // Unhandled 'error' throws (Node semantics)
 try {
-  new EventEmitter().emit('error', new Error('unhandled'));
+  new EventEmitter().emit("error", new Error("unhandled"));
 } catch (e) {
-  console.log('Uncaught error:', e.message);
+  console.log("Uncaught error:", e.message);
   // Expected: Uncaught error: unhandled
 }
 
 // newListener hook fires when a listener is added
 const hookLog = [];
 const h = new EventEmitter().onNewListener((ev) => hookLog.push(ev));
-h.on('a', () => {});
-h.on('b', () => {});
+h.on("a", () => {});
+h.on("b", () => {});
 console.log(hookLog);
 // Expected: [ 'a', 'b' ]

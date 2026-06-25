@@ -41,7 +41,10 @@ console.log(mixed.filter(identity)); // [1, 2, 3, 'a']
 
 // 用作 reduce 初始值的默认函数
 function reduceDefault(fn, list) {
-  return list.reduce((acc, x) => fn(acc, x), list[0] !== undefined ? list[0] : identity(undefined));
+  return list.reduce(
+    (acc, x) => fn(acc, x),
+    list[0] !== undefined ? list[0] : identity(undefined),
+  );
 }
 
 // 作为默认参数占位
@@ -78,5 +81,9 @@ Promise.resolve("data")
 function compose(...fns) {
   return (x) => fns.reduceRight((acc, f) => f(acc), x);
 }
-const f = compose((x) => x + 1, identity, (x) => x * 2);
+const f = compose(
+  (x) => x + 1,
+  identity,
+  (x) => x * 2,
+);
 console.log(f(5)); // 11 = (5*2)+1

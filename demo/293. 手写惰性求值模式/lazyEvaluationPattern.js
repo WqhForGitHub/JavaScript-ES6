@@ -142,16 +142,19 @@ console.log(seq.toArray(), pulled);
 
 // 3. Lazy proxy properties computed on first access
 const calls = { x: 0, y: 0 };
-const obj = lazyProps({}, {
-  x: () => {
-    calls.x++;
-    return 10;
+const obj = lazyProps(
+  {},
+  {
+    x: () => {
+      calls.x++;
+      return 10;
+    },
+    y: () => {
+      calls.y++;
+      return 20;
+    },
   },
-  y: () => {
-    calls.y++;
-    return 20;
-  },
-});
+);
 console.log(calls);
 // Expected: { x: 0, y: 0 }
 obj.x;

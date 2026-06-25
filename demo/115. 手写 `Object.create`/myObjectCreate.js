@@ -16,7 +16,11 @@
 
 function myObjectCreate(proto, propertiesObject) {
   // proto 必须是对象或 null
-  if (proto !== null && (typeof proto !== "object" && typeof proto !== "function")) {
+  if (
+    proto !== null &&
+    typeof proto !== "object" &&
+    typeof proto !== "function"
+  ) {
     throw new TypeError("Object prototype may only be an Object or null");
   }
 
@@ -43,7 +47,11 @@ function myObjectCreate(proto, propertiesObject) {
 // ===== 测试 =====
 
 // 用对象作为原型
-const animal = { eat() { return "eating"; } };
+const animal = {
+  eat() {
+    return "eating";
+  },
+};
 const dog = myObjectCreate(animal);
 console.log(dog.eat()); // 'eating'
 console.log(Object.getPrototypeOf(dog) === animal); // true
@@ -58,16 +66,21 @@ console.log(noProto.toString); // undefined（无原型方法）
 
 // 模拟继承
 function Shape() {}
-Shape.prototype.area = function () { return 0; };
+Shape.prototype.area = function () {
+  return 0;
+};
 const circle = myObjectCreate(Shape.prototype);
 console.log(circle.area()); // 0
 console.log(circle instanceof Shape); // true
 
 // 第二个参数：属性描述符
-const obj = myObjectCreate({ inherited: 1 }, {
-  own: { value: 2, enumerable: true },
-  readOnly: { value: 100, writable: false }
-});
+const obj = myObjectCreate(
+  { inherited: 1 },
+  {
+    own: { value: 2, enumerable: true },
+    readOnly: { value: 100, writable: false },
+  },
+);
 console.log(obj.inherited); // 1
 console.log(obj.own); // 2
 console.log(obj.readOnly); // 100

@@ -18,7 +18,7 @@ function createDefaultProxy(target, defaultValue) {
         return target[prop];
       }
       return defaultValue;
-    }
+    },
   });
 }
 
@@ -31,7 +31,7 @@ function createNegativeIndexProxy(arr) {
         return target[target.length + idx];
       }
       return target[prop];
-    }
+    },
   });
 }
 
@@ -39,9 +39,9 @@ function createNegativeIndexProxy(arr) {
 function createLoggingProxy(target) {
   return new Proxy(target, {
     get: function (target, prop) {
-      console.log('  [get] accessing: ' + String(prop));
+      console.log("  [get] accessing: " + String(prop));
       return target[prop];
-    }
+    },
   });
 }
 
@@ -58,7 +58,7 @@ function createGetProxyES5(target, getHandler) {
           return getHandler(target, key);
         },
         enumerable: true,
-        configurable: true
+        configurable: true,
       });
     })(keys[i]);
   }
@@ -66,43 +66,46 @@ function createGetProxyES5(target, getHandler) {
 }
 
 // 测试 1：默认值代理
-console.log('--- Default Value Proxy ---');
-var data = { name: 'Alice', age: 25 };
-var proxied1 = createDefaultProxy(data, 'N/A');
-console.log(proxied1.name);    // Alice
-console.log(proxied1.age);     // 25
+console.log("--- Default Value Proxy ---");
+var data = { name: "Alice", age: 25 };
+var proxied1 = createDefaultProxy(data, "N/A");
+console.log(proxied1.name); // Alice
+console.log(proxied1.age); // 25
 console.log(proxied1.unknown); // N/A
 
 // 测试 2：负索引代理
-console.log('--- Negative Index Proxy ---');
+console.log("--- Negative Index Proxy ---");
 var arr = createNegativeIndexProxy([1, 2, 3, 4, 5]);
 console.log(arr[-1]); // 5
 console.log(arr[-2]); // 4
-console.log(arr[0]);  // 1
+console.log(arr[0]); // 1
 
 // 测试 3：日志代理
-console.log('--- Logging Proxy ---');
+console.log("--- Logging Proxy ---");
 var logged = createLoggingProxy({ x: 1, y: 2 });
 console.log(logged.x); // [get] accessing: x \n 1
 console.log(logged.y); // [get] accessing: y \n 2
 
 // 测试 4：ES5 手写 get 拦截
-console.log('--- ES5 Get Proxy (getter) ---');
-var config = { host: 'localhost', port: 8080 };
+console.log("--- ES5 Get Proxy (getter) ---");
+var config = { host: "localhost", port: 8080 };
 var proxied2 = createGetProxyES5(config, function (target, key) {
-  console.log('  [es5 get] ' + key);
+  console.log("  [es5 get] " + key);
   return target[key];
 });
 console.log(proxied2.host); // [es5 get] host \n localhost
 console.log(proxied2.port); // [es5 get] port \n 8080
 
 // 测试 5：拦截 get 实现只读视图
-console.log('--- Read-only View Proxy ---');
-var readOnly = new Proxy({ secret: 'hidden', public: 'ok' }, {
-  get: function (target, prop) {
-    if (prop === 'secret') return undefined;
-    return target[prop];
-  }
-});
+console.log("--- Read-only View Proxy ---");
+var readOnly = new Proxy(
+  { secret: "hidden", public: "ok" },
+  {
+    get: function (target, prop) {
+      if (prop === "secret") return undefined;
+      return target[prop];
+    },
+  },
+);
 console.log(readOnly.public); // ok
 console.log(readOnly.secret); // undefined

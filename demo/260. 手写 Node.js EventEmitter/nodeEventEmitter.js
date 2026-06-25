@@ -26,7 +26,10 @@ function EventEmitter() {
 EventEmitter.defaultMaxListeners = 10;
 
 EventEmitter.init = function () {
-  if (this._events === undefined || this._events === Object.getPrototypeOf(this)._events) {
+  if (
+    this._events === undefined ||
+    this._events === Object.getPrototypeOf(this)._events
+  ) {
     this._events = Object.create(null);
     this._eventsCount = 0;
   }
@@ -47,7 +50,7 @@ EventEmitter.prototype.getMaxListeners = function () {
  * 设置最大监听器数量
  */
 EventEmitter.prototype.setMaxListeners = function (n) {
-  if (typeof n !== 'number' || n < 0 || isNaN(n)) {
+  if (typeof n !== "number" || n < 0 || isNaN(n)) {
     throw new RangeError('The value of "n" is out of range.');
   }
   this._maxListeners = n;
@@ -58,11 +61,14 @@ EventEmitter.prototype.setMaxListeners = function (n) {
  * 发出控制台警告（超出最大监听器数量）
  */
 EventEmitter.prototype._emitWarning = function (event, count) {
-  if (typeof console !== 'undefined' && console.warn) {
+  if (typeof console !== "undefined" && console.warn) {
     console.warn(
-      '(node) warning: possible EventEmitter memory leak detected. ' +
-      count + ' ' + event + ' listeners added. ' +
-      'Use emitter.setMaxListeners() to increase limit.'
+      "(node) warning: possible EventEmitter memory leak detected. " +
+        count +
+        " " +
+        event +
+        " listeners added. " +
+        "Use emitter.setMaxListeners() to increase limit.",
     );
   }
 };
@@ -75,13 +81,17 @@ EventEmitter.prototype._emitWarning = function (event, count) {
  * @returns {this}
  */
 EventEmitter.prototype.addListener = function (event, listener, prepend) {
-  if (typeof listener !== 'function') {
+  if (typeof listener !== "function") {
     throw new TypeError('The "listener" argument must be of type Function.');
   }
 
   // 触发 newListener 事件
   if (this._events.newListener) {
-    this.emit('newListener', event, typeof listener.listener === 'function' ? listener.listener : listener);
+    this.emit(
+      "newListener",
+      event,
+      typeof listener.listener === "function" ? listener.listener : listener,
+    );
   }
 
   if (!this._events[event]) {
@@ -95,12 +105,16 @@ EventEmitter.prototype.addListener = function (event, listener, prepend) {
         this._events[event].push(listener);
       }
     } else {
-      this._events[event] = prepend ? [listener, this._events[event]] : [this._events[event], listener];
+      this._events[event] = prepend
+        ? [listener, this._events[event]]
+        : [this._events[event], listener];
     }
 
     // 检查最大监听器
     var max = this.getMaxListeners();
-    var len = Array.isArray(this._events[event]) ? this._events[event].length : 1;
+    var len = Array.isArray(this._events[event])
+      ? this._events[event].length
+      : 1;
     if (max > 0 && len > max && !this._events[event].warned) {
       this._events[event].warned = true;
       this._emitWarning(event, len);
@@ -123,7 +137,7 @@ EventEmitter.prototype.prependListener = function (event, listener) {
  * 注册一次性监听器
  */
 EventEmitter.prototype.once = function (event, listener) {
-  if (typeof listener !== 'function') {
+  if (typeof listener !== "function") {
     throw new TypeError('The "listener" argument must be of type Function.');
   }
   var self = this;
@@ -149,7 +163,7 @@ EventEmitter.prototype.prependOnceListener = function (event, listener) {
  * 移除监听器
  */
 EventEmitter.prototype.removeListener = function (event, listener) {
-  if (typeof listener !== 'function') {
+  if (typeof listener !== "function") {
     throw new TypeError('The "listener" argument must be of type Function.');
   }
 
@@ -158,7 +172,9 @@ EventEmitter.prototype.removeListener = function (event, listener) {
 
   var position = -1;
   var originalListener;
-  var isSingle = list === listener || (typeof list.listener === 'function' && list.listener === listener);
+  var isSingle =
+    list === listener ||
+    (typeof list.listener === "function" && list.listener === listener);
 
   if (isSingle) {
     // 单个监听器匹配：直接删除
@@ -167,7 +183,10 @@ EventEmitter.prototype.removeListener = function (event, listener) {
     this._eventsCount--;
   } else if (Array.isArray(list)) {
     for (var i = list.length - 1; i >= 0; i--) {
-      if (list[i] === listener || (list[i].listener && list[i].listener === listener)) {
+      if (
+        list[i] === listener ||
+        (list[i].listener && list[i].listener === listener)
+      ) {
         position = i;
         originalListener = list[i];
         break;
@@ -190,7 +209,11 @@ EventEmitter.prototype.removeListener = function (event, listener) {
 
   // 触发 removeListener 事件
   if (this._events.removeListener) {
-    this.emit('removeListener', event, originalListener.listener || originalListener);
+    this.emit(
+      "removeListener",
+      event,
+      originalListener.listener || originalListener,
+    );
   }
 
   return this;
@@ -205,8 +228,8 @@ EventEmitter.prototype.removeAllListeners = function (event) {
   if (!this._events) return this;
 
   // 如果有 removeListener 监听器且不是移除 removeListener 自身
-  if (event !== 'removeListener' && this._events.removeListener) {
-    this.emit('removeListener', event);
+  if (event !== "removeListener" && this._events.removeListener) {
+    this.emit("removeListener", event);
   }
 
   if (event === undefined) {
@@ -214,10 +237,10 @@ EventEmitter.prototype.removeAllListeners = function (event) {
     var keys = Object.keys(this._events);
     for (var i = 0; i < keys.length; i++) {
       var k = keys[i];
-      if (k === 'removeListener') continue;
+      if (k === "removeListener") continue;
       this.removeAllListeners(k);
     }
-    this.removeAllListeners('removeListener');
+    this.removeAllListeners("removeListener");
     this._events = Object.create(null);
     this._eventsCount = 0;
   } else {
@@ -237,19 +260,21 @@ EventEmitter.prototype.emit = function (event) {
 
   if (list === undefined) {
     // error 事件无监听器时抛出
-    if (event === 'error') {
+    if (event === "error") {
       var err = args[0] instanceof Error ? args[0] : new Error(args[0]);
       throw err;
     }
     return false;
   }
 
-  if (typeof list === 'function') {
+  if (typeof list === "function") {
     list.apply(this, args);
   } else {
-    list.slice().forEach(function (fn) {
-      fn.apply(this, args);
-    }.bind(this));
+    list.slice().forEach(
+      function (fn) {
+        fn.apply(this, args);
+      }.bind(this),
+    );
   }
 
   return true;
@@ -261,8 +286,10 @@ EventEmitter.prototype.emit = function (event) {
 EventEmitter.prototype.listeners = function (event) {
   var list = this._events[event];
   if (list === undefined) return [];
-  if (typeof list === 'function') return [list.listener || list];
-  return list.map(function (fn) { return fn.listener || fn; });
+  if (typeof list === "function") return [list.listener || list];
+  return list.map(function (fn) {
+    return fn.listener || fn;
+  });
 };
 
 /**
@@ -287,7 +314,9 @@ EventEmitter.prototype.listenerCount = function (event) {
  * 返回所有事件名
  */
 EventEmitter.prototype.eventNames = function () {
-  return Object.keys(this._events).filter(function (k) { return k !== undefined; });
+  return Object.keys(this._events).filter(function (k) {
+    return k !== undefined;
+  });
 };
 
 // 静态方法
@@ -299,65 +328,75 @@ EventEmitter.listenerCount = function (emitter, event) {
 var ee = new EventEmitter();
 
 // 1. 基本 on / emit
-ee.on('data', function (a, b) {
-  console.log('data:', a, b);
+ee.on("data", function (a, b) {
+  console.log("data:", a, b);
 });
-ee.emit('data', 1, 2); // => data: 1 2
+ee.emit("data", 1, 2); // => data: 1 2
 
 // 2. this 指向
-ee.on('test', function () {
-  console.log('this === ee:', this === ee);
+ee.on("test", function () {
+  console.log("this === ee:", this === ee);
 });
-ee.emit('test'); // => this === ee: true
+ee.emit("test"); // => this === ee: true
 
 // 3. once
-ee.once('connect', function () {
-  console.log('connected');
+ee.once("connect", function () {
+  console.log("connected");
 });
-ee.emit('connect'); // => connected
-ee.emit('connect'); // 无输出
-console.log('once 后监听器数量：', ee.listenerCount('connect')); // => 0
+ee.emit("connect"); // => connected
+ee.emit("connect"); // 无输出
+console.log("once 后监听器数量：", ee.listenerCount("connect")); // => 0
 
 // 4. off / removeListener
-function handler() { console.log('handler'); }
-ee.on('click', handler);
-ee.on('click', function () { console.log('other'); });
-console.log('click 监听器数量：', ee.listenerCount('click')); // => 2
-ee.off('click', handler);
-console.log('off 后数量：', ee.listenerCount('click')); // => 1
-ee.emit('click'); // => other
+function handler() {
+  console.log("handler");
+}
+ee.on("click", handler);
+ee.on("click", function () {
+  console.log("other");
+});
+console.log("click 监听器数量：", ee.listenerCount("click")); // => 2
+ee.off("click", handler);
+console.log("off 后数量：", ee.listenerCount("click")); // => 1
+ee.emit("click"); // => other
 
 // 5. once + off（用原始 listener）
-function onceHandler() { console.log('once handler'); }
-ee.once('msg', onceHandler);
-ee.off('msg', onceHandler); // 通过 listener 引用移除
-console.log('once off 后数量：', ee.listenerCount('msg')); // => 0
+function onceHandler() {
+  console.log("once handler");
+}
+ee.once("msg", onceHandler);
+ee.off("msg", onceHandler); // 通过 listener 引用移除
+console.log("once off 后数量：", ee.listenerCount("msg")); // => 0
 
 // 6. prependListener
 var order2 = [];
-ee.on('step', function () { order2.push('first'); });
-ee.prependListener('step', function () { order2.push('prepended'); });
-ee.emit('step');
-console.log('执行顺序：', order2); // => ['prepended', 'first']
+ee.on("step", function () {
+  order2.push("first");
+});
+ee.prependListener("step", function () {
+  order2.push("prepended");
+});
+ee.emit("step");
+console.log("执行顺序：", order2); // => ['prepended', 'first']
 
 // 7. error 事件
 try {
-  ee.emit('error', new Error('出错了'));
+  ee.emit("error", new Error("出错了"));
 } catch (e) {
-  console.log('捕获错误：', e.message); // => 捕获错误： 出错了
+  console.log("捕获错误：", e.message); // => 捕获错误： 出错了
 }
 
 // 8. newListener / removeListener 内置事件
-ee.on('newListener', function (event, listener) {
-  console.log('新增监听器：', event);
+ee.on("newListener", function (event, listener) {
+  console.log("新增监听器：", event);
 });
-ee.on('custom', function () {}); // => 新增监听器：custom
+ee.on("custom", function () {}); // => 新增监听器：custom
 
 // 9. removeAllListeners
-ee.removeAllListeners('click');
-console.log('click 数量：', ee.listenerCount('click')); // => 0
+ee.removeAllListeners("click");
+console.log("click 数量：", ee.listenerCount("click")); // => 0
 
 // 10. listeners
-ee.on('a', function a1() {});
-ee.on('a', function a2() {});
-console.log('a 的监听器数量：', ee.listeners('a').length); // => 2
+ee.on("a", function a1() {});
+ee.on("a", function a2() {});
+console.log("a 的监听器数量：", ee.listeners("a").length); // => 2

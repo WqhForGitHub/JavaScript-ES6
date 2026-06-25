@@ -9,17 +9,24 @@
  */
 
 class CodeSplitter {
-  constructor() { this.chunks = new Map(); this.sources = {}; }
-  setSources(s) { this.sources = s; }
+  constructor() {
+    this.chunks = new Map();
+    this.sources = {};
+  }
+  setSources(s) {
+    this.sources = s;
+  }
 
   parseStatic(code) {
-    const deps = []; let m;
+    const deps = [];
+    let m;
     const r = /import\s+.*?from\s+['"`](.+?)['"`]/g;
     while ((m = r.exec(code)) !== null) deps.push(m[1]);
     return deps;
   }
   parseDynamic(code) {
-    const deps = []; let m;
+    const deps = [];
+    let m;
     const r = /import\s*\(['"`](.+?)['"`]\)/g;
     while ((m = r.exec(code)) !== null) deps.push(m[1]);
     return deps;
@@ -29,17 +36,23 @@ class CodeSplitter {
     let cid = 0;
     const main = { id: cid++, modules: new Set(), asyncDeps: [] };
     this.chunks.set(main.id, main);
-    const queue = [entry], visited = new Set();
+    const queue = [entry],
+      visited = new Set();
     while (queue.length) {
       const p = queue.shift();
       if (visited.has(p)) continue;
       visited.add(p);
       main.modules.add(p);
-      const code = this.sources[p] || '';
-      this.parseStatic(code).forEach(d => queue.push(d));
-      this.parseDynamic(code).forEach(d => {
+      const code = this.sources[p] || "";
+      this.parseStatic(code).forEach((d) => queue.push(d));
+      this.parseDynamic(code).forEach((d) => {
         main.asyncDeps.push(d);
-        const async = { id: cid++, modules: new Set(), asyncDeps: [], parent: main.id };
+        const async = {
+          id: cid++,
+          modules: new Set(),
+          asyncDeps: [],
+          parent: main.id,
+        };
         this.chunks.set(async.id, async);
         this.collectChunk(d, async);
       });
@@ -47,20 +60,26 @@ class CodeSplitter {
   }
 
   collectChunk(entry, chunk) {
-    const queue = [entry], visited = new Set();
+    const queue = [entry],
+      visited = new Set();
     while (queue.length) {
       const p = queue.shift();
       if (visited.has(p)) continue;
       visited.add(p);
       chunk.modules.add(p);
-      const code = this.sources[p] || '';
-      this.parseStatic(code).forEach(d => queue.push(d));
+      const code = this.sources[p] || "";
+      this.parseStatic(code).forEach((d) => queue.push(d));
     }
   }
 
   generateManifest() {
     const m = {};
-    for (const [id, c] of this.chunks) m[id] = { modules: [...c.modules], asyncDeps: c.asyncDeps||[], parent: c.parent||null };
+    for (const [id, c] of this.chunks)
+      m[id] = {
+        modules: [...c.modules],
+        asyncDeps: c.asyncDeps || [],
+        parent: c.parent || null,
+      };
     return m;
   }
 }
@@ -68,15 +87,23 @@ class CodeSplitter {
 // ===== 测试 =====
 const splitter = new CodeSplitter();
 splitter.setSources({
-  'entry.js': "import './a'; import('./lazy');",
-  './a': "import './b';",
-  './b': "module.exports = 'b';",
-  './lazy': "import './c';",
-  './c': "module.exports = 'c';",
+  "entry.js": "import './a'; import('./lazy');",
+  "./a": "import './b';",
+  "./b": "module.exports = 'b';",
+  "./lazy": "import './c';",
+  "./c": "module.exports = 'c';",
 });
-splitter.split('entry.js');
+splitter.split("entry.js");
 const manifest = splitter.generateManifest();
-console.log('Chunk 数量:', splitter.chunks.size); // 2
+console.log("Chunk 数量:", splitter.chunks.size); // 2
 for (const [id, info] of Object.entries(manifest)) {
-  console.log('Chunk ' + id + ': modules=[' + info.modules.join(', ') + '] asyncDeps=[' + info.asyncDeps.join(', ') + ']');
+  console.log(
+    "Chunk " +
+      id +
+      ": modules=[" +
+      info.modules.join(", ") +
+      "] asyncDeps=[" +
+      info.asyncDeps.join(", ") +
+      "]",
+  );
 }

@@ -37,10 +37,15 @@ class MiniVuex {
     });
   }
 
-  get state() { return this._state; }
+  get state() {
+    return this._state;
+  }
 
   _computeGetter(key) {
-    if (this._getterCache.has(key) && this._getterCache.get(key).version === this._stateVersion) {
+    if (
+      this._getterCache.has(key) &&
+      this._getterCache.get(key).version === this._stateVersion
+    ) {
       return this._getterCache.get(key).value;
     }
     const value = this._gettersDef[key](this._state, this.getters);
@@ -53,7 +58,9 @@ class MiniVuex {
     if (!mutation) throw new Error(`Unknown mutation type: ${type}`);
     mutation(this._state, payload);
     this._stateVersion++;
-    this._subscribers.slice().forEach((fn) => fn({ type, payload }, this._state));
+    this._subscribers
+      .slice()
+      .forEach((fn) => fn({ type, payload }, this._state));
   }
 
   dispatch(type, payload) {
@@ -85,40 +92,44 @@ const store = new MiniVuex({
     doubleCount: (state) => state.count * 2,
   },
   mutations: {
-    INCREMENT(state, n = 1) { state.count += n; },
-    ADD_TODO(state, todo) { state.todos.push(todo); },
+    INCREMENT(state, n = 1) {
+      state.count += n;
+    },
+    ADD_TODO(state, todo) {
+      state.todos.push(todo);
+    },
   },
   actions: {
     async incrementAsync(ctx, n) {
       await new Promise((r) => setTimeout(r, 0));
-      ctx.commit('INCREMENT', n);
+      ctx.commit("INCREMENT", n);
       return ctx.state.count;
     },
   },
 });
 
-console.log('initial count:', store.state.count); // expected: 0
-console.log('initial doneCount:', store.getters.doneCount); // expected: 1
-console.log('initial doubleCount:', store.getters.doubleCount); // expected: 0
+console.log("initial count:", store.state.count); // expected: 0
+console.log("initial doneCount:", store.getters.doneCount); // expected: 1
+console.log("initial doubleCount:", store.getters.doubleCount); // expected: 0
 
 let events = [];
 const unsub = store.subscribe((mutation, state) => events.push(mutation.type));
 
-store.commit('INCREMENT');          // count -> 1
-store.commit('INCREMENT', 5);       // count -> 6
-store.commit('ADD_TODO', { done: false });
-console.log('count after commits:', store.state.count); // expected: 6
-console.log('doneCount after add:', store.getters.doneCount); // expected: 1 (new todo not done)
-console.log('subscribed events:', events); // expected: ['INCREMENT', 'INCREMENT', 'ADD_TODO']
+store.commit("INCREMENT"); // count -> 1
+store.commit("INCREMENT", 5); // count -> 6
+store.commit("ADD_TODO", { done: false });
+console.log("count after commits:", store.state.count); // expected: 6
+console.log("doneCount after add:", store.getters.doneCount); // expected: 1 (new todo not done)
+console.log("subscribed events:", events); // expected: ['INCREMENT', 'INCREMENT', 'ADD_TODO']
 
 // Getter cache invalidates after mutation.
-console.log('doubleCount after commits:', store.getters.doubleCount); // expected: 12
+console.log("doubleCount after commits:", store.getters.doubleCount); // expected: 12
 
 // Async action.
-store.dispatch('incrementAsync', 10).then((v) => {
-  console.log('after async action count:', store.state.count); // expected: 16
-  console.log('async action returned:', v); // expected: 16
+store.dispatch("incrementAsync", 10).then((v) => {
+  console.log("after async action count:", store.state.count); // expected: 16
+  console.log("async action returned:", v); // expected: 16
 });
 unsub();
-store.commit('INCREMENT');
-console.log('events after unsubscribe:', events.length); // expected: 3
+store.commit("INCREMENT");
+console.log("events after unsubscribe:", events.length); // expected: 3

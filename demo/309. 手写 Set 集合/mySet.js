@@ -72,28 +72,32 @@ MySet.prototype[Symbol.iterator] = function () {
         return { value: values[index++], done: false };
       }
       return { value: undefined, done: true };
-    }
+    },
   };
 };
 
-Object.defineProperty(MySet.prototype, 'size', {
-  get: function () { return this._values.length; }
+Object.defineProperty(MySet.prototype, "size", {
+  get: function () {
+    return this._values.length;
+  },
 });
 
 // 测试
 var set = new MySet([1, 2, 3, 2, 1]);
-console.log(set.size);   // 3
+console.log(set.size); // 3
 console.log(set.has(2)); // true
 console.log(set.has(5)); // false
 
 set.add(4).add(5);
-console.log(set.size);   // 5
+console.log(set.size); // 5
 
 set.delete(2);
 console.log(set.has(2)); // false
 
 var result = [];
-set.forEach(function (v) { result.push(v); });
+set.forEach(function (v) {
+  result.push(v);
+});
 console.log(result); // [1, 3, 4, 5]
 
 // 使用 for...of 遍历
@@ -104,14 +108,18 @@ console.log(iterResult); // [1, 3, 4, 5]
 // NaN 去重
 var nanSet = new MySet();
 nanSet.add(NaN).add(NaN);
-console.log(nanSet.size);     // 1
+console.log(nanSet.size); // 1
 console.log(nanSet.has(NaN)); // true
 
 // 集合运算：并集
 MySet.prototype.union = function (other) {
   var result = new MySet();
-  this.forEach(function (v) { result.add(v); });
-  other.forEach(function (v) { result.add(v); });
+  this.forEach(function (v) {
+    result.add(v);
+  });
+  other.forEach(function (v) {
+    result.add(v);
+  });
   return result;
 };
 

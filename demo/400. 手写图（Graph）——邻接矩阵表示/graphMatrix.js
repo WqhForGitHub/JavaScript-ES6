@@ -20,7 +20,7 @@ class GraphMatrix {
 
   _getIndex(v) {
     const i = this.vertexIndex[v];
-    if (i === undefined) throw new Error('Vertex not found: ' + v);
+    if (i === undefined) throw new Error("Vertex not found: " + v);
     return i;
   }
 
@@ -64,9 +64,9 @@ class GraphMatrix {
   }
 
   print() {
-    console.log('  ' + this.vertices.join(' '));
+    console.log("  " + this.vertices.join(" "));
     for (let i = 0; i < this.vertices.length; i++) {
-      console.log(this.vertices[i] + ' ' + this.matrix[i].join(' '));
+      console.log(this.vertices[i] + " " + this.matrix[i].join(" "));
     }
   }
 
@@ -106,21 +106,21 @@ class GraphMatrix {
 }
 
 // 测试
-const g = new GraphMatrix(['A', 'B', 'C', 'D', 'E', 'F']);
-g.addEdge('A', 'B');
-g.addEdge('A', 'C');
-g.addEdge('B', 'D');
-g.addEdge('C', 'D');
-g.addEdge('D', 'E');
-g.addEdge('E', 'F');
+const g = new GraphMatrix(["A", "B", "C", "D", "E", "F"]);
+g.addEdge("A", "B");
+g.addEdge("A", "C");
+g.addEdge("B", "D");
+g.addEdge("C", "D");
+g.addEdge("D", "E");
+g.addEdge("E", "F");
 
-console.log(g.hasEdge('A', 'B')); // true
-console.log(g.hasEdge('A', 'D')); // false
-console.log(g.getNeighbors('A')); // ['B', 'C']
-console.log(g.getWeight('A', 'B')); // 1
+console.log(g.hasEdge("A", "B")); // true
+console.log(g.hasEdge("A", "D")); // false
+console.log(g.getNeighbors("A")); // ['B', 'C']
+console.log(g.getWeight("A", "B")); // 1
 
-console.log(g.bfs('A')); // ['A', 'B', 'C', 'D', 'E', 'F']
-console.log(g.dfs('A')); // ['A', 'B', 'D', 'C', 'E', 'F']
+console.log(g.bfs("A")); // ['A', 'B', 'C', 'D', 'E', 'F']
+console.log(g.dfs("A")); // ['A', 'B', 'D', 'C', 'E', 'F']
 
 g.print();
 //   A B C D E F

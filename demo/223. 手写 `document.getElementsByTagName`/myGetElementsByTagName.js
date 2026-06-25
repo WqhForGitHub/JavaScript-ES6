@@ -14,7 +14,7 @@
  * @returns {Element[]}
  */
 function myGetElementsByTagName(tagName, root) {
-  root = root || (typeof document !== 'undefined' ? document : null);
+  root = root || (typeof document !== "undefined" ? document : null);
   if (!root) return [];
 
   var result = [];
@@ -26,7 +26,10 @@ function myGetElementsByTagName(tagName, root) {
     var children = node.children || [];
     for (var i = 0; i < children.length; i++) {
       var child = children[i];
-      if (target === '*' || (child.tagName && child.tagName.toLowerCase() === target)) {
+      if (
+        target === "*" ||
+        (child.tagName && child.tagName.toLowerCase() === target)
+      ) {
         result.push(child);
       }
       dfs(child);
@@ -49,22 +52,22 @@ function createMockNode(tag, attrs, children) {
   };
 }
 
-var mockDoc = createMockNode('html', {}, [
-  createMockNode('body', {}, [
-    createMockNode('div', {}, [
-      createMockNode('p', {}, []),
-      createMockNode('span', {}, []),
+var mockDoc = createMockNode("html", {}, [
+  createMockNode("body", {}, [
+    createMockNode("div", {}, [
+      createMockNode("p", {}, []),
+      createMockNode("span", {}, []),
     ]),
-    createMockNode('p', {}, []),
-    createMockNode('P', {}, []), // 大写标签名也应匹配
+    createMockNode("p", {}, []),
+    createMockNode("P", {}, []), // 大写标签名也应匹配
   ]),
 ]);
 
-var divs = myGetElementsByTagName('div', mockDoc);
+var divs = myGetElementsByTagName("div", mockDoc);
 console.log(divs.length); // => 1
 
-var ps = myGetElementsByTagName('p', mockDoc);
+var ps = myGetElementsByTagName("p", mockDoc);
 console.log(ps.length); // => 3 （不区分大小写）
 
-var all = myGetElementsByTagName('*', mockDoc);
+var all = myGetElementsByTagName("*", mockDoc);
 console.log(all.length); // => 6 （body, div, p, span, p, P）

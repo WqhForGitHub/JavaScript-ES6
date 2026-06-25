@@ -75,6 +75,11 @@ console.log("hello".myStartsWith("h", -1)); // true
 
 // --- 与原生对比 ---
 console.log("\n--- 与原生对比 ---");
-console.log("hello world".startsWith("hello") === "hello world".myStartsWith("hello")); // true
-console.log("hello world".startsWith("world", 6) === "hello world".myStartsWith("world", 6)); // true
+console.log(
+  "hello world".startsWith("hello") === "hello world".myStartsWith("hello"),
+); // true
+console.log(
+  "hello world".startsWith("world", 6) ===
+    "hello world".myStartsWith("world", 6),
+); // true
 console.log("hello".startsWith("", 5) === "hello".myStartsWith("", 5)); // true

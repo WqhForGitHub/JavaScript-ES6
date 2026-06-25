@@ -54,7 +54,7 @@ function getLCS(text1, text2) {
       j--;
     }
   }
-  return lcs.join('');
+  return lcs.join("");
 }
 
 // 空间优化版（滚动数组），仅求长度
@@ -79,13 +79,13 @@ function lengthOfLCSOptimized(text1, text2) {
 }
 
 // 测试
-console.log(lengthOfLCS('abcde', 'ace')); // 3
-console.log(lengthOfLCS('abc', 'abc')); // 3
-console.log(lengthOfLCS('abc', 'def')); // 0
-console.log(lengthOfLCS('AGGTAB', 'GXTXAYB')); // 4 (GTAB)
+console.log(lengthOfLCS("abcde", "ace")); // 3
+console.log(lengthOfLCS("abc", "abc")); // 3
+console.log(lengthOfLCS("abc", "def")); // 0
+console.log(lengthOfLCS("AGGTAB", "GXTXAYB")); // 4 (GTAB)
 
-console.log(getLCS('abcde', 'ace')); // ace
-console.log(getLCS('AGGTAB', 'GXTXAYB')); // GTAB
+console.log(getLCS("abcde", "ace")); // ace
+console.log(getLCS("AGGTAB", "GXTXAYB")); // GTAB
 
-console.log(lengthOfLCSOptimized('abcde', 'ace')); // 3
-console.log(lengthOfLCSOptimized('AGGTAB', 'GXTXAYB')); // 4
+console.log(lengthOfLCSOptimized("abcde", "ace")); // 3
+console.log(lengthOfLCSOptimized("AGGTAB", "GXTXAYB")); // 4

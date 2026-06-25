@@ -18,12 +18,7 @@
  */
 
 function startLongPolling(requestFn, options = {}) {
-  const {
-    onSuccess,
-    onError,
-    retryDelay = 1000,
-    immediate = true,
-  } = options;
+  const { onSuccess, onError, retryDelay = 1000, immediate = true } = options;
 
   let running = true;
   let pendingTimer = null;

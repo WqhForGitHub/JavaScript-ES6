@@ -15,14 +15,14 @@
  * @returns {Element | null}
  */
 function myGetElementById(id, root) {
-  root = root || (typeof document !== 'undefined' ? document : null);
+  root = root || (typeof document !== "undefined" ? document : null);
   if (!root) return null;
 
   // 使用深度优先遍历
   function dfs(node) {
     if (!node) return null;
     // 检查当前节点
-    if (node.getAttribute && node.getAttribute('id') === id) {
+    if (node.getAttribute && node.getAttribute("id") === id) {
       return node;
     }
     // 遍历子节点
@@ -62,17 +62,22 @@ function createMockNode(tag, attrs, children) {
   };
 }
 
-var mockDoc = createMockNode('html', {}, [
-  createMockNode('body', {}, [
-    createMockNode('div', { id: 'app' }, [
-      createMockNode('div', { id: 'header' }, []),
-      createMockNode('div', { id: 'content' }, [
-        createMockNode('p', { id: 'title' }, []),
+var mockDoc = createMockNode("html", {}, [
+  createMockNode("body", {}, [
+    createMockNode("div", { id: "app" }, [
+      createMockNode("div", { id: "header" }, []),
+      createMockNode("div", { id: "content" }, [
+        createMockNode("p", { id: "title" }, []),
       ]),
     ]),
   ]),
 ]);
 
-console.log(myGetElementById('title', mockDoc) === mockDoc.children[0].children[0].children[1].children[0]); // => true
-console.log(myGetElementById('app', mockDoc) === mockDoc.children[0].children[0]); // => true
-console.log(myGetElementById('not-exist', mockDoc)); // => null
+console.log(
+  myGetElementById("title", mockDoc) ===
+    mockDoc.children[0].children[0].children[1].children[0],
+); // => true
+console.log(
+  myGetElementById("app", mockDoc) === mockDoc.children[0].children[0],
+); // => true
+console.log(myGetElementById("not-exist", mockDoc)); // => null

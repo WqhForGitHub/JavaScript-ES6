@@ -36,7 +36,7 @@ function withTimeout(task, ms, message) {
         (reason) => {
           clearTimeout(timer);
           reject(reason);
-        }
+        },
       );
   });
 }
@@ -54,8 +54,7 @@ function raceTimeout(promise, ms, message) {
 
 // 模拟异步任务：delay 后返回 data
 function fetchMock(delay, data) {
-  return () =>
-    new Promise((resolve) => setTimeout(() => resolve(data), delay));
+  return () => new Promise((resolve) => setTimeout(() => resolve(data), delay));
 }
 
 (async () => {
@@ -79,8 +78,11 @@ function fetchMock(delay, data) {
   // 3. 任务自身抛错（非超时）
   try {
     await withTimeout(
-      () => new Promise((_, rej) => setTimeout(() => rej(new Error("net err")), 20)),
-      100
+      () =>
+        new Promise((_, rej) =>
+          setTimeout(() => rej(new Error("net err")), 20),
+        ),
+      100,
     );
   } catch (e) {
     console.log("case3 err:", e.message); // case3 err: net err
@@ -88,10 +90,7 @@ function fetchMock(delay, data) {
 
   // 4. raceTimeout 包装已有 Promise
   try {
-    await raceTimeout(
-      new Promise((r) => setTimeout(() => r("done"), 30)),
-      10
-    );
+    await raceTimeout(new Promise((r) => setTimeout(() => r("done"), 30)), 10);
     console.log("case4 should not reach");
   } catch (e) {
     console.log("case4 timeout:", e.name); // case4 timeout: TimeoutError

@@ -15,7 +15,7 @@
 
 function castPath(path) {
   if (Array.isArray(path)) return path.slice();
-  if (typeof path === 'number') return [String(path)];
+  if (typeof path === "number") return [String(path)];
   const result = [];
   const re = /[^.[\]]+|\[(?:(['"])(.*?)\1|(\d+))\]/g;
   let match;
@@ -58,17 +58,17 @@ function unset(object, path) {
 // --- Tests ---
 
 const obj1 = { a: { b: { c: 1 } } };
-console.log('unset nested:', unset(obj1, 'a.b.c')); // true
-console.log('unset result:', JSON.stringify(obj1)); // expected: {"a":{"b":{}}}
+console.log("unset nested:", unset(obj1, "a.b.c")); // true
+console.log("unset result:", JSON.stringify(obj1)); // expected: {"a":{"b":{}}}
 
 const obj2 = { arr: [10, 20, 30] };
-console.log('unset array index:', unset(obj2, 'arr[1]')); // true
-console.log('unset array result:', JSON.stringify(obj2)); // expected: {"arr":[null,30]} (delete leaves a hole)
+console.log("unset array index:", unset(obj2, "arr[1]")); // true
+console.log("unset array result:", JSON.stringify(obj2)); // expected: {"arr":[null,30]} (delete leaves a hole)
 
 const obj3 = { a: 1 };
-console.log('unset missing:', unset(obj3, 'x.y.z')); // false
-console.log('unset missing keeps obj:', JSON.stringify(obj3)); // expected: {"a":1}
+console.log("unset missing:", unset(obj3, "x.y.z")); // false
+console.log("unset missing keeps obj:", JSON.stringify(obj3)); // expected: {"a":1}
 
 const obj4 = { a: { b: 2 } };
-console.log('unset via array path:', unset(obj4, ['a', 'b'])); // true
-console.log('unset via array result:', JSON.stringify(obj4)); // expected: {"a":{}}
+console.log("unset via array path:", unset(obj4, ["a", "b"])); // true
+console.log("unset via array result:", JSON.stringify(obj4)); // expected: {"a":{}}

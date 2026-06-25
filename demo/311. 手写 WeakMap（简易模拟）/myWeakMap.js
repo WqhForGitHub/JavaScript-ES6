@@ -9,21 +9,23 @@
 
 function MyWeakMap() {
   // 每个实例使用一个随机属性名作为存储键，避免冲突
-  var STORAGE_KEY = '__weakmap_' + Math.random().toString(36).slice(2) + '__';
+  var STORAGE_KEY = "__weakmap_" + Math.random().toString(36).slice(2) + "__";
 
   function isObject(key) {
-    return key !== null && (typeof key === 'object' || typeof key === 'function');
+    return (
+      key !== null && (typeof key === "object" || typeof key === "function")
+    );
   }
 
   this.set = function (key, value) {
     if (!isObject(key)) {
-      throw new TypeError('Invalid value used as weak map key');
+      throw new TypeError("Invalid value used as weak map key");
     }
     Object.defineProperty(key, STORAGE_KEY, {
       value: value,
       enumerable: false,
       configurable: true,
-      writable: true
+      writable: true,
     });
     return this;
   };
@@ -51,13 +53,13 @@ var obj = {};
 var arr = [];
 var fn = function () {};
 
-wm.set(obj, 'value1');
+wm.set(obj, "value1");
 wm.set(arr, 123);
 wm.set(fn, true);
 
 console.log(wm.get(obj)); // value1
 console.log(wm.get(arr)); // 123
-console.log(wm.get(fn));  // true
+console.log(wm.get(fn)); // true
 console.log(wm.has(obj)); // true
 
 wm.delete(obj);
@@ -66,23 +68,23 @@ console.log(wm.get(obj)); // undefined
 
 // 非对象键会抛错
 try {
-  wm.set('string', 'val');
+  wm.set("string", "val");
 } catch (e) {
   console.log(e.message); // Invalid value used as weak map key
 }
 
 try {
-  wm.set(null, 'val');
+  wm.set(null, "val");
 } catch (e) {
   console.log(e.message); // Invalid value used as weak map key
 }
 
 // 重新赋值
-wm.set(arr, 'updated');
+wm.set(arr, "updated");
 console.log(wm.get(arr)); // updated
 
 // 对象属性不可枚举（不影响正常遍历）
 var data = { x: 1, y: 2 };
-wm.set(data, 'hidden');
+wm.set(data, "hidden");
 console.log(Object.keys(data)); // ['x', 'y']（不包含隐藏属性）
-console.log(wm.get(data));      // hidden
+console.log(wm.get(data)); // hidden

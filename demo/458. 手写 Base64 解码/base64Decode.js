@@ -17,9 +17,7 @@
 const BASE64_CHARS =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-const REVERSE_MAP = new Map(
-  BASE64_CHARS.split("").map((ch, idx) => [ch, idx])
-);
+const REVERSE_MAP = new Map(BASE64_CHARS.split("").map((ch, idx) => [ch, idx]));
 
 function base64Decode(str) {
   if (typeof str !== "string") {
@@ -44,8 +42,8 @@ function base64Decode(str) {
 
     const v0 = REVERSE_MAP.get(c0) ?? 0;
     const v1 = REVERSE_MAP.get(c1) ?? 0;
-    const v2 = c2 === "=" ? 0 : REVERSE_MAP.get(c2) ?? 0;
-    const v3 = c3 === "=" ? 0 : REVERSE_MAP.get(c3) ?? 0;
+    const v2 = c2 === "=" ? 0 : (REVERSE_MAP.get(c2) ?? 0);
+    const v3 = c3 === "=" ? 0 : (REVERSE_MAP.get(c3) ?? 0);
 
     const triplet = (v0 << 18) | (v1 << 12) | (v2 << 6) | v3;
 
@@ -77,7 +75,9 @@ function utf8BytesToString(bytes) {
       i += 2;
     } else if (b < 0xf0) {
       result += String.fromCharCode(
-        ((b & 0x0f) << 12) | ((bytes[i + 1] & 0x3f) << 6) | (bytes[i + 2] & 0x3f)
+        ((b & 0x0f) << 12) |
+          ((bytes[i + 1] & 0x3f) << 6) |
+          (bytes[i + 2] & 0x3f),
       );
       i += 3;
     } else {
@@ -89,7 +89,7 @@ function utf8BytesToString(bytes) {
       const adj = cp - 0x10000;
       result += String.fromCharCode(
         0xd800 + (adj >> 10),
-        0xdc00 + (adj & 0x3ff)
+        0xdc00 + (adj & 0x3ff),
       );
       i += 4;
     }
@@ -112,7 +112,7 @@ console.log("原生解码:", Buffer.from("SGVsbG8gV29ybGQ=", "base64").toString(
 console.log(
   "中文解码一致:",
   base64Decode("5Lit5paH5rWL6K+V") ===
-    Buffer.from("5Lit5paH5rWL6K+V", "base64").toString() // true
+    Buffer.from("5Lit5paH5rWL6K+V", "base64").toString(), // true
 );
 
 // 忽略空白字符

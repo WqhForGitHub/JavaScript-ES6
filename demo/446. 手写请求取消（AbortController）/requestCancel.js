@@ -39,7 +39,8 @@ class MyAbortSignal extends MiniEventTarget {
   }
   // 现代浏览器有 throwIfAborted
   throwIfAborted() {
-    if (this.aborted) throw this.reason || new DOMException("Aborted", "AbortError");
+    if (this.aborted)
+      throw this.reason || new DOMException("Aborted", "AbortError");
   }
 }
 
@@ -61,8 +62,7 @@ function fetchWithAbort(url, options = {}) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);
-    xhr.onload = () =>
-      resolve({ status: xhr.status, data: xhr.responseText });
+    xhr.onload = () => resolve({ status: xhr.status, data: xhr.responseText });
     xhr.onerror = () => reject(new TypeError("Network error"));
 
     const signal = options.signal;
@@ -99,7 +99,10 @@ controller.signal.addEventListener("abort", () => {
 // 立即取消
 controller.abort();
 console.log("aborted 状态:", controller.signal.aborted); // aborted 状态: true
-console.log("reason:", controller.signal.reason && controller.signal.reason.name); // reason: AbortError
+console.log(
+  "reason:",
+  controller.signal.reason && controller.signal.reason.name,
+); // reason: AbortError
 
 // 再次 abort 不会重复触发
 let triggerCount = 0;

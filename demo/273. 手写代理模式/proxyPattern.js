@@ -43,7 +43,7 @@ function makeCachingProxy(target) {
   const cache = new Map();
   return new Proxy(target, {
     get(obj, prop) {
-      if (typeof obj[prop] === 'function') {
+      if (typeof obj[prop] === "function") {
         if (!cache.has(prop)) {
           cache.set(prop, (...args) => {
             const key = `${prop}:${JSON.stringify(args)}`;
@@ -61,10 +61,10 @@ function makeCachingProxy(target) {
 function makeReadOnlyProxy(target) {
   return new Proxy(target, {
     set() {
-      throw new Error('Target is read-only');
+      throw new Error("Target is read-only");
     },
     deleteProperty() {
-      throw new Error('Target is read-only');
+      throw new Error("Target is read-only");
     },
   });
 }
@@ -95,8 +95,8 @@ class DocumentProxy {
     this.user = user;
   }
   read() {
-    if (this.user.role !== 'admin' && this.user.role !== 'editor') {
-      throw new Error('Access denied');
+    if (this.user.role !== "admin" && this.user.role !== "editor") {
+      throw new Error("Access denied");
     }
     return this.doc.content;
   }
@@ -104,8 +104,8 @@ class DocumentProxy {
 
 // ---------------- Test cases ----------------
 // Virtual proxy: heavy image not created until draw()
-const img = new ImageProxy('cat.png');
-console.log('proxy created, real image not yet loaded');
+const img = new ImageProxy("cat.png");
+console.log("proxy created, real image not yet loaded");
 console.log(img.draw());
 // Expected: [proxy] lazily loading cat.png  then  drawing cat.png-pixels
 console.log(img.draw());
@@ -118,33 +118,36 @@ console.log(ro.a);
 try {
   ro.a = 2;
 } catch (e) {
-  console.log('Read-only error:', e.message);
+  console.log("Read-only error:", e.message);
   // Expected: Read-only error: Target is read-only
 }
 
 // Validating proxy
-const person = makeValidatingProxy({}, {
-  age: (v) => typeof v === 'number' && v >= 0 && v < 150,
-  name: (v) => typeof v === 'string' && v.length > 0,
-});
-person.name = 'Alice';
+const person = makeValidatingProxy(
+  {},
+  {
+    age: (v) => typeof v === "number" && v >= 0 && v < 150,
+    name: (v) => typeof v === "string" && v.length > 0,
+  },
+);
+person.name = "Alice";
 person.age = 30;
 console.log(person);
 // Expected: { name: 'Alice', age: 30 }
 try {
   person.age = -5;
 } catch (e) {
-  console.log('Validation error:', e.message);
+  console.log("Validation error:", e.message);
   // Expected: Validation error: Invalid value for age: -5
 }
 
 // Protective proxy
-const doc = new SecureDocument('top secret');
-console.log(new DocumentProxy(doc, { role: 'admin' }).read());
+const doc = new SecureDocument("top secret");
+console.log(new DocumentProxy(doc, { role: "admin" }).read());
 // Expected: top secret
 try {
-  new DocumentProxy(doc, { role: 'guest' }).read();
+  new DocumentProxy(doc, { role: "guest" }).read();
 } catch (e) {
-  console.log('Access error:', e.message);
+  console.log("Access error:", e.message);
   // Expected: Access error: Access denied
 }

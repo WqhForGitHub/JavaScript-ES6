@@ -72,6 +72,10 @@ console.log(countingSortSimple([4, 2, 2, 8, 3, 3, 1]));
 // [1, 2, 2, 3, 3, 4, 8]
 
 // 稳定性验证
-const stableTest = [{ v: 2, id: 1 }, { v: 1, id: 2 }, { v: 2, id: 3 }];
+const stableTest = [
+  { v: 2, id: 1 },
+  { v: 1, id: 2 },
+  { v: 2, id: 3 },
+];
 const stableValues = countingSort(stableTest.map((x) => x.v));
 console.log(stableValues); // [1, 2, 2]

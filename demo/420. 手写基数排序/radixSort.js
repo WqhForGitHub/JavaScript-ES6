@@ -51,7 +51,9 @@ function radixSort(arr) {
   const negatives = arr.filter((x) => x < 0).map((x) => -x);
   const nonNegatives = arr.filter((x) => x >= 0);
 
-  const sortedNeg = radixSortNonNegative(negatives).reverse().map((x) => -x);
+  const sortedNeg = radixSortNonNegative(negatives)
+    .reverse()
+    .map((x) => -x);
   const sortedNonNeg = radixSortNonNegative(nonNegatives);
 
   return sortedNeg.concat(sortedNonNeg);

@@ -9,16 +9,16 @@
  */
 
 const prefixMap = {
-  'transform': ['-webkit-', '-ms-'],
-  'transition': ['-webkit-'],
-  'animation': ['-webkit-'],
-  'flex': ['-webkit-', '-ms-'],
-  'justify-content': ['-webkit-'],
-  'align-items': ['-webkit-'],
-  'user-select': ['-webkit-', '-moz-', '-ms-'],
-  'appearance': ['-webkit-', '-moz-'],
-  'backdrop-filter': ['-webkit-'],
-  'clip-path': ['-webkit-'],
+  transform: ["-webkit-", "-ms-"],
+  transition: ["-webkit-"],
+  animation: ["-webkit-"],
+  flex: ["-webkit-", "-ms-"],
+  "justify-content": ["-webkit-"],
+  "align-items": ["-webkit-"],
+  "user-select": ["-webkit-", "-moz-", "-ms-"],
+  appearance: ["-webkit-", "-moz-"],
+  "backdrop-filter": ["-webkit-"],
+  "clip-path": ["-webkit-"],
 };
 
 function autoprefix(css) {
@@ -27,28 +27,44 @@ function autoprefix(css) {
   let m;
   while ((m = re.exec(css)) !== null) {
     const selector = m[1].trim();
-    const decls = m[2].trim().split(';').filter(d => d.trim()).map(d => {
-      const idx = d.indexOf(':');
-      return { prop: d.substring(0, idx).trim(), value: d.substring(idx + 1).trim().replace(/!important/, '').trim(), important: /!important/.test(d) };
-    });
+    const decls = m[2]
+      .trim()
+      .split(";")
+      .filter((d) => d.trim())
+      .map((d) => {
+        const idx = d.indexOf(":");
+        return {
+          prop: d.substring(0, idx).trim(),
+          value: d
+            .substring(idx + 1)
+            .trim()
+            .replace(/!important/, "")
+            .trim(),
+          important: /!important/.test(d),
+        };
+      });
     rules.push({ selector, decls });
   }
   const result = [];
   for (const rule of rules) {
-    result.push(rule.selector + ' {');
+    result.push(rule.selector + " {");
     for (const d of rule.decls) {
       const prefixes = prefixMap[d.prop];
-      if (prefixes && !d.prop.startsWith('-')) {
-        for (const p of prefixes) { const imp = d.important ? ' !important' : ''; result.push('  ' + p + d.prop + ': ' + d.value + imp + ';'); }
+      if (prefixes && !d.prop.startsWith("-")) {
+        for (const p of prefixes) {
+          const imp = d.important ? " !important" : "";
+          result.push("  " + p + d.prop + ": " + d.value + imp + ";");
+        }
       }
-      const imp = d.important ? ' !important' : '';
-      result.push('  ' + d.prop + ': ' + d.value + imp + ';');
+      const imp = d.important ? " !important" : "";
+      result.push("  " + d.prop + ": " + d.value + imp + ";");
     }
-    result.push('}');
+    result.push("}");
   }
-  return result.join('\n');
+  return result.join("\n");
 }
 
 // ===== 测试 =====
-const css = ".box { transform: rotate(45deg); transition: all 0.3s; user-select: none; display: flex; justify-content: center; }";
+const css =
+  ".box { transform: rotate(45deg); transition: all 0.3s; user-select: none; display: flex; justify-content: center; }";
 console.log(autoprefix(css));

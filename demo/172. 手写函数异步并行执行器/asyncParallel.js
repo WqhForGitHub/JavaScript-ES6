@@ -50,7 +50,7 @@ async function asyncParallelLimit(tasks, limit = Infinity) {
             (e) => {
               active--;
               reject(e);
-            }
+            },
           );
       }
     }
@@ -85,7 +85,7 @@ async function asyncParallelLimitSettled(tasks, limit = Infinity) {
               results[idx] = { status: "rejected", reason: e };
               active--;
               next();
-            }
+            },
           );
       }
     }
@@ -118,7 +118,10 @@ const delay = (ms, v) => new Promise((r) => setTimeout(() => r(v), ms));
     () => delay(30, "ok3"),
   ];
   const results = await asyncParallelSettled(tasks);
-  console.log("并行容错:", results.map((r) => r.status)); // ['fulfilled','rejected','fulfilled']
+  console.log(
+    "并行容错:",
+    results.map((r) => r.status),
+  ); // ['fulfilled','rejected','fulfilled']
 })();
 
 (async () => {
@@ -148,7 +151,7 @@ const delay = (ms, v) => new Promise((r) => setTimeout(() => r(v), ms));
   const results = await asyncParallelLimitSettled(tasks, 2);
   console.log(
     "有限并发容错:",
-    results.map((r) => r.status)
+    results.map((r) => r.status),
   ); // ['fulfilled','rejected','fulfilled','fulfilled']
 })();
 
@@ -158,7 +161,7 @@ const delay = (ms, v) => new Promise((r) => setTimeout(() => r(v), ms));
   const fetch = (url) => delay(10, `data:${url}`);
   const datas = await asyncParallelLimit(
     urls.map((u) => () => fetch(u)),
-    3
+    3,
   );
   console.log("并发请求数量:", datas.length); // 10
   console.log("顺序保持:", datas[0], datas[9]); // 'data:/api/0' 'data:/api/9'

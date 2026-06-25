@@ -97,15 +97,15 @@ const g = new GraphBFS();
 //        B   C
 //       / \   \
 //      D   E   F
-g.addEdge('A', 'B');
-g.addEdge('A', 'C');
-g.addEdge('B', 'D');
-g.addEdge('B', 'E');
-g.addEdge('C', 'F');
+g.addEdge("A", "B");
+g.addEdge("A", "C");
+g.addEdge("B", "D");
+g.addEdge("B", "E");
+g.addEdge("C", "F");
 
-console.log(g.bfs('A')); // ['A', 'B', 'C', 'D', 'E', 'F']
-console.log(g.bfsLevelOrder('A')); // [['A'], ['B', 'C'], ['D', 'E', 'F']]
+console.log(g.bfs("A")); // ['A', 'B', 'C', 'D', 'E', 'F']
+console.log(g.bfsLevelOrder("A")); // [['A'], ['B', 'C'], ['D', 'E', 'F']]
 
-console.log(g.shortestPath('A', 'F')); // ['A', 'C', 'F']
-console.log(g.shortestPath('A', 'E')); // ['A', 'B', 'E']
-console.log(g.shortestPath('D', 'F')); // ['D', 'B', 'A', 'C', 'F']
+console.log(g.shortestPath("A", "F")); // ['A', 'C', 'F']
+console.log(g.shortestPath("A", "E")); // ['A', 'B', 'E']
+console.log(g.shortestPath("D", "F")); // ['D', 'B', 'A', 'C', 'F']

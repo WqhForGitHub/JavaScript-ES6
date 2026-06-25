@@ -14,8 +14,8 @@
 // ---- 1. Mutable fluent builder ----
 class QueryBuilder {
   constructor() {
-    this._select = '*';
-    this._from = '';
+    this._select = "*";
+    this._from = "";
     this._wheres = [];
     this._limit = null;
   }
@@ -37,9 +37,9 @@ class QueryBuilder {
   }
   build() {
     const parts = [`SELECT ${this._select} FROM ${this._from}`];
-    if (this._wheres.length) parts.push('WHERE ' + this._wheres.join(' AND '));
+    if (this._wheres.length) parts.push("WHERE " + this._wheres.join(" AND "));
     if (this._limit != null) parts.push(`LIMIT ${this._limit}`);
-    return parts.join(' ');
+    return parts.join(" ");
   }
 }
 
@@ -119,18 +119,16 @@ function runAsyncChain() {
       return out;
     }
   }
-  return new Thenable(1)
-    .then((x) => x + 1)
-    .then((x) => x * 10);
+  return new Thenable(1).then((x) => x + 1).then((x) => x * 10);
 }
 
 // ---------------- Test cases ----------------
 // 1. SQL builder chain
 const sql = new QueryBuilder()
-  .select('id, name')
-  .from('users')
-  .where('age > 18')
-  .where('active = 1')
+  .select("id, name")
+  .from("users")
+  .where("age > 18")
+  .where("active = 1")
   .limit(10)
   .build();
 console.log(sql);

@@ -18,13 +18,13 @@
  */
 
 function debounce(func, wait = 0, options = {}) {
-  if (typeof func !== 'function') {
-    throw new TypeError('Expected a function');
+  if (typeof func !== "function") {
+    throw new TypeError("Expected a function");
   }
   const leading = options.leading === true;
   const trailing = options.trailing !== false;
   const maxWait =
-    'maxWait' in options ? Math.max(+options.maxWait || 0, +wait || 0) : null;
+    "maxWait" in options ? Math.max(+options.maxWait || 0, +wait || 0) : null;
 
   let timerId = null;
   let lastCallTime = null;
@@ -156,23 +156,26 @@ function debounce(func, wait = 0, options = {}) {
 (function () {
   let calls = [];
   const debounced = debounce((x) => calls.push(x), 100);
-  debounced('a');
-  debounced('b');
-  debounced('c');
+  debounced("a");
+  debounced("b");
+  debounced("c");
   setTimeout(() => {
-    console.log('debounce trailing calls:', calls); // expected: ['c']
+    console.log("debounce trailing calls:", calls); // expected: ['c']
   }, 200);
 })();
 
 // Test 2: leading option invokes immediately
 (function () {
   let calls = [];
-  const debounced = debounce((x) => calls.push(x), 100, { leading: true, trailing: false });
-  debounced('a');
-  debounced('b');
-  console.log('debounce leading immediate:', calls); // expected: ['a']
+  const debounced = debounce((x) => calls.push(x), 100, {
+    leading: true,
+    trailing: false,
+  });
+  debounced("a");
+  debounced("b");
+  console.log("debounce leading immediate:", calls); // expected: ['a']
   setTimeout(() => {
-    console.log('debounce leading after wait:', calls); // expected: ['a']
+    console.log("debounce leading after wait:", calls); // expected: ['a']
   }, 200);
 })();
 
@@ -180,9 +183,9 @@ function debounce(func, wait = 0, options = {}) {
 (function () {
   let calls = [];
   const debounced = debounce((x) => calls.push(x), 100);
-  debounced('x');
+  debounced("x");
   debounced.cancel();
   setTimeout(() => {
-    console.log('debounce cancel:', calls); // expected: []
+    console.log("debounce cancel:", calls); // expected: []
   }, 200);
 })();

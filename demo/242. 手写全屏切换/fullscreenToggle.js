@@ -51,8 +51,8 @@ function enterFullscreen(element) {
     var promise = methods.request.call(element);
     return promise;
   }
-  console.warn('当前浏览器不支持全屏 API');
-  return Promise.reject(new Error('Fullscreen API not supported'));
+  console.warn("当前浏览器不支持全屏 API");
+  return Promise.reject(new Error("Fullscreen API not supported"));
 }
 
 /**
@@ -64,7 +64,7 @@ function exitFullscreen() {
   if (methods.exit) {
     return methods.exit.call(document);
   }
-  return Promise.reject(new Error('Fullscreen API not supported'));
+  return Promise.reject(new Error("Fullscreen API not supported"));
 }
 
 /**
@@ -87,13 +87,13 @@ function toggleFullscreen(element) {
  */
 function onFullscreenChange(callback) {
   var eventName =
-    'fullscreenchange' in document
-      ? 'fullscreenchange'
-      : 'webkitfullscreenchange' in document
-      ? 'webkitfullscreenchange'
-      : 'mozfullscreenchange' in document
-      ? 'mozfullscreenchange'
-      : 'msfullscreenchange';
+    "fullscreenchange" in document
+      ? "fullscreenchange"
+      : "webkitfullscreenchange" in document
+        ? "webkitfullscreenchange"
+        : "mozfullscreenchange" in document
+          ? "mozfullscreenchange"
+          : "msfullscreenchange";
 
   var handler = function () {
     callback(isFullscreen());
@@ -122,12 +122,12 @@ function checkFullscreen(elements) {
   return !!(elements.fullscreenElement || elements.webkitFullscreenElement);
 }
 console.log(checkFullscreen({})); // => false
-console.log(checkFullscreen({ fullscreenElement: { tag: 'video' } })); // => true
-console.log(checkFullscreen({ webkitFullscreenElement: { tag: 'div' } })); // => true
+console.log(checkFullscreen({ fullscreenElement: { tag: "video" } })); // => true
+console.log(checkFullscreen({ webkitFullscreenElement: { tag: "div" } })); // => true
 
 // 验证 toggle 逻辑
 function toggleLogic(isFs) {
-  return isFs ? 'exit' : 'enter';
+  return isFs ? "exit" : "enter";
 }
 console.log(toggleLogic(false)); // => 'enter'
 console.log(toggleLogic(true)); // => 'exit'

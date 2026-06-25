@@ -19,14 +19,15 @@
  * 实现思路：用正则匹配，省份做白名单。
  */
 
-const PROVINCES = "京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤川青藏琼宁";
+const PROVINCES =
+  "京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤川青藏琼宁";
 
 // 普通燃油车牌：省+字母+5位字母数字（不含IO）
 function validateLicensePlate(plate) {
   if (typeof plate !== "string") return false;
   const str = plate.trim().toUpperCase();
   const regex = new RegExp(
-    "^[" + PROVINCES + "][A-HJ-NP-Z][A-HJ-NP-Z0-9]{4}[0-9]$"
+    "^[" + PROVINCES + "][A-HJ-NP-Z][A-HJ-NP-Z0-9]{4}[0-9]$",
   );
   // 总长度 7
   if (str.length !== 7) return false;

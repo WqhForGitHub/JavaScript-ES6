@@ -85,10 +85,10 @@ class PriorityQueue {
 
 // 测试
 const pq = new PriorityQueue();
-pq.enqueue('普通任务', 3);
-pq.enqueue('紧急任务', 1);
-pq.enqueue('低优先级任务', 5);
-pq.enqueue('较紧急任务', 2);
+pq.enqueue("普通任务", 3);
+pq.enqueue("紧急任务", 1);
+pq.enqueue("低优先级任务", 5);
+pq.enqueue("较紧急任务", 2);
 
 console.log(pq.dequeue()); // 紧急任务
 console.log(pq.dequeue()); // 较紧急任务
@@ -98,9 +98,9 @@ console.log(pq.isEmpty()); // true
 
 // 带自定义比较器（按 name 长度优先，短的优先）
 const pq2 = new PriorityQueue((a, b) => a.priority.length - b.priority.length);
-pq2.enqueue('cat', 'cat');
-pq2.enqueue('elephant', 'elephant');
-pq2.enqueue('dog', 'dog');
+pq2.enqueue("cat", "cat");
+pq2.enqueue("elephant", "elephant");
+pq2.enqueue("dog", "dog");
 console.log(pq2.dequeue()); // cat (长度3)
 console.log(pq2.dequeue()); // dog (长度3)
 console.log(pq2.dequeue()); // elephant

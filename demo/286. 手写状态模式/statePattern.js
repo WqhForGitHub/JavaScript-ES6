@@ -17,7 +17,7 @@
 class Document {
   constructor(title) {
     this.title = title;
-    this.content = '';
+    this.content = "";
     // start in Draft state
     this.transitionTo(new DraftState());
   }
@@ -46,7 +46,7 @@ class State {
     this.doc = doc;
   }
   get name() {
-    return this.constructor.name.replace('State', '');
+    return this.constructor.name.replace("State", "");
   }
   publish() {
     return `Cannot publish from ${this.name}`;
@@ -73,52 +73,52 @@ class DraftState extends State {
 
 class ModerationState extends State {
   edit() {
-    return 'Locked: cannot edit while in moderation';
+    return "Locked: cannot edit while in moderation";
   }
   publish() {
     this.doc.transitionTo(new PublishedState());
-    return 'Approved: now published';
+    return "Approved: now published";
   }
   archive() {
     this.doc.transitionTo(new WithdrawnState());
-    return 'Rejected: withdrawn';
+    return "Rejected: withdrawn";
   }
 }
 
 class PublishedState extends State {
   edit() {
-    return 'Locked: cannot edit once published';
+    return "Locked: cannot edit once published";
   }
   archive() {
     this.doc.transitionTo(new WithdrawnState());
-    return 'Archived';
+    return "Archived";
   }
   publish() {
-    return 'Already published';
+    return "Already published";
   }
 }
 
 class WithdrawnState extends State {
   publish() {
     this.doc.transitionTo(new DraftState());
-    return 'Restored to draft';
+    return "Restored to draft";
   }
   edit() {
-    return 'Restoring to draft for edits';
+    return "Restoring to draft for edits";
   }
   archive() {
-    return 'Already withdrawn';
+    return "Already withdrawn";
   }
 }
 
 // ---------------- Test cases ----------------
-const doc = new Document('Guide');
+const doc = new Document("Guide");
 console.log(doc.status());
 // Expected: Draft
 
-console.log(doc.edit('Hello '));
+console.log(doc.edit("Hello "));
 // Expected: Edited (draft): content="Hello "
-console.log(doc.edit('World'));
+console.log(doc.edit("World"));
 // Expected: Edited (draft): content="Hello World"
 
 console.log(doc.publish());
@@ -127,7 +127,7 @@ console.log(doc.status());
 // Expected: Moderation
 
 // Cannot edit while in moderation
-console.log(doc.edit('!'));
+console.log(doc.edit("!"));
 // Expected: Locked: cannot edit while in moderation
 
 // Approve -> published

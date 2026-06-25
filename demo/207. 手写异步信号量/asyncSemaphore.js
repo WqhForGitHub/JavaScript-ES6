@@ -82,11 +82,7 @@ class AsyncSemaphore {
     }
   }
 
-  await Promise.all([
-    critical("A", 30),
-    critical("B", 20),
-    critical("C", 10),
-  ]);
+  await Promise.all([critical("A", 30), critical("B", 20), critical("C", 10)]);
   console.log("mutex done, counter:", counter); // mutex done, counter: 0
 })();
 
@@ -122,8 +118,8 @@ class AsyncSemaphore {
       sem.withPermit(async () => {
         results.push(i);
         await new Promise((r) => setTimeout(r, 10));
-      })
-    )
+      }),
+    ),
   );
   console.log("withPermit order:", results); // withPermit order: [1,2,3]
 })();

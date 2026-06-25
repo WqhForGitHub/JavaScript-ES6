@@ -12,8 +12,8 @@
  */
 
 Array.prototype.myReduce = function (callback, initialValue) {
-  if (typeof callback !== 'function') {
-    throw new TypeError(callback + ' is not a function');
+  if (typeof callback !== "function") {
+    throw new TypeError(callback + " is not a function");
   }
 
   const hasInitial = arguments.length >= 2;
@@ -33,7 +33,7 @@ Array.prototype.myReduce = function (callback, initialValue) {
       }
     }
     if (!found) {
-      throw new TypeError('Reduce of empty array with no initial value');
+      throw new TypeError("Reduce of empty array with no initial value");
     }
   }
 
@@ -62,10 +62,10 @@ console.log([[1, 2], [3, 4], [5]].myReduce((a, b) => a.concat(b), [])); // [1, 2
 
 // --- 统计元素出现次数 ---
 console.log(
-  ['a', 'b', 'a', 'c', 'b', 'a'].myReduce((acc, cur) => {
+  ["a", "b", "a", "c", "b", "a"].myReduce((acc, cur) => {
     acc[cur] = (acc[cur] || 0) + 1;
     return acc;
-  }, {})
+  }, {}),
 ); // { a: 3, b: 2, c: 1 }
 
 // --- 使用索引和原数组参数 ---

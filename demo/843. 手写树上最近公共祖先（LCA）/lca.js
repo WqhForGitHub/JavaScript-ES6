@@ -11,26 +11,41 @@ class LCA {
     this.dfs(root, -1, 0, adj);
     for (let j = 1; j < this.LOG; j++)
       for (let i = 0; i < n; i++)
-        if (this.parent[i][j-1] !== -1) this.parent[i][j] = this.parent[this.parent[i][j-1]][j-1];
+        if (this.parent[i][j - 1] !== -1)
+          this.parent[i][j] = this.parent[this.parent[i][j - 1]][j - 1];
   }
   dfs(u, p, d, adj) {
-    this.depth[u] = d; this.parent[u][0] = p;
+    this.depth[u] = d;
+    this.parent[u][0] = p;
     for (const v of adj[u] || []) if (v !== p) this.dfs(v, u, d + 1, adj);
   }
   query(u, v) {
     if (this.depth[u] < this.depth[v]) [u, v] = [v, u];
     const diff = this.depth[u] - this.depth[v];
-    for (let j = 0; j < this.LOG; j++) if ((diff >> j) & 1) u = this.parent[u][j];
+    for (let j = 0; j < this.LOG; j++)
+      if ((diff >> j) & 1) u = this.parent[u][j];
     if (u === v) return u;
-    for (let j = this.LOG - 1; j >= 0; j--) if (this.parent[u][j] !== this.parent[v][j]) { u = this.parent[u][j]; v = this.parent[v][j]; }
+    for (let j = this.LOG - 1; j >= 0; j--)
+      if (this.parent[u][j] !== this.parent[v][j]) {
+        u = this.parent[u][j];
+        v = this.parent[v][j];
+      }
     return this.parent[u][0];
   }
 }
 // ===== 测试 =====
 // 树结构: 0-1, 0-2, 1-3, 1-4, 2-5, 2-6
-const adj = { 0: [1,2], 1: [0,3,4], 2: [0,5,6], 3: [1], 4: [1], 5: [2], 6: [2] };
+const adj = {
+  0: [1, 2],
+  1: [0, 3, 4],
+  2: [0, 5, 6],
+  3: [1],
+  4: [1],
+  5: [2],
+  6: [2],
+};
 const lca = new LCA(7, 0, adj);
-console.log('LCA(3,4):', lca.query(3, 4)); // 1
-console.log('LCA(3,5):', lca.query(3, 5)); // 0
-console.log('LCA(5,6):', lca.query(5, 6)); // 2
-console.log('LCA(3,3):', lca.query(3, 3)); // 3
+console.log("LCA(3,4):", lca.query(3, 4)); // 1
+console.log("LCA(3,5):", lca.query(3, 5)); // 0
+console.log("LCA(5,6):", lca.query(5, 6)); // 2
+console.log("LCA(3,3):", lca.query(3, 3)); // 3

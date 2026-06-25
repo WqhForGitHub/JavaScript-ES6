@@ -15,7 +15,7 @@
 // ---- AST node interface ----
 class Expression {
   interpret(context) {
-    throw new Error('abstract');
+    throw new Error("abstract");
   }
 }
 
@@ -24,7 +24,7 @@ class TrueExpr extends Expression {
     return true;
   }
   toString() {
-    return 'true';
+    return "true";
   }
 }
 
@@ -33,7 +33,7 @@ class FalseExpr extends Expression {
     return false;
   }
   toString() {
-    return 'false';
+    return "false";
   }
 }
 
@@ -93,40 +93,36 @@ class OrExpr extends Expression {
 
 // ---- Parser: tokenize + recursive descent over S-expr lists ----
 function tokenize(src) {
-  return src
-    .replace(/\(/g, ' ( ')
-    .replace(/\)/g, ' ) ')
-    .trim()
-    .split(/\s+/);
+  return src.replace(/\(/g, " ( ").replace(/\)/g, " ) ").trim().split(/\s+/);
 }
 
 function parse(tokens) {
   const tok = tokens.shift();
-  if (tok === '(') {
+  if (tok === "(") {
     const op = tokens.shift().toLowerCase();
     const args = [];
-    while (tokens[0] !== ')') args.push(parse(tokens));
+    while (tokens[0] !== ")") args.push(parse(tokens));
     tokens.shift(); // consume ')'
     switch (op) {
-      case 'and': {
+      case "and": {
         let expr = args[0];
         for (let i = 1; i < args.length; i++) expr = new AndExpr(expr, args[i]);
         return expr;
       }
-      case 'or': {
+      case "or": {
         let expr = args[0];
         for (let i = 1; i < args.length; i++) expr = new OrExpr(expr, args[i]);
         return expr;
       }
-      case 'not':
+      case "not":
         return new NotExpr(args[0]);
       default:
         throw new Error(`Unknown operator: ${op}`);
     }
   }
   // atom
-  if (tok === 'true') return new TrueExpr();
-  if (tok === 'false') return new FalseExpr();
+  if (tok === "true") return new TrueExpr();
+  if (tok === "false") return new FalseExpr();
   return new VariableExpr(tok);
 }
 
@@ -137,20 +133,23 @@ function evaluate(src, context) {
 // ---------------- Test cases ----------------
 const ctx = { vip: true, loggedIn: true, banned: false, age: 30 };
 
-console.log(evaluate('vip', ctx));
+console.log(evaluate("vip", ctx));
 // Expected: true
-console.log(evaluate('(not banned)', ctx));
+console.log(evaluate("(not banned)", ctx));
 // Expected: true
-console.log(evaluate('(and vip loggedIn)', ctx));
+console.log(evaluate("(and vip loggedIn)", ctx));
 // Expected: true
-console.log(evaluate('(or banned (not loggedIn))', ctx));
+console.log(evaluate("(or banned (not loggedIn))", ctx));
 // Expected: false
-console.log(evaluate('(and (or vip loggedIn) (not banned))', ctx));
+console.log(evaluate("(and (or vip loggedIn) (not banned))", ctx));
 // Expected: true
 
 // Reusing the AST: parse once, interpret many times against different contexts
-const rule = parse(tokenize('(and loggedIn (not banned))'));
-console.log([rule.interpret({ loggedIn: true, banned: false }), rule.interpret({ loggedIn: true, banned: true })]);
+const rule = parse(tokenize("(and loggedIn (not banned))"));
+console.log([
+  rule.interpret({ loggedIn: true, banned: false }),
+  rule.interpret({ loggedIn: true, banned: true }),
+]);
 // Expected: [ true, false ]
 console.log(rule.toString());
 // Expected: (and loggedIn (not banned))

@@ -37,8 +37,8 @@ function makeDraggable(element, options) {
 
   // 确保 position 为 absolute 或 fixed
   var position = getComputedStyle(element).position;
-  if (position === 'static' || !position) {
-    element.style.position = 'absolute';
+  if (position === "static" || !position) {
+    element.style.position = "absolute";
   }
 
   function getEventPos(e) {
@@ -58,9 +58,9 @@ function makeDraggable(element, options) {
     var rect = element.getBoundingClientRect();
     elemX = rect.left;
     elemY = rect.top;
-    element.style.left = elemX + 'px';
-    element.style.top = elemY + 'px';
-    element.style.margin = '0';
+    element.style.left = elemX + "px";
+    element.style.top = elemY + "px";
+    element.style.margin = "0";
     onStart(e, { x: elemX, y: elemY });
   }
 
@@ -84,8 +84,8 @@ function makeDraggable(element, options) {
       newY = Math.max(0, Math.min(newY, maxY));
     }
 
-    element.style.left = newX + 'px';
-    element.style.top = newY + 'px';
+    element.style.left = newX + "px";
+    element.style.top = newY + "px";
     onMove(e, { x: newX, y: newY });
   }
 
@@ -98,26 +98,26 @@ function makeDraggable(element, options) {
   }
 
   // 鼠标事件
-  element.addEventListener('mousedown', handleStart);
-  document.addEventListener('mousemove', handleMove);
-  document.addEventListener('mouseup', handleEnd);
+  element.addEventListener("mousedown", handleStart);
+  document.addEventListener("mousemove", handleMove);
+  document.addEventListener("mouseup", handleEnd);
 
   // 触摸事件
   if (supportTouch) {
-    element.addEventListener('touchstart', handleStart, { passive: false });
-    document.addEventListener('touchmove', handleMove, { passive: false });
-    document.addEventListener('touchend', handleEnd);
+    element.addEventListener("touchstart", handleStart, { passive: false });
+    document.addEventListener("touchmove", handleMove, { passive: false });
+    document.addEventListener("touchend", handleEnd);
   }
 
   return {
     destroy: function () {
-      element.removeEventListener('mousedown', handleStart);
-      document.removeEventListener('mousemove', handleMove);
-      document.removeEventListener('mouseup', handleEnd);
+      element.removeEventListener("mousedown", handleStart);
+      document.removeEventListener("mousemove", handleMove);
+      document.removeEventListener("mouseup", handleEnd);
       if (supportTouch) {
-        element.removeEventListener('touchstart', handleStart);
-        document.removeEventListener('touchmove', handleMove);
-        document.removeEventListener('touchend', handleEnd);
+        element.removeEventListener("touchstart", handleStart);
+        document.removeEventListener("touchmove", handleMove);
+        document.removeEventListener("touchend", handleEnd);
       }
     },
   };

@@ -36,7 +36,7 @@ const process = pipe(
   tap((x) => console.log("  after +1:", x)), // 副作用：打印
   (x) => x * 2,
   tap((x) => console.log("  after *2:", x)),
-  (x) => x - 3
+  (x) => x - 3,
 );
 console.log(process(5));
 // 打印：
@@ -51,7 +51,7 @@ const getNames = pipe(
   tap((names) => console.log("  names:", names)), // ['Tom','Jerry']
   (names) => names.map((n) => n.toUpperCase()),
   tap((upper) => console.log("  upper:", upper)),
-  (names) => names.join(", ")
+  (names) => names.join(", "),
 );
 console.log(getNames(data)); // 'TOM, JERRY'
 
@@ -62,7 +62,7 @@ const assertPositive = tap((x) => {
 const safePipe = pipe(
   (x) => x - 10,
   assertPositive,
-  (x) => x * 2
+  (x) => x * 2,
 );
 console.log(safePipe(20)); // 20 = (20-10)*2
 try {
@@ -79,7 +79,7 @@ const writeToCache = tap((value) => {
 const compute = pipe(
   (x) => x * x,
   writeToCache,
-  (x) => x + 1
+  (x) => x + 1,
 );
 console.log(compute(3)); // 10
 console.log("缓存:", cache.get("last")); // 9（写入的是 *2 后的值）

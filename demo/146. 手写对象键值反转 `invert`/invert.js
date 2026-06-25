@@ -40,7 +40,8 @@ function invertBy(obj, iteratee) {
     return {};
   }
 
-  const transform = typeof iteratee === "function" ? iteratee : (v) => String(v);
+  const transform =
+    typeof iteratee === "function" ? iteratee : (v) => String(v);
   const result = {};
 
   for (const key of Object.keys(obj)) {

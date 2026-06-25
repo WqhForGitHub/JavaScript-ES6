@@ -65,7 +65,7 @@ const immLog = debounce(
     console.log(`  执行: ${v}`);
   },
   100,
-  true
+  true,
 );
 
 immLog(1); // 立即执行
@@ -91,7 +91,7 @@ setTimeout(() => {
       console.log(`  执行: ${v}`);
     },
     100,
-    false
+    false,
   );
   lateLog(1);
   lateLog(2);
@@ -113,7 +113,7 @@ setTimeout(() => {
       console.log(`  按钮响应 #${clicks}`);
     },
     500,
-    true
+    true,
   );
   // 模拟用户快速连点 5 次
   onClick();
