@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>38. 图书管理系统</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>📚 图书管理</h1>
+  <div class="form">
+    <input id="title" placeholder="书名">
+    <input id="author" placeholder="作者">
+    <input id="year" type="number" placeholder="年份">
+    <button id="add">入库</button>
+  </div>
+  <input id="search" placeholder="搜索...">
+  <table><thead><tr><th>书名</th><th>作者</th><th>年份</th><th>状态</th><th>操作</th></tr></thead><tbody id="body"></tbody></table>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

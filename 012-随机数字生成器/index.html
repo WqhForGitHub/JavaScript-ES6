@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12. 随机数字生成器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>🎲 随机数字生成器</h1>
+  <label>最小值 <input type="number" id="min" value="1"></label>
+  <label>最大值 <input type="number" id="max" value="100"></label>
+  <label>生成个数 <input type="number" id="count" value="1" min="1" max="100"></label>
+  <label><input type="checkbox" id="unique" checked> 不重复</label>
+  <button id="gen" class="primary">生成</button>
+  <div id="result" class="result">点击生成</div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", sans-serif; }
+body { background: #1f2937; color: #e5e7eb; min-height: 100vh; display: flex; justify-content: center; padding: 30px 20px; }
+.card { width: 100%; max-width: 560px; }
+h1 { color: #38bdf8; margin-bottom: 8px; }
+.info { color: #94a3b8; font-size: 13px; margin-bottom: 14px; }
+button { padding: 10px 20px; border: none; border-radius: 8px; background: #475569; color: #fff; cursor: pointer; margin: 4px; }
+button.primary { background: #38bdf8; color: #0f172a; font-weight: 700; }
+pre { background: #111827; padding: 14px; border-radius: 8px; color: #34d399; font-size: 12px; line-height: 1.5; overflow: auto; margin-top: 12px; max-height: 260px; }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11. 汇率转换器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>💱 汇率转换器</h1>
+  <div class="row">
+    <input type="number" id="amount" value="100" placeholder="金额">
+    <select id="from"></select>
+    <span>=</span>
+    <select id="to"></select>
+  </div>
+  <div class="btns">
+    <button id="swap">⇄ 交换</button>
+    <button id="calc" class="primary">转换</button>
+  </div>
+  <div id="result" class="result">输入金额后点击转换</div>
+  <p class="tip">汇率基于 USD 静态参考值，仅用于演示。</p>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

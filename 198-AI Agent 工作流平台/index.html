@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>198. AI Agent 工作流平台</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h1>🤖 AI Agent 工作流</h1>
+  <p class="info">用节点连接组成工作流：输入 → 处理 → 输出。点击运行查看每步数据。</p>
+  <div class="canvas" id="canvas">
+    <div class="node start" style="left:20px;top:80px"><b>输入</b><div class="preview">"hello"</div></div>
+    <div class="node" style="left:200px;top:50px"><b>转大写</b><div class="preview">?</div></div>
+    <div class="node" style="left:380px;top:100px"><b>逆序</b><div class="preview">?</div></div>
+    <div class="node end" style="left:560px;top:80px"><b>输出</b><div class="preview">?</div></div>
+  </div>
+  <button id="run" class="primary">▶ 运行工作流</button>
+  <div id="log"></div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

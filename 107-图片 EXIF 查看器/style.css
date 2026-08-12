@@ -1,0 +1,10 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #ecf0f1; min-height: 100vh; display: flex; justify-content: center; padding: 30px 20px; color: #333; }
+.card { background: #fff; width: 100%; max-width: 560px; padding: 26px; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,.08); }
+h1 { text-align: center; margin-bottom: 16px; }
+input { margin-bottom: 16px; }
+.row { display: flex; gap: 16px; }
+.prev { flex: 1; background: #f5f7fa; border-radius: 8px; min-height: 200px; display: flex; align-items: center; justify-content: center; color: #aaa; overflow: hidden; }
+.prev img { max-width: 100%; }
+.info { flex: 1; line-height: 1.8; font-size: 13px; }
+.info b { color: #6c5ce7; }

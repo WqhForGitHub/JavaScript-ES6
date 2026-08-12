@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>189. 在线代码编辑器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <div class="bar"><button id="run" class="primary">▶ 运行</button><select id="mode"><option>console</option><option>alert</option></select> <span>纯前端沙盒</span></div>
+  <div class="edit"><textarea id="html" placeholder="HTML"></textarea><textarea id="css" placeholder="CSS"></textarea><textarea id="js" placeholder="JS">// 写点 JS
+console.log('hello editor');</textarea></div>
+  <iframe id="out" class="out"></iframe>
+  <div id="console" class="console"></div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

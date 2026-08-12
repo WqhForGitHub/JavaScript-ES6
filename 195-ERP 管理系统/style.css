@@ -1,0 +1,15 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", sans-serif; }
+body { background: #f5f7fa; color: #333; }
+.app { display: grid; grid-template-columns: 200px 1fr; min-height: 100vh; }
+aside { background: #2c3e50; color: #fff; padding: 24px 0; }
+aside h3 { padding: 0 24px 20px; font-weight: 800; }
+nav a { display: block; padding: 12px 24px; color: #bdc3c7; text-decoration: none; }
+nav a:hover, nav a.active { background: #34495e; color: #fff; }
+main { padding: 26px; }
+header { margin-bottom: 18px; }
+table { width: 100%; background: #fff; border-collapse: collapse; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,.05); }
+th, td { padding: 12px 16px; text-align: left; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+th { background: #fafbfc; color: #888; }
+.deals { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.deal { background: #fff; padding: 18px; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,.05); }
+.deal .v { font-size: 22px; font-weight: 700; } .deal .l { color: #888; font-size: 12px; }

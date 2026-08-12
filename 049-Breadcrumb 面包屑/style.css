@@ -1,0 +1,13 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #f5f7fa; min-height: 100vh; color: #333; }
+.page { max-width: 720px; margin: 0 auto; padding: 40px 20px; }
+h1 { margin-bottom: 20px; }
+.crumb { background: #fff; padding: 12px 16px; border-radius: 10px; margin-bottom: 18px; box-shadow: 0 4px 14px rgba(0,0,0,.05); }
+.crumb a { color: #3498db; cursor: pointer; text-decoration: none; }
+.crumb a:hover { text-decoration: underline; }
+.crumb .sep { margin: 0 8px; color: #aaa; }
+.crumb .cur { color: #555; font-weight: 600; }
+.content { background: #fff; padding: 28px; border-radius: 10px; min-height: 160px; line-height: 1.8; box-shadow: 0 4px 14px rgba(0,0,0,.05); }
+.content ul { list-style: none; margin-top: 10px; }
+.content li { padding: 8px; cursor: pointer; color: #3498db; border-radius: 6px; }
+.content li:hover { background: #f0f7ff; }

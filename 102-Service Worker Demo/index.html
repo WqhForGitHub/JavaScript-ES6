@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>102. Service Worker Demo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h1>🛠️ Service Worker</h1>
+  <p class="info">注册 SW 实现离线缓存与离线可用。需在 HTTPS 或 localhost 打开。</p>
+  <button id="reg" class="primary">注册 Service Worker</button>
+  <button id="unreg">取消注册</button>
+  <div id="status" class="status">未注册</div>
+</div>
+<script id="sw-src" type="javascript/sw">
+self.addEventListener("install", e => self.skipWaiting());
+self.addEventListener("activate", e => self.clients.claim());
+self.addEventListener("fetch", e => {
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+    const cache = caches.open("v1"); cache.put(e.request, res.clone());
+    return res;
+  }).catch(() => new Response("离线模式：资源不可用", { headers: { "Content-Type": "text/plain" } }))));
+});
+</script>
+<script src="script.js"></script>
+</body>
+</html>

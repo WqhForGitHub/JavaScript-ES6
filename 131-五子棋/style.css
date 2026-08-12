@@ -1,0 +1,7 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #d4a373; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; color: #333; }
+.card { background: #f5deb3; padding: 22px; border-radius: 12px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.2); }
+h1 { margin-bottom: 12px; color: #5b3a29; }
+canvas { background: #e6c79c; border-radius: 8px; cursor: pointer; }
+.info { margin: 12px 0; color: #5b3a29; font-weight: 700; }
+button { padding: 8px 24px; border: none; border-radius: 8px; background: #8b5a2b; color: #fff; cursor: pointer; }

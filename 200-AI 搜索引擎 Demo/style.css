@@ -1,0 +1,16 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", sans-serif; }
+body { background: #0d1017; color: #eee; min-height: 100vh; }
+.app { max-width: 800px; margin: 0 auto; padding: 30px 20px; }
+header { text-align: center; margin-bottom: 24px; }
+h1 { color: #58a6ff; margin-bottom: 18px; }
+.bar { display: flex; gap: 10px; }
+input { flex: 1; padding: 12px 16px; border: 1px solid #30363d; background: #161b22; color: #e6edf3; border-radius: 24px; font-size: 15px; }
+button { padding: 12px 22px; border: none; border-radius: 24px; background: #58a6ff; color: #161b22; font-weight: 700; cursor: pointer; }
+.results { display: flex; flex-direction: column; gap: 16px; }
+.ai-box { background: linear-gradient(135deg,#1a1f2e,#233042); padding: 18px; border-radius: 12px; border: 1px solid #2a3464; line-height: 1.6; min-height: 60px; }
+.ai-box .label { color: #58a6ff; font-size: 12px; margin-bottom: 6px; }
+.item { background: #161b22; padding: 14px; border-radius: 8px; border: 1px solid #21262d; }
+.item a { color: #58a6ff; font-weight: 600; font-size: 15px; text-decoration: none; }
+.item a:hover { text-decoration: underline; }
+.item .url { color: #7d8590; font-size: 12px; margin: 4px 0; }
+.item p { color: #b1bac4; font-size: 13px; margin-top: 4px; line-height: 1.5; }

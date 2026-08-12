@@ -1,0 +1,7 @@
+* { box-sizing: border-box; margin: 0; padding:0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #1a1a2e; min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #eee; padding: 20px; }
+.card { text-align: center; }
+h1 { margin-bottom: 12px; }
+canvas { background: #2c3e50; border-radius: 8px; outline: none; cursor: crosshair; }
+.info { margin-top: 10px; color: #6dd5fa; }
+.info b { color: #2ecc71; }

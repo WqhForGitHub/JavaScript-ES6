@@ -1,0 +1,15 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: #16213e; padding: 30px; border-radius: 16px; width: 100%; max-width: 360px; text-align: center; }
+h1 { margin-bottom: 20px; }
+.compass { width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle,#2d3436,#0f3460); margin: 0 auto; position: relative; box-shadow: inset 0 0 30px rgba(0,0,0,.6); }
+.rose { position: absolute; inset: 0; transition: transform .2s; }
+.rose span { position: absolute; color: #fff; font-weight: 700; font-size: 18px; }
+.rose .n { top: 10px; left: 50%; transform: translateX(-50%); color: #e74c3c; }
+.rose .e { right: 12px; top: 50%; transform: translateY(-50%); }
+.rose .s { bottom: 10px; left: 50%; transform: translateX(-50%); }
+.rose .w { left: 12px; top: 50%; transform: translateY(-50%); }
+.needle { position: absolute; top: 50%; left: 50%; width: 6px; height: 90px; background: linear-gradient(#e74c3c 50%, #fff 50%); transform: translate(-50%, -100%); transform-origin: bottom; border-radius: 3px; }
+.deg { margin: 18px 0 10px; font-size: 26px; color: #6dd5fa; font-weight: 700; }
+.note { color: #888; font-size: 12px; margin-bottom: 14px; }
+input[type=range] { width: 100%; }

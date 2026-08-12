@@ -1,0 +1,4 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #1a1a2e; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #eee; }
+canvas { background: #0f0f1e; border-radius: 8px; }
+.hint { margin-top: 14px; color: #888; font-size: 13px; }

@@ -1,0 +1,9 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: linear-gradient(135deg,#00b09b,#96c93d); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; color: #333; }
+.card { background: #fff; padding: 30px; border-radius: 14px; width: 100%; max-width: 420px; }
+h1 { text-align: center; margin-bottom: 20px; }
+.row { display: flex; gap: 8px; margin-bottom: 18px; }
+input { flex: 1; padding: 11px; border: 1px solid #ddd; border-radius: 8px; }
+button { padding: 11px 18px; border: none; border-radius: 8px; background: #00b09b; color: #fff; font-weight: 700; cursor: pointer; }
+#res { padding: 16px; background: #f5f7fa; border-radius: 10px; line-height: 1.8; word-break: break-all; }
+#res b { color: #00b09b; }

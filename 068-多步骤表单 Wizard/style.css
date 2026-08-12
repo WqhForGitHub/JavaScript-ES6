@@ -1,0 +1,16 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: linear-gradient(135deg,#667eea,#764ba2); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: #fff; width: 100%; max-width: 420px; padding: 30px; border-radius: 14px; }
+h1 { text-align: center; margin-bottom: 20px; }
+.bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
+#prog { height: 100%; width: 33%; background: linear-gradient(90deg,#667eea,#764ba2); transition: width .3s; }
+.labels { display: flex; justify-content: space-between; margin: 10px 0 20px; font-size: 13px; }
+.labels span { color: #999; } .labels span.active { color: #667eea; font-weight: 700; }
+.panel { display: none; flex-direction: column; gap: 12px; }
+.panel.active { display: flex; }
+.panel.done { text-align: center; padding: 40px 0; font-size: 22px; color: #2ecc71; }
+input, select { padding: 11px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; }
+.btns { display: flex; gap: 10px; margin-top: 24px; }
+button { flex: 1; padding: 12px; border: none; border-radius: 8px; background: #eee; cursor: pointer; font-size: 15px; }
+button.primary { background: #667eea; color: #fff; }
+button:disabled { opacity: .5; cursor: not-allowed; }

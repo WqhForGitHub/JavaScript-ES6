@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>161. DNS 查询工具</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h1>🔍 DNS 查询</h1>
+  <div class="row"><input id="domain" placeholder="域名（如 example.com）" value="example.com">
+    <select id="type"><option>A</option><option>AAAA</option><option>MX</option><option>NS</option><option>TXT</option><option>CNAME</option></select>
+    <button id="go" class="primary">查询</button></div>
+  <table><thead><tr><th>名称</th><th>TTL</th><th>类型</th><th>值</th></tr></thead><tbody id="body"></tbody></table>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

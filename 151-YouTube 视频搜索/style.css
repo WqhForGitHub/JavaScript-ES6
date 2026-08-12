@@ -1,0 +1,11 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #0f0f0f; color: #eee; min-height: 100vh; display: flex; justify-content: center; padding: 30px 20px; }
+.card { width: 100%; max-width: 560px; }
+h1 { text-align: center; margin-bottom: 18px; }
+.row { display: flex; gap: 8px; margin-bottom: 18px; }
+input { flex: 1; padding: 10px; border: 1px solid #333; background: #1f1f1f; color: #eee; border-radius: 20px; }
+button { padding: 10px 20px; border: none; border-radius: 20px; background: #ff0000; color: #fff; cursor: pointer; }
+#list { display: grid; gap: 10px; }
+#list .v { display: flex; gap: 10px; align-items: center; background: #1f1f1f; padding: 10px; border-radius: 10px; cursor: pointer; }
+#list img { width: 120px; aspect-ratio: 16/9; border-radius: 6px; }
+#list .t { font-size: 14px; }

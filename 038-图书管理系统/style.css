@@ -1,0 +1,14 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #fdf6ee; min-height: 100vh; display: flex; justify-content: center; padding: 30px 20px; color: #333; }
+.container { background: #fff; width: 100%; max-width: 640px; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,.1); padding: 24px; }
+h1 { text-align: center; margin-bottom: 18px; }
+.form { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 8px; margin-bottom: 14px; }
+.form input { padding: 9px; border: 1px solid #ddd; border-radius: 8px; }
+.form button { padding: 0 16px; border: none; border-radius: 8px; background: #d35400; color: #fff; cursor: pointer; }
+#search { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 14px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+th { background: #fdf6ee; }
+.in { color: #27ae60; } .out { color: #e74c3c; }
+td.act button { background: none; border: 1px solid #ddd; border-radius: 5px; padding: 3px 8px; cursor: pointer; margin-right: 4px; }
+td.act .rm { color: #e74c3c; }

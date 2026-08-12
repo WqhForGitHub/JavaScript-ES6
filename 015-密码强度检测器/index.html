@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15. 密码强度检测器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>🔒 密码强度检测器</h1>
+  <input type="text" id="pwd" placeholder="输入密码">
+  <div class="bar"><div id="fill"></div></div>
+  <div id="label" class="label">请输入密码</div>
+  <ul class="checks">
+    <li id="c1">至少 8 位</li>
+    <li id="c2">包含大写字母</li>
+    <li id="c3">包含小写字母</li>
+    <li id="c4">包含数字</li>
+    <li id="c5">包含特殊符号</li>
+  </ul>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

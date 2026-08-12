@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>72. 富文本编辑器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h1>✍️ 富文本编辑器</h1>
+  <div class="toolbar" id="tb">
+    <button data-c="bold"><b>B</b></button>
+    <button data-c="italic"><i>I</i></button>
+    <button data-c="underline"><u>U</u></button>
+    <button data-c="insertUnorderedList">• 列表</button>
+    <button data-c="formatBlock" data-v="H3">H3</button>
+    <button data-c="justifyLeft">左</button>
+    <button data-c="justifyCenter">中</button>
+    <button data-c="foreColor" data-v="#e74c3c">红</button>
+  </div>
+  <div class="editor" contenteditable="true">点击这里开始编辑，选中文字后点击上方按钮试试。</div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

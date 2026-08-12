@@ -1,0 +1,14 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", sans-serif; }
+body { background: #f0f4f8; min-height: 100vh; padding: 30px 20px; color: #333; }
+.card { background: #fff; max-width: 800px; margin: 0 auto; padding: 24px; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,.08); }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+input, select { padding: 9px; border: 1px solid #ddd; border-radius: 8px; }
+.bar { display: flex; gap: 10px; margin-bottom: 14px; }
+.bar input { flex: 1; }
+button { padding: 10px 18px; border: none; border-radius: 8px; background: #e74c3c; color: #fff; cursor: pointer; }
+button.primary { background: #6c5ce7; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+th { color: #888; }
+.badge { padding: 2px 10px; border-radius: 12px; font-size: 11px; }
+.s0 { background: #f0f3ff; color: #6c5ce7; } .s1 { background: #e7f6ff; color: #3498db; } .s2 { background: #e3f9ed; color: #27ae60; } .s3 { background: #fde8da; color: #e74c3c; }

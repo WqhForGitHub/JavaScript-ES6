@@ -1,0 +1,10 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: #1a1a1a; padding: 36px; border-radius: 18px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+h1 { margin-bottom: 22px; }
+.time { font-size: 62px; font-family: monospace; font-weight: 200; letter-spacing: 2px; color: #2ecc71; margin-bottom: 22px; }
+.btns { display: flex; gap: 10px; margin-bottom: 16px; }
+button { flex: 1; padding: 12px; border: none; border-radius: 10px; background: #333; color: #fff; cursor: pointer; }
+button.primary { background: #27ae60; }
+ul { list-style: none; max-height: 180px; overflow-y: auto; text-align: left; }
+li { padding: 8px; border-bottom: 1px solid #333; font-family: monospace; font-size: 14px; color: #aaa; }

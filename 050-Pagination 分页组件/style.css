@@ -1,0 +1,11 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #fff; min-height: 100vh; color: #333; }
+.page { max-width: 600px; margin: 40px auto; padding: 0 20px; }
+h1 { text-align: center; margin-bottom: 24px; }
+ul { list-style: none; min-height: 300px; }
+li { padding: 14px; border-bottom: 1px solid #eee; display: flex; gap: 12px; }
+li .idx { background: #6c5ce7; color: #fff; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.pager { display: flex; gap: 6px; justify-content: center; margin-top: 20px; }
+.pager button { padding: 8px 14px; border: 1px solid #ddd; background: #fff; border-radius: 8px; cursor: pointer; }
+.pager button.active { background: #6c5ce7; color: #fff; border-color: #6c5ce7; }
+.pager button:disabled { color: #ccc; cursor: not-allowed; }

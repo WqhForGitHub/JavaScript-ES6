@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>21. Emoji 随机生成器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>😀 Emoji 随机生成器</h1>
+  <div id="emoji" class="emoji">😀</div>
+  <label>类别 <select id="cat"></select></label>
+  <label>数量 <input type="number" id="n" value="6" min="1" max="30"></label>
+  <button id="gen" class="primary">随机生成</button>
+  <div id="grid" class="grid"></div>
+  <button id="copy">复制结果</button>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

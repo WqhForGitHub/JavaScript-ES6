@@ -1,0 +1,12 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: linear-gradient(135deg,#2980b9,#6dd5fa); min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #333; padding: 20px; }
+.container { background: #fff; padding: 28px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.2); width: 100%; max-width: 440px; text-align: center; }
+h1 { margin-bottom: 16px; }
+canvas { border: 4px solid #ecf0f1; border-radius: 12px; background: #fff; }
+input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin: 14px 0; }
+.btns { display: flex; gap: 10px; margin-bottom: 16px; }
+button { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #2980b9; color: #fff; cursor: pointer; }
+button.primary { background: #3498db; }
+button:hover { opacity: .9; }
+.grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; }
+.grid canvas { width: 100%; border: 2px solid #eee; border-radius: 6px; cursor: pointer; }

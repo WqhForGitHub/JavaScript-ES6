@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>37. 学生成绩管理</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>🎓 学生成绩管理</h1>
+  <div class="form">
+    <input id="name" placeholder="姓名">
+    <input id="sub" value="语文" placeholder="科目">
+    <input id="score" type="number" placeholder="分数" min="0" max="100">
+    <button id="add">录入</button>
+  </div>
+  <div class="stats">
+    <div><span id="cnt">0</span><label>人数</label></div>
+    <div><span id="avg">0</span><label>平均分</label></div>
+    <div><span id="max">0</span><label>最高分</label></div>
+    <div><span id="min">0</span><label>最低分</label></div>
+  </div>
+  <table><thead><tr><th>姓名</th><th>科目</th><th>分数</th><th>等级</th><th></th></tr></thead>
+  <tbody id="body"></tbody></table>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

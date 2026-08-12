@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>124. Canvas 画板</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h1>🎨 Canvas 画板</h1>
+  <div class="toolbar">
+    <label>颜色 <input type="color" id="color" value="#000"></label>
+    <label>粗细 <input type="range" id="size" min="1" max="30" value="4"></label>
+    <button id="clear">清空</button>
+  </div>
+  <canvas id="cv" width="640" height="400"></canvas>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system; background: #2c3e50; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+canvas { background: #34495e; border-radius: 50%; box-shadow: 0 10px 40px rgba(0,0,0,.4); }

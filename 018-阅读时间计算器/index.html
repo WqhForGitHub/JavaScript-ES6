@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>18. 阅读时间计算器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>📖 阅读时间计算器</h1>
+  <textarea id="text" placeholder="粘贴文章..."></textarea>
+  <label>阅读速度 (字/分钟) <input type="number" id="wpm" value="300"></label>
+  <button id="calc" class="primary">计算</button>
+  <div id="out" class="out">
+    <div><span id="words">0</span><label>总字数</label></div>
+    <div><span id="mins">0</span><label>分钟</label></div>
+    <div><span id="seconds">0</span><label>秒</label></div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>68. 多步骤表单 Wizard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h1>🧙 多步骤表单</h1>
+  <div class="steps"><div class="bar"><div id="prog"></div></div>
+    <div class="labels"><span class="active">账户</span><span>资料</span><span>完成</span></div>
+  </div>
+  <div class="panels">
+    <div class="panel active"><input placeholder="用户名"><input type="email" placeholder="邮箱"></div>
+    <div class="panel"><input placeholder="姓名"><input placeholder="年龄"><select><option>男</option><option>女</option></select></div>
+    <div class="panel done">🎉 完成所有步骤！</div>
+  </div>
+  <div class="btns"><button id="prev">上一步</button><button id="next" class="primary">下一步</button></div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

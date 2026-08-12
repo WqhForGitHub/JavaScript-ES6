@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>55. 图片裁剪工具</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+  <h1>✂️ 图片裁剪</h1>
+  <input type="file" id="file" accept="image/*">
+  <div class="editor">
+    <canvas id="cv" width="480" height="320"></canvas>
+    <div class="out"><h4>裁剪结果</h4><img id="result"><button id="dl">下载</button></div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

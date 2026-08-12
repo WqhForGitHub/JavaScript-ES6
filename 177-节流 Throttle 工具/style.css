@@ -1,0 +1,9 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", sans-serif; }
+body { background: #2c3e50; color: #eee; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: #34495e; padding: 28px; border-radius: 14px; width: 100%; max-width: 400px; }
+h1 { text-align: center; margin-bottom: 8px; }
+.info { color: #aaa; font-size: 13px; margin-bottom: 16px; text-align: center; }
+.area { height: 180px; background: #2c3e50; border: 2px dashed #4a6072; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #888; margin-bottom: 14px; }
+.cmp { display: flex; gap: 12px; }
+.cmp div { flex: 1; background: #2c3e50; padding: 14px; border-radius: 8px; text-align: center; }
+.cmp b { display: block; font-size: 26px; color: #1abc9c; }

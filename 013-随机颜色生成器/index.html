@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13. 随机颜色生成器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>🎨 随机颜色生成器</h1>
+  <div class="swatch" id="swatch"></div>
+  <div class="info">
+    <div><span>HEX</span><input id="hex" readonly></div>
+    <div><span>RGB</span><input id="rgb" readonly></div>
+  </div>
+  <div class="btns">
+    <button id="gen" class="primary">生成新颜色</button>
+    <button id="copy">复制 HEX</button>
+  </div>
+  <h3>历史</h3>
+  <div id="history" class="history"></div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

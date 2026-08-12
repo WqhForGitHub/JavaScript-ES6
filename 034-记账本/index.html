@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>34. 记账本</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>💰 记账本</h1>
+  <div class="summary">
+    <div class="income"><span id="inc">0</span><label>收入</label></div>
+    <div class="expense"><span id="exp">0</span><label>支出</label></div>
+    <div class="balance"><span id="bal">0</span><label>结余</label></div>
+  </div>
+  <div class="form">
+    <select id="type"><option value="expense">支出</option><option value="income">收入</option></select>
+    <select id="cat"></select>
+    <input id="amount" type="number" placeholder="金额" step="0.01">
+    <input id="note" placeholder="备注">
+    <button id="add">记一笔</button>
+  </div>
+  <ul id="list"></ul>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

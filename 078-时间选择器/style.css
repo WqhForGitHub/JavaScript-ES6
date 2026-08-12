@@ -1,0 +1,11 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.card { background: #16213e; padding: 32px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.4); text-align: center; }
+h1 { margin-bottom: 24px; }
+.picker { display: flex; align-items: center; gap: 10px; }
+.col { display: flex; flex-direction: column; align-items: center; }
+.col span { font-size: 36px; font-family: monospace; min-width: 60px; padding: 10px; background: #0f3460; border-radius: 8px; }
+.col button { width: 50px; padding: 4px; background: #0f3460; border: none; border-radius: 6px; cursor: pointer; color: #6dd5fa; font-size: 14px; }
+.sep { font-size: 36px; }
+#toggle { padding: 12px; background: #0f3460; border: none; color: #fff; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.res { margin-top: 20px; font-size: 24px; color: #6dd5fa; }

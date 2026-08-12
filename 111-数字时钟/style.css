@@ -1,0 +1,5 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #0f0c29; background: linear-gradient(135deg,#0f0c29,#302b63,#24243e); min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #fff; }
+.card { text-align: center; }
+.time { font-size: 90px; font-weight: 200; letter-spacing: 6px; font-family: monospace; text-shadow: 0 0 30px rgba(108,92,231,.6); }
+.date { margin-top: 14px; font-size: 18px; color: #6dd5fa; }

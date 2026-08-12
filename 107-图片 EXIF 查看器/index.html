@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>107. 图片 EXIF 查看器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h1>🖼️ EXIF 查看器</h1>
+  <input type="file" id="f" accept="image/*">
+  <div class="row">
+    <div id="prev" class="prev">预览</div>
+    <div id="info" class="info">请选择 JPG/HEIC 等含 EXIF 的图片</div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

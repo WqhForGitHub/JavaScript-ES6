@@ -1,0 +1,11 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #fafafa; min-height: 100vh; color: #333; }
+.page { max-width: 760px; margin: 0 auto; padding: 30px 20px; }
+h1 { text-align: center; margin-bottom: 18px; }
+input[type=file] { margin-bottom: 20px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 10px; }
+.grid .thumb { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.1); }
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); align-items: center; justify-content: center; z-index: 100; }
+.lightbox.show { display: flex; }
+.lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; }
+#close { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 36px; cursor: pointer; }

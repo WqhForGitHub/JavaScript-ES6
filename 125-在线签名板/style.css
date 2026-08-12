@@ -1,0 +1,8 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #fafafa; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: #fff; padding: 24px; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,.1); }
+h1 { text-align: center; margin-bottom: 14px; }
+canvas { border: 2px dashed #6c5ce7; border-radius: 10px; background: #fff; touch-action: none; }
+.btns { display: flex; gap: 10px; margin-top: 14px; }
+button { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #eee; cursor: pointer; }
+button.primary { background: #6c5ce7; color: #fff; }

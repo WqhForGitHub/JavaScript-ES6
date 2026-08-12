@@ -1,0 +1,8 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #fdf1f1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; color: #333; }
+.card { background: #fff; padding: 28px; border-radius: 14px; width: 90%; max-width: 380px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.1); }
+h1 { margin-bottom: 20px; }
+input { width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; }
+button { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #eee; cursor: pointer; margin-bottom: 8px; }
+button.primary { background: #e17055; color: #fff; }
+.status { margin-top: 12px; color: #888; font-size: 13px; }

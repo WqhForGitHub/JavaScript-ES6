@@ -1,0 +1,9 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: linear-gradient(135deg,#00b09b,#96c93d); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; color: #333; }
+.card { background: #fff; padding: 30px; border-radius: 16px; width: 100%; max-width: 420px; }
+h1 { text-align: center; margin-bottom: 14px; }
+.info { color: #666; font-size: 13px; margin-bottom: 16px; line-height: 1.6; }
+#install, .off { padding: 14px; border-radius: 10px; margin-bottom: 14px; text-align: center; font-weight: 600; }
+#install { background: #e7f6ee; color: #27ae60; }
+.off { background: #fff3cd; }
+ul { padding-left: 20px; } li { margin: 6px 0; color: #555; }

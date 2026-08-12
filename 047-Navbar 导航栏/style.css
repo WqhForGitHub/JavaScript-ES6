@@ -1,0 +1,15 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; }
+.navbar { display: flex; align-items: center; justify-content: space-between; background: #2c3e50; padding: 0 24px; height: 60px; position: sticky; top: 0; z-index: 50; }
+.logo { color: #fff; font-weight: 700; font-size: 18px; }
+.menu { list-style: none; display: flex; gap: 6px; }
+.menu a { display: block; padding: 8px 16px; color: #ecf0f1; text-decoration: none; border-radius: 6px; }
+.menu a:hover, .menu a.active { background: #34495e; color: #1abc9c; }
+.burger { display: none; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+.main { padding: 40px; text-align: center; }
+.main h1 { margin-bottom: 10px; }
+@media (max-width: 600px) {
+  .burger { display: block; }
+  .menu { position: absolute; top: 60px; left: 0; right: 0; flex-direction: column; background: #2c3e50; padding: 10px; max-height: 0; overflow: hidden; transition: max-height .3s; }
+  .menu.open { max-height: 260px; }
+}

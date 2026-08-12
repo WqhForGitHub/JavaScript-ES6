@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>188. 在线白板</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h1>🎨 在线白板</h1>
+  <div class="toolbar"><input type="color" id="color"><select id="size"><option>2</option><option selected>4</option><option>8</option><option>16</option></select><button id="clear">清空</button></div>
+  <canvas id="cv" width="640" height="380"></canvas>
+  <p class="filters"><button class="tool active" data-tool="pen">画笔</button><button class="tool" data-tool="eraser">橡皮</button></p>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

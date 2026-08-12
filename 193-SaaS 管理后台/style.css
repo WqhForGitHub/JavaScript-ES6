@@ -1,0 +1,19 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", sans-serif; }
+body { background: #f5f7fa; color: #333; }
+.app { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+aside { background: #1f2a44; color: #fff; padding: 20px 0; }
+.brand { padding: 0 24px 24px; font-weight: 800; font-size: 18px; border-bottom: 1px solid #2c3a5e; }
+nav a { display: block; padding: 12px 24px; color: #b9c2d1; text-decoration: none; }
+nav a:hover, nav a.active { background: #2c3a5e; color: #fff; }
+main { padding: 28px; }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.user { padding: 6px 14px; background: #1f2a44; color: #fff; border-radius: 20px; font-size: 13px; }
+.cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+.card { background: #fff; padding: 18px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
+.card .v { font-size: 24px; font-weight: 700; }
+.card .l { color: #888; font-size: 12px; margin-top: 4px; }
+table { width: 100%; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.05); border-collapse: collapse; }
+th, td { padding: 12px 16px; text-align: left; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+th { background: #fafbfc; color: #888; }
+.badge { padding: 3px 10px; border-radius: 10px; font-size: 11px; }
+.active { background: #e3f9ed; color: #27ae60; } .bad-p { background: #fde8da; color: #e74c3c; }

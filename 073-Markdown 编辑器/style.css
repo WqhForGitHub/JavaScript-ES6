@@ -1,0 +1,13 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #1e1e2e; color: #ddd; min-height: 100vh; }
+.app { max-width: 900px; margin: 0 auto; padding: 24px; }
+h1 { text-align: center; margin-bottom: 18px; }
+.edit { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 70vh; }
+textarea { padding: 16px; border: 1px solid #333; background: #181825; color: #cdd6f4; border-radius: 10px; resize: none; font-family: monospace; font-size: 14px; line-height: 1.6; }
+.prev { background: #181825; border: 1px solid #333; border-radius: 10px; padding: 16px; overflow-y: auto; line-height: 1.7; }
+.prev h1, .prev h2, .prev h3 { color: #cba6f7; margin: 10px 0; }
+.prev a { color: #89b4fa; }
+.prev code { background: #313244; padding: 1px 5px; border-radius: 4px; }
+.prev blockquote { border-left: 3px solid #6c5ce7; padding-left: 10px; color: #a6adc8; margin: 8px 0; }
+.prev ul, .prev ol { padding-left: 22px; }
+@media (max-width: 700px) { .edit { grid-template-columns: 1fr; height: auto; } }

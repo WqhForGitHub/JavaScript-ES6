@@ -1,0 +1,11 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #f0f2f5; min-height: 100vh; color: #333; }
+.page { max-width: 800px; margin: 0 auto; padding: 30px 20px; }
+h1 { text-align: center; margin-bottom: 18px; }
+input[type=file] { margin-bottom: 16px; }
+.editor { display: flex; gap: 20px; flex-wrap: wrap; }
+canvas { background: #000; border-radius: 10px; cursor: crosshair; box-shadow: 0 6px 20px rgba(0,0,0,.15); }
+.out { flex: 1; min-width: 200px; }
+.out h4 { margin-bottom: 10px; }
+.out img { max-width: 100%; border-radius: 8px; margin-bottom: 10px; border: 1px solid #ddd; }
+button { padding: 8px 16px; border: none; border-radius: 8px; background: #6c5ce7; color: #fff; cursor: pointer; }

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>31. Todo List 待办事项</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>✅ Todo List</h1>
+  <div class="add"><input id="inp" placeholder="有什么需要做？"><button id="add">添加</button></div>
+  <div class="filters">
+    <button data-f="all" class="active">全部</button>
+    <button data-f="active">进行中</button>
+    <button data-f="done">已完成</button>
+  </div>
+  <ul id="list"></ul>
+  <div class="foot"><span id="left">0</span> 项剩余 · <a id="clear">清除已完成</a></div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

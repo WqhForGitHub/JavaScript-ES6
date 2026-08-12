@@ -1,0 +1,8 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #1a1a2e; min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #fff; }
+.card { text-align: center; }
+.flip { display: inline-block; font-size: 100px; font-weight: 900; padding: 0 40px; font-family: monospace; perspective: 600px; }
+.flip .num { display: inline-block; transform-style: preserve-3d; transition: transform .5s; }
+.flip .num.flip { animation: flipNum .5s ease; }
+@keyframes flipNum { 0% { transform: rotateX(0); } 50% { transform: rotateX(-90deg); } 100% { transform: rotateX(0); } }
+p { margin-top: 20px; color: #888; }

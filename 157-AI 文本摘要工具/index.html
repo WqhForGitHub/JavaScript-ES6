@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>157. AI 文本摘要工具</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h1>🤖 文本摘要</h1>
+  <p>基于抽取式统计算法（无需 AI API）：按句子权重提取摘要。</p>
+  <textarea id="src" rows="8" placeholder="粘贴长文本...">文本摘要（Text Summarization）是 NLP 常见任务。本 Demo 不依赖任何 LLM，使用经典 TextRank 思想：对句子分词、计算共现权重，再按总分排序后按原文顺序输出前 N 句。</textarea>
+  <label>压缩比 <input type="range" id="ratio" min="10" max="80" value="30"> <span id="rv">30%</span></label>
+  <button id="go" class="primary">生成摘要</button>
+  <div id="res" class="res">摘要将显示于此</div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", sans-serif; }
+body { background: #1e1e2e; color: #cdd6f4; min-height: 100vh; display: flex; gap: 20px; padding: 30px; }
+#app { flex: 1; color: #f5e0dc; }
+#app button { padding: 8px 16px; border: 1px solid #cba6f7; background: transparent; color: #cba6f7; border-radius: 6px; cursor: pointer; margin: 4px; }
+.panel { width: 360px; background: #181825; padding: 16px; border-radius: 10px; }
+h3 { color: #f9e2af; margin-bottom: 8px; }
+pre { background: #11111b; padding: 12px; border-radius: 8px; font-size: 11px; line-height: 1.5; overflow: auto; max-height: 300px; color: #a6e3a1; }

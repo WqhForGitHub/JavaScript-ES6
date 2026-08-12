@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>30. Markdown 字符统计器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>📝 Markdown 字符统计器</h1>
+  <textarea id="md" placeholder="# 标题&#10;- 列表&#10;**粗体** *斜体*"></textarea>
+  <div class="stats">
+    <div><span id="chars">0</span><label>原文字符</label></div>
+    <div><span id="words">0</span><label>纯文本词数</label></div>
+    <div><span id="headings">0</span><label>标题数</label></div>
+    <div><span id="list">0</span><label>列表项</label></div>
+    <div><span id="code">0</span><label>代码块</label></div>
+    <div><span id="links">0</span><label>链接数</label></div>
+    <div><span id="imgs">0</span><label>图片数</label></div>
+    <div><span id="read">0</span><label>预计阅读(分)</label></div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

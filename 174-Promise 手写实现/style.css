@@ -1,0 +1,6 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", sans-serif; }
+body { background: #1f2937; color: #e5e7eb; min-height: 100vh; display: flex; justify-content: center; padding: 30px 20px; }
+.card { width: 100%; max-width: 760px; }
+h1 { color: #34d399; margin-bottom: 16px; }
+.out { padding: 14px; background: #111827; border-radius: 8px; margin-bottom: 16px; font-family: monospace; white-space: pre-wrap; }
+pre { background: #111827; padding: 14px; border-radius: 8px; color: #34d399; font-size: 12px; line-height: 1.5; overflow: auto; max-height: 320px; }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>105. 文件读取器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h1>📄 文件读取器</h1>
+  <input type="file" id="f">
+  <div class="out">
+    <div><b>文件名：</b><span id="n"></span></div>
+    <div><b>大小：</b><span id="s"></span></div>
+    <div><b>类型：</b><span id="t"></span></div>
+    <div><b>最后修改：</b><span id="l"></span></div>
+  </div>
+  <div class="btns">
+    <button id="text" class="primary">读取为文本</button>
+    <button id="data">读取为 DataURL</button>
+    <button id="bin">读取为字节</button>
+  </div>
+  <div id="res" class="res">选择文件后点击读取</div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

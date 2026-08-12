@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>82. SessionStorage Demo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h1>⏳ SessionStorage</h1>
+  <p class="info">数据只在当前标签页会话有效，关闭标签后即被清除。数据在标签页之间不共享。</p>
+  <input id="v" placeholder="输入内容保存"><button id="set">保存</button>
+  <div class="box" id="box">（暂无数据）</div>
+  <div class="meta">打开的新标签页不会有此数据 → <a id="open" href="#">在新标签打开本页</a></div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

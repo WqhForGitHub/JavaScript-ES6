@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>14. 随机密码生成器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>🔐 随机密码生成器</h1>
+  <input id="pwd" readonly>
+  <label>长度 <span id="lenv">16</span> <input type="range" id="len" min="4" max="32" value="16"></label>
+  <div class="opts">
+    <label><input type="checkbox" id="lo" checked> a-z</label>
+    <label><input type="checkbox" id="up" checked> A-Z</label>
+    <label><input type="checkbox" id="num" checked> 0-9</label>
+    <label><input type="checkbox" id="sym" checked> 符号</label>
+  </div>
+  <div class="btns">
+    <button id="gen" class="primary">生成</button>
+    <button id="copy">复制</button>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
