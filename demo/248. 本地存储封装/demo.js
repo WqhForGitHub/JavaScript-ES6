@@ -12,4 +12,4 @@ const storage = {
     localStorage.removeItem(key);
   },
 };
-console.log("storage ready");
+console.log('storage ready');

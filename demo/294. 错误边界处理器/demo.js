@@ -4,8 +4,8 @@ function errorBoundary(fn, fallback) {
   try {
     return fn();
   } catch (error) {
-    console.log("捕获错误:", error.message);
+    console.log('捕获错误:', error.message);
     return fallback;
   }
 }
-console.log(errorBoundary(() => JSON.parse("bad"), { safe: true }));
+console.log(errorBoundary(() => JSON.parse('bad'), { safe: true }));

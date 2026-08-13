@@ -14,6 +14,4 @@ class MiniPromise {
     return this;
   }
 }
-new MiniPromise((resolve) => setTimeout(() => resolve(42), 50)).then(
-  console.log,
-);
+new MiniPromise((resolve) => setTimeout(() => resolve(42), 50)).then(console.log);

@@ -15,9 +15,9 @@ console.log(
   bundle(
     {
       main(req, module) {
-        module.exports = "bundle result";
+        module.exports = 'bundle result';
       },
     },
-    "main",
-  ),
+    'main'
+  )
 );

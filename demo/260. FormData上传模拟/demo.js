@@ -5,9 +5,5 @@ function createUploadFormData(fields) {
   Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
   return fd;
 }
-if (typeof FormData !== "undefined")
-  console.log(
-    Array.from(
-      createUploadFormData({ name: "demo", file: "content" }).entries(),
-    ),
-  );
+if (typeof FormData !== 'undefined')
+  console.log(Array.from(createUploadFormData({ name: 'demo', file: 'content' }).entries()));

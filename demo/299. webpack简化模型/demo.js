@@ -13,6 +13,4 @@ class MiniWebpack {
     return { entry: this.entry, graph };
   }
 }
-console.log(
-  new MiniWebpack("main", { main: () => console.log("app") }).build(),
-);
+console.log(new MiniWebpack('main', { main: () => console.log('app') }).build());

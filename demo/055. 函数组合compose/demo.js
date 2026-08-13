@@ -8,6 +8,6 @@ console.log(
   compose(
     (n) => n + 1,
     (n) => n * n,
-    (n) => n * 2,
-  )(3),
+    (n) => n * 2
+  )(3)
 );

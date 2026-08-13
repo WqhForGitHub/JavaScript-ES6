@@ -2,7 +2,7 @@
 
 function listenInput(input, callback) {
   const handler = (e) => callback(e.target.value);
-  input.addEventListener("input", handler);
-  return () => input.removeEventListener("input", handler);
+  input.addEventListener('input', handler);
+  return () => input.removeEventListener('input', handler);
 }
-console.log("listenInput ready");
+console.log('listenInput ready');

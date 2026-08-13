@@ -7,6 +7,4 @@ function convert(value) {
     boolean: Boolean(value),
   };
 }
-["123", "", "abc", 0, null, undefined, []].forEach((value) =>
-  console.log(value, convert(value)),
-);
+['123', '', 'abc', 0, null, undefined, []].forEach((value) => console.log(value, convert(value)));

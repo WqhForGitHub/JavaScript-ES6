@@ -8,4 +8,4 @@ function safeRun(fn) {
   }
 }
 console.log(safeRun(() => JSON.parse('{"ok":true}')));
-console.log(safeRun(() => JSON.parse("{bad}")));
+console.log(safeRun(() => JSON.parse('{bad}')));

@@ -7,4 +7,4 @@ function makeIterable(items) {
     },
   };
 }
-console.log([...makeIterable(["x", "y"])]);
+console.log([...makeIterable(['x', 'y'])]);

@@ -8,4 +8,4 @@ async function request(url, options = {}, fetcher = mockFetch) {
 function mockFetch(url) {
   return Promise.resolve({ ok: true, json: () => Promise.resolve({ url }) });
 }
-request("/users").then(console.log);
+request('/users').then(console.log);

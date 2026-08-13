@@ -18,7 +18,7 @@
 ```html
 <script>
     function sayHi() {
-        console.log("Hi!");
+                                                                console.log("Hi!");
     }
 </script>
 ```

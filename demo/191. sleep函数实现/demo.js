@@ -2,8 +2,8 @@
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function demo() {
-  console.log("start");
+  console.log('start');
   await sleep(100);
-  console.log("end");
+  console.log('end');
 }
 demo();

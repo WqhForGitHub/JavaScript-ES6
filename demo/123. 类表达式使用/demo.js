@@ -8,4 +8,4 @@ const User = class {
     return this.name;
   }
 };
-console.log(new User("Lin").getName());
+console.log(new User('Lin').getName());

@@ -6,4 +6,4 @@ function myBind(fn, context, ...boundArgs) {
 function add(a, b) {
   return `${this.prefix}${a + b}`;
 }
-console.log(myBind(add, { prefix: "sum=" }, 1)(2));
+console.log(myBind(add, { prefix: 'sum=' }, 1)(2));

@@ -2,13 +2,13 @@
 
 class Component {
   mount() {
-    console.log("mounted");
+    console.log('mounted');
   }
   update() {
-    console.log("updated");
+    console.log('updated');
   }
   destroy() {
-    console.log("destroyed");
+    console.log('destroyed');
   }
 }
 const c = new Component();

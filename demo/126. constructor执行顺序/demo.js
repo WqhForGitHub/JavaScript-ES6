@@ -2,14 +2,14 @@
 
 class Parent {
   constructor() {
-    console.log("parent");
+    console.log('parent');
   }
 }
 class Child extends Parent {
   constructor() {
-    console.log("before super");
+    console.log('before super');
     super();
-    console.log("child");
+    console.log('child');
   }
 }
 new Child();

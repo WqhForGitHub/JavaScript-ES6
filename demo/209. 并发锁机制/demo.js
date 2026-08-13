@@ -9,7 +9,7 @@ class Mutex {
     return new Promise((resolve) =>
       this.locked
         ? this.waiting.push(resolve)
-        : ((this.locked = true), resolve(this.unlock.bind(this))),
+        : ((this.locked = true), resolve(this.unlock.bind(this)))
     );
   }
   unlock() {
@@ -19,10 +19,10 @@ class Mutex {
 }
 const mutex = new Mutex();
 mutex.lock().then((unlock) => {
-  console.log("task1");
+  console.log('task1');
   unlock();
 });
 mutex.lock().then((unlock) => {
-  console.log("task2");
+  console.log('task2');
   unlock();
 });

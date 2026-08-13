@@ -1,9 +1,9 @@
 // 239. 表单双向绑定
 
 function bindInput(input, state, key) {
-  let value = state[key] || "";
+  let value = state[key] || '';
   input.value = value;
-  input.addEventListener("input", () => (state[key] = input.value));
+  input.addEventListener('input', () => (state[key] = input.value));
   Object.defineProperty(state, key, {
     get() {
       return value;
@@ -14,4 +14,4 @@ function bindInput(input, state, key) {
     },
   });
 }
-console.log("bindInput ready");
+console.log('bindInput ready');

@@ -14,5 +14,5 @@ class PubSub {
   }
 }
 const bus = new PubSub();
-bus.on("login", console.log);
-bus.emit("login", { user: "Alice" });
+bus.on('login', console.log);
+bus.emit('login', { user: 'Alice' });

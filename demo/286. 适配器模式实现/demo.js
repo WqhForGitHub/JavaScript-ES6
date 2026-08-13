@@ -13,4 +13,4 @@ class LoggerAdapter {
     this.oldLogger.write(message);
   }
 }
-new LoggerAdapter(new OldLogger()).log("hello");
+new LoggerAdapter(new OldLogger()).log('hello');

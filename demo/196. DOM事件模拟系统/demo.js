@@ -12,6 +12,6 @@ class Node {
     (this.listeners[type] || []).forEach((fn) => fn({ type, target: this }));
   }
 }
-const button = new Node("button");
-button.addEventListener("click", (e) => console.log(e.type, e.target.name));
-button.dispatchEvent("click");
+const button = new Node('button');
+button.addEventListener('click', (e) => console.log(e.type, e.target.name));
+button.dispatchEvent('click');

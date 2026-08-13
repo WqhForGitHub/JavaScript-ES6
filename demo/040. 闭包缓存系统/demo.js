@@ -9,5 +9,5 @@ function createCache() {
   };
 }
 const cache = createCache();
-cache.set("token", "abc");
-console.log(cache.has("token"), cache.get("token"));
+cache.set('token', 'abc');
+console.log(cache.has('token'), cache.get('token'));

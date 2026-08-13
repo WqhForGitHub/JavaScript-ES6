@@ -3,10 +3,10 @@
 class ShapeFactory {
   static create(type) {
     const shapes = {
-      circle: { draw: () => "draw circle" },
-      square: { draw: () => "draw square" },
+      circle: { draw: () => 'draw circle' },
+      square: { draw: () => 'draw square' },
     };
-    return shapes[type] || { draw: () => "unknown" };
+    return shapes[type] || { draw: () => 'unknown' };
   }
 }
-console.log(ShapeFactory.create("circle").draw());
+console.log(ShapeFactory.create('circle').draw());

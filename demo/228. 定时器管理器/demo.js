@@ -17,4 +17,4 @@ class TimerManager {
     this.timers.clear();
   }
 }
-new TimerManager().set(() => console.log("done"), 10);
+new TimerManager().set(() => console.log('done'), 10);

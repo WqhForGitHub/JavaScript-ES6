@@ -6,6 +6,6 @@ const animal = {
   },
 };
 const dog = Object.create(animal);
-dog.name = "Dog";
+dog.name = 'Dog';
 console.log(dog.speak());
 console.log(Object.getPrototypeOf(dog) === animal);

@@ -2,11 +2,11 @@
 
 async function postJson(url, data) {
   const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
-console.log("postJson ready");
+console.log('postJson ready');

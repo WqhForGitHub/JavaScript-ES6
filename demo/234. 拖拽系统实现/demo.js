@@ -3,7 +3,7 @@
 function makeDraggable(el) {
   let ox = 0,
     oy = 0;
-  el.addEventListener("mousedown", (e) => {
+  el.addEventListener('mousedown', (e) => {
     ox = e.clientX - el.offsetLeft;
     oy = e.clientY - el.offsetTop;
     document.onmousemove = (m) => {
@@ -13,4 +13,4 @@ function makeDraggable(el) {
     document.onmouseup = () => (document.onmousemove = null);
   });
 }
-console.log("makeDraggable ready");
+console.log('makeDraggable ready');

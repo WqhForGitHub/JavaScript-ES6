@@ -1,12 +1,12 @@
 // 1. JS变量作用域测试
 
-var globalName = "global";
+const globalName = 'global';
 function testScope() {
-  var functionName = "function";
+  const functionName = 'function';
   if (true) {
-    var varName = "var";
-    let letName = "let";
-    const constName = "const";
+    var varName = 'var';
+    const letName = 'let';
+    const constName = 'const';
     console.log(globalName, functionName, varName, letName, constName);
   }
   console.log(varName);

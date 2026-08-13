@@ -2,7 +2,7 @@
 
 class Api {
   getUser() {
-    return { name: "Ada" };
+    return { name: 'Ada' };
   }
 }
 class UserService {

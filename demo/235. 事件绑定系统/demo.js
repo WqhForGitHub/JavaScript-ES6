@@ -9,9 +9,7 @@ class EventBinder {
     this.records.push({ target, type, handler });
   }
   offAll() {
-    this.records.forEach(({ target, type, handler }) =>
-      target.removeEventListener(type, handler),
-    );
+    this.records.forEach(({ target, type, handler }) => target.removeEventListener(type, handler));
     this.records = [];
   }
 }

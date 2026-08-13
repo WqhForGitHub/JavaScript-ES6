@@ -8,6 +8,6 @@ function requireMock(name, factory) {
   factory(module, module.exports);
   return module.exports;
 }
-const a = requireMock("counter", (m) => (m.exports.count = 1)),
-  b = requireMock("counter", () => {});
+const a = requireMock('counter', (m) => (m.exports.count = 1)),
+  b = requireMock('counter', () => {});
 console.log(a === b, b.count);

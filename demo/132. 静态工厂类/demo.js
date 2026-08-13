@@ -6,7 +6,7 @@ class User {
     this.role = role;
   }
   static admin(name) {
-    return new User(name, "admin");
+    return new User(name, 'admin');
   }
 }
-console.log(User.admin("Root"));
+console.log(User.admin('Root'));

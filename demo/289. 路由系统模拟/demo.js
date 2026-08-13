@@ -9,9 +9,9 @@ class RouterSystem {
   }
   dispatch(path) {
     const route = this.routes.find((r) => r.path === path);
-    return route ? route.handler() : "404";
+    return route ? route.handler() : '404';
   }
 }
 const router = new RouterSystem();
-router.add("/", () => "home");
-console.log(router.dispatch("/"));
+router.add('/', () => 'home');
+console.log(router.dispatch('/'));

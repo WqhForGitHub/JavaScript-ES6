@@ -10,4 +10,4 @@ class Config {
   }
 }
 const getConfig = createSingleton(Config);
-console.log(getConfig("app") === getConfig("other"));
+console.log(getConfig('app') === getConfig('other'));

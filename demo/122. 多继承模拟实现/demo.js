@@ -3,13 +3,13 @@
 const Eat = (Base) =>
   class extends Base {
     eat() {
-      return "eat";
+      return 'eat';
     }
   };
 const Sleep = (Base) =>
   class extends Base {
     sleep() {
-      return "sleep";
+      return 'sleep';
     }
   };
 class Person {}

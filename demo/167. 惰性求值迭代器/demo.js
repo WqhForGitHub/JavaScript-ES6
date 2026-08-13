@@ -2,7 +2,7 @@
 
 function* mapLazy(items, fn) {
   for (const item of items) {
-    console.log("compute", item);
+    console.log('compute', item);
     yield fn(item);
   }
 }

@@ -1,6 +1,6 @@
 // 268. sessionStorage封装
 
-function createSessionStore(prefix = "session:") {
+function createSessionStore(prefix = 'session:') {
   return {
     set(key, value) {
       sessionStorage.setItem(prefix + key, JSON.stringify(value));
@@ -11,4 +11,4 @@ function createSessionStore(prefix = "session:") {
     },
   };
 }
-console.log("createSessionStore ready");
+console.log('createSessionStore ready');

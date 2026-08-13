@@ -6,8 +6,8 @@ class App {
   }
 }
 function logger(app) {
-  app.log = (msg) => "[log] " + msg;
+  app.log = (msg) => '[log] ' + msg;
 }
 const app = new App();
 app.use(logger);
-console.log(app.log("ok"));
+console.log(app.log('ok'));

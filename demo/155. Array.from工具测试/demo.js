@@ -2,4 +2,4 @@
 
 const set = new Set([1, 2, 3]);
 console.log(Array.from(set, (n) => n * 2));
-console.log(Array.from("JS"));
+console.log(Array.from('JS'));

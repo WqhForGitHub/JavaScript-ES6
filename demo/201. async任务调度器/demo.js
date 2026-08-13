@@ -10,5 +10,5 @@ class Scheduler {
   }
 }
 const scheduler = new Scheduler();
-scheduler.add(() => Promise.resolve(console.log("A")));
-scheduler.add(() => Promise.resolve(console.log("B")));
+scheduler.add(() => Promise.resolve(console.log('A')));
+scheduler.add(() => Promise.resolve(console.log('B')));

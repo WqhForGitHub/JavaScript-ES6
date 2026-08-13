@@ -9,4 +9,4 @@ function createUser(name, role) {
     },
   };
 }
-console.log(createUser("Alice", "admin").describe());
+console.log(createUser('Alice', 'admin').describe());

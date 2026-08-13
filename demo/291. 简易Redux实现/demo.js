@@ -16,7 +16,7 @@ function createStore(reducer, initialState) {
     },
   };
 }
-const reducer = (s, a) => (a.type === "inc" ? { count: s.count + 1 } : s);
+const reducer = (s, a) => (a.type === 'inc' ? { count: s.count + 1 } : s);
 const store = createStore(reducer, { count: 0 });
 store.subscribe(() => console.log(store.getState()));
-store.dispatch({ type: "inc" });
+store.dispatch({ type: 'inc' });

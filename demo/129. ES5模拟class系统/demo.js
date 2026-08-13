@@ -6,4 +6,4 @@ function Person(name) {
 Person.prototype.say = function () {
   return this.name;
 };
-console.log(new Person("ES5").say());
+console.log(new Person('ES5').say());

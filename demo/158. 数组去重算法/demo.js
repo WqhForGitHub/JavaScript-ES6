@@ -3,4 +3,4 @@
 function unique(arr) {
   return arr.filter((item, index) => arr.indexOf(item) === index);
 }
-console.log(unique(["a", "b", "a", "c"]));
+console.log(unique(['a', 'b', 'a', 'c']));

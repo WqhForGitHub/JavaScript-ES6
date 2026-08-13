@@ -11,4 +11,4 @@ function Dog(name) {
 }
 Dog.prototype = Object.create(Animal.prototype);
 Dog.prototype.constructor = Dog;
-console.log(new Dog("Lucky").speak());
+console.log(new Dog('Lucky').speak());

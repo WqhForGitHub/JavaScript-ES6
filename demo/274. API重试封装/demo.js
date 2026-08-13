@@ -11,4 +11,4 @@ async function retryRequest(task, times = 3) {
   }
   throw lastError;
 }
-retryRequest(() => Promise.resolve("ok")).then(console.log);
+retryRequest(() => Promise.resolve('ok')).then(console.log);

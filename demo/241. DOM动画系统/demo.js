@@ -10,4 +10,4 @@ function moveTo(el, x, duration = 300) {
   }
   requestAnimationFrame(tick);
 }
-console.log("moveTo ready");
+console.log('moveTo ready');

@@ -12,5 +12,5 @@ class EventBus {
   }
 }
 const bus = new EventBus();
-bus.on("ready", console.log);
-bus.emit("ready", "ok");
+bus.on('ready', console.log);
+bus.emit('ready', 'ok');

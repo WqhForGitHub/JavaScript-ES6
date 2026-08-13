@@ -4,7 +4,7 @@ function withTiming(fn) {
   return (...args) => {
     const start = Date.now();
     const result = fn(...args);
-    console.log("cost:", Date.now() - start);
+    console.log('cost:', Date.now() - start);
     return result;
   };
 }

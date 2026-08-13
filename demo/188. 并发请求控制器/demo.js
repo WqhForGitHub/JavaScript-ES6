@@ -23,5 +23,5 @@ function limit(tasks, max) {
 }
 limit(
   [1, 2, 3, 4].map((n) => () => Promise.resolve(n)),
-  2,
+  2
 ).then(console.log);

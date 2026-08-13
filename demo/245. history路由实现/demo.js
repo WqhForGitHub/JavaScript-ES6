@@ -8,7 +8,7 @@ class HistoryRouter {
     this.routes.set(path, handler);
   }
   push(path) {
-    if (typeof history !== "undefined") history.pushState({}, "", path);
+    if (typeof history !== 'undefined') history.pushState({}, '', path);
     this.resolve(path);
   }
   resolve(path) {

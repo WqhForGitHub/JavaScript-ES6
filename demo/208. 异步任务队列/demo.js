@@ -10,5 +10,5 @@ class AsyncQueue {
   }
 }
 const queue = new AsyncQueue();
-queue.push(() => Promise.resolve(console.log("one")));
-queue.push(() => Promise.resolve(console.log("two")));
+queue.push(() => Promise.resolve(console.log('one')));
+queue.push(() => Promise.resolve(console.log('two')));

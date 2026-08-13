@@ -8,4 +8,4 @@ class Singleton {
     Singleton.instance = this;
   }
 }
-console.log(new Singleton("first") === new Singleton("second"));
+console.log(new Singleton('first') === new Singleton('second'));

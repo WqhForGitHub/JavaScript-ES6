@@ -11,7 +11,4 @@ async function retry(task, times, delay = 50) {
   }
 }
 let count = 0;
-retry(
-  () => (++count < 3 ? Promise.reject("fail") : Promise.resolve("ok")),
-  3,
-).then(console.log);
+retry(() => (++count < 3 ? Promise.reject('fail') : Promise.resolve('ok')), 3).then(console.log);

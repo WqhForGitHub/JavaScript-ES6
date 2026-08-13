@@ -13,4 +13,4 @@ class Subject {
 }
 const subject = new Subject();
 subject.subscribe({ update: console.log });
-subject.notify("changed");
+subject.notify('changed');

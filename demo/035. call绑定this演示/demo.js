@@ -3,4 +3,4 @@
 function intro(prefix, suffix) {
   return `${prefix} ${this.name}${suffix}`;
 }
-console.log(intro.call({ name: "Alice" }, "Hello", "!"));
+console.log(intro.call({ name: 'Alice' }, 'Hello', '!'));

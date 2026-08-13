@@ -1,7 +1,7 @@
 // 227. screen信息展示
 
 function getScreenInfo() {
-  if (typeof screen === "undefined") return { message: "无 screen 对象" };
+  if (typeof screen === 'undefined') return { message: '无 screen 对象' };
   return {
     width: screen.width,
     height: screen.height,

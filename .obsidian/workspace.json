@@ -13,8 +13,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "第01章：什么是 JavaScript/README.md",
-                "mode": "source",
+                "file": "第04章：变量、作用域与内存/README.md",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
@@ -41,7 +41,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "文件列表"
@@ -94,7 +96,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "第01章：什么是 JavaScript/README.md",
+                "file": "第04章：变量、作用域与内存/README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +106,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "README 的反向链接列表"
+              "title": "反向链接"
             }
           },
           {
@@ -184,5 +186,10 @@
     }
   },
   "active": "fd10d490eb38f09d",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "第02章：HTML 中的 JavaScript/README.md",
+    "第01章：什么是 JavaScript/README.md",
+    "第08章：对象、类与面向对象编程/README.md",
+    "第05章：基本引用类型/README.md"
+  ]
 }

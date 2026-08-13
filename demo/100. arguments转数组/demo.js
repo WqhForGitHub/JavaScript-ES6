@@ -4,4 +4,4 @@ function collect() {
   console.log(Array.from(arguments));
   console.log([...arguments]);
 }
-collect(1, "a", true);
+collect(1, 'a', true);

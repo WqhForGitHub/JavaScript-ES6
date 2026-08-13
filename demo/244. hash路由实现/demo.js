@@ -8,13 +8,13 @@ class HashRouter {
     this.routes[path] = handler;
   }
   start() {
-    if (typeof window === "undefined") return;
-    window.addEventListener("hashchange", () => this.resolve());
+    if (typeof window === 'undefined') return;
+    window.addEventListener('hashchange', () => this.resolve());
     this.resolve();
   }
   resolve() {
-    const path = location.hash.slice(1) || "/";
-    (this.routes[path] || (() => console.log("not found")))();
+    const path = location.hash.slice(1) || '/';
+    (this.routes[path] || (() => console.log('not found')))();
   }
 }
 console.log(new HashRouter());

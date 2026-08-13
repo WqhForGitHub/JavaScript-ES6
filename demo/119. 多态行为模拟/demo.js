@@ -2,12 +2,12 @@
 
 class Cat {
   speak() {
-    return "meow";
+    return 'meow';
   }
 }
 class Duck {
   speak() {
-    return "quack";
+    return 'quack';
   }
 }
 [new Cat(), new Duck()].forEach((animal) => console.log(animal.speak()));

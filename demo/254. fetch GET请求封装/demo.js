@@ -6,4 +6,4 @@ async function getJson(url, params = {}) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
-console.log("getJson ready");
+console.log('getJson ready');

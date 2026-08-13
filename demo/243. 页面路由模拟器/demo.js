@@ -8,10 +8,10 @@ class PageRouter {
     this.routes.set(path, handler);
   }
   go(path) {
-    const h = this.routes.get(path) || this.routes.get("*");
+    const h = this.routes.get(path) || this.routes.get('*');
     if (h) h(path);
   }
 }
 const router = new PageRouter();
-router.route("/home", () => console.log("home"));
-router.go("/home");
+router.route('/home', () => console.log('home'));
+router.go('/home');

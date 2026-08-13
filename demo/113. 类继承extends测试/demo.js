@@ -2,12 +2,12 @@
 
 class Animal {
   speak() {
-    return "sound";
+    return 'sound';
   }
 }
 class Dog extends Animal {
   bark() {
-    return "woof";
+    return 'woof';
   }
 }
 const dog = new Dog();

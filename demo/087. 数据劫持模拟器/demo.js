@@ -13,5 +13,5 @@ function observe(obj, key, callback) {
   });
 }
 const state = { count: 0 };
-observe(state, "count", (value) => console.log("changed", value));
+observe(state, 'count', (value) => console.log('changed', value));
 state.count = 1;

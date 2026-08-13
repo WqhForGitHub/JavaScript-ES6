@@ -12,5 +12,5 @@ class PubSub {
   }
 }
 const ps = new PubSub();
-ps.subscribe("news", console.log);
-ps.publish("news", "JavaScript");
+ps.subscribe('news', console.log);
+ps.publish('news', 'JavaScript');

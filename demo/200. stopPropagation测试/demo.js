@@ -7,11 +7,11 @@ const event = {
   },
 };
 function child(e) {
-  console.log("child");
+  console.log('child');
   e.stopPropagation();
 }
 function parent() {
-  console.log("parent");
+  console.log('parent');
 }
 child(event);
 if (!event.stopped) parent();

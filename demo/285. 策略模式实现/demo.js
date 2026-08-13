@@ -8,4 +8,4 @@ const priceStrategies = {
 function calculatePrice(price, strategy) {
   return priceStrategies[strategy](price);
 }
-console.log(calculatePrice(100, "vip"));
+console.log(calculatePrice(100, 'vip'));

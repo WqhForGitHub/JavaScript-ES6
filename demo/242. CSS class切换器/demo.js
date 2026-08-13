@@ -7,4 +7,4 @@ function createClassToggler(el, className) {
     toggle: () => el.classList.toggle(className),
   };
 }
-console.log("createClassToggler ready");
+console.log('createClassToggler ready');

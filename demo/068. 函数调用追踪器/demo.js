@@ -2,10 +2,10 @@
 
 function trace(fn, name = fn.name) {
   return (...args) => {
-    console.log("call", name, args);
+    console.log('call', name, args);
     const result = fn(...args);
-    console.log("return", result);
+    console.log('return', result);
     return result;
   };
 }
-trace((a, b) => a + b, "add")(2, 3);
+trace((a, b) => a + b, 'add')(2, 3);

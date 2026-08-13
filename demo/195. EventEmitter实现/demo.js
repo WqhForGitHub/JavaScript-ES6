@@ -15,4 +15,4 @@ class EventEmitter {
     (this.events[type] || []).forEach((fn) => fn(...args));
   }
 }
-new EventEmitter().on("data", console.log).emit("data", "ok");
+new EventEmitter().on('data', console.log).emit('data', 'ok');

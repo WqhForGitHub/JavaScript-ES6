@@ -2,6 +2,6 @@
 
 const obj = Object.create({ inherited: true });
 obj.own = true;
-console.log(obj.hasOwnProperty("own"));
-console.log(obj.hasOwnProperty("inherited"));
-console.log(Object.prototype.hasOwnProperty.call(obj, "own"));
+console.log(obj.hasOwnProperty('own'));
+console.log(obj.hasOwnProperty('inherited'));
+console.log(Object.prototype.hasOwnProperty.call(obj, 'own'));

@@ -3,7 +3,7 @@
 const Flyable = (Base) =>
   class extends Base {
     fly() {
-      return this.name + " flies";
+      return this.name + ' flies';
     }
   };
 class Bird {
@@ -12,4 +12,4 @@ class Bird {
   }
 }
 class Eagle extends Flyable(Bird) {}
-console.log(new Eagle("eagle").fly());
+console.log(new Eagle('eagle').fly());

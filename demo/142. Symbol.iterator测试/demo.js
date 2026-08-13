@@ -1,7 +1,7 @@
 // 142. Symbol.iterator测试
 
 const list = {
-  values: ["a", "b"],
+  values: ['a', 'b'],
   [Symbol.iterator]: function* () {
     yield* this.values;
   },

@@ -9,6 +9,6 @@ function* filter(iterable, fn) {
 console.log([
   ...filter(
     map([1, 2, 3, 4], (n) => n * 2),
-    (n) => n > 4,
+    (n) => n > 4
   ),
 ]);

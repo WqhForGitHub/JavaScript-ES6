@@ -8,5 +8,5 @@ function createModel(type) {
     }
   };
 }
-const UserModel = createModel("user");
-console.log(new UserModel("Tom"));
+const UserModel = createModel('user');
+console.log(new UserModel('Tom'));

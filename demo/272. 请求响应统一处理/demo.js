@@ -8,6 +8,4 @@ async function requestWithHandler(task) {
     return { success: false, message: error.message };
   }
 }
-requestWithHandler(() => Promise.resolve({ data: [1, 2, 3] })).then(
-  console.log,
-);
+requestWithHandler(() => Promise.resolve({ data: [1, 2, 3] })).then(console.log);

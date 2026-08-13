@@ -12,6 +12,6 @@ class MessageQueue {
   }
 }
 const mq = new MessageQueue();
-mq.push("hello");
-mq.push("world");
+mq.push('hello');
+mq.push('world');
 mq.consume();

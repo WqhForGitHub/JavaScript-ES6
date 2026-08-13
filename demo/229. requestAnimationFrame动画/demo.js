@@ -2,7 +2,7 @@
 
 function animate(duration, onUpdate) {
   const raf =
-    typeof requestAnimationFrame === "function"
+    typeof requestAnimationFrame === 'function'
       ? requestAnimationFrame
       : (fn) => setTimeout(fn, 16);
   const start = Date.now();

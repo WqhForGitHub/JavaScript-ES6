@@ -1,6 +1,6 @@
 // 267. localStorage封装
 
-function createLocalStore(prefix = "app:") {
+function createLocalStore(prefix = 'app:') {
   return {
     set(key, value) {
       localStorage.setItem(prefix + key, JSON.stringify(value));
@@ -11,4 +11,4 @@ function createLocalStore(prefix = "app:") {
     },
   };
 }
-console.log("createLocalStore ready");
+console.log('createLocalStore ready');

@@ -6,5 +6,5 @@ function createNode(tag, props = {}, children = []) {
   children.forEach((c) => el.append(c));
   return el;
 }
-if (typeof document !== "undefined")
-  console.log(createNode("div", { class: "card" }, ["hello"]).outerHTML);
+if (typeof document !== 'undefined')
+  console.log(createNode('div', { class: 'card' }, ['hello']).outerHTML);

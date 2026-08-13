@@ -2,7 +2,7 @@
 
 Promise.resolve()
   .then(() => {
-    throw new Error("failed");
+    throw new Error('failed');
   })
   .catch((err) => console.log(err.message))
-  .finally(() => console.log("finally"));
+  .finally(() => console.log('finally'));

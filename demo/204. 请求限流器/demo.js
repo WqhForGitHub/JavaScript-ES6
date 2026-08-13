@@ -8,9 +8,9 @@ function throttleRequest(fn, delay) {
       last = now;
       return fn(...args);
     }
-    return Promise.resolve("limited");
+    return Promise.resolve('limited');
   };
 }
-const request = throttleRequest((url) => Promise.resolve("fetch " + url), 1000);
-request("/api").then(console.log);
-request("/api").then(console.log);
+const request = throttleRequest((url) => Promise.resolve('fetch ' + url), 1000);
+request('/api').then(console.log);
+request('/api').then(console.log);

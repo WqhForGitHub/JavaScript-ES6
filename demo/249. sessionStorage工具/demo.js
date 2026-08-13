@@ -12,4 +12,4 @@ const sessionStore = {
     sessionStorage.clear();
   },
 };
-console.log("sessionStore ready");
+console.log('sessionStore ready');

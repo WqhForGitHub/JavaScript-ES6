@@ -10,5 +10,5 @@ class Sandbox {
   }
 }
 const box = new Sandbox();
-box.set("x", 1);
+box.set('x', 1);
 console.log(box.run((s) => s.x + 1));

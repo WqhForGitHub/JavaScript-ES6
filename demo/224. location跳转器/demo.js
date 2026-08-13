@@ -2,11 +2,11 @@
 
 const locationHelper = {
   parse(url) {
-    const u = new URL(url, "https://example.com");
+    const u = new URL(url, 'https://example.com');
     return { path: u.pathname, query: u.search, hash: u.hash };
   },
   jump(url) {
-    if (typeof location !== "undefined") location.href = url;
+    if (typeof location !== 'undefined') location.href = url;
   },
 };
-console.log(locationHelper.parse("/user?id=1#profile"));
+console.log(locationHelper.parse('/user?id=1#profile'));

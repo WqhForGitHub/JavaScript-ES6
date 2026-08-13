@@ -3,10 +3,10 @@
 const debugConsole = {
   enabled: true,
   log(...args) {
-    if (this.enabled) console.log("[debug]", ...args);
+    if (this.enabled) console.log('[debug]', ...args);
   },
   table(data) {
     if (this.enabled) console.table(data);
   },
 };
-debugConsole.log("state", { count: 1 });
+debugConsole.log('state', { count: 1 });

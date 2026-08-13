@@ -7,9 +7,9 @@ const cookieManager = {
   },
   get(name) {
     return document.cookie
-      .split("; ")
+      .split('; ')
       .find((row) => row.startsWith(`${name}=`))
-      ?.split("=")[1];
+      ?.split('=')[1];
   },
 };
-console.log("cookieManager ready");
+console.log('cookieManager ready');

@@ -3,5 +3,5 @@
 function greet(word) {
   return `${word}, ${this.name}`;
 }
-const hiAlice = greet.bind({ name: "Alice" }, "Hi");
+const hiAlice = greet.bind({ name: 'Alice' }, 'Hi');
 console.log(hiAlice());

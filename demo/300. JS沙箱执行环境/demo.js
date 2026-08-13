@@ -6,4 +6,4 @@ function runInSandbox(code, context = {}) {
   const fn = new Function(...keys, `"use strict"; ${code}`);
   return fn(...values);
 }
-console.log(runInSandbox("return a+b", { a: 2, b: 3 }));
+console.log(runInSandbox('return a+b', { a: 2, b: 3 }));

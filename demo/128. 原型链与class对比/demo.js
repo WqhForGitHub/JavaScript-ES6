@@ -2,11 +2,11 @@
 
 class ClassUser {
   say() {
-    return "class";
+    return 'class';
   }
 }
 function ProtoUser() {}
 ProtoUser.prototype.say = function () {
-  return "prototype";
+  return 'prototype';
 };
 console.log(new ClassUser().say(), new ProtoUser().say());

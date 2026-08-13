@@ -4,6 +4,6 @@ function Person(name) {
   this.name = name;
 }
 Person.prototype.sayHi = function () {
-  return "Hi " + this.name;
+  return 'Hi ' + this.name;
 };
-console.log(new Person("Grace").sayHi());
+console.log(new Person('Grace').sayHi());

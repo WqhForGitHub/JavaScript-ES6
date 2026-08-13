@@ -6,5 +6,5 @@ class DelayQueue {
   }
 }
 const queue = new DelayQueue();
-queue.add(() => console.log("after 50ms"), 50);
-queue.add(() => console.log("after 100ms"), 100);
+queue.add(() => console.log('after 50ms'), 50);
+queue.add(() => console.log('after 100ms'), 100);

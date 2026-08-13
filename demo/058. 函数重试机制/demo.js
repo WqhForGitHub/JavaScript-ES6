@@ -12,6 +12,6 @@ async function retry(fn, times = 3) {
   throw err;
 }
 retry((i) => {
-  if (i < 2) throw new Error("fail");
-  return "success";
+  if (i < 2) throw new Error('fail');
+  return 'success';
 }).then(console.log);

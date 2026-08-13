@@ -14,9 +14,9 @@ function composeMiddlewares(middlewares) {
 const ctx = { logs: [] };
 composeMiddlewares([
   (c, n) => {
-    c.logs.push("a");
+    c.logs.push('a');
     n();
   },
-  (c) => c.logs.push("b"),
+  (c) => c.logs.push('b'),
 ])(ctx);
 console.log(ctx.logs);

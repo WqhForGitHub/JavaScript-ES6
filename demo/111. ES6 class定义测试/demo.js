@@ -5,7 +5,7 @@ class Person {
     this.name = name;
   }
   sayHi() {
-    return "Hi " + this.name;
+    return 'Hi ' + this.name;
   }
 }
-console.log(new Person("Ada").sayHi());
+console.log(new Person('Ada').sayHi());

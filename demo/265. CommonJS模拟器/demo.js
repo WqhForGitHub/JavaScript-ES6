@@ -6,7 +6,7 @@ function createCommonJS(factory) {
   return module.exports;
 }
 const obj = createCommonJS((module, exports) => {
-  exports.name = "CommonJS";
-  module.exports.version = "mock";
+  exports.name = 'CommonJS';
+  module.exports.version = 'mock';
 });
 console.log(obj);

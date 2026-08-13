@@ -6,7 +6,7 @@ function freezePrototype(ClassRef) {
 }
 class Service {
   run() {
-    return "run";
+    return 'run';
   }
 }
 const S = freezePrototype(Service);

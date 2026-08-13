@@ -8,6 +8,6 @@ console.log(
   pipe(
     (s) => s.trim(),
     (s) => s.toUpperCase(),
-    (s) => `${s}!`,
-  )(" hello "),
+    (s) => `${s}!`
+  )(' hello ')
 );

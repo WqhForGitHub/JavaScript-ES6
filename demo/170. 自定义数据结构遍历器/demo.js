@@ -12,6 +12,6 @@ class Stack {
   }
 }
 const stack = new Stack();
-stack.push("first");
-stack.push("second");
+stack.push('first');
+stack.push('second');
 console.log([...stack]);

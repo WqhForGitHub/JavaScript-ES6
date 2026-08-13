@@ -2,15 +2,15 @@
 
 class AbstractTask {
   constructor() {
-    if (new.target === AbstractTask) throw new Error("abstract");
+    if (new.target === AbstractTask) throw new Error('abstract');
   }
   run() {
-    throw new Error("override");
+    throw new Error('override');
   }
 }
 class Task extends AbstractTask {
   run() {
-    return "running";
+    return 'running';
   }
 }
 console.log(new Task().run());

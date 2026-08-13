@@ -3,6 +3,6 @@
 function show() {
   return this.name;
 }
-const user = { name: "Alice", show };
+const user = { name: 'Alice', show };
 console.log(user.show());
-console.log(show.call({ name: "Bob" }));
+console.log(show.call({ name: 'Bob' }));
