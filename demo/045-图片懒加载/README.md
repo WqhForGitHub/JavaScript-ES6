@@ -8,98 +8,107 @@
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <title>图片懒加载</title>
-  <style>
-    .img-item {
-      width: 100%;
-      height: 400px;
-      margin-bottom: 20px;
-      background: #eee;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #999;
-      font-size: 20px;
-    }
-    .img-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  </style>
-</head>
-<body>
-  <div class="img-item"><img class="lazy" data-src="https://picsum.photos/id/1/800/400" src="" alt="占位" /></div>
-  <div class="img-item"><img class="lazy" data-src="https://picsum.photos/id/2/800/400" src="" alt="占位" /></div>
-  <div class="img-item"><img class="lazy" data-src="https://picsum.photos/id/3/800/400" src="" alt="占位" /></div>
-  <div class="img-item"><img class="lazy" data-src="https://picsum.photos/id/4/800/400" src="" alt="占位" /></div>
-  <div class="img-item"><img class="lazy" data-src="https://picsum.photos/id/5/800/400" src="" alt="占位" /></div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>图片懒加载</title>
+    <style>
+      .img-item {
+        width: 100%;
+        height: 400px;
+        margin-bottom: 20px;
+        background: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 20px;
+      }
+      .img-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="img-item">
+      <img class="lazy" data-src="https://picsum.photos/id/1/800/400" src="" alt="占位" />
+    </div>
+    <div class="img-item">
+      <img class="lazy" data-src="https://picsum.photos/id/2/800/400" src="" alt="占位" />
+    </div>
+    <div class="img-item">
+      <img class="lazy" data-src="https://picsum.photos/id/3/800/400" src="" alt="占位" />
+    </div>
+    <div class="img-item">
+      <img class="lazy" data-src="https://picsum.photos/id/4/800/400" src="" alt="占位" />
+    </div>
+    <div class="img-item">
+      <img class="lazy" data-src="https://picsum.photos/id/5/800/400" src="" alt="占位" />
+    </div>
 
-  <script>
-    /* ============ 方式一：scroll 事件 + getBoundingClientRect ============ */
-    function lazyLoad1() {
-      const images = document.querySelectorAll('img.lazy');
-      // 视口高度
-      const clientHeight = document.documentElement.clientHeight;
-      // 兼容写法：滚动距离
-      const scrollTop =
-        document.documentElement.scrollTop || document.body.scrollTop;
+    <script>
+      /* ============ 方式一：scroll 事件 + getBoundingClientRect ============ */
+      function lazyLoad1() {
+        const images = document.querySelectorAll('img.lazy');
+        // 视口高度
+        const clientHeight = document.documentElement.clientHeight;
+        // 兼容写法：滚动距离
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 
-      images.forEach((img) => {
-        if (img.src) return; // 已加载过
-        // 图片顶部距离页面顶部的距离 < 视口高度 + 滚动距离 => 进入视口
-        if (img.getBoundingClientRect().top < clientHeight + scrollTop) {
-          img.src = img.dataset.src; // 真实地址赋给 src
-          img.classList.remove('lazy');
-        }
-      });
-    }
+        images.forEach((img) => {
+          if (img.src) return; // 已加载过
+          // 图片顶部距离页面顶部的距离 < 视口高度 + 滚动距离 => 进入视口
+          if (img.getBoundingClientRect().top < clientHeight + scrollTop) {
+            img.src = img.dataset.src; // 真实地址赋给 src
+            img.classList.remove('lazy');
+          }
+        });
+      }
 
-    // 滚动事件必须配合节流，否则触发过于频繁
-    function throttle(fn, interval = 200) {
-      let lastTime = 0;
-      return function (...args) {
-        const now = Date.now();
-        if (now - lastTime >= interval) {
-          lastTime = now;
-          fn.apply(this, args);
-        }
-      };
-    }
+      // 滚动事件必须配合节流，否则触发过于频繁
+      function throttle(fn, interval = 200) {
+        let lastTime = 0;
+        return function (...args) {
+          const now = Date.now();
+          if (now - lastTime >= interval) {
+            lastTime = now;
+            fn.apply(this, args);
+          }
+        };
+      }
 
-    // window.addEventListener('scroll', throttle(lazyLoad1));
-    // window.addEventListener('load', lazyLoad1);
+      // window.addEventListener('scroll', throttle(lazyLoad1));
+      // window.addEventListener('load', lazyLoad1);
 
-    /* ============ 方式二：IntersectionObserver（推荐） ============ */
-    function lazyLoad2() {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            // isIntersecting：目标元素是否与视口交叉（可见）
-            if (entry.isIntersecting) {
-              const img = entry.target;
-              img.src = img.dataset.src;
-              observer.unobserve(img); // 加载后停止观察
-            }
-          });
-        },
-        {
-          root: null, // 相对视口
-          rootMargin: '0px 0px 200px 0px', // 提前 200px 开始加载
-          threshold: 0, // 交叉比例阈值
-        }
-      );
+      /* ============ 方式二：IntersectionObserver（推荐） ============ */
+      function lazyLoad2() {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              // isIntersecting：目标元素是否与视口交叉（可见）
+              if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                observer.unobserve(img); // 加载后停止观察
+              }
+            });
+          },
+          {
+            root: null, // 相对视口
+            rootMargin: '0px 0px 200px 0px', // 提前 200px 开始加载
+            threshold: 0, // 交叉比例阈值
+          }
+        );
 
-      document.querySelectorAll('img.lazy').forEach((img) => {
-        observer.observe(img); // 逐个观察
-      });
-    }
+        document.querySelectorAll('img.lazy').forEach((img) => {
+          observer.observe(img); // 逐个观察
+        });
+      }
 
-    lazyLoad2();
-  </script>
-</body>
+      lazyLoad2();
+    </script>
+  </body>
 </html>
 ```
 

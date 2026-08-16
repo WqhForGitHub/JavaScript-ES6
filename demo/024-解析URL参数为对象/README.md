@@ -13,9 +13,7 @@ function parseParams(url) {
   return result;
 }
 
-console.log(
-  parseParams('https://example.com?page=1&size=10&keyword=js')
-);
+console.log(parseParams('https://example.com?page=1&size=10&keyword=js'));
 // { page: '1', size: '10', keyword: 'js' }
 ```
 
@@ -35,9 +33,7 @@ function parseParams(url) {
   return result;
 }
 
-console.log(
-  parseParams('https://example.com?name=%E5%BC%A0%E4%B8%89&age=18&from=beijing')
-);
+console.log(parseParams('https://example.com?name=%E5%BC%A0%E4%B8%89&age=18&from=beijing'));
 // { name: '张三', age: '18', from: 'beijing' }
 ```
 
@@ -65,9 +61,7 @@ function parseParams(url, collectRepeated = false) {
   return result;
 }
 
-console.log(
-  parseParams('https://example.com?a=1&b=2&a=3#hash', true)
-);
+console.log(parseParams('https://example.com?a=1&b=2&a=3#hash', true));
 // { a: ['1', '3'], b: '2' }
 ```
 
@@ -76,10 +70,7 @@ console.log(
 ```js
 function stringifyParams(obj) {
   return Object.entries(obj)
-    .map(
-      ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
-    )
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
     .join('&');
 }
 

@@ -8,12 +8,14 @@
 ```js
 function myParse(jsonStr) {
   // 1. 校验字符串是否为合法 JSON（防御性检查）
-  if (!/^[\],:{}\s]*$/.test(
-    jsonStr
-      .replace(/\\["\\\/bfnrtu]/g, '@') // 转义字符
-      .replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']') // 字面量
-      .replace(/(?:^|:|,)(?:\s*\[)+/g, '') // 数组
-  )) {
+  if (
+    !/^[\],:{}\s]*$/.test(
+      jsonStr
+        .replace(/\\["\\/bfnrtu]/g, '@') // 转义字符
+        .replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?/g, ']') // 字面量
+        .replace(/(?:^|:|,)(?:\s*\[)+/g, '') // 数组
+    )
+  ) {
     throw new SyntaxError('Unexpected token in JSON');
   }
 
@@ -38,10 +40,7 @@ function myParse(jsonStr) {
 
   // 跳过空白字符
   function skipWhitespace() {
-    while (
-      index < jsonStr.length &&
-      /[\s]/.test(jsonStr[index])
-    ) {
+    while (index < jsonStr.length && /[\s]/.test(jsonStr[index])) {
       index++;
     }
   }

@@ -1,0 +1,20 @@
+{
+  "name": "handwritten-js-demos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JavaScript 手写代码题（54 道 demo）",
+  "type": "module",
+  "scripts": {
+    "readme": "node scripts/generate-readme.mjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.0",
+    "eslint": "^9.30.0",
+    "eslint-plugin-markdown": "^5.1.0",
+    "prettier": "^3.6.0"
+  }
+}

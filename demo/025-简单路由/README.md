@@ -1,6 +1,7 @@
 # 025 - 实现一个简单的路由（hash 路由）
 
 > 前端路由两种实现方式：
+>
 > 1. **hash 路由**：监听 `hashchange` 事件，兼容性好；
 > 2. **history 路由**：借助 `pushState` / `popstate`，需要服务端配合。
 
@@ -11,80 +12,79 @@
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <title>简单 Hash 路由</title>
-</head>
-<body>
-  <nav>
-    <a href="#/">首页</a> |
-    <a href="#/about">关于</a> |
-    <a href="#/user/123">用户 123</a>
-  </nav>
-  <div id="app"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>简单 Hash 路由</title>
+  </head>
+  <body>
+    <nav>
+      <a href="#/">首页</a> | <a href="#/about">关于</a> |
+      <a href="#/user/123">用户 123</a>
+    </nav>
+    <div id="app"></div>
 
-  <script>
-    class Router {
-      constructor() {
-        this.routes = {}; // path -> 回调
-        this.currentPath = '';
-        // 监听 hash 变化：点击 a 标签、输入/修改 url、前进后退
-        window.addEventListener('hashchange', () => this.load());
-      }
+    <script>
+      class Router {
+        constructor() {
+          this.routes = {}; // path -> 回调
+          this.currentPath = '';
+          // 监听 hash 变化：点击 a 标签、输入/修改 url、前进后退
+          window.addEventListener('hashchange', () => this.load());
+        }
 
-      // 注册路由
-      register(path, callback) {
-        this.routes[path] = callback;
-        return this; // 支持链式调用
-      }
+        // 注册路由
+        register(path, callback) {
+          this.routes[path] = callback;
+          return this; // 支持链式调用
+        }
 
-      // 注册 404
-      notFound(callback) {
-        this.notFoundCallback = callback;
-        return this;
-      }
+        // 注册 404
+        notFound(callback) {
+          this.notFoundCallback = callback;
+          return this;
+        }
 
-      // 加载当前路由
-      load() {
-        // location.hash 形如 '#/about'，去掉 '#'
-        this.currentPath = location.hash.slice(1) || '/';
-        const handler = this.routes[this.currentPath];
+        // 加载当前路由
+        load() {
+          // location.hash 形如 '#/about'，去掉 '#'
+          this.currentPath = location.hash.slice(1) || '/';
+          const handler = this.routes[this.currentPath];
 
-        if (handler) {
-          handler();
-        } else if (this.notFoundCallback) {
-          this.notFoundCallback();
+          if (handler) {
+            handler();
+          } else if (this.notFoundCallback) {
+            this.notFoundCallback();
+          }
+        }
+
+        // 跳转
+        push(path) {
+          location.hash = path;
         }
       }
 
-      // 跳转
-      push(path) {
-        location.hash = path;
-      }
-    }
+      // ---- 使用示例 ----
+      const app = document.getElementById('app');
+      const router = new Router();
 
-    // ---- 使用示例 ----
-    const app = document.getElementById('app');
-    const router = new Router();
+      router
+        .register('/', () => {
+          app.innerHTML = '<h1>首页</h1>';
+        })
+        .register('/about', () => {
+          app.innerHTML = '<h1>关于页面</h1>';
+        })
+        .register('/user/123', () => {
+          app.innerHTML = '<h1>用户详情：123</h1>';
+        })
+        .notFound(() => {
+          app.innerHTML = '<h1>404 - 页面不存在</h1>';
+        });
 
-    router
-      .register('/', () => {
-        app.innerHTML = '<h1>首页</h1>';
-      })
-      .register('/about', () => {
-        app.innerHTML = '<h1>关于页面</h1>';
-      })
-      .register('/user/123', () => {
-        app.innerHTML = '<h1>用户详情：123</h1>';
-      })
-      .notFound(() => {
-        app.innerHTML = '<h1>404 - 页面不存在</h1>';
-      });
-
-    // 初始加载
-    window.addEventListener('load', () => router.load());
-  </script>
-</body>
+      // 初始加载
+      window.addEventListener('load', () => router.load());
+    </script>
+  </body>
 </html>
 ```
 

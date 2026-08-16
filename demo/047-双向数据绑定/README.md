@@ -8,48 +8,48 @@
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <title>双向绑定 - defineProperty</title>
-</head>
-<body>
-  <input id="input" type="text" />
-  <p id="text"></p>
+  <head>
+    <meta charset="UTF-8" />
+    <title>双向绑定 - defineProperty</title>
+  </head>
+  <body>
+    <input id="input" type="text" />
+    <p id="text"></p>
 
-  <script>
-    const data = { message: 'hello' };
-    const input = document.getElementById('input');
-    const text = document.getElementById('text');
+    <script>
+      const data = { message: 'hello' };
+      const input = document.getElementById('input');
+      const text = document.getElementById('text');
 
-    // 1. 数据劫持：拦截 message 的读写
-    Object.defineProperty(data, 'message', {
-      get() {
-        return value;
-      },
-      set(newValue) {
-        value = newValue;
-        // 数据 -> 视图
-        input.value = newValue;
-        text.innerHTML = newValue;
-      },
-      enumerable: true,
-      configurable: true,
-    });
+      // 1. 数据劫持：拦截 message 的读写
+      Object.defineProperty(data, 'message', {
+        get() {
+          return value;
+        },
+        set(newValue) {
+          value = newValue;
+          // 数据 -> 视图
+          input.value = newValue;
+          text.innerHTML = newValue;
+        },
+        enumerable: true,
+        configurable: true,
+      });
 
-    // 2. 视图 -> 数据：监听 input 事件
-    input.addEventListener('input', function (e) {
-      data.message = e.target.value; // 触发 set
-    });
+      // 2. 视图 -> 数据：监听 input 事件
+      input.addEventListener('input', function (e) {
+        data.message = e.target.value; // 触发 set
+      });
 
-    // 3. 初始化
-    data.message = 'hello';
+      // 3. 初始化
+      data.message = 'hello';
 
-    // 2 秒后修改数据，验证 数据 -> 视图
-    setTimeout(() => {
-      data.message = '数据变了，视图也变了';
-    }, 2000);
-  </script>
-</body>
+      // 2 秒后修改数据，验证 数据 -> 视图
+      setTimeout(() => {
+        data.message = '数据变了，视图也变了';
+      }, 2000);
+    </script>
+  </body>
 </html>
 ```
 
@@ -58,38 +58,38 @@
 ```html
 <!DOCTYPE html>
 <html>
-<body>
-  <input id="input" type="text" />
-  <p id="text"></p>
+  <body>
+    <input id="input" type="text" />
+    <p id="text"></p>
 
-  <script>
-    const input = document.getElementById('input');
-    const text = document.getElementById('text');
+    <script>
+      const input = document.getElementById('input');
+      const text = document.getElementById('text');
 
-    const data = { message: 'hello' };
+      const data = { message: 'hello' };
 
-    const proxy = new Proxy(data, {
-      get(target, key, receiver) {
-        return Reflect.get(target, key, receiver);
-      },
-      set(target, key, value, receiver) {
-        const result = Reflect.set(target, key, value, receiver);
-        // 数据 -> 视图
-        input.value = value;
-        text.innerHTML = value;
-        return result;
-      },
-    });
+      const proxy = new Proxy(data, {
+        get(target, key, receiver) {
+          return Reflect.get(target, key, receiver);
+        },
+        set(target, key, value, receiver) {
+          const result = Reflect.set(target, key, value, receiver);
+          // 数据 -> 视图
+          input.value = value;
+          text.innerHTML = value;
+          return result;
+        },
+      });
 
-    // 视图 -> 数据
-    input.addEventListener('input', (e) => {
-      proxy.message = e.target.value;
-    });
+      // 视图 -> 数据
+      input.addEventListener('input', (e) => {
+        proxy.message = e.target.value;
+      });
 
-    // 初始化
-    proxy.message = 'hello';
-  </script>
-</body>
+      // 初始化
+      proxy.message = 'hello';
+    </script>
+  </body>
 </html>
 ```
 
@@ -137,9 +137,9 @@ setTimeout(() => {
 
 ## defineProperty vs Proxy
 
-| 对比 | Object.defineProperty | Proxy |
-| ---- | --------------------- | ----- |
-| 劫持粒度 | 逐个属性劫持 | 代理整个对象 |
-| 新增/删除属性 | 无法监听（Vue2 需 $set/$delete） | 可监听 |
-| 数组索引/length | 无法直接监听（Vue2 重写数组方法） | 可监听 |
-| 兼容性 | IE9+ | 不支持 IE |
+| 对比            | Object.defineProperty             | Proxy        |
+| --------------- | --------------------------------- | ------------ |
+| 劫持粒度        | 逐个属性劫持                      | 代理整个对象 |
+| 新增/删除属性   | 无法监听（Vue2 需 $set/$delete）  | 可监听       |
+| 数组索引/length | 无法直接监听（Vue2 重写数组方法） | 可监听       |
+| 兼容性          | IE9+                              | 不支持 IE    |

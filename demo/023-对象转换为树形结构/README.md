@@ -66,9 +66,7 @@ console.log(JSON.stringify(listToTree(list), null, 2));
         "id": 3,
         "name": "部门C",
         "parentId": 1,
-        "children": [
-          { "id": 6, "name": "部门F", "parentId": 3, "children": [] }
-        ]
+        "children": [{ "id": 6, "name": "部门F", "parentId": 3, "children": [] }]
       }
     ]
   }

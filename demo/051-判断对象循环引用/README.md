@@ -95,7 +95,7 @@ console.log(hasCycle(obj2)); // true
 ```js
 function hasCycle(obj) {
   const WHITE = 0; // 未访问
-  const GRAY = 1;  // 当前访问路径上
+  const GRAY = 1; // 当前访问路径上
   const BLACK = 2; // 已完成，确认无环
 
   const color = new WeakMap();
@@ -128,7 +128,12 @@ function findCyclePath(obj, path = new WeakMap(), stack = []) {
   if (path.has(obj)) {
     // 找到环，返回从重复节点开始的路径
     const startIndex = stack.indexOf(obj);
-    return stack.slice(startIndex).map((n, i) => `[${i}]`).join(' -> ') + ' -> 循环点';
+    return (
+      stack
+        .slice(startIndex)
+        .map((n, i) => `[${i}]`)
+        .join(' -> ') + ' -> 循环点'
+    );
   }
 
   path.set(obj, true);

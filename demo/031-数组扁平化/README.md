@@ -7,8 +7,7 @@
 ```js
 function flatten(arr) {
   return arr.reduce(
-    (prev, cur) =>
-      Array.isArray(cur) ? prev.concat(flatten(cur)) : prev.concat(cur),
+    (prev, cur) => (Array.isArray(cur) ? prev.concat(flatten(cur)) : prev.concat(cur)),
     []
   );
 }
@@ -20,7 +19,7 @@ console.log(flatten([1, [2, [3, [4]]]])); // [1, 2, 3, 4]
 
 ```js
 function flatten(arr) {
-  const result = [];
+  let result = [];
   for (const item of arr) {
     if (Array.isArray(item)) {
       result = result.concat(flatten(item)); // 或用 push(...flatten(item))
@@ -91,11 +90,7 @@ console.log([...flattenGenerator([1, [2, [3, [4]]]])]); // [1, 2, 3, 4]
 ```js
 function flatten(arr, depth = 1) {
   return depth > 0
-    ? arr.reduce(
-        (prev, cur) =>
-          prev.concat(Array.isArray(cur) ? flatten(cur, depth - 1) : cur),
-        []
-      )
+    ? arr.reduce((prev, cur) => prev.concat(Array.isArray(cur) ? flatten(cur, depth - 1) : cur), [])
     : arr.slice();
 }
 

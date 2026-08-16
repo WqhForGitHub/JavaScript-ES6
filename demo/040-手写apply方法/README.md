@@ -9,9 +9,7 @@
 Function.prototype.myApply = function (context, argsArray) {
   // 1. 调用者必须是函数
   if (typeof this !== 'function') {
-    throw new TypeError(
-      'Function.prototype.myApply was called on non-function'
-    );
+    throw new TypeError('Function.prototype.myApply was called on non-function');
   }
 
   // 2. context 为 null/undefined 时指向全局对象
@@ -76,8 +74,8 @@ console.log(Math.max.myApply(null, [1, 5, 3])); // 5
 
 ## call / apply / bind 对比
 
-| 方法 | 调用方式 | 传参方式 | 是否立即执行 |
-| ---- | -------- | -------- | ------------ |
-| call | `fn.call(ctx, 1, 2)` | 参数列表 | 是 |
-| apply | `fn.apply(ctx, [1, 2])` | 参数数组 | 是 |
-| bind | `fn.bind(ctx, 1, 2)` | 参数列表 | 否，返回新函数 |
+| 方法  | 调用方式                | 传参方式 | 是否立即执行   |
+| ----- | ----------------------- | -------- | -------------- |
+| call  | `fn.call(ctx, 1, 2)`    | 参数列表 | 是             |
+| apply | `fn.apply(ctx, [1, 2])` | 参数数组 | 是             |
+| bind  | `fn.bind(ctx, 1, 2)`    | 参数列表 | 否，返回新函数 |

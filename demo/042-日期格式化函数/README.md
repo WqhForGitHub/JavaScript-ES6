@@ -13,12 +13,12 @@ function formatDate(date, pattern = 'yyyy-MM-dd hh:mm:ss') {
   const pad = (n) => String(n).padStart(2, '0'); // 补零
 
   const config = {
-    yyyy: date.getFullYear(),                    // 年
-    MM: pad(date.getMonth() + 1),                // 月（0-11，需 +1）
-    dd: pad(date.getDate()),                     // 日
-    hh: pad(date.getHours()),                    // 时
-    mm: pad(date.getMinutes()),                  // 分
-    ss: pad(date.getSeconds()),                  // 秒
+    yyyy: date.getFullYear(), // 年
+    MM: pad(date.getMonth() + 1), // 月（0-11，需 +1）
+    dd: pad(date.getDate()), // 日
+    hh: pad(date.getHours()), // 时
+    mm: pad(date.getMinutes()), // 分
+    ss: pad(date.getSeconds()), // 秒
     SSS: String(date.getMilliseconds()).padStart(3, '0'), // 毫秒
     w: ['日', '一', '二', '三', '四', '五', '六'][date.getDay()], // 星期
   };
@@ -72,10 +72,7 @@ class DateFormatter {
       mm: this.minutes(),
       ss: this.seconds(),
     };
-    return Object.entries(full).reduce(
-      (str, [key, value]) => str.replace(key, value),
-      pattern
-    );
+    return Object.entries(full).reduce((str, [key, value]) => str.replace(key, value), pattern);
   }
 }
 

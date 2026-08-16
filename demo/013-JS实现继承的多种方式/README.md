@@ -104,7 +104,8 @@ console.log(child.name); // Child
 ```js
 function createAnother(original) {
   const clone = Object.create(original); // 创建新对象
-  clone.sayHi = function () { // 增强对象
+  clone.sayHi = function () {
+    // 增强对象
     console.log('hi');
   };
   return clone;

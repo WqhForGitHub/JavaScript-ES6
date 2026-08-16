@@ -51,9 +51,7 @@ function findTopNWords(article, n = 3) {
   for (const word of words) {
     wordCount.set(word, (wordCount.get(word) || 0) + 1);
   }
-  return [...wordCount.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, n);
+  return [...wordCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
 }
 
 console.log(findTopNWords(article, 3));

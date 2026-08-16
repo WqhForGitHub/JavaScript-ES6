@@ -20,11 +20,7 @@ console.log(render(tpl, { name: '张三', age: 18 }));
 function render(tpl, data) {
   return tpl.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_, path) => {
     // 按点号逐层取值
-    return (
-      path
-        .split('.')
-        .reduce((obj, key) => (obj == null ? '' : obj[key]), data) ?? ''
-    );
+    return path.split('.').reduce((obj, key) => (obj == null ? '' : obj[key]), data) ?? '';
   });
 }
 
@@ -40,7 +36,10 @@ function compile(tpl) {
   // 把 {{ expr }} 转成字符串拼接，再交给 Function 执行
   const code = tpl
     .replace(/<%=([\s\S]+?)%>/g, (_, expr) => `');\n__out__ += (${expr});\n__out__ +=('`)
-    .replace(/\{\{([\s\S]+?)\}\}/g, (_, expr) => `');\n__out__ += String((${expr}));\n__out__ +=('`);
+    .replace(
+      /\{\{([\s\S]+?)\}\}/g,
+      (_, expr) => `');\n__out__ += String((${expr}));\n__out__ +=('`
+    );
 
   const fn = new Function(
     'data',
@@ -65,9 +64,7 @@ const tpl3 = `
 const tpl4 = '你好 {{ user.name.toUpperCase() }}，共有 {{ users.length }} 个用户';
 const renderFn = compile(tpl4);
 
-console.log(
-  renderFn({ user: { name: 'zhangsan' }, users: [1, 2, 3] })
-);
+console.log(renderFn({ user: { name: 'zhangsan' }, users: [1, 2, 3] }));
 // 你好 ZHANGSAN，共有 3 个用户
 ```
 

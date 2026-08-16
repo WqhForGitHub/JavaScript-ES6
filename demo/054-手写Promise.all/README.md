@@ -73,8 +73,7 @@ function myAll(promises) {
 ## 测试
 
 ```js
-const delay = (value, ms) =>
-  new Promise((resolve) => setTimeout(() => resolve(value), ms));
+const delay = (value, ms) => new Promise((resolve) => setTimeout(() => resolve(value), ms));
 
 // 1. 全部成功：结果按传入顺序（不管完成先后）
 myAll([delay('a', 300), delay('b', 100), delay('c', 200)]).then((values) => {

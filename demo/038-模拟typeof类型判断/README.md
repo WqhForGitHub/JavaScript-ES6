@@ -2,15 +2,15 @@
 
 ## 原生 typeof 的结果
 
-| 输入 | 结果 |
-| ---- | ---- |
-| `1`, `NaN`, `Infinity` | `'number'` |
-| `'abc'` | `'string'` |
-| `true` | `'boolean'` |
-| `undefined` | `'undefined'` |
-| `null` | `'object'`（历史 bug，需特殊处理） |
-| `function(){}` | `'function'` |
-| `[]`, `{}`, `new Date()` | `'object'` |
+| 输入                     | 结果                               |
+| ------------------------ | ---------------------------------- |
+| `1`, `NaN`, `Infinity`   | `'number'`                         |
+| `'abc'`                  | `'string'`                         |
+| `true`                   | `'boolean'`                        |
+| `undefined`              | `'undefined'`                      |
+| `null`                   | `'object'`（历史 bug，需特殊处理） |
+| `function(){}`           | `'function'`                       |
+| `[]`, `{}`, `new Date()` | `'object'`                         |
 
 ## 实现：用 Object.prototype.toString 模拟
 

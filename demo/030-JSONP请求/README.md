@@ -85,16 +85,16 @@ app.listen(3000);
 ```html
 <!DOCTYPE html>
 <html>
-<body>
-  <script>
-    // 最原始的 JSONP 写法
-    function handleData(data) {
-      console.log('收到数据：', data);
-    }
-  </script>
-  <!-- 服务端返回：handleData({...})，加载完成后自动执行 -->
-  <script src="https://api.example.com/user?id=1&callback=handleData"></script>
-</body>
+  <body>
+    <script>
+      // 最原始的 JSONP 写法
+      function handleData(data) {
+        console.log('收到数据：', data);
+      }
+    </script>
+    <!-- 服务端返回：handleData({...})，加载完成后自动执行 -->
+    <script src="https://api.example.com/user?id=1&callback=handleData"></script>
+  </body>
 </html>
 ```
 

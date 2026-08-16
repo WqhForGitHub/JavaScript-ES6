@@ -36,10 +36,7 @@ console.log([1, , 2].myFlat()); // [1, 2]（空槽被移除，与原生一致）
 ```js
 Array.prototype.myFlat = function (depth = 1) {
   return this.reduce(
-    (prev, cur) =>
-      prev.concat(
-        Array.isArray(cur) && depth > 0 ? cur.myFlat(depth - 1) : cur
-      ),
+    (prev, cur) => prev.concat(Array.isArray(cur) && depth > 0 ? cur.myFlat(depth - 1) : cur),
     []
   );
 };

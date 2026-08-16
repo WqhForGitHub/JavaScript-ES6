@@ -4,13 +4,7 @@
 
 ```js
 function request(options) {
-  const {
-    url,
-    method = 'GET',
-    data = null,
-    headers = {},
-    timeout = 10000,
-  } = options;
+  const { url, method = 'GET', data = null, headers = {}, timeout = 10000 } = options;
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();

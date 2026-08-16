@@ -1,4 +1,4 @@
-# 004 - 下划线 / 驱峰命名相互转换
+# 004 - 下划线与驼峰相互转换
 
 ## 驼峰转下划线（camelCase -> camel_case）
 
@@ -49,15 +49,13 @@ function convertNaming(str, mode = 'toCamel', sep = '-') {
   }
   // 驼峰转分隔符：aBC -> a-b-c
   const escaped = sep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return str
-    .replace(/([A-Z])/g, `${escaped}$1`)
-    .toLowerCase();
+  return str.replace(/([A-Z])/g, `${escaped}$1`).toLowerCase();
 }
 
 console.log(convertNaming('first_name', 'toCamel', '_')); // firstName
-console.log(convertNaming('firstName', 'toLine', '_'));   // first_name
+console.log(convertNaming('firstName', 'toLine', '_')); // first_name
 console.log(convertNaming('get-element-by-id', 'toCamel')); // getElementById
-console.log(convertNaming('getElementById', 'toLine'));     // get-element-by-id
+console.log(convertNaming('getElementById', 'toLine')); // get-element-by-id
 ```
 
 ## 批量转换对象 key

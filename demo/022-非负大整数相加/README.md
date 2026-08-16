@@ -22,7 +22,7 @@ function bigNumberAdd(a, b) {
     const sum = digitA + digitB + carry;
 
     carry = Math.floor(sum / 10); // 进位
-    result.push(sum % 10);        // 当前位
+    result.push(sum % 10); // 当前位
     i++;
   }
 
@@ -33,12 +33,7 @@ function bigNumberAdd(a, b) {
 console.log(bigNumberAdd('123', '456')); // 579
 console.log(bigNumberAdd('999', '1')); // 1000
 console.log(bigNumberAdd('9007199254740993', '123456789')); // 9007200509321782
-console.log(
-  bigNumberAdd(
-    '123456789012345678901234567890',
-    '987654321098765432109876543210'
-  )
-); // 1111111110111111111011111111100
+console.log(bigNumberAdd('123456789012345678901234567890', '987654321098765432109876543210')); // 1111111110111111111011111111100
 ```
 
 ## 验证精度丢失问题

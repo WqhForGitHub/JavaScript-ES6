@@ -75,33 +75,33 @@ window.addEventListener('scroll', onScroll);
 ```html
 <!DOCTYPE html>
 <html>
-<body style="height: 3000px">
-  <script>
-    function throttle(fn, interval = 500) {
-      let lastTime = 0;
-      return function (...args) {
-        const now = Date.now();
-        if (now - lastTime >= interval) {
-          lastTime = now;
-          fn.apply(this, args);
-        }
-      };
-    }
+  <body style="height: 3000px">
+    <script>
+      function throttle(fn, interval = 500) {
+        let lastTime = 0;
+        return function (...args) {
+          const now = Date.now();
+          if (now - lastTime >= interval) {
+            lastTime = now;
+            fn.apply(this, args);
+          }
+        };
+      }
 
-    window.addEventListener(
-      'scroll',
-      throttle(() => {
-        console.log('scrollY:', window.scrollY);
-      }, 1000)
-    );
-  </script>
-</body>
+      window.addEventListener(
+        'scroll',
+        throttle(() => {
+          console.log('scrollY:', window.scrollY);
+        }, 1000)
+      );
+    </script>
+  </body>
 </html>
 ```
 
 ## 防抖 vs 节流
 
-| 对比 | 防抖 debounce | 节流 throttle |
-| ---- | ------------- | ------------- |
+| 对比 | 防抖 debounce      | 节流 throttle            |
+| ---- | ------------------ | ------------------------ |
 | 规则 | 停止触发后延迟执行 | 固定时间间隔内只执行一次 |
-| 场景 | 搜索输入、resize | 滚动监听、拖拽 |
+| 场景 | 搜索输入、resize   | 滚动监听、拖拽           |

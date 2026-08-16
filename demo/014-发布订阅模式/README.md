@@ -51,9 +51,7 @@ class EventEmitter {
       delete this.events[event];
     } else {
       // 同时匹配 once 包装后的回调与原回调
-      const index = callbacks.findIndex(
-        (cb) => cb === callback || cb.originCallback === callback
-      );
+      const index = callbacks.findIndex((cb) => cb === callback || cb.originCallback === callback);
       if (index !== -1) callbacks.splice(index, 1);
     }
     return this;

@@ -80,29 +80,29 @@ main();
 ```html
 <!DOCTYPE html>
 <html>
-<body>
-  <div id="light" style="width: 50px; height: 50px; border-radius: 50%; background: #ccc"></div>
-  <script>
-    const lightEl = document.getElementById('light');
-    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  <body>
+    <div id="light" style="width: 50px; height: 50px; border-radius: 50%; background: #ccc"></div>
+    <script>
+      const lightEl = document.getElementById('light');
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-    async function main() {
-      const lights = [
-        { color: 'red', name: '红', duration: 3000 },
-        { color: 'green', name: '绿', duration: 2000 },
-        { color: 'yellow', name: '黄', duration: 1000 },
-      ];
-      while (true) {
-        for (const item of lights) {
-          console.log(`${item.name}灯亮起`);
-          lightEl.style.background = item.color;
-          await sleep(item.duration);
+      async function main() {
+        const lights = [
+          { color: 'red', name: '红', duration: 3000 },
+          { color: 'green', name: '绿', duration: 2000 },
+          { color: 'yellow', name: '黄', duration: 1000 },
+        ];
+        while (true) {
+          for (const item of lights) {
+            console.log(`${item.name}灯亮起`);
+            lightEl.style.background = item.color;
+            await sleep(item.duration);
+          }
         }
       }
-    }
 
-    main();
-  </script>
-</body>
+      main();
+    </script>
+  </body>
 </html>
 ```

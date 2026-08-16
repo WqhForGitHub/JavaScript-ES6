@@ -9,9 +9,7 @@
 Function.prototype.myBind = function (context, ...prependArgs) {
   // 1. 调用者必须是函数
   if (typeof this !== 'function') {
-    throw new TypeError(
-      'Function.prototype.myBind was called on non-function'
-    );
+    throw new TypeError('Function.prototype.myBind was called on non-function');
   }
 
   const originalFn = this; // 保存原函数

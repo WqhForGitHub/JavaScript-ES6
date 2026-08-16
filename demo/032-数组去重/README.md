@@ -56,10 +56,7 @@ console.log(unique([1, 2, 2, NaN, NaN])); // [1, 2, NaN]
 
 ```js
 function unique(arr) {
-  return arr.reduce(
-    (prev, cur) => (prev.includes(cur) ? prev : [...prev, cur]),
-    []
-  );
+  return arr.reduce((prev, cur) => (prev.includes(cur) ? prev : [...prev, cur]), []);
 }
 
 console.log(unique([1, 2, 2, 3, 3])); // [1, 2, 3]

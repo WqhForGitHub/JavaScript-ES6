@@ -21,9 +21,7 @@ console.log(formatNumber(123)); // 123（不足千位不加）
 function formatNumber(num) {
   const [intPart, decimalPart] = String(num).split('.');
   const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return decimalPart !== undefined
-    ? `${formattedInt}.${decimalPart}`
-    : formattedInt;
+  return decimalPart !== undefined ? `${formattedInt}.${decimalPart}` : formattedInt;
 }
 
 console.log(formatNumber(1234567.89)); // 1,234,567.89
@@ -68,9 +66,7 @@ console.log(formatNumber(9876543.21)); // 9,876,543.21
 function formatNumber(num) {
   const [intPart, decimalPart] = String(num).split('.');
   if (intPart.length <= 3) {
-    return decimalPart !== undefined
-      ? `${intPart}.${decimalPart}`
-      : intPart;
+    return decimalPart !== undefined ? `${intPart}.${decimalPart}` : intPart;
   }
   // 取出末三位，前面的部分递归处理
   const rest = formatNumber(intPart.slice(0, -3));

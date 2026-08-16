@@ -2,16 +2,16 @@
 
 ## 原生规则回顾
 
-| 值类型 | 转换结果 |
-| ------ | -------- |
+| 值类型                              | 转换结果                                                                      |
+| ----------------------------------- | ----------------------------------------------------------------------------- |
 | `undefined` / `function` / `symbol` | 作为对象属性值时被**忽略**；作为数组元素转为 `null`；单独转换返回 `undefined` |
-| `null` / `number` / `boolean` | 原样输出（NaN/Infinity -> null） |
-| `string` | 加双引号，转义特殊字符 |
-| `Array` | 递归序列化，无效元素转为 `null` |
-| `Object` | 递归序列化，忽略无效属性值 |
-| `Date` | 调用 toJSON，输出时间字符串 |
-| `RegExp` | `{}`（空对象字面量） |
-| 循环引用 | 抛出 TypeError |
+| `null` / `number` / `boolean`       | 原样输出（NaN/Infinity -> null）                                              |
+| `string`                            | 加双引号，转义特殊字符                                                        |
+| `Array`                             | 递归序列化，无效元素转为 `null`                                               |
+| `Object`                            | 递归序列化，忽略无效属性值                                                    |
+| `Date`                              | 调用 toJSON，输出时间字符串                                                   |
+| `RegExp`                            | `{}`（空对象字面量）                                                          |
+| 循环引用                            | 抛出 TypeError                                                                |
 
 ## 代码实现
 
@@ -66,10 +66,7 @@ function myStringify(value) {
       '\r': '\\r',
       '\t': '\\t',
     };
-    const escaped = str.replace(
-      /["\\\b\f\n\r\t]/g,
-      (ch) => escapeMap[ch]
-    );
+    const escaped = str.replace(/["\\\b\f\n\r\t]/g, (ch) => escapeMap[ch]);
     return `"${escaped}"`;
   }
 

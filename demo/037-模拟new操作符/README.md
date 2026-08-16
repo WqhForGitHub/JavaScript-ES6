@@ -77,7 +77,7 @@ function Baz() {
 console.log(myNew(Baz).name); // undefined，返回的是新对象
 ```
 
-## 另一种写法：__proto__ 直接赋值（不推荐，仅演示）
+## 另一种写法：**proto** 直接赋值（不推荐，仅演示）
 
 ```js
 function myNew(constructor, ...args) {

@@ -6,7 +6,12 @@
 ## 原生行为回顾
 
 ```js
-const parent = { name: 'parent', say() { console.log(this.name); } };
+const parent = {
+  name: 'parent',
+  say() {
+    console.log(this.name);
+  },
+};
 
 const child = Object.create(parent);
 child.say(); // parent
