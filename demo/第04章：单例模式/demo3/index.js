@@ -6,10 +6,10 @@ console.log('===== 透明单例：用 new 也能创建单例 =====');
 // 之前的方式需要使用者调用 Singleton.getInstance()
 // "透明"单例让使用者可以像普通类一样使用 new，但始终返回同一个实例
 
-var CreateDiv = (function() {
-  var instance;
+const CreateDiv = (function () {
+  let instance;
 
-  var CreateDiv = function(html) {
+  const CreateDiv = function (html) {
     if (instance) {
       return instance; // 如果实例已存在，直接返回
     }
@@ -18,8 +18,8 @@ var CreateDiv = (function() {
     return (instance = this); // 保存实例并返回
   };
 
-  CreateDiv.prototype.init = function() {
-    var div = document.createElement('div');
+  CreateDiv.prototype.init = function () {
+    const div = document.createElement('div');
     div.innerHTML = this.html;
     document.body.appendChild(div);
   };
@@ -27,8 +27,8 @@ var CreateDiv = (function() {
   return CreateDiv;
 })();
 
-var a = new CreateDiv('sven1');
-var b = new CreateDiv('sven2');
+const a = new CreateDiv('sven1');
+const b = new CreateDiv('sven2');
 
 console.log('a === b：', a === b); // true
 console.log('a.html：', a.html); // sven1
@@ -44,21 +44,21 @@ console.log('\n===== 代理单例：使用代理实现单例 =====');
 // 将"创建对象"和"管理单例"这两个职责分离
 
 // 1. 负责创建对象的构造函数（纯粹的创建逻辑）
-var CreateDiv2 = function(html) {
+const CreateDiv2 = function (html) {
   this.html = html;
   this.init();
 };
 
-CreateDiv2.prototype.init = function() {
-  var div = document.createElement('div');
+CreateDiv2.prototype.init = function () {
+  const div = document.createElement('div');
   div.innerHTML = this.html;
   document.body.appendChild(div);
 };
 
 // 2. 代理函数：负责管理单例
-var ProxySingletonCreateDiv = (function() {
-  var instance;
-  return function(html) {
+const ProxySingletonCreateDiv = (function () {
+  let instance;
+  return function (html) {
     if (!instance) {
       instance = new CreateDiv2(html);
     }
@@ -66,8 +66,8 @@ var ProxySingletonCreateDiv = (function() {
   };
 })();
 
-var c = new ProxySingletonCreateDiv('sven3');
-var d = new ProxySingletonCreateDiv('sven4');
+const c = new ProxySingletonCreateDiv('sven3');
+const d = new ProxySingletonCreateDiv('sven4');
 
 console.log('c === d：', c === d); // true
 console.log('c.html：', c.html); // sven3

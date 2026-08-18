@@ -3,37 +3,37 @@
 // ========== 全局 Event 对象 ==========
 console.log('===== 全局 Event 对象 =====');
 
-var Event = (function() {
-  var clientList = {};
-  var listen, trigger, remove;
+const Event = (function () {
+  const clientList = {};
+  let listen, trigger, remove;
 
-  listen = function(key, fn) {
+  listen = function (key, fn) {
     if (!clientList[key]) {
       clientList[key] = [];
     }
     clientList[key].push(fn);
   };
 
-  trigger = function() {
-    var key = Array.prototype.shift.call(arguments);
-    var fns = clientList[key];
+  trigger = function () {
+    const key = Array.prototype.shift.call(arguments);
+    const fns = clientList[key];
     if (!fns || fns.length === 0) {
       return false;
     }
-    for (var i = 0, fn; fn = fns[i++];) {
+    for (var i = 0, fn; (fn = fns[i++]);) {
       fn.apply(this, arguments);
     }
   };
 
-  remove = function(key, fn) {
-    var fns = clientList[key];
+  remove = function (key, fn) {
+    const fns = clientList[key];
     if (!fns) {
       return false;
     }
     if (!fn) {
       fns && (fns.length = 0);
     } else {
-      for (var l = fns.length - 1; l >= 0; l--) {
+      for (let l = fns.length - 1; l >= 0; l--) {
         if (fns[l] === fn) {
           fns.splice(l, 1);
         }
@@ -44,12 +44,12 @@ var Event = (function() {
   return {
     listen: listen,
     trigger: trigger,
-    remove: remove
+    remove: remove,
   };
 })();
 
 // 使用全局 Event
-Event.listen('squareMeter88', function(price) {
+Event.listen('squareMeter88', function (price) {
   console.log('全局Event - 88平米价格：' + price);
 });
 
@@ -58,39 +58,39 @@ Event.trigger('squareMeter88', 2000000);
 // ========== 命名空间支持 ==========
 console.log('\n===== 命名空间支持 =====');
 
-var Event2 = (function() {
-  var global = this;
-  var Event = function() {
-    var clientList = {};
-    var listen, trigger, remove;
+const Event2 = (function () {
+  const global = this;
+  const Event = function () {
+    const clientList = {};
+    let listen, trigger, remove;
 
-    listen = function(key, fn) {
+    listen = function (key, fn) {
       if (!clientList[key]) {
         clientList[key] = [];
       }
       clientList[key].push(fn);
     };
 
-    trigger = function() {
-      var key = Array.prototype.shift.call(arguments);
-      var fns = clientList[key];
+    trigger = function () {
+      const key = Array.prototype.shift.call(arguments);
+      const fns = clientList[key];
       if (!fns || fns.length === 0) {
         return false;
       }
-      for (var i = 0, fn; fn = fns[i++];) {
+      for (var i = 0, fn; (fn = fns[i++]);) {
         fn.apply(this, arguments);
       }
     };
 
-    remove = function(key, fn) {
-      var fns = clientList[key];
+    remove = function (key, fn) {
+      const fns = clientList[key];
       if (!fns) {
         return false;
       }
       if (!fn) {
         fns && (fns.length = 0);
       } else {
-        for (var l = fns.length - 1; l >= 0; l--) {
+        for (let l = fns.length - 1; l >= 0; l--) {
           if (fns[l] === fn) {
             fns.splice(l, 1);
           }
@@ -101,29 +101,29 @@ var Event2 = (function() {
     return {
       listen: listen,
       trigger: trigger,
-      remove: remove
+      remove: remove,
     };
   };
 
   return {
-    create: function(namespace) {
+    create: function (namespace) {
       var namespace = namespace || 'default';
       return Event();
-    }
+    },
   };
 })();
 
 // 创建不同命名空间的事件对象
-var ns1 = Event2.create('namespace1');
-var ns2 = Event2.create('namespace2');
+const ns1 = Event2.create('namespace1');
+const ns2 = Event2.create('namespace2');
 
 // namespace1 订阅
-ns1.listen('click', function(data) {
+ns1.listen('click', function (data) {
   console.log('namespace1 收到 click：', data);
 });
 
 // namespace2 订阅
-ns2.listen('click', function(data) {
+ns2.listen('click', function (data) {
   console.log('namespace2 收到 click：', data);
 });
 
@@ -138,33 +138,33 @@ ns2.trigger('click', '来自namespace2');
 // ========== 模块间通信示例 ==========
 console.log('\n===== 模块间通信示例 =====');
 
-var headerModule = (function() {
-  Event.listen('loginSuccess', function(data) {
+const headerModule = (function () {
+  Event.listen('loginSuccess', function (data) {
     console.log('Header 模块：更新欢迎信息 -', data.name);
   });
   return {};
 })();
 
-var navModule = (function() {
-  Event.listen('loginSuccess', function(data) {
+const navModule = (function () {
+  Event.listen('loginSuccess', function (data) {
     console.log('Nav 模块：更新用户菜单 -', data.userId);
   });
   return {};
 })();
 
-var contentModule = (function() {
-  Event.listen('loginSuccess', function(data) {
+const contentModule = (function () {
+  Event.listen('loginSuccess', function (data) {
     console.log('Content 模块：加载用户数据 -', data.userId);
   });
   return {};
 })();
 
-var loginModule = (function() {
+const loginModule = (function () {
   return {
-    login: function(name, userId) {
+    login: function (name, userId) {
       console.log('登录模块：用户登录成功');
       Event.trigger('loginSuccess', { name: name, userId: userId });
-    }
+    },
   };
 })();
 
@@ -175,7 +175,7 @@ loginModule.login('张三', 1001);
 // ========== 取消订阅示例 ==========
 console.log('\n===== 取消订阅示例 =====');
 
-var callback = function(data) {
+const callback = function (data) {
   console.log('临时订阅者收到消息：', data);
 };
 

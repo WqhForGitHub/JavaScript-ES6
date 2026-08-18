@@ -9,7 +9,7 @@
 
 console.log('=== 反例：每次新增形状都要修改函数 ===');
 
-var calculateAreaBad = function(shape) {
+const calculateAreaBad = function (shape) {
   if (shape.type === 'circle') {
     return Math.PI * shape.radius * shape.radius;
   } else if (shape.type === 'rectangle') {
@@ -21,9 +21,9 @@ var calculateAreaBad = function(shape) {
   throw new Error('不支持的形状类型: ' + shape.type);
 };
 
-var circle = { type: 'circle', radius: 5 };
-var rectangle = { type: 'rectangle', width: 4, height: 6 };
-var triangle = { type: 'triangle', base: 3, height: 8 };
+const circle = { type: 'circle', radius: 5 };
+const rectangle = { type: 'rectangle', width: 4, height: 6 };
+const triangle = { type: 'triangle', base: 3, height: 8 };
 
 console.log('圆形面积: ' + calculateAreaBad(circle));
 console.log('矩形面积: ' + calculateAreaBad(rectangle));
@@ -37,26 +37,26 @@ console.log('');
 
 console.log('=== 修复1：使用对象多态性 ===');
 
-var shapes = {
+const shapes = {
   circle: {
-    area: function(shape) {
+    area: function (shape) {
       return Math.PI * shape.radius * shape.radius;
-    }
+    },
   },
   rectangle: {
-    area: function(shape) {
+    area: function (shape) {
       return shape.width * shape.height;
-    }
+    },
   },
   triangle: {
-    area: function(shape) {
+    area: function (shape) {
       return 0.5 * shape.base * shape.height;
-    }
-  }
+    },
+  },
 };
 
-var calculateArea = function(shape) {
-  var shapeObj = shapes[shape.type];
+const calculateArea = function (shape) {
+  const shapeObj = shapes[shape.type];
   if (!shapeObj) {
     throw new Error('不支持的形状类型: ' + shape.type);
   }
@@ -70,12 +70,12 @@ console.log('');
 
 // 新增形状只需添加新的策略对象，不需要修改 calculateArea
 shapes.trapezoid = {
-  area: function(shape) {
+  area: function (shape) {
     return 0.5 * (shape.topBase + shape.bottomBase) * shape.height;
-  }
+  },
 };
 
-var trapezoid = { type: 'trapezoid', topBase: 3, bottomBase: 5, height: 4 };
+const trapezoid = { type: 'trapezoid', topBase: 3, bottomBase: 5, height: 4 };
 console.log('新增梯形（无需修改 calculateArea）: ' + calculateArea(trapezoid));
 console.log('');
 
@@ -86,39 +86,39 @@ console.log('');
 console.log('=== 修复2：使用高阶函数 ===');
 
 // 让每个形状自带计算方法
-var circle2 = {
+const circle2 = {
   type: 'circle',
   radius: 5,
-  area: function() {
+  area: function () {
     return Math.PI * this.radius * this.radius;
-  }
+  },
 };
 
-var rectangle2 = {
+const rectangle2 = {
   type: 'rectangle',
   width: 4,
   height: 6,
-  area: function() {
+  area: function () {
     return this.width * this.height;
-  }
+  },
 };
 
-var triangle2 = {
+const triangle2 = {
   type: 'triangle',
   base: 3,
   height: 8,
-  area: function() {
+  area: function () {
     return 0.5 * this.base * this.height;
-  }
+  },
 };
 
 // 高阶函数：接受一个计算面积的回调
-var calculateAreaWith = function(shape, areaFn) {
+const calculateAreaWith = function (shape, areaFn) {
   return areaFn(shape);
 };
 
 // 或者更简洁：直接委托
-var calculateArea2 = function(shape) {
+const calculateArea2 = function (shape) {
   if (typeof shape.area === 'function') {
     return shape.area();
   }
@@ -131,13 +131,13 @@ console.log('三角形面积: ' + calculateArea2(triangle2));
 console.log('');
 
 // 新增形状只需定义自己的 area 方法
-var ellipse = {
+const ellipse = {
   type: 'ellipse',
   semiMajor: 5,
   semiMinor: 3,
-  area: function() {
+  area: function () {
     return Math.PI * this.semiMajor * this.semiMinor;
-  }
+  },
 };
 
 console.log('新增椭圆（无需修改 calculateArea2）: ' + calculateArea2(ellipse));

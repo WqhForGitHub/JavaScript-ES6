@@ -5,27 +5,27 @@
 // ========== 最初的实现：使用类的静态属性 ==========
 console.log('===== 最初的实现：使用类的静态属性 =====');
 
-var Singleton = function(name) {
+const Singleton = function (name) {
   this.name = name;
 };
 
 // 使用静态属性 instance 来保存唯一实例
 Singleton.instance = null;
 
-Singleton.prototype.getName = function() {
+Singleton.prototype.getName = function () {
   console.log(this.name);
 };
 
 // 通过 getInstance 方法获取唯一实例
-Singleton.getInstance = function(name) {
+Singleton.getInstance = function (name) {
   if (!this.instance) {
     this.instance = new Singleton(name);
   }
   return this.instance;
 };
 
-var a = Singleton.getInstance('sven1');
-var b = Singleton.getInstance('sven2');
+const a = Singleton.getInstance('sven1');
+const b = Singleton.getInstance('sven2');
 
 console.log('a === b：', a === b); // true
 console.log('a.name：', a.name); // sven1（第一次创建的实例）

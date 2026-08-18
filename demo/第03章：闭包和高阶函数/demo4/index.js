@@ -5,10 +5,10 @@
 console.log('=== Function.prototype.before ===');
 
 // before: 在原函数之前执行前置函数
-Function.prototype.before = function(beforefn) {
-  var __self = this; // 保存原函数引用
+Function.prototype.before = function (beforefn) {
+  const __self = this; // 保存原函数引用
 
-  return function() {
+  return function () {
     // 先执行前置函数
     beforefn.apply(this, arguments);
     // 再执行原函数
@@ -19,12 +19,12 @@ Function.prototype.before = function(beforefn) {
 console.log('\n=== Function.prototype.after ===');
 
 // after: 在原函数之后执行后置函数
-Function.prototype.after = function(afterfn) {
-  var __self = this; // 保存原函数引用
+Function.prototype.after = function (afterfn) {
+  const __self = this; // 保存原函数引用
 
-  return function() {
+  return function () {
     // 先执行原函数
-    var ret = __self.apply(this, arguments);
+    const ret = __self.apply(this, arguments);
     // 再执行后置函数
     afterfn.apply(this, arguments);
     return ret;
@@ -37,15 +37,17 @@ Function.prototype.after = function(afterfn) {
 
 console.log('\n=== 基本使用 ===');
 
-var func = function() {
+let func = function () {
   console.log(2);
 };
 
-func = func.before(function() {
-  console.log(1);
-}).after(function() {
-  console.log(3);
-});
+func = func
+  .before(function () {
+    console.log(1);
+  })
+  .after(function () {
+    console.log(3);
+  });
 
 func(); // 输出: 1, 2, 3
 
@@ -55,12 +57,12 @@ func(); // 输出: 1, 2, 3
 
 console.log('\n=== 给函数添加日志 ===');
 
-var showLogin = function() {
+let showLogin = function () {
   console.log('显示登录弹窗');
 };
 
 // 在显示登录弹窗之前，记录点击日志
-showLogin = showLogin.before(function() {
+showLogin = showLogin.before(function () {
   console.log('记录用户点击登录按钮的日志');
 });
 
@@ -74,13 +76,13 @@ showLogin();
 
 console.log('\n=== 给 ajax 请求添加 token ===');
 
-var ajax = function(type, url, param) {
+let ajax = function (type, url, param) {
   console.log('发送 ' + type + ' 请求到 ' + url);
   console.log('参数:', JSON.stringify(param));
 };
 
 // 使用 before 在发送请求前自动添加 token
-ajax = ajax.before(function(type, url, param) {
+ajax = ajax.before(function (type, url, param) {
   param = param || {};
   param.token = 'xxxx-yyyy-zzzz';
   // 修改 arguments 对象
@@ -99,13 +101,13 @@ ajax('GET', '/api/user', { name: 'sven' });
 
 console.log('\n=== 表单验证 ===');
 
-var submitForm = function() {
+let submitForm = function () {
   console.log('提交表单数据');
 };
 
 // 在提交前添加验证逻辑
-submitForm = submitForm.before(function() {
-  var username = 'test'; // 模拟获取输入值
+submitForm = submitForm.before(function () {
+  const username = 'test'; // 模拟获取输入值
   if (!username) {
     console.log('验证失败：用户名不能为空');
     return false;
@@ -123,21 +125,21 @@ submitForm();
 
 console.log('\n=== 链式 AOP ===');
 
-var greet = function(name) {
+let greet = function (name) {
   console.log('Hello, ' + name + '!');
 };
 
 greet = greet
-  .before(function(name) {
+  .before(function (name) {
     console.log('前置：准备问候 ' + name);
   })
-  .before(function(name) {
+  .before(function (name) {
     console.log('前置：检查 ' + name + ' 是否在线');
   })
-  .after(function(name) {
+  .after(function (name) {
     console.log('后置：记录问候 ' + name + ' 的日志');
   })
-  .after(function(name) {
+  .after(function (name) {
     console.log('后置：更新 ' + name + ' 的最后活跃时间');
   });
 

@@ -7,22 +7,28 @@
 // 反例：一个函数承担多个职责
 // ============================================
 
-var processUserDataAndUpdateUI = function(users) {
+const processUserDataAndUpdateUI = function (users) {
   // 职责1：数据处理
-  var processedUsers = [];
-  for (var i = 0; i < users.length; i++) {
+  const processedUsers = [];
+  for (let i = 0; i < users.length; i++) {
     processedUsers.push({
       id: users[i].id,
       displayName: users[i].firstName + ' ' + users[i].lastName,
-      email: users[i].email.toLowerCase()
+      email: users[i].email.toLowerCase(),
     });
   }
 
   // 职责2：UI 更新
   console.log('--- 反例：一个函数做三件事 ---');
   console.log('[UI] 更新用户列表容器:');
-  for (var j = 0; j < processedUsers.length; j++) {
-    console.log('[UI] 渲染行: <li>' + processedUsers[j].displayName + ' - ' + processedUsers[j].email + '</li>');
+  for (let j = 0; j < processedUsers.length; j++) {
+    console.log(
+      '[UI] 渲染行: <li>' +
+        processedUsers[j].displayName +
+        ' - ' +
+        processedUsers[j].email +
+        '</li>'
+    );
   }
 
   // 职责3：事件绑定
@@ -31,10 +37,10 @@ var processUserDataAndUpdateUI = function(users) {
   console.log('');
 };
 
-var rawUsers = [
+const rawUsers = [
   { id: 1, firstName: '张', lastName: '三', email: 'ZHANGSAN@EXAMPLE.COM' },
   { id: 2, firstName: '李', lastName: '四', email: 'LISI@EXAMPLE.COM' },
-  { id: 3, firstName: '王', lastName: '五', email: 'WANGWU@EXAMPLE.COM' }
+  { id: 3, firstName: '王', lastName: '五', email: 'WANGWU@EXAMPLE.COM' },
 ];
 
 processUserDataAndUpdateUI(rawUsers);
@@ -44,35 +50,41 @@ processUserDataAndUpdateUI(rawUsers);
 // ============================================
 
 // 职责1：数据处理
-var processUserData = function(users) {
-  var processedUsers = [];
-  for (var i = 0; i < users.length; i++) {
+const processUserData = function (users) {
+  const processedUsers = [];
+  for (let i = 0; i < users.length; i++) {
     processedUsers.push({
       id: users[i].id,
       displayName: users[i].firstName + ' ' + users[i].lastName,
-      email: users[i].email.toLowerCase()
+      email: users[i].email.toLowerCase(),
     });
   }
   return processedUsers;
 };
 
 // 职责2：UI 更新
-var updateUserListUI = function(processedUsers) {
+const updateUserListUI = function (processedUsers) {
   console.log('[UI] 更新用户列表容器:');
-  for (var i = 0; i < processedUsers.length; i++) {
-    console.log('[UI] 渲染行: <li>' + processedUsers[i].displayName + ' - ' + processedUsers[i].email + '</li>');
+  for (let i = 0; i < processedUsers.length; i++) {
+    console.log(
+      '[UI] 渲染行: <li>' +
+        processedUsers[i].displayName +
+        ' - ' +
+        processedUsers[i].email +
+        '</li>'
+    );
   }
 };
 
 // 职责3：事件绑定
-var attachUserListEvents = function() {
+const attachUserListEvents = function () {
   console.log('[Event] 绑定用户列表点击事件');
   console.log('[Event] 绑定用户列表悬停事件');
 };
 
 // 组合调用
 console.log('--- 重构：每个函数只做一件事 ---');
-var processed = processUserData(rawUsers);
+const processed = processUserData(rawUsers);
 updateUserListUI(processed);
 attachUserListEvents();
 console.log('');

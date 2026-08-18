@@ -2,30 +2,30 @@
 
 // ==================== Folder 类（组合对象）====================
 
-var Folder = function(name) {
+const Folder = function (name) {
   this.name = name;
   this.files = [];
   this.parent = null;
 };
 
-Folder.prototype.add = function(file) {
+Folder.prototype.add = function (file) {
   file.parent = this;
   this.files.push(file);
 };
 
-Folder.prototype.scan = function() {
+Folder.prototype.scan = function () {
   console.log('开始扫描文件夹: ' + this.name);
-  for (var i = 0; i < this.files.length; i++) {
+  for (let i = 0; i < this.files.length; i++) {
     this.files[i].scan();
   }
 };
 
-Folder.prototype.remove = function() {
+Folder.prototype.remove = function () {
   if (!this.parent) {
     console.log('根目录无法删除');
     return;
   }
-  for (var i = 0; i < this.parent.files.length; i++) {
+  for (let i = 0; i < this.parent.files.length; i++) {
     if (this.parent.files[i] === this) {
       this.parent.files.splice(i, 1);
       break;
@@ -35,25 +35,25 @@ Folder.prototype.remove = function() {
 
 // ==================== File 类（叶对象）====================
 
-var File = function(name) {
+const File = function (name) {
   this.name = name;
   this.parent = null;
 };
 
-File.prototype.add = function() {
+File.prototype.add = function () {
   throw new Error('文件下面不能再添加文件');
 };
 
-File.prototype.scan = function() {
+File.prototype.scan = function () {
   console.log('  扫描文件: ' + this.name);
 };
 
-File.prototype.remove = function() {
+File.prototype.remove = function () {
   if (!this.parent) {
     console.log('根目录无法删除');
     return;
   }
-  for (var i = 0; i < this.parent.files.length; i++) {
+  for (let i = 0; i < this.parent.files.length; i++) {
     if (this.parent.files[i] === this) {
       this.parent.files.splice(i, 1);
       break;
@@ -63,12 +63,12 @@ File.prototype.remove = function() {
 
 // ==================== 构建文件树 ====================
 
-var learningFolder = new Folder('学习资料');
-var jsFolder = new Folder('JavaScript');
-var nodeFolder = new Folder('Node.js');
+const learningFolder = new Folder('学习资料');
+const jsFolder = new Folder('JavaScript');
+const nodeFolder = new Folder('Node.js');
 
-var designPatternFile = new File('设计模式');
-var jqueryFile = new File('精通jQuery');
+const designPatternFile = new File('设计模式');
+const jqueryFile = new File('精通jQuery');
 
 jsFolder.add(designPatternFile);
 jsFolder.add(jqueryFile);
@@ -86,7 +86,7 @@ learningFolder.scan();
 // ==================== 添加更多文件 ====================
 
 console.log('\n--- 添加 Node.js 文件夹下的文件 ---');
-var nodeInActionFile = new File('Node.js实战');
+const nodeInActionFile = new File('Node.js实战');
 nodeFolder.add(nodeInActionFile);
 
 learningFolder.scan();

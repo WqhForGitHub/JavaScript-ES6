@@ -3,23 +3,23 @@
 // ========== 内部迭代器 ==========
 console.log('===== 内部迭代器 =====');
 
-var each = function(ary, callback) {
-  for (var i = 0, l = ary.length; i < l; i++) {
+const each = function (ary, callback) {
+  for (let i = 0, l = ary.length; i < l; i++) {
     callback.call(ary[i], ary[i], i); // 把 ary[i] 作为 callback 的 this
   }
 };
 
-each([1, 2, 3, 4], function(item, index) {
+each([1, 2, 3, 4], function (item, index) {
   console.log('索引', index, '：', item);
 });
 
 // 内部迭代器的 compare 函数
-var compare = function(ary1, ary2) {
+const compare = function (ary1, ary2) {
   if (ary1.length !== ary2.length) {
     console.log('两个数组不相等');
     return;
   }
-  each(ary1, function(item, index) {
+  each(ary1, function (item, index) {
     if (item !== ary2[index]) {
       console.log('两个数组不相等');
       return;
@@ -38,38 +38,38 @@ compare([1, 2, 3], [1, 2, 4]); // 不相等
 // ========== 外部迭代器 ==========
 console.log('\n===== 外部迭代器 =====');
 
-var Iterator = function(obj) {
-  var current = 0;
+const Iterator = function (obj) {
+  let current = 0;
 
-  var next = function() {
+  const next = function () {
     current += 1;
   };
 
-  var isDone = function() {
+  const isDone = function () {
     return current >= obj.length;
   };
 
-  var getCurrItem = function() {
+  const getCurrItem = function () {
     return obj[current];
   };
 
   return {
     next: next,
     isDone: isDone,
-    getCurrItem: getCurrItem
+    getCurrItem: getCurrItem,
   };
 };
 
 // 使用外部迭代器遍历数组
 console.log('\n--- 使用外部迭代器遍历 ---');
-var iter = Iterator([10, 20, 30]);
+const iter = Iterator([10, 20, 30]);
 while (!iter.isDone()) {
   console.log('当前项：', iter.getCurrItem());
   iter.next();
 }
 
 // 使用外部迭代器的 compare 函数
-var compare2 = function(iterator1, iterator2) {
+const compare2 = function (iterator1, iterator2) {
   while (!iterator1.isDone() && !iterator2.isDone()) {
     if (iterator1.getCurrItem() !== iterator2.getCurrItem()) {
       console.log('两个数组不相等');
@@ -82,15 +82,17 @@ var compare2 = function(iterator1, iterator2) {
 };
 
 console.log('\n--- 外部迭代器比较数组 ---');
-var iter1 = Iterator([1, 2, 3]);
-var iter2 = Iterator([1, 2, 3]);
+const iter1 = Iterator([1, 2, 3]);
+const iter2 = Iterator([1, 2, 3]);
 compare2(iter1, iter2); // 相等
 
-var iter3 = Iterator([1, 2, 3]);
-var iter4 = Iterator([1, 2, 4]);
+const iter3 = Iterator([1, 2, 3]);
+const iter4 = Iterator([1, 2, 4]);
 compare2(iter3, iter4); // 不相等
 
 // ========== 内部迭代器 vs 外部迭代器 ==========
 console.log('\n===== 内部迭代器 vs 外部迭代器 =====');
-console.log('内部迭代器：调用简单，但迭代规则已在内部写死，无法灵活控制迭代过程');
+console.log(
+  '内部迭代器：调用简单，但迭代规则已在内部写死，无法灵活控制迭代过程'
+);
 console.log('外部迭代器：调用稍复杂，但可以手动控制迭代过程，更灵活');

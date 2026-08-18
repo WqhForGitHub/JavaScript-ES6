@@ -7,13 +7,13 @@
 console.log('===== 对象字面量命名空间 =====');
 
 // 最简单的命名空间：用一个对象字面量来组织代码
-var namespace1 = {
-  a: function() {
+const namespace1 = {
+  a: function () {
     console.log('namespace1.a 执行');
   },
-  b: function() {
+  b: function () {
     console.log('namespace1.b 执行');
-  }
+  },
 };
 
 namespace1.a(); // namespace1.a 执行
@@ -25,13 +25,13 @@ namespace1.b(); // namespace1.b 执行
 // ========== 动态创建命名空间 ==========
 console.log('\n===== 动态创建命名空间 =====');
 
-var MyApp = {};
+const MyApp = {};
 
 // 通用的命名空间方法：逐层创建命名空间
-MyApp.namespace = function(name) {
-  var parts = name.split('.');
-  var current = MyApp;
-  for (var i = 0; i < parts.length; i++) {
+MyApp.namespace = function (name) {
+  const parts = name.split('.');
+  let current = MyApp;
+  for (let i = 0; i < parts.length; i++) {
     if (!current[parts[i]]) {
       current[parts[i]] = {};
     }
@@ -56,22 +56,22 @@ console.log('\n===== 模块模式：使用闭包封装私有变量 =====');
 // 模块模式通过 IIFE 创建闭包，将私有变量隐藏在闭包中
 // 只暴露需要公开的接口，本质上就是一个单例
 
-var user = (function() {
+const user = (function () {
   // 私有变量，外部无法直接访问
-  var __name = 'sven';
-  var __age = 29;
+  let __name = 'sven';
+  let __age = 29;
 
   return {
     // 公有方法，可以访问私有变量
-    getUserInfo: function() {
+    getUserInfo: function () {
       return __name + ' - ' + __age;
     },
-    setName: function(name) {
+    setName: function (name) {
       __name = name;
     },
-    setAge: function(age) {
+    setAge: function (age) {
       __age = age;
-    }
+    },
   };
 })();
 
@@ -87,21 +87,21 @@ console.log('user.__name：', user.__name); // undefined
 // ========== 模块模式扩展 ==========
 console.log('\n===== 模块模式扩展 =====');
 
-var config = (function() {
-  var __config = {
+const config = (function () {
+  const __config = {
     maxWidth: 100,
-    maxHeight: 200
+    maxHeight: 200,
   };
 
   return {
-    get: function(key) {
+    get: function (key) {
       return __config[key];
     },
-    set: function(key, value) {
+    set: function (key, value) {
       if (__config.hasOwnProperty(key)) {
         __config[key] = value;
       }
-    }
+    },
   };
 })();
 

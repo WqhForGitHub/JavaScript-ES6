@@ -4,10 +4,10 @@
 
 console.log('=== 变量作用域 ===');
 
-var a = 1; // 全局变量
+const a = 1; // 全局变量
 
-var func = function() {
-  var a = 2; // 局部变量，与全局变量 a 互不影响
+const func = function () {
+  const a = 2; // 局部变量，与全局变量 a 互不影响
   console.log('func 内部 a:', a); // 2
 };
 
@@ -17,14 +17,14 @@ console.log('func 外部 a:', a); // 1
 // 闭包：函数可以访问其定义时所在的词法作用域
 console.log('\n=== 闭包的形成 ===');
 
-var func2 = function() {
-  var b = 1;
-  return function() {
+const func2 = function () {
+  const b = 1;
+  return function () {
     console.log('通过闭包访问 b:', b);
   };
 };
 
-var closure = func2();
+const closure = func2();
 closure(); // 通过闭包访问 b: 1
 // 虽然 func2 已经执行完毕，但内部函数仍然可以访问其局部变量 b
 
@@ -34,21 +34,21 @@ closure(); // 通过闭包访问 b: 1
 
 console.log('\n=== 闭包延长局部变量生命周期 ===');
 
-var createCounter = function() {
-  var count = 0; // 局部变量
+const createCounter = function () {
+  let count = 0; // 局部变量
 
   return {
-    increment: function() {
+    increment: function () {
       count++;
       console.log('count:', count);
     },
-    getCount: function() {
+    getCount: function () {
       return count;
-    }
+    },
   };
 };
 
-var counter = createCounter();
+const counter = createCounter();
 counter.increment(); // count: 1
 counter.increment(); // count: 2
 counter.increment(); // count: 3
@@ -63,32 +63,32 @@ console.log('final count:', counter.getCount()); // 3
 
 console.log('\n=== 闭包封装私有变量 ===');
 
-var mult = (function() {
-  var cache = {}; // 私有缓存
+const mult = (function () {
+  const cache = {}; // 私有缓存
 
-  var calculate = function() {
-    var a = arguments[0];
-    for (var i = 1, l = arguments.length; i < l; i++) {
+  const calculate = function () {
+    let a = arguments[0];
+    for (let i = 1, l = arguments.length; i < l; i++) {
       a = a * arguments[i];
     }
     return a;
   };
 
-  return function() {
-    var args = Array.prototype.join.call(arguments, ',');
+  return function () {
+    const args = Array.prototype.join.call(arguments, ',');
     if (args in cache) {
       console.log('(缓存命中) ' + args + ' = ' + cache[args]);
       return cache[args];
     }
-    var result = calculate.apply(null, arguments);
+    const result = calculate.apply(null, arguments);
     cache[args] = result;
     console.log('(计算结果) ' + args + ' = ' + result);
     return result;
   };
 })();
 
-mult(2, 3);    // (计算结果) 2,3 = 6
-mult(2, 3);    // (缓存命中) 2,3 = 6
+mult(2, 3); // (计算结果) 2,3 = 6
+mult(2, 3); // (缓存命中) 2,3 = 6
 mult(3, 4, 5); // (计算结果) 3,4,5 = 60
 mult(3, 4, 5); // (缓存命中) 3,4,5 = 60
 
@@ -103,9 +103,9 @@ console.log('\n=== 闭包修复循环变量问题 ===');
 // 错误示例：所有输出都是 3
 console.log('--- 错误示例 ---');
 
-var funcs = [];
+const funcs = [];
 for (var i = 0; i < 3; i++) {
-  funcs.push(function() {
+  funcs.push(function () {
     console.log(i);
   });
 }
@@ -117,10 +117,10 @@ for (var j = 0; j < 3; j++) {
 // 正确示例：使用 IIFE 创建闭包，保存每次循环的 i 值
 console.log('--- 正确示例（IIFE） ---');
 
-var funcs2 = [];
+const funcs2 = [];
 for (var i = 0; i < 3; i++) {
-  (function(k) {
-    funcs2.push(function() {
+  (function (k) {
+    funcs2.push(function () {
       console.log(k);
     });
   })(i);
