@@ -2423,7 +2423,7 @@ console.log(String(value4)); // "undefined"
 >
 >用加号操作符给一个值加上一个空字符串 "" 也可以将其转换为字符串（加号操作符本章后面会介绍）。
 
-### 4. 模板字面量
+### 3.4.7.4 模板字面量
 
 使用模板字面量也可以定义字符串，此时要使用反引号（`）作为定界符。与使用单引号或双引号不同，模板字面量保留换行字符，可以跨行定义字符串：
 
@@ -2475,7 +2475,7 @@ console.log(thirdTemplateLiteral);
 // first line
 // second line
 ```
-### 5. 字符串插值
+### 3.4.7.5. 字符串插值
 
 模板字面量最常用的一个特性是支持字符串插值，也就是可以在一个连续定义中插入一个或多个值。技术上讲，模板字面量不是字符串，而是一种特殊的 JavaScript 句法表达式，只不过求值后得到的是字符串。模板字面量在定义时立即求值并转换为字符串实例，任何插入的变量也会从它们最接近的作用域中取值。
 
@@ -2523,7 +2523,7 @@ console.log(`${ capitalize('hello') }, ${ capitalize('world') }!`); // Hello, Wo
 此外，模板也可以插入自己之前的值：
 
 ```javascript
-let value = ''l
+let value = '';
 function append() {
     value = `${value}abc`;
     console.log(value);
@@ -2532,11 +2532,10 @@ append(); // abc
 append(); // abcabc
 append(); // abcabcabc
 ```
-### 6. 模板字面量标签函数
+### 3.4.7.6 模板字面量标签函数
 
-模板字面量也支持定义标签函数（tag function），而通过标签函数可以自定义插值行为。标签函数会接收被插值记号分隔后的模板和对表达式求值的结果。
-
-标签函数本身是一个常规函数，通过前缀到模板字面量来应用自定义行为，如下例所示。标签函数接收到额参数依次是原始字符串数组和对每个表达式求值的结果。这个函数的返回值是对模板字面量求值得到的字符串。
+模板字面量也支持定义**标签函数**（tag function），而通过标签函数可以自定义插值行为。标签函数会接收被插值记号分隔后的模板和对每个表达式求值的结果。
+标签函数本身是一个常规函数，通过前缀到模板字面 量来应用自定义行为，如下例所示。标签函数接收到额参数依次是原始字符串数组和对每个表达式求值的结果。这个函数的返回值是对模板字面量求值得到的字符串。
 
 最好通过一个例子来理解：
 
@@ -2604,7 +2603,119 @@ let taggedResult = zipTag`${ a } + ${ b } = ${ a + b }`;
 console.log(untaggedResult); // "6 + 9 = 15"
 console.log(taggedResult); // "6 + 9 = 15"
 ```
-### 7. 原始字符串
+#### ai overview
+一、标签函数（Tagged Template）
+
+1）本质是什么？
+
+普通模板字符串：
+
+`${a} + ${b} = ${a + b}`
+
+👉 本质是：**字符串拼接**
+
+---
+
+但如果你在前面加一个函数：
+
+tag`${a} + ${b} = ${a + b}`
+
+👉 就不是字符串了，而是：
+
+👉 **调用函数 tag(...)**
+
+---
+
+ 2）函数实际收到什么？
+
+let a = 6;
+
+let b = 9;
+
+  
+
+function tag(strings, ...values) {
+
+  console.log(strings);
+
+  console.log(values);
+
+}
+
+  
+
+tag`${a} + ${b} = ${a + b}`;
+
+输出：
+
+["", " + ", " = ", ""]
+
+[6, 9, 15]
+
+ 解释：
+
+| 部分      | 内容             |
+| ------- | -------------- |
+| strings | 被 `${}` 切开的字符串 |
+| values  | 每个表达式的结果       |
+
+👉 规则：
+
+- strings.length = 表达式数量 + 1
+
+---
+
+ 3）你可以自定义拼接逻辑
+
+function zipTag(strings, ...values) {
+
+  return strings[0] +
+
+    values.map((v, i) => v + strings[i + 1]).join('');
+
+}
+
+  
+
+let result = zipTag`${a} + ${b} = ${a + b}`;
+
+console.log(result);
+
+输出：
+
+6 + 9 = 15
+
+👉 你甚至可以：
+
+- 改格式
+- 做过滤
+- 做转义（防 XSS）
+- 返回对象而不是字符串
+
+---
+
+一个更实用例子（安全 HTML）
+
+function safeHTML(strings, ...values) {
+
+  return strings.reduce((res, str, i) => {
+
+    let val = values[i] || '';
+
+    val = String(val).replace(/</g, '&lt;');
+
+    return res + str + val;
+
+  }, '');
+
+}
+
+let userInput = "<script>alert(1)</script>";
+
+console.log(safeHTML`<p>${userInput}</p>`);
+
+防止注入攻击
+### 3.4.7.7 原始字符串
 
 使用模板字面量也恶意直接获取原始的模板字面量内容（如换行符或 Unicode 字符），而不是被转换后的字符表示。为此，可以使用默认的 String.raw 标签函数：
 
@@ -2657,7 +2768,128 @@ printRaw`\u00A9${ 'and' }\n`;
 // \u00A9
 // \n
 ```
-## 8. Symbol 类型
+
+#### ai overview
+
+用最通俗的话讲，这一节其实在说一件事：
+
+> **“模板字符串默认会‘加工内容’，但 String.raw 可以让你看到‘原封不动的原材料’。”**
+
+🧠 一句话理解
+
+普通模板字符串 = **自动帮你“翻译转义符”**  
+String.raw = **不翻译，直接显示你写的样子**
+🔥 1. 普通模板字符串（会“加工”）
+
+console.log(`first line\nsecond line`);
+
+输出是：
+
+first line
+
+second line
+
+👉 因为 `\n` 被“翻译成换行”
+
+你写的是：
+
+\ n
+
+但 JS 帮你变成了真正的“换行”。
+
+ 🧊 2. String.raw（完全不加工）
+
+console.log(String.raw`first line\nsecond line`);
+
+输出：
+
+first line\nsecond line
+
+👉 注意：这里没有换行！
+
+它把 `\n` 当成两个普通字符：
+
+\  +  n
+
+🧾 3. Unicode 也是一样
+
+console.log(`\u00A9`);
+
+输出：
+
+©
+
+✔ 被转换了（版权符号）
+
+---
+
+console.log(String.raw`\u00A9`);
+
+输出：
+
+\u00A9
+
+👉 没转换，原样输出
+
+📦 4. 可以这样理解 String.raw
+
+想象两种“阅读方式”：
+
+| 模式         | 行为          |
+| ---------- | ----------- |
+| 普通模板字符串    | 翻译成“真实字符”   |
+| String.raw | 显示“你写的代码原样” |
+📁 5. 最经典例子：Windows 路径
+
+const path = `C:\new\test`;
+
+JS 会误读：
+
+- `\n` = 换行
+- `\t` = tab
+
+结果可能乱掉
+
+---
+
+用 raw：
+
+String.raw`C:\new\test`
+
+输出：
+
+C:\new\test
+
+👉 完全安全
+
+---
+
+🧩 6. raw 属性（核心原理）
+
+标签函数里：
+
+function tag(strings) {
+
+  console.log(strings);      // “加工后的”
+
+  console.log(strings.raw);  // “原始的”
+
+}
+
+---
+
+调用：
+
+tag`a\nb`
+
+结果：
+
+strings:     ["a", "b"]
+
+strings.raw: ["a\\nb"]
+
+👉 raw 就是“没被 JS 处理过的版本”
+## 3.4.8 Symbol 类型
 
 符号是原始值，且符号实例是唯一、不可变的。符号的用途是确保对象属性使用唯一标识符，不会发生属性冲突的危险。
 
@@ -2756,7 +2988,7 @@ let emptyGlobalSymbol = Symbol.for();
 console.log(emptyGlobalSymbol); // Symbol(undefined)
 ```
 
-还可以使用 Sybol.keyFor() 来查询全局注册表，这个方法接收符号，返回该全局符号对应的字符串键。如果查询的不是全局符号，则返回 undefined。
+还可以使用 Symbol.keyFor() 来查询全局注册表，这个方法接收符号，返回该全局符号对应的字符串键。如果查询的不是全局符号，则返回 undefined。
 
 ```javascript
 // 创建全局符号
@@ -3360,9 +3592,7 @@ with (o) {
 >
 >不推荐使用 with，因此也不推荐使用 Symbol.unscopeables。
 
-<br>
-
-## 9. Object 类型
+## 3.4.9 Object 类型
 
 ECMAScript 中的对象其实就是一组数据和功能的集合。对象通过 new 操作符后跟对象类型的名称来创建。开发者可以通过创建 Object 类型的实例来创建自己的对象，然后再给对象添加属性和方法：
 
@@ -3386,14 +3616,12 @@ Object 的实例本身并不是很有用，但理解与它相关的概念非常�
 * propertyIsEnumerable(propertyName)：用于判断给定的属性是否可以使用（本章稍后讨论的）for-in 语句枚举。与 hasOwnProperty() 一样，属性名必须是字符串。
 * toLocaleString()：返回对象的字符串表示，该字符串反映对象所在的本地化执行环境。
 * toString()：返回对象的字符串表示。
-* valueOf()：返回对象对应的字符串、数值或布尔值表示。通常与 toString() 的返回值相同。因为在 ECMAScript 中 Object 是所有对象的基类，所以任何对象都有这些属性和方法。
+* valueOf()：返回对象对应的字符串、数值或布尔值表示。通常与 toString() 的返回值相同。
+因为在 ECMAScript 中 Object 是所有对象的基类，所以任何对象都有这些属性和方法。
 
 >注意
 >
 >严格来讲，ECMA-262 中对象的行为不一定适合 JavaScript 中的其他对象。比如浏览器环境中的 BOM 和 DOM 对象，它们都是由宿主环境定义和提供的宿主对象。而宿主对象不受 ECMA-262 约束，所以它们可能会可能不会继承 Object。
-
-<br>
-
 # 5. 操作符
 
 ECMA-262 描述了一组可用于操作数据值的操作符，包括数学操作符（如加、减）、位操作符、关系操作符和相等操作符等。ECMAScript 中的操作符是独特的，因为它们可用于各种值，包括字符串、数值、布尔值，甚至还有对象。在应用给对象时，操作符通常会调用 valueOf() 和 toString() 方法来取得可以计算的值。
