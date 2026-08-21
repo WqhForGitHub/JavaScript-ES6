@@ -4,16 +4,16 @@
 
 const MenuBar = {
   refresh: function () {
-    console.log('刷新菜单目录');
+    console.log("刷新菜单目录");
   },
 };
 
 const SubMenu = {
   add: function () {
-    console.log('增加子菜单');
+    console.log("增加子菜单");
   },
   del: function () {
-    console.log('删除子菜单');
+    console.log("删除子菜单");
   },
 };
 
@@ -75,11 +75,11 @@ setCommand(refreshBarButton, refreshMenuBarCommand);
 setCommand(addSubMenuButton, addSubMenuCommand);
 setCommand(delSubMenuButton, delSubMenuCommand);
 
-console.log('--- 点击刷新菜单按钮 ---');
+console.log("--- 点击刷新菜单按钮 ---");
 refreshBarButton.onclick();
 
-console.log('--- 点击增加子菜单按钮 ---');
+console.log("--- 点击增加子菜单按钮 ---");
 addSubMenuButton.onclick();
 
-console.log('--- 点击删除子菜单按钮 ---');
+console.log("--- 点击删除子菜单按钮 ---");
 delSubMenuButton.onclick();
