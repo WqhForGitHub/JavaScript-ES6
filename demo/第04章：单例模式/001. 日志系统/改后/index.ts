@@ -24,3 +24,5 @@ const loggerB = Logger.getInstance();
 loggerA.log('user login');
 loggerB.log('user logout');
 console.log(loggerA === loggerB); // true ✅
+
+export {};

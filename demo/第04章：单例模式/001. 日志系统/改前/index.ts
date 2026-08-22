@@ -18,3 +18,5 @@ const loggerB = new Logger('app.log');
 loggerB.log('user logout');
 
 console.log(loggerA === loggerB); // false 😱
+
+export {};
