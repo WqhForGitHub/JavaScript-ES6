@@ -342,3 +342,19 @@ console.log("abc".split("")); // ["a", "b", "c"]
 // 80. 用特殊字符分割
 console.log("a-b_c=d".split(/[-_=]/)); // ["a", "b", "c", "d"]
 ```
+
+---
+
+## 目录：按函数分文件详解（每个函数 20 个例子）
+
+| 文件 | 函数 | 一句话说明 |
+| --- | --- | --- |
+| [常用例子.md](<常用例子.md>) | 综合 | 10 个常用实战正则 |
+| [01. test().md](<01. test().md>) | `test()` | 布尔校验、常用表单验证 |
+| [02. exec().md](<02. exec().md>) | `exec()` | 提取匹配内容、捕获组、lastIndex |
+| [03. match().md](<03. match().md>) | `match()` | 批量提取（g 标志行为差异） |
+| [04. matchAll().md](<04. matchAll().md>) | `matchAll()` | 迭代器 + 捕获组完整信息 |
+| [05. search().md](<05. search().md>) | `search()` | 查找匹配位置索引 |
+| [06. replace().md](<06. replace().md>) | `replace()` | 替换、格式转换、$1/$& 引用 |
+| [07. replaceAll().md](<07. replaceAll().md>) | `replaceAll()` | 全量替换、Unicode 属性 |
+| [08. split().md](<08. split().md>) | `split()` | 正则分割、捕获组保留分隔符 |
