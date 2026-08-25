@@ -3,26 +3,26 @@
 // ========== 基础版：售楼处 ==========
 console.log('===== 基础版：售楼处 =====');
 
-var salesOffices = {}; // 售楼处对象
+const salesOffices = {}; // 售楼处对象
 
 salesOffices.clientList = []; // 缓存列表，存放订阅者的回调函数
 
-salesOffices.listen = function(fn) {
+salesOffices.listen = function (fn) {
   this.clientList.push(fn); // 订阅的消息添加进缓存列表
 };
 
-salesOffices.trigger = function() {
-  for (var i = 0, fn; fn = this.clientList[i++];) {
+salesOffices.trigger = function () {
+  for (var i = 0, fn; (fn = this.clientList[i++]);) {
     fn.apply(this, arguments); // arguments 是发布消息时带上的参数
   }
 };
 
 // 订阅
-salesOffices.listen(function(price, squareMeter) {
+salesOffices.listen(function (price, squareMeter) {
   console.log('订阅者A - 价格=' + price + '，面积=' + squareMeter);
 });
 
-salesOffices.listen(function(price, squareMeter) {
+salesOffices.listen(function (price, squareMeter) {
   console.log('订阅者B - 价格=' + price + '，面积=' + squareMeter);
 });
 
@@ -35,35 +35,35 @@ salesOffices.trigger(3000000, 110);
 // ========== 改进版：基于 key 的订阅 ==========
 console.log('\n===== 改进版：基于 key 的订阅 =====');
 
-var salesOffices2 = {};
+const salesOffices2 = {};
 
 salesOffices2.clientList = {};
 
-salesOffices2.listen = function(key, fn) {
+salesOffices2.listen = function (key, fn) {
   if (!this.clientList[key]) {
     this.clientList[key] = [];
   }
   this.clientList[key].push(fn);
 };
 
-salesOffices2.trigger = function() {
-  var key = Array.prototype.shift.call(arguments);
-  var fns = this.clientList[key];
+salesOffices2.trigger = function () {
+  const key = Array.prototype.shift.call(arguments);
+  const fns = this.clientList[key];
   if (!fns || fns.length === 0) {
     return false;
   }
-  for (var i = 0, fn; fn = fns[i++];) {
+  for (var i = 0, fn; (fn = fns[i++]);) {
     fn.apply(this, arguments);
   }
 };
 
 // 订阅 88 平方米的消息
-salesOffices2.listen('squareMeter88', function(price) {
+salesOffices2.listen('squareMeter88', function (price) {
   console.log('订阅者A（88平米）- 价格=' + price);
 });
 
 // 订阅 110 平方米的消息
-salesOffices2.listen('squareMeter110', function(price) {
+salesOffices2.listen('squareMeter110', function (price) {
   console.log('订阅者B（110平米）- 价格=' + price);
 });
 
@@ -77,32 +77,32 @@ salesOffices2.trigger('squareMeter110', 3000000); // 只有订阅者B收到
 // ========== 通用的 installEvent 函数 ==========
 console.log('\n===== 通用的 installEvent 函数 =====');
 
-var installEvent = function(obj) {
-  for (var i in event) {
+const installEvent = function (obj) {
+  for (const i in event) {
     obj[i] = event[i];
   }
 };
 
 var event = {
   clientList: {},
-  listen: function(key, fn) {
+  listen: function (key, fn) {
     if (!this.clientList[key]) {
       this.clientList[key] = [];
     }
     this.clientList[key].push(fn);
   },
-  trigger: function() {
-    var key = Array.prototype.shift.call(arguments);
-    var fns = this.clientList[key];
+  trigger: function () {
+    const key = Array.prototype.shift.call(arguments);
+    const fns = this.clientList[key];
     if (!fns || fns.length === 0) {
       return false;
     }
-    for (var i = 0, fn; fn = fns[i++];) {
+    for (var i = 0, fn; (fn = fns[i++]);) {
       fn.apply(this, arguments);
     }
   },
-  remove: function(key, fn) {
-    var fns = this.clientList[key];
+  remove: function (key, fn) {
+    const fns = this.clientList[key];
     if (!fns) {
       return false;
     }
@@ -110,20 +110,20 @@ var event = {
       // 如果没有传入具体的回调函数，表示取消 key 对应的所有订阅
       fns && (fns.length = 0);
     } else {
-      for (var l = fns.length - 1; l >= 0; l--) {
+      for (let l = fns.length - 1; l >= 0; l--) {
         if (fns[l] === fn) {
           fns.splice(l, 1); // 删除订阅者的回调函数
         }
       }
     }
-  }
+  },
 };
 
 // 给任意对象安装发布-订阅功能
-var loginModule = {};
+const loginModule = {};
 installEvent(loginModule);
 
-var loginSuccess = function(data) {
+const loginSuccess = function (data) {
   console.log('登录成功，收到数据：', data);
 };
 

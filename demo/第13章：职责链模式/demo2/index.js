@@ -4,10 +4,10 @@
 // 一、AOP 方式实现职责链：Function.prototype.after
 // ============================================================
 
-Function.prototype.after = function(fn) {
-  var self = this;
-  return function() {
-    var ret = self.apply(this, arguments);
+Function.prototype.after = function (fn) {
+  const self = this;
+  return function () {
+    const ret = self.apply(this, arguments);
     if (ret === 'nextSuccessor') {
       return fn.apply(this, arguments);
     }
@@ -19,7 +19,7 @@ Function.prototype.after = function(fn) {
 // 订单处理函数
 // ============================================================
 
-var order500yuan = function(orderType, pay, stock) {
+const order500yuan = function (orderType, pay, stock) {
   if (orderType === 1 && pay === true) {
     console.log('500元定金预购，得到100优惠券');
     return;
@@ -27,7 +27,7 @@ var order500yuan = function(orderType, pay, stock) {
   return 'nextSuccessor';
 };
 
-var order200yuan = function(orderType, pay, stock) {
+const order200yuan = function (orderType, pay, stock) {
   if (orderType === 2 && pay === true) {
     console.log('200元定金预购，得到50优惠券');
     return;
@@ -35,7 +35,7 @@ var order200yuan = function(orderType, pay, stock) {
   return 'nextSuccessor';
 };
 
-var orderNormal = function(orderType, pay, stock) {
+const orderNormal = function (orderType, pay, stock) {
   if (stock > 0) {
     console.log('普通购买，无优惠券');
   } else {
@@ -44,7 +44,7 @@ var orderNormal = function(orderType, pay, stock) {
 };
 
 // 用 after 串联职责链
-var order = order500yuan.after(order200yuan).after(orderNormal);
+const order = order500yuan.after(order200yuan).after(orderNormal);
 
 console.log('--- AOP 方式实现职责链 ---');
 console.log('测试：orderType=1, pay=true, stock=500');
@@ -70,32 +70,35 @@ console.log('');
 // 二、异步职责链：Chain.prototype.next
 // ============================================================
 
-var Chain = function(fn) {
+const Chain = function (fn) {
   this.fn = fn;
   this.successor = null;
 };
 
-Chain.prototype.setNextSuccessor = function(successor) {
-  return this.successor = successor;
+Chain.prototype.setNextSuccessor = function (successor) {
+  return (this.successor = successor);
 };
 
-Chain.prototype.passRequest = function() {
-  var ret = this.fn.apply(this, arguments);
+Chain.prototype.passRequest = function () {
+  const ret = this.fn.apply(this, arguments);
   if (ret === 'nextSuccessor') {
-    return this.successor && this.successor.passRequest.apply(this.successor, arguments);
+    return (
+      this.successor &&
+      this.successor.passRequest.apply(this.successor, arguments)
+    );
   }
   return ret;
 };
 
 // 异步传递请求
-Chain.prototype.next = function() {
+Chain.prototype.next = function () {
   if (this.successor) {
     return this.successor.passRequest.apply(this.successor, arguments);
   }
 };
 
 // 异步节点1：500元定金
-var chainAsync500 = new Chain(function(orderType, pay, stock) {
+const chainAsync500 = new Chain(function (orderType, pay, stock) {
   if (orderType === 1 && pay === true) {
     console.log('[异步] 500元定金预购，得到100优惠券');
     return;
@@ -104,24 +107,24 @@ var chainAsync500 = new Chain(function(orderType, pay, stock) {
 });
 
 // 异步节点2：200元定金（模拟异步操作）
-var chainAsync200 = new Chain(function(orderType, pay, stock) {
-  var self = this;
+const chainAsync200 = new Chain(function (orderType, pay, stock) {
+  const self = this;
   if (orderType === 2 && pay === true) {
     // 模拟异步操作，1秒后处理
-    setTimeout(function() {
+    setTimeout(function () {
       console.log('[异步] 200元定金预购，得到50优惠券');
     }, 1000);
     return;
   }
   // 如果不匹配，异步传递给下一个节点
-  setTimeout(function() {
+  setTimeout(function () {
     self.next.apply(self, arguments);
   }, 1000);
   return 'nextSuccessor';
 });
 
 // 异步节点3：普通购买
-var chainAsyncNormal = new Chain(function(orderType, pay, stock) {
+const chainAsyncNormal = new Chain(function (orderType, pay, stock) {
   if (stock > 0) {
     console.log('[异步] 普通购买，无优惠券');
   } else {

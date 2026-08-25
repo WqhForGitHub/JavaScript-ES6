@@ -4,19 +4,19 @@
 
 console.log('=== 原型链继承 ===');
 
-var obj = {
+const obj = {
   name: 'sven',
-  getName: function() {
+  getName: function () {
     return this.name;
-  }
+  },
 };
 
-var A = function() {};
+const A = function () {};
 A.prototype = obj;
 
-var a = new A();
-console.log(a.getName());          // sven
-console.log(a.name);               // sven
+const a = new A();
+console.log(a.getName()); // sven
+console.log(a.name); // sven
 
 // a 通过原型链访问到 obj 的属性和方法
 // a.__proto__ === A.prototype === obj
@@ -27,19 +27,19 @@ console.log(a.name);               // sven
 
 console.log('\n=== Object.create ===');
 
-var Plane = function() {
+const Plane = function () {
   this.blood = 100;
   this.attackLevel = 1;
   this.defenseLevel = 1;
 };
 
-var plane = new Plane();
+const plane = new Plane();
 plane.blood = 500;
 plane.attackLevel = 10;
 plane.defenseLevel = 7;
 
-var clonePlane = Object.create(plane);
-console.log('clonePlane.blood:', clonePlane.blood);           // 500
+const clonePlane = Object.create(plane);
+console.log('clonePlane.blood:', clonePlane.blood); // 500
 console.log('clonePlane.attackLevel:', clonePlane.attackLevel); // 10
 console.log('clonePlane.defenseLevel:', clonePlane.defenseLevel); // 7
 
@@ -51,8 +51,8 @@ console.log('clonePlane.__proto__ === plane:', clonePlane.__proto__ === plane); 
 
 // 修改 clonePlane 的属性不影响 plane
 clonePlane.blood = 200;
-console.log('clonePlane.blood:', clonePlane.blood);  // 200 (自身属性)
-console.log('plane.blood:', plane.blood);            // 500 (不变)
+console.log('clonePlane.blood:', clonePlane.blood); // 200 (自身属性)
+console.log('plane.blood:', plane.blood); // 500 (不变)
 
 // ==============================
 // 模拟 new 操作符 —— objectFactory
@@ -60,32 +60,35 @@ console.log('plane.blood:', plane.blood);            // 500 (不变)
 
 console.log('\n=== objectFactory 模拟 new ===');
 
-var objectFactory = function() {
-  var Constructor = [].shift.call(arguments); // 取出构造函数
-  var obj = new Object();                     // 创建新对象
-  obj.__proto__ = Constructor.prototype;      // 指向构造函数的原型
-  var ret = Constructor.apply(obj, arguments); // 执行构造函数，绑定 this
-  return typeof ret === 'object' ? ret : obj;  // 确保返回对象
+const objectFactory = function () {
+  const Constructor = [].shift.call(arguments); // 取出构造函数
+  const obj = new Object(); // 创建新对象
+  obj.__proto__ = Constructor.prototype; // 指向构造函数的原型
+  const ret = Constructor.apply(obj, arguments); // 执行构造函数，绑定 this
+  return typeof ret === 'object' ? ret : obj; // 确保返回对象
 };
 
-var Person = function(name) {
+const Person = function (name) {
   this.name = name;
 };
 
-Person.prototype.getName = function() {
+Person.prototype.getName = function () {
   return this.name;
 };
 
-var p1 = objectFactory(Person, 'sven');
-console.log('p1.name:', p1.name);               // sven
-console.log('p1.getName():', p1.getName());     // sven
+const p1 = objectFactory(Person, 'sven');
+console.log('p1.name:', p1.name); // sven
+console.log('p1.getName():', p1.getName()); // sven
 console.log('p1 instanceof Person:', p1 instanceof Person); // true
-console.log('p1.__proto__ === Person.prototype:', p1.__proto__ === Person.prototype); // true
+console.log(
+  'p1.__proto__ === Person.prototype:',
+  p1.__proto__ === Person.prototype
+); // true
 
 // 与原生 new 对比
-var p2 = new Person('Tom');
-console.log('p2.name:', p2.name);               // Tom
-console.log('p2.getName():', p2.getName());     // Tom
+const p2 = new Person('Tom');
+console.log('p2.name:', p2.name); // Tom
+console.log('p2.getName():', p2.getName()); // Tom
 console.log('p2 instanceof Person:', p2 instanceof Person); // true
 
 // ==============================
@@ -94,20 +97,23 @@ console.log('p2 instanceof Person:', p2 instanceof Person); // true
 
 console.log('\n=== __proto__ 与 prototype ===');
 
-var Animal = function(name) {
+const Animal = function (name) {
   this.name = name;
 };
 
-Animal.prototype.run = function() {
+Animal.prototype.run = function () {
   console.log(this.name + ' is running');
 };
 
-var cat = new Animal('kitty');
+const cat = new Animal('kitty');
 cat.run(); // kitty is running
 
 // cat.__proto__ 指向 Animal.prototype
-console.log('cat.__proto__ === Animal.prototype:', cat.__proto__ === Animal.prototype); // true
+console.log(
+  'cat.__proto__ === Animal.prototype:',
+  cat.__proto__ === Animal.prototype
+); // true
 
 // 原型链查找：cat 自身没有 run 方法，通过 __proto__ 在 Animal.prototype 上找到
 console.log('cat.hasOwnProperty("name"):', cat.hasOwnProperty('name')); // true
-console.log('cat.hasOwnProperty("run"):', cat.hasOwnProperty('run'));   // false
+console.log('cat.hasOwnProperty("run"):', cat.hasOwnProperty('run')); // false

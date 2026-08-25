@@ -5,10 +5,10 @@
 console.log('=== 柯里化实现 ===');
 
 // currying 函数：收集参数，直到不传参数时才执行计算
-var currying = function(fn) {
-  var args = []; // 用于收集参数
+const currying = function (fn) {
+  const args = []; // 用于收集参数
 
-  return function() {
+  return function () {
     if (arguments.length === 0) {
       // 不传参数时，执行原函数
       return fn.apply(this, args);
@@ -28,10 +28,10 @@ var currying = function(fn) {
 console.log('\n=== 月度开销计算 ===');
 
 // 原始的 cost 函数
-var cost = (function() {
-  var money = 0;
-  return function() {
-    for (var i = 0, l = arguments.length; i < l; i++) {
+const cost = (function () {
+  let money = 0;
+  return function () {
+    for (let i = 0, l = arguments.length; i < l; i++) {
       money += arguments[i];
     }
     return money;
@@ -39,7 +39,7 @@ var cost = (function() {
 })();
 
 // 经过柯里化后
-var costCurried = currying(cost);
+const costCurried = currying(cost);
 
 costCurried(100); // 记录第1笔开销
 costCurried(200); // 记录第2笔开销
@@ -59,16 +59,16 @@ console.log('追加后总计:', costCurried()); // 800
 
 console.log('\n=== 通用柯里化示例 ===');
 
-var sum = function() {
-  var total = 0;
-  for (var i = 0, l = arguments.length; i < l; i++) {
+const sum = function () {
+  let total = 0;
+  for (let i = 0, l = arguments.length; i < l; i++) {
     total += arguments[i];
   }
   console.log('求和结果:', total);
   return total;
 };
 
-var curriedSum = currying(sum);
+const curriedSum = currying(sum);
 
 curriedSum(1);
 curriedSum(2);
@@ -84,17 +84,17 @@ curriedSum(); // 求和结果: 15
 console.log('\n=== uncurrying ===');
 
 // uncurrying：将对象的方法脱离出来，使其可以被任意对象使用
-var uncurrying = function(fn) {
-  return function() {
-    var obj = [].shift.call(arguments);
+const uncurrying = function (fn) {
+  return function () {
+    const obj = [].shift.call(arguments);
     return fn.apply(obj, arguments);
   };
 };
 
 // 将 Array.prototype.push 脱离出来
-var push = uncurrying(Array.prototype.push);
+const push = uncurrying(Array.prototype.push);
 
-(function() {
+(function () {
   push(arguments, 4);
   push(arguments, 5);
   console.log('arguments after push:', arguments.length); // 4 (原2个 + 新增2个)

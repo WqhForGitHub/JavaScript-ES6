@@ -4,58 +4,58 @@
 // 一、不好的方式：玩家之间直接互相引用
 // ============================================================
 
-var BadPlayer = function(name, teamColor) {
+const BadPlayer = function (name, teamColor) {
   this.name = name;
   this.teamColor = teamColor;
-  this.partners = [];  // 队友列表
-  this.enemies = [];   // 敌人列表
+  this.partners = []; // 队友列表
+  this.enemies = []; // 敌人列表
   this.state = 'alive';
 };
 
-BadPlayer.prototype.win = function() {
+BadPlayer.prototype.win = function () {
   console.log(this.name + ':' + this.teamColor + '方赢了！');
 };
 
-BadPlayer.prototype.lose = function() {
+BadPlayer.prototype.lose = function () {
   console.log(this.name + ':' + this.teamColor + '方输了！');
 };
 
-BadPlayer.prototype.die = function() {
+BadPlayer.prototype.die = function () {
   this.state = 'dead';
-  var allDead = true;
+  let allDead = true;
   // 检查所有队友是否都死了
-  for (var i = 0; i < this.partners.length; i++) {
+  for (let i = 0; i < this.partners.length; i++) {
     if (this.partners[i].state === 'alive') {
       allDead = false;
       break;
     }
   }
   if (allDead) {
-    this.lose();                    // 自己方输
-    for (var j = 0; j < this.partners.length; j++) {
-      this.partners[j].lose();      // 队友输
+    this.lose(); // 自己方输
+    for (let j = 0; j < this.partners.length; j++) {
+      this.partners[j].lose(); // 队友输
     }
-    for (var k = 0; k < this.enemies.length; k++) {
-      this.enemies[k].win();        // 敌人赢
+    for (let k = 0; k < this.enemies.length; k++) {
+      this.enemies[k].win(); // 敌人赢
     }
   }
 };
 
 // 创建玩家（不好：每个玩家都要持有队友和敌人的引用）
-var players = [];
-var playerNames1 = ['皮蛋', '小乖', '宝宝', '小强'];
-var playerNames2 = ['黑妞', '葱头', '胖墩', '海盗'];
+const players = [];
+const playerNames1 = ['皮蛋', '小乖', '宝宝', '小强'];
+const playerNames2 = ['黑妞', '葱头', '胖墩', '海盗'];
 
-for (var i = 0; i < 4; i++) {
-  var p1 = new BadPlayer(playerNames1[i], 'red');
-  var p2 = new BadPlayer(playerNames2[i], 'blue');
+for (let i = 0; i < 4; i++) {
+  const p1 = new BadPlayer(playerNames1[i], 'red');
+  const p2 = new BadPlayer(playerNames2[i], 'blue');
   players.push(p1);
   players.push(p2);
 }
 
 // 设置队友和敌人关系（不好：高度耦合）
-for (var m = 0; m < players.length; m++) {
-  for (var n = 0; n < players.length; n++) {
+for (let m = 0; m < players.length; m++) {
+  for (let n = 0; n < players.length; n++) {
     if (players[m].teamColor === players[n].teamColor && m !== n) {
       players[m].partners.push(players[n]);
     }
@@ -80,52 +80,52 @@ console.log('');
 // 二、好的方式：中介者模式
 // ============================================================
 
-var GoodPlayer = function(name, teamColor) {
+const GoodPlayer = function (name, teamColor) {
   this.name = name;
   this.teamColor = teamColor;
   this.state = 'alive';
 };
 
 // 玩家只需要通知中介者，不需要知道其他玩家的存在
-GoodPlayer.prototype.win = function() {
+GoodPlayer.prototype.win = function () {
   console.log(this.name + ':' + this.teamColor + '方赢了！');
 };
 
-GoodPlayer.prototype.lose = function() {
+GoodPlayer.prototype.lose = function () {
   console.log(this.name + ':' + this.teamColor + '方输了！');
 };
 
-GoodPlayer.prototype.die = function() {
+GoodPlayer.prototype.die = function () {
   this.state = 'dead';
   playerDirector.ReceiveMessage('playerDead', this);
 };
 
-GoodPlayer.prototype.remove = function() {
+GoodPlayer.prototype.remove = function () {
   playerDirector.ReceiveMessage('removePlayer', this);
 };
 
-GoodPlayer.prototype.changeTeam = function(color) {
+GoodPlayer.prototype.changeTeam = function (color) {
   playerDirector.ReceiveMessage('changeTeam', this, color);
 };
 
 // 中介者：playerDirector
-var playerDirector = (function() {
-  var players = {};  // 用对象存储所有玩家，key 为团队颜色
+var playerDirector = (function () {
+  const players = {}; // 用对象存储所有玩家，key 为团队颜色
 
   var operations = {
     // 添加玩家
-    addPlayer: function(player) {
-      var teamColor = player.teamColor;
+    addPlayer: function (player) {
+      const teamColor = player.teamColor;
       if (!players[teamColor]) {
         players[teamColor] = [];
       }
       players[teamColor].push(player);
     },
     // 移除玩家
-    removePlayer: function(player) {
-      var teamColor = player.teamColor;
-      var teamPlayers = players[teamColor] || [];
-      for (var i = teamPlayers.length - 1; i >= 0; i--) {
+    removePlayer: function (player) {
+      const teamColor = player.teamColor;
+      const teamPlayers = players[teamColor] || [];
+      for (let i = teamPlayers.length - 1; i >= 0; i--) {
         if (teamPlayers[i] === player) {
           teamPlayers.splice(i, 1);
         }
@@ -133,11 +133,11 @@ var playerDirector = (function() {
       console.log('  ' + player.name + ' 已被移除');
     },
     // 玩家换队
-    changeTeam: function(player, newTeamColor) {
-      var oldTeamColor = player.teamColor;
+    changeTeam: function (player, newTeamColor) {
+      const oldTeamColor = player.teamColor;
       // 从原队伍移除
-      var teamPlayers = players[oldTeamColor] || [];
-      for (var i = teamPlayers.length - 1; i >= 0; i--) {
+      const teamPlayers = players[oldTeamColor] || [];
+      for (let i = teamPlayers.length - 1; i >= 0; i--) {
         if (teamPlayers[i] === player) {
           teamPlayers.splice(i, 1);
         }
@@ -146,15 +146,23 @@ var playerDirector = (function() {
       player.teamColor = newTeamColor;
       // 加入新队伍
       operations.addPlayer(player);
-      console.log('  ' + player.name + ' 从 ' + oldTeamColor + '方 转到 ' + newTeamColor + '方');
+      console.log(
+        '  ' +
+          player.name +
+          ' 从 ' +
+          oldTeamColor +
+          '方 转到 ' +
+          newTeamColor +
+          '方'
+      );
     },
     // 玩家死亡
-    playerDead: function(player) {
-      var teamColor = player.teamColor;
-      var teamPlayers = players[teamColor];
+    playerDead: function (player) {
+      const teamColor = player.teamColor;
+      const teamPlayers = players[teamColor];
       // 检查同队是否全部阵亡
-      var allDead = true;
-      for (var i = 0; i < teamPlayers.length; i++) {
+      let allDead = true;
+      for (let i = 0; i < teamPlayers.length; i++) {
         if (teamPlayers[i].state === 'alive') {
           allDead = false;
           break;
@@ -162,29 +170,29 @@ var playerDirector = (function() {
       }
       if (allDead) {
         // 同队全部阵亡，本队输
-        for (var j = 0; j < teamPlayers.length; j++) {
+        for (let j = 0; j < teamPlayers.length; j++) {
           teamPlayers[j].lose();
         }
         // 敌队赢
-        for (var color in players) {
+        for (const color in players) {
           if (color !== teamColor) {
-            var enemyTeam = players[color];
-            for (var k = 0; k < enemyTeam.length; k++) {
+            const enemyTeam = players[color];
+            for (let k = 0; k < enemyTeam.length; k++) {
               enemyTeam[k].win();
             }
           }
         }
       }
-    }
+    },
   };
 
-  var ReceiveMessage = function() {
-    var message = Array.prototype.shift.call(arguments);
+  const ReceiveMessage = function () {
+    const message = Array.prototype.shift.call(arguments);
     operations[message].apply(this, arguments);
   };
 
   return {
-    ReceiveMessage: ReceiveMessage
+    ReceiveMessage: ReceiveMessage,
   };
 })();
 
@@ -192,18 +200,18 @@ var playerDirector = (function() {
 console.log('--- 好的方式：中介者模式 ---');
 console.log('创建红蓝两队玩家...');
 
-var redTeam = [];
-var blueTeam = [];
-var redNames = ['皮蛋', '小乖', '宝宝', '小强'];
-var blueNames = ['黑妞', '葱头', '胖墩', '海盗'];
+const redTeam = [];
+const blueTeam = [];
+const redNames = ['皮蛋', '小乖', '宝宝', '小强'];
+const blueNames = ['黑妞', '葱头', '胖墩', '海盗'];
 
-for (var r = 0; r < 4; r++) {
-  var redPlayer = new GoodPlayer(redNames[r], 'red');
+for (let r = 0; r < 4; r++) {
+  const redPlayer = new GoodPlayer(redNames[r], 'red');
   playerDirector.ReceiveMessage('addPlayer', redPlayer);
   redTeam.push(redPlayer);
 }
-for (var b = 0; b < 4; b++) {
-  var bluePlayer = new GoodPlayer(blueNames[b], 'blue');
+for (let b = 0; b < 4; b++) {
+  const bluePlayer = new GoodPlayer(blueNames[b], 'blue');
   playerDirector.ReceiveMessage('addPlayer', bluePlayer);
   blueTeam.push(bluePlayer);
 }
@@ -229,18 +237,18 @@ console.log('');
 console.log('--- 测试2：removePlayer 和 changeTeam ---');
 console.log('重新创建玩家...');
 
-var redTeam2 = [];
-var blueTeam2 = [];
-var redNames2 = ['皮蛋2', '小乖2', '宝宝2', '小强2'];
-var blueNames2 = ['黑妞2', '葱头2', '胖墩2', '海盗2'];
+const redTeam2 = [];
+const blueTeam2 = [];
+const redNames2 = ['皮蛋2', '小乖2', '宝宝2', '小强2'];
+const blueNames2 = ['黑妞2', '葱头2', '胖墩2', '海盗2'];
 
-for (var r2 = 0; r2 < 4; r2++) {
-  var rp = new GoodPlayer(redNames2[r2], 'red');
+for (let r2 = 0; r2 < 4; r2++) {
+  const rp = new GoodPlayer(redNames2[r2], 'red');
   playerDirector.ReceiveMessage('addPlayer', rp);
   redTeam2.push(rp);
 }
-for (var b2 = 0; b2 < 4; b2++) {
-  var bp = new GoodPlayer(blueNames2[b2], 'blue');
+for (let b2 = 0; b2 < 4; b2++) {
+  const bp = new GoodPlayer(blueNames2[b2], 'blue');
   playerDirector.ReceiveMessage('addPlayer', bp);
   blueTeam2.push(bp);
 }
@@ -270,7 +278,13 @@ console.log('');
 // ============================================================
 
 console.log('--- 总结 ---');
-console.log('不好的方式：每个玩家持有 partners[] 和 enemies[]，玩家之间高度耦合');
-console.log('好的方式：玩家只与中介者 playerDirector 通信，解耦了玩家之间的关系');
+console.log(
+  '不好的方式：每个玩家持有 partners[] 和 enemies[]，玩家之间高度耦合'
+);
+console.log(
+  '好的方式：玩家只与中介者 playerDirector 通信，解耦了玩家之间的关系'
+);
 console.log('中介者负责：addPlayer, removePlayer, changeTeam, playerDead');
-console.log('玩家只需调用：die(), remove(), changeTeam()，内部转发给中介者处理');
+console.log(
+  '玩家只需调用：die(), remove(), changeTeam()，内部转发给中介者处理'
+);

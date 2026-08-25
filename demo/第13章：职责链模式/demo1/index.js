@@ -4,8 +4,9 @@
 // 一、不好的方式：巨大的条件分支函数
 // ============================================================
 
-var order = function(orderType, pay, stock) {
-  if (orderType === 1) { // 500元定金购手机
+const order = function (orderType, pay, stock) {
+  if (orderType === 1) {
+    // 500元定金购手机
     if (pay === true) {
       console.log('500元定金预购，得到100优惠券');
     } else {
@@ -16,7 +17,8 @@ var order = function(orderType, pay, stock) {
         console.log('手机库存不足');
       }
     }
-  } else if (orderType === 2) { // 200元定金购手机
+  } else if (orderType === 2) {
+    // 200元定金购手机
     if (pay === true) {
       console.log('200元定金预购，得到50优惠券');
     } else {
@@ -27,7 +29,8 @@ var order = function(orderType, pay, stock) {
         console.log('手机库存不足');
       }
     }
-  } else if (orderType === 3) { // 普通购买
+  } else if (orderType === 3) {
+    // 普通购买
     if (stock > 0) {
       console.log('普通购买，无优惠券');
     } else {
@@ -37,11 +40,11 @@ var order = function(orderType, pay, stock) {
 };
 
 console.log('--- 不好的方式：巨大的条件分支 ---');
-order(1, true, 500);   // 500元定金，已支付
-order(1, false, 500);  // 500元定金，未支付
-order(2, true, 500);   // 200元定金，已支付
-order(3, false, 500);  // 普通购买
-order(3, false, 0);    // 普通购买，无库存
+order(1, true, 500); // 500元定金，已支付
+order(1, false, 500); // 500元定金，未支付
+order(2, true, 500); // 200元定金，已支付
+order(3, false, 500); // 普通购买
+order(3, false, 0); // 普通购买，无库存
 console.log('');
 
 // ============================================================
@@ -49,7 +52,7 @@ console.log('');
 // ============================================================
 
 // 定义三个处理函数，返回特定值表示是否传递给下一个节点
-var order500 = function(orderType, pay, stock) {
+const order500 = function (orderType, pay, stock) {
   if (orderType === 1 && pay === true) {
     console.log('500元定金预购，得到100优惠券');
     return; // 处理成功，不再传递
@@ -57,7 +60,7 @@ var order500 = function(orderType, pay, stock) {
   return 'nextSuccessor'; // 传递给下一个节点
 };
 
-var order200 = function(orderType, pay, stock) {
+const order200 = function (orderType, pay, stock) {
   if (orderType === 2 && pay === true) {
     console.log('200元定金预购，得到50优惠券');
     return;
@@ -65,7 +68,7 @@ var order200 = function(orderType, pay, stock) {
   return 'nextSuccessor';
 };
 
-var orderNormal = function(orderType, pay, stock) {
+const orderNormal = function (orderType, pay, stock) {
   if (stock > 0) {
     console.log('普通购买，无优惠券');
   } else {
@@ -74,29 +77,32 @@ var orderNormal = function(orderType, pay, stock) {
 };
 
 // Chain 构造函数
-var Chain = function(fn) {
+const Chain = function (fn) {
   this.fn = fn;
   this.successor = null;
 };
 
 // 设置下一个节点
-Chain.prototype.setNextSuccessor = function(successor) {
-  return this.successor = successor;
+Chain.prototype.setNextSuccessor = function (successor) {
+  return (this.successor = successor);
 };
 
 // 传递请求给某个节点
-Chain.prototype.passRequest = function() {
-  var ret = this.fn.apply(this, arguments);
+Chain.prototype.passRequest = function () {
+  const ret = this.fn.apply(this, arguments);
   if (ret === 'nextSuccessor') {
-    return this.successor && this.successor.passRequest.apply(this.successor, arguments);
+    return (
+      this.successor &&
+      this.successor.passRequest.apply(this.successor, arguments)
+    );
   }
   return ret;
 };
 
 // 创建职责链节点
-var chainOrder500 = new Chain(order500);
-var chainOrder200 = new Chain(order200);
-var chainOrderNormal = new Chain(orderNormal);
+const chainOrder500 = new Chain(order500);
+const chainOrder200 = new Chain(order200);
+const chainOrderNormal = new Chain(orderNormal);
 
 // 设置职责链顺序：500 -> 200 -> normal
 chainOrder500.setNextSuccessor(chainOrder200);
@@ -128,7 +134,7 @@ console.log('');
 
 console.log('--- 灵活性：插入新的节点 ---');
 
-var order300 = function(orderType, pay, stock) {
+const order300 = function (orderType, pay, stock) {
   if (orderType === 3 && pay === true) {
     console.log('300元定金预购，得到60优惠券');
     return;
@@ -136,7 +142,7 @@ var order300 = function(orderType, pay, stock) {
   return 'nextSuccessor';
 };
 
-var chainOrder300 = new Chain(order300);
+const chainOrder300 = new Chain(order300);
 // 在500和200之间插入300节点
 chainOrder500.setNextSuccessor(chainOrder300);
 chainOrder300.setNextSuccessor(chainOrder200);
