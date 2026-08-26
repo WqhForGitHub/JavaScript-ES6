@@ -9,3 +9,5 @@ class DBPool {
 // 每个模块各自建池 → 连接数爆炸
 const pool1 = new DBPool(10);
 const pool2 = new DBPool(10); // 又开了 10 个连接
+
+export { }

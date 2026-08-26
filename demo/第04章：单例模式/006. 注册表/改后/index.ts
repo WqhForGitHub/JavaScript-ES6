@@ -13,3 +13,5 @@ class ServiceRegistry {
 
 ServiceRegistry.getInstance().register('user-service', 'http://localhost:8001');
 console.log(ServiceRegistry.getInstance().services.get('user-service')); // ✅
+
+export { }

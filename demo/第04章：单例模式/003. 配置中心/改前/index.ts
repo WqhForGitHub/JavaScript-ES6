@@ -10,3 +10,5 @@ class Config {
 
 const c1 = new Config(); // 读磁盘
 const c2 = new Config(); // 又读一次
+
+export { }
