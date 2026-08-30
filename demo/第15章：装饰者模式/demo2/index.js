@@ -42,14 +42,7 @@ console.log('');
 console.log('========== 2. 动态修改函数参数（注入 Token）==========');
 
 let ajax = function (type, url, param) {
-  console.log(
-    '发送 ajax 请求：type=' +
-      type +
-      ', url=' +
-      url +
-      ', param=' +
-      JSON.stringify(param)
-  );
+  console.log('发送 ajax 请求：type=' + type + ', url=' + url + ', param=' + JSON.stringify(param));
 };
 
 const getToken = function () {

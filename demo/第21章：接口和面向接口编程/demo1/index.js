@@ -71,16 +71,12 @@ const remoteLogger = {
     console.log('[RemoteLogger] 发送警告到 http://log-server/api/warn: ' + msg);
   },
   error: function (msg) {
-    console.log(
-      '[RemoteLogger] 发送错误到 http://log-server/api/error: ' + msg
-    );
+    console.log('[RemoteLogger] 发送错误到 http://log-server/api/error: ' + msg);
   },
 };
 
 // 验证所有 Logger 都满足接口
-console.log(
-  'consoleLogger 满足 Logger 接口: ' + implementsLogger(consoleLogger)
-);
+console.log('consoleLogger 满足 Logger 接口: ' + implementsLogger(consoleLogger));
 console.log('fileLogger 满足 Logger 接口: ' + implementsLogger(fileLogger));
 console.log('remoteLogger 满足 Logger 接口: ' + implementsLogger(remoteLogger));
 console.log('');
@@ -119,9 +115,7 @@ const OrderProcessor = function (paymentGateway) {
 };
 
 OrderProcessor.prototype.processOrder = function (order) {
-  console.log(
-    '[OrderProcessor] 处理订单 #' + order.id + ', 金额: $' + order.amount
-  );
+  console.log('[OrderProcessor] 处理订单 #' + order.id + ', 金额: $' + order.amount);
   const result = this.paymentGateway.charge(order.amount, order.currency);
   if (result.success) {
     console.log('[OrderProcessor] 订单 #' + order.id + ' 支付成功');
@@ -141,9 +135,7 @@ console.log('=== 4. 不同的支付网关实现 ===');
 const stripeGateway = {
   charge: function (amount, currency) {
     const fee = (amount * 0.029 + 0.3).toFixed(2);
-    console.log(
-      '[Stripe] 扣款 $' + amount + ' ' + currency + ', 手续费: $' + fee
-    );
+    console.log('[Stripe] 扣款 $' + amount + ' ' + currency + ', 手续费: $' + fee);
     return { success: true, transactionId: 'stripe_' + Date.now() };
   },
 };
@@ -152,9 +144,7 @@ const stripeGateway = {
 const payPalGateway = {
   charge: function (amount, currency) {
     const fee = (amount * 0.034 + 0.35).toFixed(2);
-    console.log(
-      '[PayPal] 扣款 $' + amount + ' ' + currency + ', 手续费: $' + fee
-    );
+    console.log('[PayPal] 扣款 $' + amount + ' ' + currency + ', 手续费: $' + fee);
     return { success: true, transactionId: 'paypal_' + Date.now() };
   },
 };
@@ -163,9 +153,7 @@ const payPalGateway = {
 const alipayGateway = {
   charge: function (amount, currency) {
     const fee = (amount * 0.006).toFixed(2);
-    console.log(
-      '[Alipay] 扣款 ¥' + amount + ' ' + currency + ', 手续费: ¥' + fee
-    );
+    console.log('[Alipay] 扣款 ¥' + amount + ' ' + currency + ', 手续费: ¥' + fee);
     return { success: true, transactionId: 'alipay_' + Date.now() };
   },
 };

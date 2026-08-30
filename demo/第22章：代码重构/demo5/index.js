@@ -28,9 +28,7 @@ for (let i = 0; i < people.length; i++) {
   totalSalaryBefore += people[i].salary;
 }
 
-console.log(
-  '重构前 - 最年轻: ' + youngestBefore + ', 总薪水: ' + totalSalaryBefore
-);
+console.log('重构前 - 最年轻: ' + youngestBefore + ', 总薪水: ' + totalSalaryBefore);
 
 // ---------- 重构后 ----------
 // 拆成两个独立的循环，每个循环只做一件事
@@ -55,9 +53,7 @@ const getTotalSalary = function (arr) {
 const youngestAfter = getYoungestAge(people);
 const totalSalaryAfter = getTotalSalary(people);
 
-console.log(
-  '重构后 - 最年轻: ' + youngestAfter + ', 总薪水: ' + totalSalaryAfter
-);
+console.log('重构后 - 最年轻: ' + youngestAfter + ', 总薪水: ' + totalSalaryAfter);
 
 // ============================================================
 // 二、替换算法
@@ -68,11 +64,7 @@ console.log(
 const getContinentBefore = function (country) {
   if (country === '中国' || country === '日本' || country === '韩国') {
     return '亚洲';
-  } else if (
-    country === '美国' ||
-    country === '加拿大' ||
-    country === '墨西哥'
-  ) {
+  } else if (country === '美国' || country === '加拿大' || country === '墨西哥') {
     return '北美洲';
   } else if (country === '巴西' || country === '阿根廷') {
     return '南美洲';

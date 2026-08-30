@@ -10,7 +10,10 @@ class UserService {
 }
 
 class AdminGuardProxy {
-  constructor(private real: UserService, private role: string) {}
+  constructor(
+    private real: UserService,
+    private role: string,
+  ) {}
 
   private check(): boolean {
     if (this.role !== 'admin') {

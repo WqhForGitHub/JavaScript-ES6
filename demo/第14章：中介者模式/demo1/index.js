@@ -146,15 +146,7 @@ var playerDirector = (function () {
       player.teamColor = newTeamColor;
       // 加入新队伍
       operations.addPlayer(player);
-      console.log(
-        '  ' +
-          player.name +
-          ' 从 ' +
-          oldTeamColor +
-          '方 转到 ' +
-          newTeamColor +
-          '方'
-      );
+      console.log('  ' + player.name + ' 从 ' + oldTeamColor + '方 转到 ' + newTeamColor + '方');
     },
     // 玩家死亡
     playerDead: function (player) {
@@ -278,13 +270,7 @@ console.log('');
 // ============================================================
 
 console.log('--- 总结 ---');
-console.log(
-  '不好的方式：每个玩家持有 partners[] 和 enemies[]，玩家之间高度耦合'
-);
-console.log(
-  '好的方式：玩家只与中介者 playerDirector 通信，解耦了玩家之间的关系'
-);
+console.log('不好的方式：每个玩家持有 partners[] 和 enemies[]，玩家之间高度耦合');
+console.log('好的方式：玩家只与中介者 playerDirector 通信，解耦了玩家之间的关系');
 console.log('中介者负责：addPlayer, removePlayer, changeTeam, playerDead');
-console.log(
-  '玩家只需调用：die(), remove(), changeTeam()，内部转发给中介者处理'
-);
+console.log('玩家只需调用：die(), remove(), changeTeam()，内部转发给中介者处理');

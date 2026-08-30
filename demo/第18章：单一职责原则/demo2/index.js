@@ -41,11 +41,7 @@ UserManager.prototype.renderUserList = function () {
   console.log('[UserManager] 渲染用户列表:');
   for (let i = 0; i < this.users.length; i++) {
     console.log(
-      '[UserManager]   <div>' +
-        this.users[i].name +
-        ' - ' +
-        this.users[i].email +
-        '</div>'
+      '[UserManager]   <div>' + this.users[i].name + ' - ' + this.users[i].email + '</div>',
     );
   }
 };
@@ -124,20 +120,14 @@ UserProfileRenderer.prototype.renderUserList = function (users) {
   console.log('[UserProfileRenderer] 渲染用户列表:');
   for (let i = 0; i < users.length; i++) {
     console.log(
-      '[UserProfileRenderer]   <div>' +
-        users[i].name +
-        ' - ' +
-        users[i].email +
-        '</div>'
+      '[UserProfileRenderer]   <div>' + users[i].name + ' - ' + users[i].email + '</div>',
     );
   }
 };
 
 UserProfileRenderer.prototype.renderUserProfile = function (user) {
   if (user) {
-    console.log(
-      '[UserProfileRenderer] 渲染用户详情: ' + user.name + ', ' + user.email
-    );
+    console.log('[UserProfileRenderer] 渲染用户详情: ' + user.name + ', ' + user.email);
   }
 };
 

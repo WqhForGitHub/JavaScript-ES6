@@ -43,9 +43,7 @@ const itemPrice1 = price1 * quantity1;
 
 // 一个包含多个计算的复杂表达式
 const orderTotal1 =
-  itemPrice1 -
-  Math.max(0, itemPrice1 - 500) * 0.05 +
-  Math.min(itemPrice1 * 0.1, 100);
+  itemPrice1 - Math.max(0, itemPrice1 - 500) * 0.05 + Math.min(itemPrice1 * 0.1, 100);
 
 console.log('重构前订单总额: ' + orderTotal1);
 

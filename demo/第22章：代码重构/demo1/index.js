@@ -19,11 +19,7 @@ const printOwingBefore = function (invoice) {
 
   // 记录到期日
   const today = new Date();
-  invoice.dueDate = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() + 30
-  );
+  invoice.dueDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
 
   // 打印详情
   console.log('name: ' + invoice.customer);
@@ -59,11 +55,7 @@ const getOutstanding = function (orders) {
 // 将记录到期日的逻辑提取为独立函数
 const recordDueDate = function (invoice) {
   const today = new Date();
-  invoice.dueDate = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() + 30
-  );
+  invoice.dueDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
 };
 
 // 将打印详情的逻辑提取为独立函数

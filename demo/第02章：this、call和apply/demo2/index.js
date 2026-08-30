@@ -74,16 +74,10 @@ const numbers = [1, 2, 5, 3, 4];
 console.log('Math.max(1, 2, 5, 3, 4):', Math.max(1, 2, 5, 3, 4)); // 5
 
 // 使用 apply 展开数组
-console.log(
-  'Math.max.apply(null, [1,2,5,3,4]):',
-  Math.max.apply(null, numbers)
-); // 5
+console.log('Math.max.apply(null, [1,2,5,3,4]):', Math.max.apply(null, numbers)); // 5
 
 // 同理，Math.min
-console.log(
-  'Math.min.apply(null, [1,2,5,3,4]):',
-  Math.min.apply(null, numbers)
-); // 1
+console.log('Math.min.apply(null, [1,2,5,3,4]):', Math.min.apply(null, numbers)); // 1
 
 // ==============================
 // 借用构造函数（伪经典继承）

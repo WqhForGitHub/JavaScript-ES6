@@ -27,7 +27,7 @@ const processUserDataAndUpdateUI = function (users) {
         processedUsers[j].displayName +
         ' - ' +
         processedUsers[j].email +
-        '</li>'
+        '</li>',
     );
   }
 
@@ -71,7 +71,7 @@ const updateUserListUI = function (processedUsers) {
         processedUsers[i].displayName +
         ' - ' +
         processedUsers[i].email +
-        '</li>'
+        '</li>',
     );
   }
 };

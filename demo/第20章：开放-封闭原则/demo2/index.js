@@ -79,23 +79,11 @@ const PaymentProcessorBad = function () {};
 
 PaymentProcessorBad.prototype.pay = function (type, amount) {
   if (type === 'stripe') {
-    console.log(
-      '[Stripe] 支付 $' +
-        amount +
-        ', 手续费: $' +
-        (amount * 0.029 + 0.3).toFixed(2)
-    );
+    console.log('[Stripe] 支付 $' + amount + ', 手续费: $' + (amount * 0.029 + 0.3).toFixed(2));
   } else if (type === 'paypal') {
-    console.log(
-      '[PayPal] 支付 $' +
-        amount +
-        ', 手续费: $' +
-        (amount * 0.034 + 0.35).toFixed(2)
-    );
+    console.log('[PayPal] 支付 $' + amount + ', 手续费: $' + (amount * 0.034 + 0.35).toFixed(2));
   } else if (type === 'alipay') {
-    console.log(
-      '[Alipay] 支付 ¥' + amount + ', 手续费: ¥' + (amount * 0.006).toFixed(2)
-    );
+    console.log('[Alipay] 支付 ¥' + amount + ', 手续费: ¥' + (amount * 0.006).toFixed(2));
   }
   // 新增支付方式必须修改此函数
 };
@@ -197,9 +185,7 @@ const removeNulls = function (data) {
       filtered.push(data[i]);
     }
   }
-  console.log(
-    '[Filter] 移除空值: ' + data.length + ' -> ' + filtered.length + ' 条'
-  );
+  console.log('[Filter] 移除空值: ' + data.length + ' -> ' + filtered.length + ' 条');
   return filtered;
 };
 
@@ -243,6 +229,4 @@ console.log('=== 开放-封闭原则总结 ===');
 console.log('1. 中间件模式：通过 use() 添加插件，核心逻辑 run() 不需修改');
 console.log('2. 策略模式：通过 register() 注册策略，核心方法 pay() 不需修改');
 console.log('3. 插件模式：通过 addFilter() 添加过滤器，process() 不需修改');
-console.log(
-  '4. 共同点：对扩展开放（新增插件/策略），对修改封闭（核心逻辑不变）'
-);
+console.log('4. 共同点：对扩展开放（新增插件/策略），对修改封闭（核心逻辑不变）');

@@ -28,9 +28,7 @@ const company = {
 // 违反最少知识原则：需要了解 company -> department -> engineering -> team -> lead -> contact -> email
 console.log('违反原则: company.department.engineering.team.lead.contact.email');
 console.log('结果: ' + company.department.engineering.team.lead.contact.email);
-console.log(
-  '问题: 调用者需要了解整条链上的结构，任何中间环节变化都会导致代码出错'
-);
+console.log('问题: 调用者需要了解整条链上的结构，任何中间环节变化都会导致代码出错');
 console.log('');
 
 // ============================================
@@ -60,9 +58,7 @@ const company2 = {
 console.log('=== 修复1：添加方法封装内部结构 ===');
 console.log('符合原则: company2.getEngineeringLeadEmail()');
 console.log('结果: ' + company2.getEngineeringLeadEmail());
-console.log(
-  '好处: 调用者只需知道 getEngineeringLeadEmail 方法，不需要了解内部结构'
-);
+console.log('好处: 调用者只需知道 getEngineeringLeadEmail 方法，不需要了解内部结构');
 console.log('');
 
 // ============================================
@@ -151,15 +147,13 @@ console.log('');
 
 console.log('=== 反例3：DOM 操作中的深链式访问 ===');
 console.log(
-  '违反原则: document.querySelector("div.container").children[0].children[2].style.color = "red"'
+  '违反原则: document.querySelector("div.container").children[0].children[2].style.color = "red"',
 );
 console.log('问题: 对 DOM 结构依赖过深，任何层级变化都会导致代码失效');
 console.log('');
 
 console.log('=== 修复3：使用 getElementById 直接获取目标元素 ===');
-console.log(
-  '符合原则: document.getElementById("targetElement").style.color = "red"'
-);
+console.log('符合原则: document.getElementById("targetElement").style.color = "red"');
 console.log('好处: 只需要知道目标元素的 id，不需要了解 DOM 层级结构');
 console.log('');
 

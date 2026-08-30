@@ -10,10 +10,7 @@ const objectPoolFactory = function (createObjFn) {
   return {
     // 从对象池中获取对象，如果池为空则创建新对象
     create: function () {
-      const obj =
-        objectPool.length === 0
-          ? createObjFn.apply(this, arguments)
-          : objectPool.shift();
+      const obj = objectPool.length === 0 ? createObjFn.apply(this, arguments) : objectPool.shift();
       return obj;
     },
     // 将对象归还到对象池中
@@ -47,9 +44,7 @@ console.log('第一次：创建3个对象');
 const obj1 = iframePool.create();
 const obj2 = iframePool.create();
 const obj3 = iframePool.create();
-console.log(
-  '  obj1.id=' + obj1.id + ', obj2.id=' + obj2.id + ', obj3.id=' + obj3.id
-);
+console.log('  obj1.id=' + obj1.id + ', obj2.id=' + obj2.id + ', obj3.id=' + obj3.id);
 console.log('  对象池中可用对象数：' + iframePool.size());
 console.log('');
 
@@ -78,9 +73,7 @@ console.log('');
 console.log('--- 验证对象复用 ---');
 console.log('obj4 === obj1: ' + (obj4 === obj1));
 console.log('obj5 === obj2: ' + (obj5 === obj2));
-console.log(
-  'obj6 是新创建的对象: ' + (obj6 !== obj1 && obj6 !== obj2 && obj6 !== obj3)
-);
+console.log('obj6 是新创建的对象: ' + (obj6 !== obj1 && obj6 !== obj2 && obj6 !== obj3));
 console.log('');
 
 // ============================================================
@@ -114,14 +107,8 @@ console.log('再创建3个数值对象（2个复用 + 1个新建）');
 const n3 = numberPool.create(30);
 const n4 = numberPool.create(40);
 const n5 = numberPool.create(50);
-console.log(
-  '  n3: { value=' + n3.value + ', serial=' + n3.serial + ' } (复用)'
-);
-console.log(
-  '  n4: { value=' + n4.value + ', serial=' + n4.serial + ' } (复用)'
-);
-console.log(
-  '  n5: { value=' + n5.value + ', serial=' + n5.serial + ' } (新建)'
-);
+console.log('  n3: { value=' + n3.value + ', serial=' + n3.serial + ' } (复用)');
+console.log('  n4: { value=' + n4.value + ', serial=' + n4.serial + ' } (复用)');
+console.log('  n5: { value=' + n5.value + ', serial=' + n5.serial + ' } (新建)');
 console.log('  n3 === n1: ' + (n3 === n1));
 console.log('  n4 === n2: ' + (n4 === n2));

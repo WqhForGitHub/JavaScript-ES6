@@ -82,10 +82,7 @@ Chain.prototype.setNextSuccessor = function (successor) {
 Chain.prototype.passRequest = function () {
   const ret = this.fn.apply(this, arguments);
   if (ret === 'nextSuccessor') {
-    return (
-      this.successor &&
-      this.successor.passRequest.apply(this.successor, arguments)
-    );
+    return this.successor && this.successor.passRequest.apply(this.successor, arguments);
   }
   return ret;
 };

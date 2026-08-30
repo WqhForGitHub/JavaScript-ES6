@@ -80,10 +80,7 @@ const p1 = objectFactory(Person, 'sven');
 console.log('p1.name:', p1.name); // sven
 console.log('p1.getName():', p1.getName()); // sven
 console.log('p1 instanceof Person:', p1 instanceof Person); // true
-console.log(
-  'p1.__proto__ === Person.prototype:',
-  p1.__proto__ === Person.prototype
-); // true
+console.log('p1.__proto__ === Person.prototype:', p1.__proto__ === Person.prototype); // true
 
 // 与原生 new 对比
 const p2 = new Person('Tom');
@@ -109,10 +106,7 @@ const cat = new Animal('kitty');
 cat.run(); // kitty is running
 
 // cat.__proto__ 指向 Animal.prototype
-console.log(
-  'cat.__proto__ === Animal.prototype:',
-  cat.__proto__ === Animal.prototype
-); // true
+console.log('cat.__proto__ === Animal.prototype:', cat.__proto__ === Animal.prototype); // true
 
 // 原型链查找：cat 自身没有 run 方法，通过 __proto__ 在 Animal.prototype 上找到
 console.log('cat.hasOwnProperty("name"):', cat.hasOwnProperty('name')); // true
