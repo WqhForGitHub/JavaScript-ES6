@@ -1,0 +1,5 @@
+node_modules
+package-lock.json
+
+# 中文学习笔记不做格式化，只格式化代码文件
+*.md

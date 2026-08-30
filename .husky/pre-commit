@@ -1,0 +1,6 @@
+# 提交前检查：eslint + prettier + ts-check
+# 1. lint-staged：对暂存文件执行 eslint --fix 与 prettier --write（失败则中止提交）
+npx lint-staged
+
+# 2. TypeScript 全量类型检查（tsconfig 仅覆盖 demo/**/*.ts）
+npx tsc --noEmit
