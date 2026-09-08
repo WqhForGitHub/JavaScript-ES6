@@ -1,4 +1,0 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system; background: #1a1a2e; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #eee; padding: 20px; }
-canvas { background: #2d3436; border-radius: 8px; outline: none; }
-.info { margin-top: 12px; color: #6dd5fa; }

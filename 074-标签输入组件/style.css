@@ -1,9 +1,0 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, "Segoe UI", sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-.card { background: #fff; padding: 28px; border-radius: 14px; width: 90%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,.08); }
-h1 { text-align: center; margin-bottom: 20px; }
-.tag-box { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px; border: 2px solid #6c5ce7; border-radius: 10px; min-height: 50px; }
-.tag { background: #6c5ce7; color: #fff; padding: 4px 8px 4px 12px; border-radius: 16px; font-size: 14px; display: flex; align-items: center; }
-.tag .x { margin-left: 6px; cursor: pointer; }
-input { border: none; outline: none; flex: 1; min-width: 80px; font-size: 14px; }
-.hint { text-align: center; color: #999; font-size: 12px; margin-top: 12px; }

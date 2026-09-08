@@ -1,8 +1,0 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, "Segoe UI", sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; justify-content: center; padding: 30px 20px; }
-.card { width: 100%; max-width: 600px; }
-h1 { text-align: center; margin-bottom: 18px; }
-.row { display: flex; gap: 8px; margin-bottom: 16px; }
-input { flex: 1; padding: 10px; border: 1px solid #4a6072; background: #16213e; color: #eee; border-radius: 8px; }
-button { padding: 10px 18px; border: none; border-radius: 8px; background: #6dd5fa; color: #16213e; font-weight: 700; cursor: pointer; }
-pre { background: #16213e; padding: 14px; border-radius: 8px; color: #98c379; font-size: 12px; line-height: 1.6; overflow: auto; max-height: 360px; white-space: pre-wrap; word-break: break-all; }

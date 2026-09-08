@@ -1,7 +1,0 @@
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", sans-serif; }
-body { background: linear-gradient(135deg,#1565c0,#42a5f5); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; color: #fff; }
-.card { background: rgba(255,255,255,.1); padding: 30px; border-radius: 14px; width: 100%; max-width: 480px; backdrop-filter: blur(8px); }
-nav a { color: #fff; text-decoration: none; padding: 6px 14px; background: rgba(255,255,255,.15); border-radius: 8px; margin-right: 6px; }
-nav a:hover { background: rgba(255,255,255,.3); }
-#view { background: rgba(0,0,0,.2); padding: 24px; border-radius: 10px; margin-top: 18px; min-height: 120px; }
-.hint { color: rgba(255,255,255,.7); margin-top: 14px; font-size: 13px; }

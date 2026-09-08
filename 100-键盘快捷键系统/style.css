@@ -1,9 +1,0 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, "Segoe UI", sans-serif; background: #2c3e50; color: #eee; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; transition: background .3s; }
-body.dark { background: #0d0d1e; }
-.card { background: #fff; color: #333; padding: 30px; border-radius: 14px; width: 100%; max-width: 460px; }
-h1 { text-align: center; margin-bottom: 20px; }
-.shortcuts div { padding: 10px; border-bottom: 1px solid #eee; }
-kbd { background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; padding: 2px 6px; font-family: monospace; font-size: 13px; }
-.log { margin-top: 18px; padding: 14px; background: #f5f7fa; border-radius: 8px; text-align: center; }
-.theme { margin-top: 10px; text-align: center; color: #888; }
