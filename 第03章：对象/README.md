@@ -293,6 +293,46 @@ newObj.d === anotherFunction; // true
 ```
 >下一节会介绍”属性描述符“以及 Object.defineProperty(..) 用法。但是需要注意一点是，由于 Object.assign(..) 就是使用 = 操作符来赋值，所以源对象属性的一些特性（比如 writable）不会被复制到目标对象。
 
+## 3.3.5 属性描述符
+
+在 ES5 之前，JavaScript 语言本身并没有直接检测属性特性的方法，比如判断属性是否是只读。
+
+但是从 ES5 开始，所有的属性都具备了属性描述符。
+
+思考下面的代码：
+```javascript
+var myObject = {
+	a: 2
+};
+
+Object.getOwnPropertyDescriptor(myObject, "a");
+//{
+//	value: 2,
+//	writable: true,
+//	enumerable: true,
+//	configurable: true
+//}
+```
+如你所见，这个普通的对象属性对应的属性描述符（也被称为“数据描述符”，因为它只保存一个数据值）可不仅仅只是一个 2。它还包含另外三个特性：writable（可写）、enumerable（可枚举）、和configurable（可配置）。
+
+在创建普通属性时属性描述符会使用默认值，我们也可以使用 Object.defineProperty(..)来添加一个新属性或者修改一个已有属性（如果它是 configurable）并对特性进行设置。
+
+举例来说：
+```javascript
+var myObject = {};
+
+Object.defineProperty(myObject, "a", {
+	value: 2,
+	writable: true,
+	configurable: true,
+	enumerable: true
+});
+
+myObject.a; // 2
+```
+我们使用 defineProperty(..) 给 myObject 添加了一个普通的属性并显式指定了一些特定。然而，一般来说你不会使用这种方式，除非你想修改属性描述符。。
+
+
 
 
 
